@@ -37,7 +37,6 @@ export default function AbsensiSiswaView({ showToast }) {
 
     setLoadingStudents(true);
     try {
-      // Query REAL database students
       const res = await api.get(`/siswa?kode_kelas=${kId}`);
       if (res.data.success && res.data.data.length > 0) {
         const dbStudents = res.data.data.map(s => ({
@@ -50,7 +49,6 @@ export default function AbsensiSiswaView({ showToast }) {
         dbStudents.forEach(s => initialStatus[s.id] = 'H');
         setStudentStatus(initialStatus);
       } else {
-        // Fallback sample list if class has no students in DB yet
         const mock = [
           { id: 101, nis: '202401', nama: 'Ahmad Fauzi' },
           { id: 102, nis: '202402', nama: 'Budi Santoso' },
@@ -100,16 +98,16 @@ export default function AbsensiSiswaView({ showToast }) {
   };
 
   return (
-    <div>
+    <div className="inner-page-wrapper">
       <div style={{ marginBottom: 16 }}>
-        <h2 style={{ fontSize: 20 }}>Absensi Harian Siswa</h2>
-        <p style={{ color: '#94a3b8', fontSize: 12 }}>Data siswa terhubung langsung ke database MySQL</p>
+        <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a' }}>Absensi Harian Siswa</h2>
+        <p style={{ color: '#64748b', fontSize: 13 }}>Input data kehadiran siswa per kelas</p>
       </div>
 
-      <div className="glass-card" style={{ marginBottom: 16 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label>Pilih Kelas</label>
+      <div className="white-card">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div className="form-group-custom">
+            <label>PILIH KELAS</label>
             <select value={selectedKelas} onChange={handleKelasChange}>
               <option value="">-- Pilih Kelas --</option>
               {kelasList.map(k => (
@@ -120,51 +118,35 @@ export default function AbsensiSiswaView({ showToast }) {
             </select>
           </div>
 
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label>Tanggal</label>
+          <div className="form-group-custom">
+            <label>TANGGAL</label>
             <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} />
           </div>
         </div>
       </div>
 
       {loadingStudents ? (
-        <div style={{ textAlign: 'center', padding: 30, color: '#38bdf8' }}>
-          <Loader2 size={24} className="spin" />
-          <p style={{ marginTop: 8, fontSize: 13 }}>Mengambil data siswa dari database...</p>
+        <div style={{ textAlign: 'center', padding: 30, color: '#2563eb' }}>
+          <Loader2 size={28} className="spin" />
+          <p style={{ marginTop: 8, fontSize: 13, fontWeight: 600 }}>Memuat daftar siswa...</p>
         </div>
       ) : studentList.length > 0 ? (
         <div>
           {studentList.map(s => (
-            <div key={s.id} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '12px 16px', marginBottom: 10, background: 'rgba(22, 30, 46, 0.75)',
-              borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)'
-            }}>
+            <div key={s.id} className="student-item-card">
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>{s.nama}</div>
-                <div style={{ fontSize: 11, color: '#94a3b8' }}>NIS: {s.nis}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{s.nama}</div>
+                <div style={{ fontSize: 11, color: '#64748b' }}>NIS: {s.nis}</div>
               </div>
               <div style={{ display: 'flex', gap: 6 }}>
                 {['H', 'S', 'I', 'A'].map(st => {
                   const isActive = studentStatus[s.id] === st;
-                  let bg = 'rgba(255,255,255,0.05)';
-                  let color = '#94a3b8';
-                  if (isActive) {
-                    if (st === 'H') { bg = '#059669'; color = '#fff'; }
-                    if (st === 'S') { bg = '#0284c7'; color = '#fff'; }
-                    if (st === 'I') { bg = '#d97706'; color = '#fff'; }
-                    if (st === 'A') { bg = '#e11d48'; color = '#fff'; }
-                  }
                   return (
                     <button
                       key={st}
                       type="button"
                       onClick={() => updateStatus(s.id, st)}
-                      style={{
-                        width: 32, height: 32, borderRadius: 8,
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        background: bg, color, fontWeight: 700, fontSize: 12, cursor: 'pointer'
-                      }}
+                      className={`status-btn-pill ${isActive ? `act-${st}` : ''}`}
                     >
                       {st}
                     </button>
@@ -175,14 +157,14 @@ export default function AbsensiSiswaView({ showToast }) {
           ))}
 
           <button className="btn btn-primary btn-block" onClick={handleSubmit} disabled={saving} style={{ marginTop: 16 }}>
-            <Save size={16} />
+            <Save size={18} />
             <span>{saving ? 'Menyimpan...' : 'Simpan Absensi Siswa'}</span>
           </button>
         </div>
       ) : (
         <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
-          <UserCheck size={48} style={{ opacity: 0.4, marginBottom: 12 }} />
-          <p>Silakan pilih kelas dan tanggal untuk menampilkan siswa dari database.</p>
+          <UserCheck size={52} style={{ opacity: 0.3, marginBottom: 12 }} />
+          <p style={{ fontWeight: 600, color: '#64748b' }}>Silakan pilih kelas & tanggal di atas.</p>
         </div>
       )}
     </div>

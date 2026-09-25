@@ -2,22 +2,24 @@ import React from 'react';
 import { LogOut } from 'lucide-react';
 
 export default function TopBar({ user, onLogout }) {
-  const initials = user?.nama_guru
-    ? user.nama_guru.split(' ').slice(0, 2).map(n => n[0]).join('')
-    : 'G';
+  const name = user?.nama_guru || 'Ali Irsan Shafar, S.H., M.Pd';
+  const initials = name.split(' ').slice(0, 2).map(n => n[0]).join('');
 
   return (
-    <header className="top-bar">
-      <div className="user-info">
-        <div className="avatar">{initials}</div>
-        <div className="user-text">
-          <h3>{user?.nama_guru || 'Pengguna Guru'}</h3>
-          <span className="badge">{user?.role || 'Guru SMK ARTANITA'}</span>
+    <div className="header-hero">
+      <div className="header-user">
+        <div className="user-left">
+          <div className="avatar-wrapper">{initials}</div>
+          <div>
+            <div className="welcome-sub">Selamat datang,</div>
+            <div className="welcome-title">{name}</div>
+          </div>
         </div>
+
+        <button className="logout-btn" onClick={onLogout} title="Keluar Akun">
+          <LogOut size={20} />
+        </button>
       </div>
-      <button className="icon-btn" onClick={onLogout} title="Keluar">
-        <LogOut size={18} />
-      </button>
-    </header>
+    </div>
   );
 }
