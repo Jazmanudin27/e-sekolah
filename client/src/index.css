@@ -23,11 +23,11 @@
 }
 
 body {
-  background: #0f172a;
+  background: #f4f7fb;
   color: var(--text-dark);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   min-height: 100vh;
 }
 
@@ -35,33 +35,35 @@ body {
 .app-shell {
   width: 100%;
   max-width: 440px;
-  height: 100vh;
-  max-height: 920px;
+  min-height: 100vh;
   background-color: var(--bg-app);
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.5);
 }
 
-@media (min-width: 480px) {
+@media (min-width: 500px) {
+  body {
+    background: #0f172a;
+    align-items: center;
+    padding: 20px 0;
+  }
   .app-shell {
-    border-radius: 40px;
+    border-radius: 36px;
     border: 8px solid #1e293b;
     height: 880px;
+    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.5);
   }
 }
 
 /* HEADER HERO BANNER (VIBRANT BLUE) */
 .header-blue-hero {
   background: linear-gradient(135deg, #0052cc, #0072ff);
-  padding: 20px 20px 52px 20px;
+  padding: 18px 20px 58px 20px;
   color: #ffffff;
   position: relative;
-  border-bottom-left-radius: 30px;
-  border-bottom-right-radius: 30px;
-  z-index: 1;
+  width: 100%;
 }
 
 .header-top-row {
@@ -151,11 +153,11 @@ body {
 
 /* FLOATING OVERLAPPING SUMMARY CARD */
 .summary-overlap-card {
-  margin: -36px 16px 16px 16px;
+  margin: -42px 14px 16px 14px;
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 18px;
   padding: 14px 12px;
-  box-shadow: 0 10px 25px rgba(0, 102, 255, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 80, 220, 0.12);
   position: relative;
   z-index: 10;
 }
@@ -170,19 +172,21 @@ body {
 .summary-pills-row {
   display: flex;
   justify-content: space-between;
-  gap: 6px;
+  align-items: center;
+  gap: 4px;
 }
 
 .pill-item {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 10px;
+  padding: 6px 8px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 700;
   flex: 1;
   justify-content: center;
+  white-space: nowrap;
 }
 
 .pill-hadir { background: #e0f2fe; color: #0284c7; }

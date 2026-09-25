@@ -49,6 +49,23 @@ export default function BerandaView({ onOpenPresensiModal, onSwitchTab }) {
     { date: 'Sel, 11 Okt 2023', status: 'Hadir', time: '07:48', class: 'status-text-hadir' },
   ];
 
+  const formatDisplayDate = (dateStr) => {
+    if (!dateStr) return 'Sen, 17 Okt 2023';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const days = ['Ming', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      const dayName = days[d.getDay()];
+      const dateNum = d.getDate();
+      const monthName = months[d.getMonth()];
+      const year = d.getFullYear();
+      return `${dayName}, ${dateNum} ${monthName} ${year}`;
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
   return (
     <div className="main-content-area">
 
@@ -169,7 +186,7 @@ export default function BerandaView({ onOpenPresensiModal, onSwitchTab }) {
         {historyItems.length > 0 ? (
           historyItems.slice(0, 5).map((item, idx) => (
             <div key={item.id || idx} className="history-table-row">
-              <span className="history-col-left">{item.tanggal || item.date}</span>
+              <span className="history-col-left">{formatDisplayDate(item.tanggal || item.date)}</span>
               <span className={`history-col-right ${item.jam_in ? 'status-text-hadir' : 'status-text-izin'}`}>
                 {item.jam_in ? `Hadir, ${item.jam_in.substring(0, 5)}` : 'Izin, --'}
               </span>

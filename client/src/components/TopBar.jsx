@@ -19,7 +19,21 @@ export default function TopBar({ user, onLogout }) {
   }, []);
 
   const rawName = user?.nama_guru || user?.username || 'Bu Citra';
-  const displayName = rawName.startsWith('Bu') || rawName.startsWith('Pak') ? rawName : `Guru ${rawName}`;
+
+  const getCleanName = (name) => {
+    if (!name) return 'Bu Citra';
+    let clean = name.split(',')[0].trim();
+    if (clean.startsWith('Pak') || clean.startsWith('Bu') || clean.startsWith('Guru')) {
+      return clean;
+    }
+    const parts = clean.split(' ').filter(Boolean);
+    if (parts.length > 2) {
+      clean = parts.slice(0, 2).join(' ');
+    }
+    return `Pak ${clean}`;
+  };
+
+  const displayName = getCleanName(rawName);
   const initials = rawName.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
 
   return (
@@ -51,7 +65,7 @@ export default function TopBar({ user, onLogout }) {
             <span>{initials || 'BC'}</span>
           )}
         </div>
-        <div>
+        <div className="user-text-col">
           <div className="greeting-text">Selamat Datang, {displayName}!</div>
           <div className="date-time-text">{currentDateTime || 'Senin, 18 Oktober 2023 | 08:30 WIB'}</div>
         </div>
