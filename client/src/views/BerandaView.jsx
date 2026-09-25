@@ -134,59 +134,59 @@ export default function BerandaView({ onOpenPresensiModal, onSwitchTab }) {
         </button>
       </div>
 
-      {/* 3. 8-GRID BLUE MENU CARDS */}
+      {/* 3. 8-GRID COLORFUL GRADIENT MENU CARDS */}
       <div className="grid-8-menu-wrapper">
         <div className="grid-8-menu">
-          <button className="menu-blue-card" onClick={() => onSwitchTab('absensiSiswa')}>
+          <button className="menu-blue-card card-grad-siswa" onClick={() => onSwitchTab('absensiSiswa')}>
             <div className="menu-icon-circle">
               <Users size={22} />
             </div>
             <span>Siswa</span>
           </button>
 
-          <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>
+          <button className="menu-blue-card card-grad-pengajar" onClick={() => onSwitchTab('jadwal')}>
             <div className="menu-icon-circle">
               <GraduationCap size={22} />
             </div>
             <span>Pengajar</span>
           </button>
 
-          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
+          <button className="menu-blue-card card-grad-history" onClick={() => onSwitchTab('riwayat')}>
             <div className="menu-icon-circle">
               <History size={22} />
             </div>
             <span>History</span>
           </button>
 
-          <button className="menu-blue-card" onClick={() => onSwitchTab('absensiSiswa')}>
+          <button className="menu-blue-card card-grad-absen-siswa" onClick={() => onSwitchTab('absensiSiswa')}>
             <div className="menu-icon-circle">
               <UserCheck size={22} />
             </div>
             <span>Absen Siswa</span>
           </button>
 
-          <button className="menu-blue-card" onClick={() => onSwitchTab('absensiMapel')}>
+          <button className="menu-blue-card card-grad-absen-mapel" onClick={() => onSwitchTab('absensiMapel')}>
             <div className="menu-icon-circle">
               <BookOpen size={22} />
             </div>
             <span>Absen Mapel</span>
           </button>
 
-          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
+          <button className="menu-blue-card card-grad-rekap-siswa" onClick={() => onSwitchTab('riwayat')}>
             <div className="menu-icon-circle">
               <FileBarChart size={22} />
             </div>
             <span>Rekap Siswa</span>
           </button>
 
-          <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>
+          <button className="menu-blue-card card-grad-rekap-mapel" onClick={() => onSwitchTab('jadwal')}>
             <div className="menu-icon-circle">
               <PieChart size={22} />
             </div>
             <span>Rekap Mapel</span>
           </button>
 
-          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
+          <button className="menu-blue-card card-grad-rekap-guru" onClick={() => onSwitchTab('riwayat')}>
             <div className="menu-icon-circle">
               <Award size={22} />
             </div>
