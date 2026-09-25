@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-  CheckCircle, Building, FileText, Clock, Fingerprint,
-  Users, GraduationCap, History, UserCheck, BookOpen,
-  FileBarChart, PieChart, Award
+  CheckCircle2, Heart, FileText, Calendar, Fingerprint,
+  Users, UserCheck, Clock, ListFilter, BookOpen,
+  TrendingUp, Bell
 } from 'lucide-react';
 import api from '../api/client';
 
@@ -40,153 +40,154 @@ export default function BerandaView({ onOpenPresensiModal, onSwitchTab }) {
   const isCheckInDisabled = todayStatus?.status === 'CHECKIN' || todayStatus?.status === 'CHECKOUT';
   const isCheckOutDisabled = todayStatus?.status === 'BELUM_CHECKIN' || todayStatus?.status === 'CHECKOUT';
 
+  // Default fallback 5-day history list matching the reference mockup picture
+  const defaultHistoryList = [
+    { date: 'Sen, 17 Okt 2023', status: 'Hadir', time: '07:45', class: 'status-text-hadir' },
+    { date: 'Jum, 14 Okt 2023', status: 'Hadir', time: '07:50', class: 'status-text-hadir' },
+    { date: 'Kam, 13 Okt 2023', status: 'Izin', time: '--', class: 'status-text-izin' },
+    { date: 'Rab, 12 Okt 2023', status: 'Sakit', time: '--', class: 'status-text-sakit' },
+    { date: 'Sel, 11 Okt 2023', status: 'Hadir', time: '07:48', class: 'status-text-hadir' },
+  ];
+
   return (
-    <div style={{ position: 'relative' }}>
-      
-      {/* 1. OVERLAPPING SUMMARY CARD */}
-      <div className="summary-card-overlap">
-        <div className="summary-item">
-          <div className="summary-icon-box box-hadir">
-            <CheckCircle size={22} />
-            <span className="badge-count">19</span>
-          </div>
-          <span className="summary-label">Hadir</span>
-        </div>
+    <div className="main-content-area">
 
-        <div className="summary-item">
-          <div className="summary-icon-box box-sakit">
-            <Building size={22} />
+      {/* 1. FLOATING OVERLAPPING SUMMARY CARD */}
+      <div className="summary-overlap-card">
+        <div className="summary-card-title">Ringkasan Absensi Hari Ini</div>
+        <div className="summary-pills-row">
+          <div className="pill-item pill-hadir">
+            <CheckCircle2 size={13} />
+            <span>Hadir</span>
+            <span className="pill-badge badge-hadir">19</span>
           </div>
-          <span className="summary-label">Sakit</span>
-        </div>
 
-        <div className="summary-item">
-          <div className="summary-icon-box box-izin">
-            <FileText size={22} />
+          <div className="pill-item pill-sakit">
+            <Heart size={13} />
+            <span>Sakit</span>
+            <span className="pill-badge badge-sakit">1</span>
           </div>
-          <span className="summary-label">Izin</span>
-        </div>
 
-        <div className="summary-item">
-          <div className="summary-icon-box box-cuti">
-            <Clock size={22} />
+          <div className="pill-item pill-izin">
+            <FileText size={13} />
+            <span>Izin</span>
+            <span className="pill-badge badge-izin">2</span>
           </div>
-          <span className="summary-label">Cuti</span>
+
+          <div className="pill-item pill-cuti">
+            <Calendar size={13} />
+            <span>Cuti</span>
+            <span className="pill-badge badge-cuti">0</span>
+          </div>
         </div>
       </div>
 
-      {/* 2. DUAL SCAN CARDS (SCAN MASUK & SCAN PULANG) */}
-      <div className="dual-scan-container">
+      {/* 2. DUAL SCAN ACTION CARDS (SCAN MASUK & SCAN PULANG) */}
+      <div className="dual-scan-row">
         <button
-          className="scan-card scan-masuk"
+          className="scan-box-btn scan-masuk-btn"
           onClick={() => onOpenPresensiModal('in')}
           disabled={isCheckInDisabled}
         >
-          <div className="scan-icon-circle">
-            <Fingerprint size={26} />
+          <div className="scan-icon-circle-box">
+            <Fingerprint size={24} />
           </div>
           <div>
-            <div className="scan-text-title">Scan Masuk</div>
-            <div className="scan-text-sub">
-              {todayStatus?.jam_in ? `Jam: ${todayStatus.jam_in}` : 'Belum Scan'}
+            <div className="scan-main-title">Scan Masuk</div>
+            <div className="scan-sub-text">
+              {todayStatus?.jam_in ? `Jam: ${todayStatus.jam_in}` : 'Ketuk untuk Absen Masuk'}
             </div>
           </div>
         </button>
 
         <button
-          className="scan-card scan-pulang"
+          className="scan-box-btn scan-pulang-btn"
           onClick={() => onOpenPresensiModal('out')}
           disabled={isCheckOutDisabled}
         >
-          <div className="scan-icon-circle">
-            <Fingerprint size={26} />
+          <div className="scan-icon-circle-box">
+            <Fingerprint size={24} />
           </div>
           <div>
-            <div className="scan-text-title">Scan Pulang</div>
-            <div className="scan-text-sub">
-              {todayStatus?.jam_out ? `Jam: ${todayStatus.jam_out}` : 'Belum Scan'}
+            <div className="scan-main-title">Scan Pulang</div>
+            <div className="scan-sub-text">
+              {todayStatus?.jam_out ? `Jam: ${todayStatus.jam_out}` : 'Ketuk untuk Absen Pulang'}
             </div>
           </div>
         </button>
       </div>
 
-      {/* 3. 8-GRID BLUE MENU BUTTONS */}
-      <div className="grid-menu-container">
-        <div className="grid-menu-8">
-          <button className="menu-card-blue" onClick={() => onSwitchTab('absensiSiswa')}>
-            <div className="menu-icon"><Users size={24} /></div>
+      {/* 3. 8-GRID BLUE MENU CARDS */}
+      <div className="grid-8-menu-wrapper">
+        <div className="grid-8-menu">
+          <button className="menu-blue-card" onClick={() => onSwitchTab('absensiSiswa')}>
+            <Users size={22} />
             <span>Siswa</span>
           </button>
 
-          <button className="menu-card-blue" onClick={() => onSwitchTab('jadwal')}>
-            <div className="menu-icon"><GraduationCap size={24} /></div>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>
+            <UserCheck size={22} />
             <span>Pengajar</span>
           </button>
 
-          <button className="menu-card-blue" onClick={() => onSwitchTab('riwayat')}>
-            <div className="menu-icon"><History size={24} /></div>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
+            <Clock size={22} />
             <span>History</span>
           </button>
 
-          <button className="menu-card-blue" onClick={() => onSwitchTab('absensiSiswa')}>
-            <div className="menu-icon"><UserCheck size={24} /></div>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('absensiSiswa')}>
+            <ListFilter size={22} />
             <span>Absen Siswa</span>
           </button>
 
-          <button className="menu-card-blue" onClick={() => onSwitchTab('absensiMapel')}>
-            <div className="menu-icon"><BookOpen size={24} /></div>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('absensiMapel')}>
+            <BookOpen size={22} />
             <span>Absen Mapel</span>
           </button>
 
-          <button className="menu-card-blue" onClick={() => onSwitchTab('riwayat')}>
-            <div className="menu-icon"><FileBarChart size={24} /></div>
-            <span>Rekap Siswa</span>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
+            <TrendingUp size={22} />
+            <span>Rekap</span>
           </button>
 
-          <button className="menu-card-blue" onClick={() => onSwitchTab('riwayat')}>
-            <div className="menu-icon"><PieChart size={24} /></div>
-            <span>Rekap Mapel</span>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>
+            <Calendar size={22} />
+            <span>Agenda</span>
           </button>
 
-          <button className="menu-card-blue" onClick={() => onSwitchTab('riwayat')}>
-            <div className="menu-icon"><Award size={24} /></div>
-            <span>Rekap Guru</span>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
+            <Bell size={22} />
+            <span>Pengumuman</span>
           </button>
         </div>
       </div>
 
-      {/* 4. HISTORI 5 HARI TERAKHIR SECTION */}
-      <div className="section-header-row">
-        <div className="section-title-bold">Histori 5 Hari Terakhir</div>
-        <div className="view-all-link" onClick={() => onSwitchTab('riwayat')}>View All</div>
-      </div>
+      {/* 4. HISTORI ABSENSI 5 HARI TERAKHIR */}
+      <div className="history-section-card">
+        <div className="history-card-title">Histori Absensi 5 Hari Terakhir</div>
 
-      {historyItems.length > 0 ? (
-        historyItems.slice(0, 3).map(h => (
-          <div key={h.id} className="history-card-white">
-            <div className="history-fingerprint-box">
-              <Fingerprint size={26} />
+        {historyItems.length > 0 ? (
+          historyItems.slice(0, 5).map((item, idx) => (
+            <div key={item.id || idx} className="history-table-row">
+              <span className="history-col-left">{item.tanggal || item.date}</span>
+              <span className={`history-col-right ${item.jam_in ? 'status-text-hadir' : 'status-text-izin'}`}>
+                {item.jam_in ? `Hadir, ${item.jam_in.substring(0, 5)}` : 'Izin, --'}
+              </span>
             </div>
-            <div>
-              <div className="history-date">{h.tanggal}</div>
-              <div className="history-time">
-                {h.jam_in || '06:23:35'} - {h.jam_out || '15:08:46'}
-              </div>
+          ))
+        ) : (
+          defaultHistoryList.map((item, idx) => (
+            <div key={idx} className="history-table-row">
+              <span className="history-col-left">{item.date}</span>
+              <span className={`history-col-right ${item.class}`}>
+                {item.status}, {item.time}
+              </span>
             </div>
-          </div>
-        ))
-      ) : (
-        <div className="history-card-white">
-          <div className="history-fingerprint-box">
-            <Fingerprint size={26} />
-          </div>
-          <div>
-            <div className="history-date">Friday, 25 September 2026</div>
-            <div className="history-time">06:23:35 - 15:08:46</div>
-          </div>
-        </div>
-      )}
+          ))
+        )}
+      </div>
 
     </div>
   );
 }
+

@@ -1,33 +1,50 @@
 import React from 'react';
-import { Home, Fingerprint, Settings } from 'lucide-react';
+import { Home, Users, Fingerprint, Bell, User } from 'lucide-react';
 
 export default function BottomNav({ activeTab, onTabChange, onOpenPresensi }) {
   return (
-    <nav className="bottom-nav-bar">
+    <nav className="bottom-nav-white">
       <button
-        className={`nav-btn-item ${activeTab === 'beranda' ? 'active' : ''}`}
+        className={`nav-link-item ${activeTab === 'beranda' ? 'active' : ''}`}
         onClick={() => onTabChange('beranda')}
       >
-        <Home size={22} />
+        <Home size={20} />
         <span>Home</span>
+      </button>
+
+      <button
+        className={`nav-link-item ${activeTab === 'absensiSiswa' ? 'active' : ''}`}
+        onClick={() => onTabChange('absensiSiswa')}
+      >
+        <Users size={20} />
+        <span>Siswa</span>
       </button>
 
       {/* CENTER FLOATING FINGERPRINT FAB */}
       <button
-        className="fab-center-btn"
-        onClick={() => onOpenPresensi('in')}
+        className="floating-center-fab"
+        onClick={() => onOpenPresensi?.('in')}
         title="Scan Presensi Fingerprint"
       >
         <Fingerprint size={32} />
       </button>
 
       <button
-        className={`nav-btn-item ${activeTab === 'riwayat' ? 'active' : ''}`}
+        className={`nav-link-item ${activeTab === 'notifikasi' ? 'active' : ''}`}
         onClick={() => onTabChange('riwayat')}
       >
-        <Settings size={22} />
-        <span>Settings</span>
+        <Bell size={20} />
+        <span>Notifikasi</span>
+      </button>
+
+      <button
+        className={`nav-link-item ${activeTab === 'profil' ? 'active' : ''}`}
+        onClick={() => onTabChange('jadwal')}
+      >
+        <User size={20} />
+        <span>Profil</span>
       </button>
     </nav>
   );
 }
+
