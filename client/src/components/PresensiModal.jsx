@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, MapPin, Send, Smile, ShieldCheck, ToggleLeft, ToggleRight, Navigation } from 'lucide-react';
 import api from '../api/client';
 
@@ -10,6 +10,10 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
   const [fakeLat, setFakeLat] = useState('-7.325205');
   const [fakeLng, setFakeLng] = useState('108.208354');
   const [loading, setLoading] = useState(false);
+
+  const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markerRef = useRef(null);
 
   const SCHOOL_LOCATION = {
     name: 'SMK Artanita Tasikmalaya (Kantor Pusat)',
@@ -34,6 +38,52 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
       );
     }
   }, [isFakeGpsActive]);
+
+  // Leaflet Map Initialization & Update Effect
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    const L = window.L;
+    if (!L) return;
+
+    if (!mapInstanceRef.current) {
+      const map = L.map(mapContainerRef.current, {
+        center: [coords.lat, coords.lng],
+        zoom: 16,
+        zoomControl: true
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://leafletjs.com" title="A JavaScript library for interactive maps"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"></path><path fill="#FFD500" d="M0 4h12v3H0z"></path><path fill="#E0BC00" d="M0 7h12v1H0z"></path></svg> Leaflet</a> | &copy; OpenStreetMap'
+      }).addTo(map);
+
+      // School Safe Zone Radius Circle
+      L.circle([SCHOOL_LOCATION.lat, SCHOOL_LOCATION.lng], {
+        color: '#0066ff',
+        fillColor: '#3b82f6',
+        fillOpacity: 0.18,
+        radius: SCHOOL_LOCATION.radiusMeter
+      }).addTo(map);
+
+      // Marker for School Office
+      const schoolMarker = L.marker([SCHOOL_LOCATION.lat, SCHOOL_LOCATION.lng]).addTo(map);
+      schoolMarker.bindPopup(`<b>${SCHOOL_LOCATION.name}</b><br>Kantor Pusat Presensi`);
+
+      // Custom User / Fake GPS Marker
+      const userMarker = L.marker([coords.lat, coords.lng]).addTo(map);
+      userMarker.bindPopup(`<b>${isFakeGpsActive ? 'Lokasi Fake GPS' : 'Lokasi GPS Guru'}</b><br>${coordsString}`).openPopup();
+
+      markerRef.current = userMarker;
+      mapInstanceRef.current = map;
+    } else {
+      mapInstanceRef.current.setView([coords.lat, coords.lng], 16);
+      if (markerRef.current) {
+        markerRef.current.setLatLng([coords.lat, coords.lng]);
+        markerRef.current.setPopupContent(`<b>${isFakeGpsActive ? 'Lokasi Fake GPS' : 'Lokasi GPS Guru'}</b><br>${coordsString}`);
+      }
+    }
+  }, [coords, isFakeGpsActive, coordsString]);
 
   const handleToggleFakeGps = () => {
     const nextState = !isFakeGpsActive;
@@ -150,26 +200,18 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
           <p style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>Posisikan wajah Anda di dalam area kamera</p>
         </div>
 
-        {/* EMBEDDED MAP DISPLAY (LOKASI SEKOLAH & KANTOR) */}
-        <div style={{ borderRadius: 16, overflow: 'hidden', marginBottom: 14, border: '1px solid #e2e8f0' }}>
+        {/* LEAFLET INTERACTIVE MAP DISPLAY (LOKASI SEKOLAH & KANTOR) */}
+        <div style={{ borderRadius: 16, overflow: 'hidden', marginBottom: 14, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
           <div style={{ background: '#f8fafc', padding: '8px 12px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 11, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Navigation size={14} color="#0066ff" /> Peta Lokasi Sekolah & Presensi
+              <Navigation size={14} color="#0066ff" /> Peta Interaktif Leaflet (Sekolah & Kantor)
             </span>
             <span style={{ fontSize: 10, color: '#16a34a', fontWeight: 700, background: '#dcfce7', padding: '2px 8px', borderRadius: 10 }}>
               Radius Safe Zone: {SCHOOL_LOCATION.radiusMeter}m
             </span>
           </div>
 
-          <iframe
-            title="School Location Map"
-            width="100%"
-            height="130"
-            frameBorder="0"
-            scrolling="no"
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng - 0.005},${coords.lat - 0.005},${coords.lng + 0.005},${coords.lat + 0.005}&layer=mapnik&marker=${coords.lat},${coords.lng}`}
-            style={{ border: 0, display: 'block' }}
-          ></iframe>
+          <div ref={mapContainerRef} style={{ height: 160, width: '100%', zIndex: 1 }}></div>
         </div>
 
         {/* FAKE GPS CONTROL PANEL */}
