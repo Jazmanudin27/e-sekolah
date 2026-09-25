@@ -25,45 +25,31 @@
 body {
   background: #f4f7fb;
   color: var(--text-dark);
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
   min-height: 100vh;
 }
 
-/* SMARTPHONE CONTAINER FRAME */
+/* APP SHELL CONTAINER (FULL WIDTH RESPONSIVE) */
 .app-shell {
   width: 100%;
-  max-width: 440px;
   min-height: 100vh;
   background-color: var(--bg-app);
   position: relative;
-  overflow-x: hidden;
   display: flex;
   flex-direction: column;
-}
-
-@media (min-width: 500px) {
-  body {
-    background: #0f172a;
-    align-items: center;
-    padding: 20px 0;
-  }
-  .app-shell {
-    border-radius: 36px;
-    border: 8px solid #1e293b;
-    height: 880px;
-    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.5);
-  }
 }
 
 /* HEADER HERO BANNER (VIBRANT BLUE) */
 .header-blue-hero {
   background: linear-gradient(135deg, #0052cc, #0072ff);
-  padding: 18px 20px 58px 20px;
+  padding: 20px 20px 60px 20px;
   color: #ffffff;
   position: relative;
   width: 100%;
+}
+
+.header-inner {
+  max-width: 680px;
+  margin: 0 auto;
 }
 
 .header-top-row {
@@ -153,10 +139,12 @@ body {
 
 /* FLOATING OVERLAPPING SUMMARY CARD */
 .summary-overlap-card {
-  margin: -42px 14px 16px 14px;
+  max-width: 680px;
+  margin: -42px auto 16px auto;
+  width: calc(100% - 32px);
   background: #ffffff;
   border-radius: 18px;
-  padding: 14px 12px;
+  padding: 14px 16px;
   box-shadow: 0 10px 25px rgba(0, 80, 220, 0.12);
   position: relative;
   z-index: 10;
@@ -213,11 +201,13 @@ body {
 
 /* DUAL ACTION SCAN CARDS (GREEN / RED) */
 .dual-scan-row {
+  max-width: 680px;
+  margin: 0 auto 16px auto;
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   padding: 0 16px;
-  margin-bottom: 16px;
 }
 
 .scan-box-btn {
@@ -279,8 +269,10 @@ body {
 
 /* 8-GRID BLUE MENU CARDS */
 .grid-8-menu-wrapper {
+  max-width: 680px;
+  margin: 0 auto 20px auto;
+  width: 100%;
   padding: 0 16px;
-  margin-bottom: 20px;
 }
 
 .grid-8-menu {
@@ -318,9 +310,11 @@ body {
 
 /* HISTORI SECTION */
 .history-section-card {
-  margin: 0 16px 20px 16px;
+  max-width: 680px;
+  margin: 0 auto 20px auto;
+  width: calc(100% - 32px);
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 18px;
   padding: 16px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
 }
@@ -361,16 +355,23 @@ body {
 
 /* BOTTOM NAV BAR WITH CENTER FLOATING FINGERPRINT FAB */
 .bottom-nav-white {
-  position: absolute;
+  position: fixed;
   bottom: 0; left: 0; right: 0;
   height: 68px;
   background: #ffffff;
   border-top: 1px solid #e2e8f0;
+  z-index: 100;
+  padding: 0 16px;
+}
+
+.bottom-nav-inner {
+  max-width: 680px;
+  height: 100%;
+  margin: 0 auto;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  z-index: 20;
-  padding: 0 6px;
+  position: relative;
 }
 
 .nav-link-item {
