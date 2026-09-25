@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+// Dynamic API Base URL: Adapts to mobile.sistemiartas.com in production or localhost in dev
+const baseURL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+  ? 'http://localhost:5007/api'
+  : `${window.location.origin}/api`;
+
 const api = axios.create({
-  baseURL: 'http://localhost:5007/api',
+  baseURL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
