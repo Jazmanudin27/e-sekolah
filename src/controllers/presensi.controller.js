@@ -37,7 +37,7 @@ async function getTodayStatus(req, res, next) {
 async function checkIn(req, res, next) {
   try {
     const { kode_guru } = req.user;
-    const { lokasi, foto } = req.body;
+    const { lokasi, foto, is_fake_gps } = req.body;
     const today = getTodayString();
     const timeNow = getCurrentTimeString();
 
@@ -47,11 +47,13 @@ async function checkIn(req, res, next) {
       return sendError(res, 'Anda sudah melakukan presensi masuk hari ini.', 400);
     }
 
+    const finalLokasi = is_fake_gps ? `${lokasi} (FAKE GPS)` : lokasi;
+
     const insertId = await PresensiModel.createCheckIn({
       kode_guru,
       tanggal: today,
       jam_in: timeNow,
-      lokasi_in: lokasi,
+      lokasi_in: finalLokasi,
       foto_in: foto
     });
 
@@ -60,7 +62,7 @@ async function checkIn(req, res, next) {
       kode_guru,
       tanggal: today,
       jam_in: timeNow,
-      lokasi_in: lokasi
+      lokasi_in: finalLokasi
     }, 201);
   } catch (error) {
     next(error);
@@ -71,7 +73,7 @@ async function checkIn(req, res, next) {
 async function checkOut(req, res, next) {
   try {
     const { kode_guru } = req.user;
-    const { lokasi, foto } = req.body;
+    const { lokasi, foto, is_fake_gps } = req.body;
     const today = getTodayString();
     const timeNow = getCurrentTimeString();
 
@@ -85,9 +87,11 @@ async function checkOut(req, res, next) {
       return sendError(res, 'Anda sudah melakukan presensi pulang hari ini.', 400);
     }
 
+    const finalLokasi = is_fake_gps ? `${lokasi} (FAKE GPS)` : lokasi;
+
     await PresensiModel.updateCheckOut(existing.id, {
       jam_out: timeNow,
-      lokasi_out: lokasi,
+      lokasi_out: finalLokasi,
       foto_out: foto
     });
 
@@ -96,7 +100,7 @@ async function checkOut(req, res, next) {
       kode_guru,
       tanggal: today,
       jam_out: timeNow,
-      lokasi_out: lokasi
+      lokasi_out: finalLokasi
     });
   } catch (error) {
     next(error);
