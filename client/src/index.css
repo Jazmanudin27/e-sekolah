@@ -139,67 +139,91 @@ body {
   font-weight: 500;
 }
 
-/* FLOATING OVERLAPPING SUMMARY CARD */
+/* FLOATING OVERLAPPING SUMMARY CARD (4 VERTICAL ICON COLUMNS) */
 .summary-overlap-card {
   max-width: 680px;
   margin: -24px auto 16px auto;
   width: calc(100% - 32px);
   background: #ffffff;
-  border-radius: 18px;
-  padding: 14px 16px;
+  border-radius: 20px;
+  padding: 16px 12px;
   box-shadow: 0 10px 25px rgba(0, 80, 220, 0.12);
   position: relative;
   z-index: 10;
 }
 
-.summary-card-title {
-  font-size: 13px;
-  font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 10px;
+.summary-grid-4 {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
 }
 
-.summary-pills-row {
+.summary-col-item {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  cursor: pointer;
 }
 
-.pill-item {
+.summary-icon-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-  flex: 1;
   justify-content: center;
-  white-space: nowrap;
+  position: relative;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.pill-hadir { background: #e0f2fe; color: #0284c7; }
-.pill-sakit { background: #ffe4e6; color: #e11d48; }
-.pill-izin  { background: #fef3c7; color: #d97706; }
-.pill-cuti  { background: #f1f5f9; color: #64748b; }
+.summary-col-item:hover .summary-icon-box {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
 
-.pill-badge {
-  width: 18px;
-  height: 18px;
+.box-green {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.box-red {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.box-amber {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.box-teal {
+  background: linear-gradient(135deg, #10b981, #0d9488);
+}
+
+.box-notify-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
+  background: #ef4444;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  font-size: 11px;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  font-weight: 800;
-  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
-.badge-hadir { background: #0284c7; }
-.badge-sakit { background: #e11d48; }
-.badge-izin  { background: #d97706; }
-.badge-cuti  { background: #64748b; }
+.summary-col-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  text-align: center;
+}
 
 /* DUAL ACTION SCAN CARDS (GREEN / RED) */
 .dual-scan-row {
@@ -269,7 +293,7 @@ body {
   margin-top: 2px;
 }
 
-/* 8-GRID COLORFUL GRADIENT MENU CARDS */
+/* 8-GRID BLUE MENU CARDS */
 .grid-8-menu-wrapper {
   max-width: 680px;
   margin: 0 auto 24px auto;
@@ -284,6 +308,7 @@ body {
 }
 
 .menu-blue-card {
+  background: linear-gradient(135deg, #0066ff, #0052cc);
   border-radius: 18px;
   padding: 10px 2px;
   display: flex;
@@ -292,64 +317,25 @@ body {
   justify-content: center;
   gap: 6px;
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  box-shadow: 0 6px 18px rgba(0, 102, 255, 0.22);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
   min-height: 82px;
   overflow: hidden;
 }
 
 .menu-blue-card:hover {
-  transform: translateY(-4px);
-  filter: brightness(1.08);
-}
-
-/* 8 VIBRANT BRIGHT GRADIENTS */
-.card-grad-siswa {
-  background: linear-gradient(135deg, #00c6ff, #0072ff);
-  box-shadow: 0 6px 18px rgba(0, 114, 255, 0.3);
-}
-
-.card-grad-pengajar {
-  background: linear-gradient(135deg, #8a2387, #e94057);
-  box-shadow: 0 6px 18px rgba(233, 64, 87, 0.3);
-}
-
-.card-grad-history {
-  background: linear-gradient(135deg, #11998e, #38ef7d);
-  box-shadow: 0 6px 18px rgba(56, 239, 125, 0.3);
-}
-
-.card-grad-absen-siswa {
-  background: linear-gradient(135deg, #ff9966, #ff5e62);
-  box-shadow: 0 6px 18px rgba(255, 94, 98, 0.3);
-}
-
-.card-grad-absen-mapel {
-  background: linear-gradient(135deg, #36d1dc, #5b86e5);
-  box-shadow: 0 6px 18px rgba(54, 209, 220, 0.3);
-}
-
-.card-grad-rekap-siswa {
-  background: linear-gradient(135deg, #f857a6, #ff5858);
-  box-shadow: 0 6px 18px rgba(248, 87, 166, 0.3);
-}
-
-.card-grad-rekap-mapel {
-  background: linear-gradient(135deg, #f7971e, #ffd200);
-  box-shadow: 0 6px 18px rgba(247, 151, 30, 0.3);
-}
-
-.card-grad-rekap-guru {
-  background: linear-gradient(135deg, #7f00ff, #e100ff);
-  box-shadow: 0 6px 18px rgba(225, 0, 255, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 102, 255, 0.38);
+  background: linear-gradient(135deg, #0072ff, #005ce6);
 }
 
 .menu-icon-circle {
   width: 36px;
   height: 36px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;

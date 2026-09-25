@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  CheckCircle2, Heart, FileText, Calendar, Fingerprint,
+  CheckSquare, Building2, FileText, Clock, Fingerprint,
   Users, GraduationCap, History, UserCheck, BookOpen,
   FileBarChart, PieChart, Award
 } from 'lucide-react';
@@ -69,33 +69,39 @@ export default function BerandaView({ onOpenPresensiModal, onSwitchTab }) {
   return (
     <div className="beranda-view-container">
 
-      {/* 1. FLOATING OVERLAPPING SUMMARY CARD */}
+      {/* 1. FLOATING OVERLAPPING SUMMARY CARD (4 VERTICAL ICON COLUMNS) */}
       <div className="summary-overlap-card">
-        <div className="summary-card-title">Ringkasan Absensi Hari Ini</div>
-        <div className="summary-pills-row">
-          <div className="pill-item pill-hadir">
-            <CheckCircle2 size={13} />
-            <span>Hadir</span>
-            <span className="pill-badge badge-hadir">19</span>
+        <div className="summary-grid-4">
+
+          <div className="summary-col-item">
+            <div className="summary-icon-box box-green">
+              <CheckSquare size={26} color="#ffffff" strokeWidth={2.4} />
+              <span className="box-notify-badge">19</span>
+            </div>
+            <span className="summary-col-label">Hadir</span>
           </div>
 
-          <div className="pill-item pill-sakit">
-            <Heart size={13} />
-            <span>Sakit</span>
-            <span className="pill-badge badge-sakit">1</span>
+          <div className="summary-col-item">
+            <div className="summary-icon-box box-red">
+              <Building2 size={26} color="#ffffff" strokeWidth={2.2} />
+            </div>
+            <span className="summary-col-label">Sakit</span>
           </div>
 
-          <div className="pill-item pill-izin">
-            <FileText size={13} />
-            <span>Izin</span>
-            <span className="pill-badge badge-izin">2</span>
+          <div className="summary-col-item">
+            <div className="summary-icon-box box-amber">
+              <FileText size={26} color="#ffffff" strokeWidth={2.2} />
+            </div>
+            <span className="summary-col-label">Izin</span>
           </div>
 
-          <div className="pill-item pill-cuti">
-            <Calendar size={13} />
-            <span>Cuti</span>
-            <span className="pill-badge badge-cuti">0</span>
+          <div className="summary-col-item">
+            <div className="summary-icon-box box-teal">
+              <Clock size={26} color="#ffffff" strokeWidth={2.2} />
+            </div>
+            <span className="summary-col-label">Cuti</span>
           </div>
+
         </div>
       </div>
 
@@ -134,59 +140,59 @@ export default function BerandaView({ onOpenPresensiModal, onSwitchTab }) {
         </button>
       </div>
 
-      {/* 3. 8-GRID COLORFUL GRADIENT MENU CARDS */}
+      {/* 3. 8-GRID BLUE MENU CARDS */}
       <div className="grid-8-menu-wrapper">
         <div className="grid-8-menu">
-          <button className="menu-blue-card card-grad-siswa" onClick={() => onSwitchTab('absensiSiswa')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('absensiSiswa')}>
             <div className="menu-icon-circle">
               <Users size={22} />
             </div>
             <span>Siswa</span>
           </button>
 
-          <button className="menu-blue-card card-grad-pengajar" onClick={() => onSwitchTab('jadwal')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>
             <div className="menu-icon-circle">
               <GraduationCap size={22} />
             </div>
             <span>Pengajar</span>
           </button>
 
-          <button className="menu-blue-card card-grad-history" onClick={() => onSwitchTab('riwayat')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
             <div className="menu-icon-circle">
               <History size={22} />
             </div>
             <span>History</span>
           </button>
 
-          <button className="menu-blue-card card-grad-absen-siswa" onClick={() => onSwitchTab('absensiSiswa')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('absensiSiswa')}>
             <div className="menu-icon-circle">
               <UserCheck size={22} />
             </div>
             <span>Absen Siswa</span>
           </button>
 
-          <button className="menu-blue-card card-grad-absen-mapel" onClick={() => onSwitchTab('absensiMapel')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('absensiMapel')}>
             <div className="menu-icon-circle">
               <BookOpen size={22} />
             </div>
             <span>Absen Mapel</span>
           </button>
 
-          <button className="menu-blue-card card-grad-rekap-siswa" onClick={() => onSwitchTab('riwayat')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
             <div className="menu-icon-circle">
               <FileBarChart size={22} />
             </div>
             <span>Rekap Siswa</span>
           </button>
 
-          <button className="menu-blue-card card-grad-rekap-mapel" onClick={() => onSwitchTab('jadwal')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>
             <div className="menu-icon-circle">
               <PieChart size={22} />
             </div>
             <span>Rekap Mapel</span>
           </button>
 
-          <button className="menu-blue-card card-grad-rekap-guru" onClick={() => onSwitchTab('riwayat')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
             <div className="menu-icon-circle">
               <Award size={22} />
             </div>
