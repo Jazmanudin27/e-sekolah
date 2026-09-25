@@ -10,6 +10,7 @@ const presensiRoutes = require('./presensi.routes');
 const absensiSiswaRoutes = require('./absensiSiswa.routes');
 const absensiMapelRoutes = require('./absensiMapel.routes');
 const dashboardRoutes = require('./dashboard.routes');
+const siswaRoutes = require('./siswa.routes');
 
 // System Health Check
 router.get('/health', (req, res) => {
@@ -31,5 +32,6 @@ router.use('/presensi', presensiRoutes);
 router.use('/absensi-siswa', absensiSiswaRoutes);
 router.use('/absensi-mapel', absensiMapelRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/siswa', siswaRoutes);
 
 module.exports = router;

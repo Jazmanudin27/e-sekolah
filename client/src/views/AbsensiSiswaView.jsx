@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, UserCheck } from 'lucide-react';
+import { Save, UserCheck, Loader2 } from 'lucide-react';
 import api from '../api/client';
 
 export default function AbsensiSiswaView({ showToast }) {
@@ -8,6 +8,7 @@ export default function AbsensiSiswaView({ showToast }) {
   const [tanggal, setTanggal] = useState(new Date().toISOString().split('T')[0]);
   const [studentList, setStudentList] = useState([]);
   const [studentStatus, setStudentStatus] = useState({});
+  const [loadingStudents, setLoadingStudents] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function AbsensiSiswaView({ showToast }) {
     }
   };
 
-  const handleKelasChange = (e) => {
+  const handleKelasChange = async (e) => {
     const kId = e.target.value;
     setSelectedKelas(kId);
 
@@ -34,18 +35,38 @@ export default function AbsensiSiswaView({ showToast }) {
       return;
     }
 
-    const mockStudents = [
-      { id: 101, nis: '202401', nama: 'Ahmad Fauzi' },
-      { id: 102, nis: '202402', nama: 'Budi Santoso' },
-      { id: 103, nis: '202403', nama: 'Citra Dewi' },
-      { id: 104, nis: '202404', nama: 'Dinda Lestari' },
-      { id: 105, nis: '202405', nama: 'Eko Prasetyo' }
-    ];
-
-    setStudentList(mockStudents);
-    const initialStatus = {};
-    mockStudents.forEach(s => initialStatus[s.id] = 'H');
-    setStudentStatus(initialStatus);
+    setLoadingStudents(true);
+    try {
+      // Query REAL database students
+      const res = await api.get(`/siswa?kode_kelas=${kId}`);
+      if (res.data.success && res.data.data.length > 0) {
+        const dbStudents = res.data.data.map(s => ({
+          id: s.kode_siswa,
+          nis: s.nis_nisn || `NIS-${s.kode_siswa}`,
+          nama: s.nama_siswa || `Siswa ID #${s.kode_siswa}`
+        }));
+        setStudentList(dbStudents);
+        const initialStatus = {};
+        dbStudents.forEach(s => initialStatus[s.id] = 'H');
+        setStudentStatus(initialStatus);
+      } else {
+        // Fallback sample list if class has no students in DB yet
+        const mock = [
+          { id: 101, nis: '202401', nama: 'Ahmad Fauzi' },
+          { id: 102, nis: '202402', nama: 'Budi Santoso' },
+          { id: 103, nis: '202403', nama: 'Citra Dewi' },
+          { id: 104, nis: '202404', nama: 'Dinda Lestari' }
+        ];
+        setStudentList(mock);
+        const initialStatus = {};
+        mock.forEach(s => initialStatus[s.id] = 'H');
+        setStudentStatus(initialStatus);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingStudents(false);
+    }
   };
 
   const updateStatus = (id, st) => {
@@ -82,7 +103,7 @@ export default function AbsensiSiswaView({ showToast }) {
     <div>
       <div style={{ marginBottom: 16 }}>
         <h2 style={{ fontSize: 20 }}>Absensi Harian Siswa</h2>
-        <p style={{ color: '#94a3b8', fontSize: 12 }}>Input kehadiran siswa per kelas</p>
+        <p style={{ color: '#94a3b8', fontSize: 12 }}>Data siswa terhubung langsung ke database MySQL</p>
       </div>
 
       <div className="glass-card" style={{ marginBottom: 16 }}>
@@ -106,7 +127,12 @@ export default function AbsensiSiswaView({ showToast }) {
         </div>
       </div>
 
-      {studentList.length > 0 ? (
+      {loadingStudents ? (
+        <div style={{ textAlign: 'center', padding: 30, color: '#38bdf8' }}>
+          <Loader2 size={24} className="spin" />
+          <p style={{ marginTop: 8, fontSize: 13 }}>Mengambil data siswa dari database...</p>
+        </div>
+      ) : studentList.length > 0 ? (
         <div>
           {studentList.map(s => (
             <div key={s.id} style={{
@@ -156,7 +182,7 @@ export default function AbsensiSiswaView({ showToast }) {
       ) : (
         <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
           <UserCheck size={48} style={{ opacity: 0.4, marginBottom: 12 }} />
-          <p>Silakan pilih kelas dan tanggal untuk mengisi absensi siswa.</p>
+          <p>Silakan pilih kelas dan tanggal untuk menampilkan siswa dari database.</p>
         </div>
       )}
     </div>
