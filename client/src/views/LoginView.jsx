@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { School, GraduationCap, UserCheck, Lock, ArrowRight, ShieldCheck, Sparkles, BookOpen, User } from 'lucide-react';
+import { GraduationCap, Lock, ArrowRight, ShieldCheck, User, BookOpen } from 'lucide-react';
 import api from '../api/client';
 
 export default function LoginView({ onLoginSuccess, showToast }) {
@@ -25,156 +25,215 @@ export default function LoginView({ onLoginSuccess, showToast }) {
     }
   };
 
-  const handleQuickLogin = (email) => {
-    setUsername(email);
-    setPassword('123456');
-  };
-
   return (
     <div style={{
-      padding: '32px 20px', display: 'flex', flexDirection: 'column',
-      justifyContent: 'center', minHeight: '100vh', flex: 1,
+      padding: '40px 20px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      width: '100%',
       backgroundColor: '#070a14',
-      background: 'radial-gradient(circle at top, rgba(14, 165, 233, 0.25), rgba(7, 10, 20, 0.98) 70%)',
-      position: 'relative'
+      backgroundImage: 'radial-gradient(circle at 50% 20%, rgba(14, 165, 233, 0.22), rgba(7, 10, 20, 0.98) 75%)',
+      position: 'relative',
+      boxSizing: 'border-box'
     }}>
 
-      {/* EDUCATIONAL HERO HEADER */}
-      <div style={{ textAlign: 'center', marginBottom: 20 }}>
-        {/* SCHOOL CREST EMBLEM */}
-        <div style={{
-          width: 76, height: 76,
-          background: 'linear-gradient(135deg, #0284c7, #6366f1)',
-          borderRadius: 24, display: 'inline-flex', alignItems: 'center',
-          justifyContent: 'center', color: '#fff', marginBottom: 12,
-          boxShadow: '0 0 30px rgba(56, 189, 248, 0.4), inset 0 0 15px rgba(255,255,255,0.3)',
-          border: '2px solid rgba(255,255,255,0.2)'
-        }}>
-          <GraduationCap size={44} />
-        </div>
+      <div style={{ width: '100%', maxWidth: '400px' }}>
 
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11,
-          fontWeight: 700, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.12)',
-          padding: '4px 12px', borderRadius: 20, marginBottom: 8,
-          border: '1px solid rgba(56, 189, 248, 0.3)'
-        }}>
-          <School size={12} /> PORTAL PRESENSI GURU & SEKOLAH
-        </div>
-
-        <h1 style={{
-          fontSize: 28, fontWeight: 800, letterSpacing: 1,
-          background: 'linear-gradient(to right, #ffffff, #94a3b8)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-        }}>
-          SMK ARTANITA
-        </h1>
-        <p style={{ color: '#94a3b8', fontSize: 12, marginTop: 2 }}>
-          Sistem Informasi & Presensi Digital Terpadu
-        </p>
-      </div>
-
-      {/* LOGIN CARD WITH SCHOOL EMBLEM THEME */}
-      <div className="glass-card" style={{
-        border: '1px solid rgba(56, 189, 248, 0.3)',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(56, 189, 248, 0.15)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700 }}>Masuk Akun Pengajar</h2>
-            <p style={{ color: '#94a3b8', fontSize: 12 }}>Silakan masukkan NIP / Email Guru</p>
-          </div>
+        {/* EDUCATIONAL HERO HEADER */}
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          {/* SCHOOL CREST EMBLEM */}
           <div style={{
-            width: 36, height: 36, borderRadius: 12,
-            background: 'rgba(16, 185, 129, 0.15)', color: '#10b981',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
+            width: 80,
+            height: 80,
+            background: 'linear-gradient(135deg, #0284c7, #6366f1)',
+            borderRadius: 24,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            marginBottom: 16,
+            boxShadow: '0 0 35px rgba(56, 189, 248, 0.45), inset 0 0 15px rgba(255,255,255,0.3)',
+            border: '2px solid rgba(255,255,255,0.25)'
           }}>
-            <ShieldCheck size={20} />
+            <GraduationCap size={48} />
           </div>
+
+          <h1 style={{
+            fontSize: 28,
+            fontWeight: 800,
+            letterSpacing: '0.5px',
+            color: '#ffffff',
+            margin: 0
+          }}>
+            SMK ARTANITA
+          </h1>
+          <p style={{ color: '#94a3b8', fontSize: 13, marginTop: 6, fontWeight: 500 }}>
+            Sistem Informasi & Presensi Digital Terpadu
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <User size={14} style={{ color: '#38bdf8' }} /> NIP / Email / Username
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Contoh: ali@artanita.com"
-              required
-            />
+        {/* LOGIN CARD */}
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(56, 189, 248, 0.25)',
+          borderRadius: 24,
+          padding: '28px 24px',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(56, 189, 248, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
+            <div>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#ffffff', margin: 0 }}>Masuk Akun Pengajar</h2>
+              <p style={{ color: '#94a3b8', fontSize: 12, marginTop: 4, margin: 0 }}>Silakan masukkan NIP / Email Guru</p>
+            </div>
+            <div style={{
+              width: 40,
+              height: 40,
+              borderRadius: 14,
+              background: 'rgba(16, 185, 129, 0.15)',
+              color: '#10b981',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid rgba(16, 185, 129, 0.3)'
+            }}>
+              <ShieldCheck size={22} />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Lock size={14} style={{ color: '#38bdf8' }} /> Password Akses
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Masukkan password anda"
-              required
-            />
-          </div>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            {/* USERNAME INPUT FIELD */}
+            <div>
+              <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 600, marginBottom: 8, letterSpacing: '0.3px' }}>
+                NIP / EMAIL / USERNAME
+              </label>
+              <div style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <User size={18} style={{ position: 'absolute', left: 14, color: '#38bdf8', pointerEvents: 'none' }} />
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Masukkan NIP atau Email"
+                  required
+                  style={{
+                    width: '100%',
+                    height: 48,
+                    padding: '0 14px 0 42px',
+                    background: 'rgba(30, 41, 59, 0.7)',
+                    border: '1.5px solid rgba(56, 189, 248, 0.25)',
+                    borderRadius: 14,
+                    color: '#ffffff',
+                    fontSize: 14,
+                    fontWeight: 500,
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#38bdf8';
+                    e.target.style.boxShadow = '0 0 14px rgba(56, 189, 248, 0.3)';
+                    e.target.style.background = 'rgba(30, 41, 59, 0.9)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(56, 189, 248, 0.25)';
+                    e.target.style.boxShadow = 'none';
+                    e.target.style.background = 'rgba(30, 41, 59, 0.7)';
+                  }}
+                />
+              </div>
+            </div>
 
-          <button type="submit" className="btn btn-primary btn-block" disabled={loading} style={{ marginTop: 6 }}>
-            <span>{loading ? 'Verifikasi Data Akun...' : 'Masuk Portal Presensi'}</span>
-            <ArrowRight size={16} />
-          </button>
-        </form>
+            {/* PASSWORD INPUT FIELD */}
+            <div>
+              <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 600, marginBottom: 8, letterSpacing: '0.3px' }}>
+                PASSWORD AKSES
+              </label>
+              <div style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <Lock size={18} style={{ position: 'absolute', left: 14, color: '#38bdf8', pointerEvents: 'none' }} />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Masukkan password anda"
+                  required
+                  style={{
+                    width: '100%',
+                    height: 48,
+                    padding: '0 14px 0 42px',
+                    background: 'rgba(30, 41, 59, 0.7)',
+                    border: '1.5px solid rgba(56, 189, 248, 0.25)',
+                    borderRadius: 14,
+                    color: '#ffffff',
+                    fontSize: 14,
+                    fontWeight: 500,
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#38bdf8';
+                    e.target.style.boxShadow = '0 0 14px rgba(56, 189, 248, 0.3)';
+                    e.target.style.background = 'rgba(30, 41, 59, 0.9)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(56, 189, 248, 0.25)';
+                    e.target.style.boxShadow = 'none';
+                    e.target.style.background = 'rgba(30, 41, 59, 0.7)';
+                  }}
+                />
+              </div>
+            </div>
 
-        {/* QUICK PRESET TEACHERS */}
-        <div style={{ marginTop: 22, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-              <UserCheck size={12} style={{ display: 'inline', marginRight: 4 }} /> Akun Demo Pengajar:
-            </span>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {/* SUBMIT BUTTON */}
             <button
-              type="button"
-              onClick={() => handleQuickLogin('ali@artanita.com')}
+              type="submit"
+              disabled={loading}
               style={{
-                padding: '10px 8px', background: 'rgba(56, 189, 248, 0.08)',
-                border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: 12,
-                color: '#f8fafc', fontSize: 11, fontWeight: 500, cursor: 'pointer',
-                textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 2,
-                transition: 'all 0.2s'
+                width: '100%',
+                height: 50,
+                marginTop: 6,
+                background: 'linear-gradient(135deg, #0072ff, #0052cc)',
+                border: 'none',
+                borderRadius: 14,
+                color: '#ffffff',
+                fontSize: 15,
+                fontWeight: 700,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 10,
+                boxShadow: '0 8px 25px rgba(0, 114, 255, 0.4)',
+                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                opacity: loading ? 0.7 : 1
               }}
             >
-              <span style={{ fontWeight: 700, color: '#38bdf8' }}>Ali Irsan, S.H.</span>
-              <span style={{ color: '#94a3b8', fontSize: 10 }}>Guru Hukum / PPKn</span>
+              <span>{loading ? 'Verifikasi Data Akun...' : 'Masuk Portal Presensi'}</span>
+              <ArrowRight size={18} />
             </button>
-
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('dina@artanita.com')}
-              style={{
-                padding: '10px 8px', background: 'rgba(129, 140, 248, 0.08)',
-                border: '1px solid rgba(129, 140, 248, 0.25)', borderRadius: 12,
-                color: '#f8fafc', fontSize: 11, fontWeight: 500, cursor: 'pointer',
-                textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 2,
-                transition: 'all 0.2s'
-              }}
-            >
-              <span style={{ fontWeight: 700, color: '#818cf8' }}>Dina Saparinda</span>
-              <span style={{ color: '#94a3b8', fontSize: 10 }}>Guru Informatika / IT</span>
-            </button>
-          </div>
+          </form>
         </div>
-      </div>
 
-      {/* FOOTER MOTTO */}
-      <div style={{ textAlign: 'center', marginTop: 18 }}>
-        <p style={{ fontSize: 11, color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-          <BookOpen size={12} /> Presensi Digital Transparan & Akurat
-        </p>
-      </div>
+        {/* FOOTER MOTTO */}
+        <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <p style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: 0 }}>
+            <BookOpen size={14} /> Presensi Digital Transparan & Akurat
+          </p>
+        </div>
 
+      </div>
     </div>
   );
 }
