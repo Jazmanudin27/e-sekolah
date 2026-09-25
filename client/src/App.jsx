@@ -70,7 +70,7 @@ export default function App() {
 
   if (!currentUser) {
     return (
-      <div className="app-shell">
+      <div className="app-shell" style={{ background: '#070a14', minHeight: '100vh' }}>
         {toast.show && (
           <div className="toast-msg">
             {toast.isSuccess ? <CheckCircle2 size={18} style={{ color: '#10b981' }} /> : <XCircle size={18} style={{ color: '#f43f5e' }} />}

@@ -32,9 +32,10 @@ export default function LoginView({ onLoginSuccess, showToast }) {
 
   return (
     <div style={{
-      padding: '24px 20px', display: 'flex', flexDirection: 'column',
-      justifyContent: 'center', minHeight: '100%',
-      background: 'radial-gradient(circle at top, rgba(14, 165, 233, 0.15), rgba(7, 10, 20, 0.95) 70%)',
+      padding: '32px 20px', display: 'flex', flexDirection: 'column',
+      justifyContent: 'center', minHeight: '100vh', flex: 1,
+      backgroundColor: '#070a14',
+      background: 'radial-gradient(circle at top, rgba(14, 165, 233, 0.25), rgba(7, 10, 20, 0.98) 70%)',
       position: 'relative'
     }}>
 
