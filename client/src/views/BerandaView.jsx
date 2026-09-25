@@ -67,7 +67,7 @@ export default function BerandaView({ onOpenPresensiModal, onSwitchTab }) {
   };
 
   return (
-    <div className="main-content-area">
+    <div className="beranda-view-container">
 
       {/* 1. FLOATING OVERLAPPING SUMMARY CARD */}
       <div className="summary-overlap-card">
