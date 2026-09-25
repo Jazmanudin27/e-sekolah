@@ -92,11 +92,10 @@ export default function App() {
         </div>
       )}
 
-      {/* Top App Bar */}
-      <TopBar user={currentUser} onLogout={handleLogout} />
+      {/* Main Content Area */}
+      <main className="main-content-area">
+        <TopBar user={currentUser} onLogout={handleLogout} />
 
-      {/* Main Tab Content */}
-      <main className="main-content">
         {activeTab === 'beranda' && (
           <BerandaView
             onOpenPresensiModal={(type) => setPresensiModalType(type)}
