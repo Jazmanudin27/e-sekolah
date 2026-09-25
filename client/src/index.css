@@ -359,49 +359,85 @@ body {
 }
 
 /* HISTORI SECTION */
-.history-section-card {
+.history-section-wrapper {
   max-width: 680px;
-  margin: 0 auto 20px auto;
+  margin: 0 auto 24px auto;
   width: calc(100% - 32px);
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
 }
 
-.history-card-title {
-  font-size: 14px;
-  font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 12px;
-}
-
-.history-table-row {
+.section-header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 12px;
 }
 
-.history-table-row:last-child {
-  border-bottom: none;
+.section-title-bold {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
 }
 
-.history-col-left {
-  font-size: 12px;
-  font-weight: 600;
-  color: #334155;
-}
-
-.history-col-right {
-  font-size: 12px;
+.view-all-link {
+  background: none;
+  border: none;
+  color: #0066ff;
+  font-size: 13px;
   font-weight: 700;
+  cursor: pointer;
+  padding: 0;
 }
 
-.status-text-hadir { color: #16a34a; }
-.status-text-izin  { color: #d97706; }
-.status-text-sakit { color: #dc2626; }
+.history-item-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.history-item-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 102, 255, 0.08);
+}
+
+.history-fingerprint-box {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 12px;
+  background: #e0f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.history-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.history-item-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.history-item-time {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0066ff;
+  line-height: 1.2;
+}
+
 
 /* BOTTOM NAV BAR WITH CENTER FLOATING FINGERPRINT FAB */
 .bottom-nav-white {

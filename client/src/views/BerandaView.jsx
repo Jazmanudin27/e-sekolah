@@ -40,22 +40,21 @@ export default function BerandaView({ onOpenPresensiModal, onSwitchTab }) {
   const isCheckInDisabled = todayStatus?.status === 'CHECKIN' || todayStatus?.status === 'CHECKOUT';
   const isCheckOutDisabled = todayStatus?.status === 'BELUM_CHECKIN' || todayStatus?.status === 'CHECKOUT';
 
-  // Default fallback 5-day history list matching the reference mockup picture
-  const defaultHistoryList = [
-    { date: 'Sen, 17 Okt 2023', status: 'Hadir', time: '07:45', class: 'status-text-hadir' },
-    { date: 'Jum, 14 Okt 2023', status: 'Hadir', time: '07:50', class: 'status-text-hadir' },
-    { date: 'Kam, 13 Okt 2023', status: 'Izin', time: '--', class: 'status-text-izin' },
-    { date: 'Rab, 12 Okt 2023', status: 'Sakit', time: '--', class: 'status-text-sakit' },
-    { date: 'Sel, 11 Okt 2023', status: 'Hadir', time: '07:48', class: 'status-text-hadir' },
+  const defaultHistoryCards = [
+    { date: 'Friday, 25 September 2026', time: '06:23:35 - 15:08:46' },
+    { date: 'Thursday, 24 September 2026', time: '06:19:20 - 15:00:12' },
+    { date: 'Wednesday, 23 September 2026', time: '06:20:05 - 15:05:40' },
+    { date: 'Tuesday, 22 September 2026', time: '06:17:42 - 15:10:00' },
+    { date: 'Monday, 21 September 2026', time: '06:25:10 - 15:02:18' },
   ];
 
-  const formatDisplayDate = (dateStr) => {
-    if (!dateStr) return 'Sen, 17 Okt 2023';
+  const formatFullDate = (dateStr) => {
+    if (!dateStr) return 'Friday, 25 September 2026';
     try {
       const d = new Date(dateStr);
       if (isNaN(d.getTime())) return dateStr;
-      const days = ['Ming', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       const dayName = days[d.getDay()];
       const dateNum = d.getDate();
       const monthName = months[d.getMonth()];
@@ -202,25 +201,36 @@ export default function BerandaView({ onOpenPresensiModal, onSwitchTab }) {
       </div>
 
       {/* 4. HISTORI ABSENSI 5 HARI TERAKHIR */}
-      <div className="history-section-card">
-        <div className="history-card-title">Histori Absensi 5 Hari Terakhir</div>
+      <div className="history-section-wrapper">
+        <div className="section-header-row">
+          <h3 className="section-title-bold">Histori Absensi 5 Hari Terakhir</h3>
+          <button className="view-all-link" onClick={() => onSwitchTab('riwayat')}>View All</button>
+        </div>
 
         {historyItems.length > 0 ? (
           historyItems.slice(0, 5).map((item, idx) => (
-            <div key={item.id || idx} className="history-table-row">
-              <span className="history-col-left">{formatDisplayDate(item.tanggal || item.date)}</span>
-              <span className={`history-col-right ${item.jam_in ? 'status-text-hadir' : 'status-text-izin'}`}>
-                {item.jam_in ? `Hadir, ${item.jam_in.substring(0, 5)}` : 'Izin, --'}
-              </span>
+            <div key={item.id || idx} className="history-item-card">
+              <div className="history-fingerprint-box">
+                <Fingerprint size={24} color="#0066ff" />
+              </div>
+              <div className="history-item-content">
+                <div className="history-item-date">{formatFullDate(item.tanggal || item.date)}</div>
+                <div className="history-item-time">
+                  {item.jam_in || '06:23:35'} - {item.jam_out || '15:08:46'}
+                </div>
+              </div>
             </div>
           ))
         ) : (
-          defaultHistoryList.map((item, idx) => (
-            <div key={idx} className="history-table-row">
-              <span className="history-col-left">{item.date}</span>
-              <span className={`history-col-right ${item.class}`}>
-                {item.status}, {item.time}
-              </span>
+          defaultHistoryCards.map((item, idx) => (
+            <div key={idx} className="history-item-card">
+              <div className="history-fingerprint-box">
+                <Fingerprint size={24} color="#0066ff" />
+              </div>
+              <div className="history-item-content">
+                <div className="history-item-date">{item.date}</div>
+                <div className="history-item-time">{item.time}</div>
+              </div>
             </div>
           ))
         )}
@@ -229,4 +239,3 @@ export default function BerandaView({ onOpenPresensiModal, onSwitchTab }) {
     </div>
   );
 }
-
