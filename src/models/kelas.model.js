@@ -20,6 +20,19 @@ class KelasModel {
     return rows[0] || null;
   }
 
+  static async findByUsername(username) {
+    try {
+      const rows = await query(
+        'SELECT * FROM kelas WHERE (username = ? OR nama_kelas = ?) LIMIT 1',
+        [username, username]
+      );
+      return rows[0] || null;
+    } catch (e) {
+      console.warn('[KelasModel.findByUsername]', e.message);
+      return null;
+    }
+  }
+
   static async countAll() {
     const rows = await query('SELECT COUNT(*) AS total FROM kelas');
     return rows[0].total || 0;
