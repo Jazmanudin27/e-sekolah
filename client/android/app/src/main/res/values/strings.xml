@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">E-Sekolah</string>
+    <string name="title_activity_main">E-Sekolah</string>
+    <string name="package_name">com.esekolah.app</string>
+    <string name="custom_url_scheme">com.esekolah.app</string>
+</resources>

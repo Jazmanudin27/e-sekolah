@@ -6,16 +6,22 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:apk": "vite build && npx cap sync android && cd android && gradlew assembleDebug",
+    "cap:sync": "npx cap sync",
+    "cap:open": "npx cap open android",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
     "axios": "^1.20.0",
     "lucide-react": "^1.48.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@capacitor/cli": "^6.0.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^4.3.4",
