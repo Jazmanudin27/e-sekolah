@@ -2,6 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Save, UserCheck, Loader2, Calendar, CheckCircle2, AlertCircle, RefreshCw, Users, Filter } from 'lucide-react';
 import api from '../api/client';
 
+const getTodayIndonesianDate = () => {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date());
+  } catch (e) {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+};
+
 export default function AbsensiSiswaView({ user, showToast }) {
   const isClassAccount = user?.type === 'Kelas' || Boolean(user?.kode_kelas && user?.role === 'Kelas');
   const userClassId = user?.kode_kelas;
@@ -9,7 +21,7 @@ export default function AbsensiSiswaView({ user, showToast }) {
 
   const [kelasList, setKelasList] = useState([]);
   const [selectedKelas, setSelectedKelas] = useState(userClassId || '');
-  const [tanggal, setTanggal] = useState(new Date().toISOString().split('T')[0]);
+  const [tanggal, setTanggal] = useState(getTodayIndonesianDate());
   const [studentList, setStudentList] = useState([]);
   const [studentStatus, setStudentStatus] = useState({});
   const [isExistingData, setIsExistingData] = useState(false);

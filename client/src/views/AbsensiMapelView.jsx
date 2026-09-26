@@ -2,12 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { Save, BookOpen, UserCheck, Calendar, Loader2, CheckCircle2, AlertCircle, RefreshCw, Filter } from 'lucide-react';
 import api from '../api/client';
 
+const getTodayIndonesianDate = () => {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date());
+  } catch (e) {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+};
+
 export default function AbsensiMapelView({ user, showToast }) {
+  const isClassAccount = user?.type === 'Kelas' || Boolean(user?.kode_kelas && user?.role === 'Kelas');
+  const userClassId = user?.kode_kelas;
+  const userClassName = user?.nama_kelas || (userClassId ? `Kelas ${userClassId}` : 'Kelas');
+
   const [mapelList, setMapelList] = useState([]);
   const [kelasList, setKelasList] = useState([]);
   const [selectedMapel, setSelectedMapel] = useState('');
-  const [selectedKelas, setSelectedKelas] = useState('');
-  const [tanggal, setTanggal] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedKelas, setSelectedKelas] = useState(userClassId || '');
+  const [tanggal, setTanggal] = useState(getTodayIndonesianDate());
   const [studentList, setStudentList] = useState([]);
   const [mapelStatus, setMapelStatus] = useState({});
   const [isExistingData, setIsExistingData] = useState(false);
@@ -16,7 +32,7 @@ export default function AbsensiMapelView({ user, showToast }) {
 
   useEffect(() => {
     fetchOptions();
-  }, []);
+  }, [userClassId, isClassAccount]);
 
   const fetchOptions = async () => {
     try {
@@ -26,7 +42,7 @@ export default function AbsensiMapelView({ user, showToast }) {
       ]);
 
       let firstM = '';
-      let firstK = '';
+      let firstK = isClassAccount && userClassId ? userClassId : '';
 
       if (resM.data.success && resM.data.data.length > 0) {
         setMapelList(resM.data.data);
@@ -35,8 +51,12 @@ export default function AbsensiMapelView({ user, showToast }) {
       }
       if (resK.data.success && resK.data.data.length > 0) {
         setKelasList(resK.data.data);
-        firstK = resK.data.data[0].kode_kelas;
-        setSelectedKelas(firstK);
+        if (!isClassAccount || !userClassId) {
+          firstK = resK.data.data[0].kode_kelas;
+          setSelectedKelas(firstK);
+        } else {
+          setSelectedKelas(userClassId);
+        }
       }
 
       if (firstM && firstK) {
@@ -190,12 +210,32 @@ export default function AbsensiMapelView({ user, showToast }) {
 
   return (
     <div className="inner-page-wrapper" style={{ paddingTop: 4 }}>
-      {/* FILTER CONTROL CARD (SAMAIN SAMA HISTORI PRESENSI) */}
+      {/* FILTER CONTROL CARD */}
       <div style={{ background: '#ffffff', padding: 14, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)', marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 11, fontWeight: 700, color: '#475569', letterSpacing: '0.3px' }}>
           <Filter size={14} color="#0066ff" />
           FILTER ABSENSI MATA PELAJARAN
         </div>
+
+        {isClassAccount && (
+          <div
+            style={{
+              padding: '8px 12px',
+              borderRadius: 10,
+              background: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              color: '#1d4ed8',
+              fontSize: 12,
+              fontWeight: 700,
+              marginBottom: 10,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6
+            }}
+          >
+            <span>🔒 Logged-in sebagai Akun Kelas: <strong>{userClassName}</strong> (Akses Terkunci)</span>
+          </div>
+        )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div>
@@ -228,6 +268,7 @@ export default function AbsensiMapelView({ user, showToast }) {
               <select
                 value={selectedKelas}
                 onChange={handleKelasChange}
+                disabled={isClassAccount}
                 style={{
                   width: '100%',
                   padding: '9px 12px',
@@ -235,12 +276,13 @@ export default function AbsensiMapelView({ user, showToast }) {
                   border: '1px solid #cbd5e1',
                   fontSize: 12,
                   fontWeight: 700,
-                  background: '#f8fafc',
-                  color: '#0f172a',
+                  background: isClassAccount ? '#e2e8f0' : '#f8fafc',
+                  color: isClassAccount ? '#64748b' : '#0f172a',
+                  cursor: isClassAccount ? 'not-allowed' : 'pointer',
                   outline: 'none'
                 }}
               >
-                <option value="">-- Pilih Kelas --</option>
+                {!isClassAccount && <option value="">-- Pilih Kelas --</option>}
                 {kelasList.map(k => (
                   <option key={k.kode_kelas} value={k.kode_kelas}>
                     {k.nama_kelas}{k.jurusan && k.jurusan.trim() !== '-' ? ` (${k.jurusan.trim()})` : ''}
