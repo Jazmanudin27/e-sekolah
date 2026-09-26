@@ -121,7 +121,7 @@ export default function SiswaView({ showToast }) {
               <option value="ALL">Semua Kelas ({siswaList.length} Siswa)</option>
               {kelasList.map(k => (
                 <option key={k.kode_kelas} value={k.kode_kelas}>
-                  {k.nama_kelas} {k.jurusan ? `(${k.jurusan})` : ''}
+                  {k.nama_kelas}
                 </option>
               ))}
             </select>
