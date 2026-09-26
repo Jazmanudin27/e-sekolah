@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Users, User, CalendarX } from 'lucide-react';
+import { Clock, Users, User, CalendarX, BookOpen } from 'lucide-react';
 import api from '../api/client';
 
 export default function JadwalView() {
@@ -28,51 +28,74 @@ export default function JadwalView() {
   };
 
   return (
-    <div>
-      <div style={{ marginBottom: 16 }}>
-        <h2 style={{ fontSize: 20 }}>Jadwal Pelajaran</h2>
-        <p style={{ color: '#94a3b8', fontSize: 12 }}>Jadwal mengajar minggu ini</p>
-      </div>
-
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 10, marginBottom: 16 }}>
-        {days.map(d => (
-          <button
-            key={d}
-            onClick={() => setActiveHari(d)}
-            style={{
-              padding: '8px 16px', borderRadius: 20,
-              background: activeHari === d ? '#38bdf8' : 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: activeHari === d ? '#000' : '#94a3b8',
-              fontWeight: activeHari === d ? 600 : 400,
-              fontSize: 12, whiteSpace: 'nowrap', cursor: 'pointer'
-            }}
-          >
-            {d}
-          </button>
-        ))}
+    <div className="inner-page-wrapper">
+      {/* DAY PILLS FILTER */}
+      <div style={{
+        display: 'flex',
+        gap: 8,
+        overflowX: 'auto',
+        paddingBottom: 6,
+        marginBottom: 16
+      }}>
+        {days.map(d => {
+          const isActive = activeHari === d;
+          return (
+            <button
+              key={d}
+              onClick={() => setActiveHari(d)}
+              style={{
+                padding: '8px 18px',
+                borderRadius: 20,
+                background: isActive ? '#0066ff' : '#ffffff',
+                border: isActive ? '1px solid #0066ff' : '1px solid #e2e8f0',
+                color: isActive ? '#ffffff' : '#64748b',
+                fontWeight: isActive ? 700 : 600,
+                fontSize: 13,
+                whiteSpace: 'nowrap',
+                cursor: 'pointer',
+                boxShadow: isActive ? '0 4px 12px rgba(0, 102, 255, 0.25)' : '0 2px 6px rgba(0,0,0,0.02)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {d}
+            </button>
+          );
+        })}
       </div>
 
       {loading ? (
-        <p style={{ textAlign: 'center', color: '#94a3b8', padding: 20 }}>Memuat jadwal...</p>
+        <div style={{ textAlign: 'center', color: '#0066ff', padding: '40px 20px', fontWeight: 600 }}>
+          Memuat jadwal mengajar...
+        </div>
       ) : (
         jadwalList.length > 0 ? (
           jadwalList.map(j => (
-            <div key={j.kode_jadwal} className="glass-card" style={{ padding: 14, marginBottom: 10, borderLeft: '4px solid #38bdf8' }}>
-              <div style={{ fontSize: 12, color: '#38bdf8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Clock size={14} /> Jam ke-{j.jam_ke || '-'} ({j.jam || 'Waktu N/A'})
+            <div key={j.kode_jadwal} className="white-card" style={{ borderLeft: '5px solid #0066ff', padding: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <div style={{ fontSize: 12, color: '#0066ff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Clock size={15} /> Jam ke-{j.jam_ke || '-'} ({j.jam || '07:30 - 09:00'})
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, background: '#e0f2fe', color: '#0066ff', padding: '2px 8px', borderRadius: 8 }}>
+                  Aktif
+                </span>
               </div>
-              <div style={{ fontSize: 15, fontWeight: 600, margin: '4px 0' }}>{j.nama_mapel || 'Mata Pelajaran'}</div>
-              <div style={{ fontSize: 12, color: '#94a3b8', display: 'flex', gap: 12 }}>
-                <span><Users size={12} /> Kelas: {j.nama_kelas || '-'}</span>
-                <span><User size={12} /> Guru: {j.nama_guru || '-'}</span>
+              <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <BookOpen size={18} color="#0066ff" /> {j.nama_mapel || 'Mata Pelajaran'}
+              </div>
+              <div style={{ fontSize: 13, color: '#64748b', display: 'flex', gap: 16, borderTop: '1px solid #f1f5f9', paddingTop: 8 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+                  <Users size={14} color="#64748b" /> Kelas: <strong style={{ color: '#0f172a' }}>{j.nama_kelas || '-'}</strong>
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+                  <User size={14} color="#64748b" /> Guru: <strong style={{ color: '#0f172a' }}>{j.nama_guru || '-'}</strong>
+                </span>
               </div>
             </div>
           ))
         ) : (
-          <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
-            <CalendarX size={48} style={{ opacity: 0.4, marginBottom: 12 }} />
-            <p>Tidak ada jadwal mengajar pada hari {activeHari}.</p>
+          <div style={{ textAlign: 'center', padding: '50px 20px', color: '#94a3b8' }}>
+            <CalendarX size={54} style={{ opacity: 0.3, marginBottom: 12 }} />
+            <p style={{ fontWeight: 600, color: '#64748b' }}>Tidak ada jadwal mengajar pada hari {activeHari}.</p>
           </div>
         )
       )}

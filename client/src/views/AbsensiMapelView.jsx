@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, BookOpen } from 'lucide-react';
+import { Save, BookOpen, UserCheck, Calendar } from 'lucide-react';
 import api from '../api/client';
 
 export default function AbsensiMapelView({ user, showToast }) {
@@ -39,7 +39,8 @@ export default function AbsensiMapelView({ user, showToast }) {
       { id: 201, nis: '202401', nama: 'Ahmad Fauzi' },
       { id: 202, nis: '202402', nama: 'Budi Santoso' },
       { id: 203, nis: '202403', nama: 'Citra Dewi' },
-      { id: 204, nis: '202404', nama: 'Dinda Lestari' }
+      { id: 204, nis: '202404', nama: 'Dinda Lestari' },
+      { id: 205, nis: '202405', nama: 'Eko Prasetyo' }
     ];
 
     setStudentList(sample);
@@ -74,49 +75,52 @@ export default function AbsensiMapelView({ user, showToast }) {
       });
 
       if (res.data.success) {
-        showToast(res.data.message, true);
+        showToast(res.data.message || 'Absensi mapel berhasil disimpan!', true);
       } else {
         showToast(res.data.message || 'Gagal menyimpan absensi mapel.', false);
       }
     } catch (err) {
-      showToast('Terjadi kesalahan jaringan.', false);
+      showToast('Terjadi kesalahan koneksi.', false);
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div>
-      <div style={{ marginBottom: 16 }}>
-        <h2 style={{ fontSize: 20 }}>Absensi Mata Pelajaran</h2>
-        <p style={{ color: '#94a3b8', fontSize: 12 }}>Catat kehadiran siswa pada jam mengajar</p>
-      </div>
-
-      <div className="glass-card" style={{ marginBottom: 16 }}>
-        <div className="form-group">
-          <label>Pilih Mata Pelajaran</label>
-          <select value={selectedMapel} onChange={(e) => setSelectedMapel(e.target.value)}>
-            <option value="">-- Pilih Mapel --</option>
-            {mapelList.map(m => (
-              <option key={m.kode_mapel} value={m.kode_mapel}>{m.nama_mapel}</option>
-            ))}
-          </select>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label>Pilih Kelas</label>
-            <select value={selectedKelas} onChange={(e) => setSelectedKelas(e.target.value)}>
-              <option value="">-- Pilih Kelas --</option>
-              {kelasList.map(k => (
-                <option key={k.kode_kelas} value={k.kode_kelas}>{k.nama_kelas}</option>
+    <div className="inner-page-wrapper">
+      <div className="white-card">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div className="form-group-custom">
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <BookOpen size={14} color="#0066ff" /> PILIH MATA PELAJARAN
+            </label>
+            <select value={selectedMapel} onChange={(e) => setSelectedMapel(e.target.value)}>
+              <option value="">-- Pilih Mata Pelajaran --</option>
+              {mapelList.map(m => (
+                <option key={m.kode_mapel} value={m.kode_mapel}>{m.nama_mapel}</option>
               ))}
             </select>
           </div>
 
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label>Tanggal</label>
-            <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="form-group-custom">
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <UserCheck size={14} color="#0066ff" /> PILIH KELAS
+              </label>
+              <select value={selectedKelas} onChange={(e) => setSelectedKelas(e.target.value)}>
+                <option value="">-- Pilih Kelas --</option>
+                {kelasList.map(k => (
+                  <option key={k.kode_kelas} value={k.kode_kelas}>{k.nama_kelas}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group-custom">
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Calendar size={14} color="#0066ff" /> TANGGAL
+              </label>
+              <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} />
+            </div>
           </div>
         </div>
       </div>
@@ -124,36 +128,20 @@ export default function AbsensiMapelView({ user, showToast }) {
       {studentList.length > 0 ? (
         <div>
           {studentList.map(s => (
-            <div key={s.id} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '12px 16px', marginBottom: 10, background: 'rgba(22, 30, 46, 0.75)',
-              borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)'
-            }}>
+            <div key={s.id} className="student-item-card">
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>{s.nama}</div>
-                <div style={{ fontSize: 11, color: '#94a3b8' }}>NIS: {s.nis}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{s.nama}</div>
+                <div style={{ fontSize: 11, color: '#64748b' }}>NIS: {s.nis}</div>
               </div>
               <div style={{ display: 'flex', gap: 6 }}>
                 {['H', 'S', 'I', 'A'].map(st => {
                   const isActive = mapelStatus[s.id] === st;
-                  let bg = 'rgba(255,255,255,0.05)';
-                  let color = '#94a3b8';
-                  if (isActive) {
-                    if (st === 'H') { bg = '#059669'; color = '#fff'; }
-                    if (st === 'S') { bg = '#0284c7'; color = '#fff'; }
-                    if (st === 'I') { bg = '#d97706'; color = '#fff'; }
-                    if (st === 'A') { bg = '#e11d48'; color = '#fff'; }
-                  }
                   return (
                     <button
                       key={st}
                       type="button"
                       onClick={() => updateStatus(s.id, st)}
-                      style={{
-                        width: 32, height: 32, borderRadius: 8,
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        background: bg, color, fontWeight: 700, fontSize: 12, cursor: 'pointer'
-                      }}
+                      className={`status-btn-pill ${isActive ? `act-${st}` : ''}`}
                     >
                       {st}
                     </button>
@@ -163,15 +151,27 @@ export default function AbsensiMapelView({ user, showToast }) {
             </div>
           ))}
 
-          <button className="btn btn-primary btn-block" onClick={handleSubmit} disabled={saving} style={{ marginTop: 16 }}>
-            <Save size={16} />
+          <button
+            className="btn btn-primary btn-block"
+            onClick={handleSubmit}
+            disabled={saving}
+            style={{
+              marginTop: 16,
+              background: 'linear-gradient(135deg, #0072ff, #0052cc)',
+              height: 48,
+              borderRadius: 14,
+              fontWeight: 800,
+              fontSize: 14
+            }}
+          >
+            <Save size={18} />
             <span>{saving ? 'Menyimpan...' : 'Simpan Absensi Mapel'}</span>
           </button>
         </div>
       ) : (
-        <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
-          <BookOpen size={48} style={{ opacity: 0.4, marginBottom: 12 }} />
-          <p>Pilih mata pelajaran, kelas, dan tanggal untuk mengisi absensi.</p>
+        <div style={{ textAlign: 'center', padding: '50px 20px', color: '#94a3b8' }}>
+          <BookOpen size={54} style={{ opacity: 0.3, marginBottom: 12 }} />
+          <p style={{ fontWeight: 600, color: '#64748b' }}>Silakan pilih mata pelajaran & kelas di atas.</p>
         </div>
       )}
     </div>

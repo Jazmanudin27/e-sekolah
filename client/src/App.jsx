@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import TopBar from './components/TopBar';
+import SubHeader from './components/SubHeader';
 import BottomNav from './components/BottomNav';
 import PresensiModal from './components/PresensiModal';
 import LoginView from './views/LoginView';
@@ -9,13 +11,11 @@ import AbsensiMapelView from './views/AbsensiMapelView';
 import JadwalView from './views/JadwalView';
 import RiwayatView from './views/RiwayatView';
 import api from './api/client';
-import { CheckCircle2, XCircle } from 'lucide-react';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeTab, setActiveTab] = useState('beranda');
-  const [presensiModalType, setPresensiModalType] = useState(null); // 'in', 'out' or null
-  const [toast, setToast] = useState({ show: false, message: '', isSuccess: true });
+  const [presensiModalType, setPresensiModalType] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,17 +42,34 @@ export default function App() {
     }
   };
 
-  const showToast = (message, isSuccess = true) => {
-    setToast({ show: true, message, isSuccess });
-    setTimeout(() => {
-      setToast({ show: false, message: '', isSuccess: true });
-    }, 3000);
+  const showToast = (message, isSuccess = true, title = null) => {
+    Swal.fire({
+      title: title || (isSuccess ? 'Berhasil!' : 'Perhatian'),
+      text: message,
+      icon: isSuccess ? 'success' : 'error',
+      confirmButtonColor: '#0066ff',
+      confirmButtonText: 'OK',
+      customClass: {
+        popup: 'swal2-custom-popup'
+      }
+    });
   };
 
   const handleLoginSuccess = (user, token) => {
     localStorage.setItem('esekolah_token', token);
     setCurrentUser(user);
     setActiveTab('beranda');
+    Swal.fire({
+      title: 'Login Berhasil!',
+      text: `Selamat datang kembali, ${user.nama_guru || user.username || 'Pengajar'}!`,
+      icon: 'success',
+      confirmButtonColor: '#0066ff',
+      timer: 2200,
+      timerProgressBar: true,
+      customClass: {
+        popup: 'swal2-custom-popup'
+      }
+    });
   };
 
   const handleLogout = () => {
@@ -63,7 +80,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="app-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: '#38bdf8', fontWeight: 600 }}>Memuat E-Sekolah Mobile...</p>
+        <p style={{ color: '#0066ff', fontWeight: 600 }}>Memuat E-Sekolah Mobile...</p>
       </div>
     );
   }
@@ -71,12 +88,6 @@ export default function App() {
   if (!currentUser) {
     return (
       <div className="app-shell" style={{ background: '#070a14', minHeight: '100vh' }}>
-        {toast.show && (
-          <div className="toast-msg">
-            {toast.isSuccess ? <CheckCircle2 size={18} style={{ color: '#10b981' }} /> : <XCircle size={18} style={{ color: '#f43f5e' }} />}
-            <span>{toast.message}</span>
-          </div>
-        )}
         <LoginView onLoginSuccess={handleLoginSuccess} showToast={showToast} />
       </div>
     );
@@ -84,18 +95,45 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      {/* Toast Notification */}
-      {toast.show && (
-        <div className="toast-msg">
-          {toast.isSuccess ? <CheckCircle2 size={18} style={{ color: '#10b981' }} /> : <XCircle size={18} style={{ color: '#f43f5e' }} />}
-          <span>{toast.message}</span>
-        </div>
+      {/* Conditionally Render Header based on activeTab */}
+      {activeTab === 'beranda' && (
+        <TopBar user={currentUser} onLogout={handleLogout} />
+      )}
+
+      {activeTab === 'absensiSiswa' && (
+        <SubHeader
+          title="Absensi Siswa"
+          subtitle="Input data kehadiran siswa per kelas"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
+      {activeTab === 'absensiMapel' && (
+        <SubHeader
+          title="Absensi Mapel"
+          subtitle="Catat kehadiran siswa pada jam mengajar"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
+      {activeTab === 'jadwal' && (
+        <SubHeader
+          title="Jadwal Pengajar"
+          subtitle="Jadwal mengajar dan kelas minggu ini"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
+      {activeTab === 'riwayat' && (
+        <SubHeader
+          title="Riwayat Presensi"
+          subtitle="Catatan dan rekap kehadiran presensi"
+          onBack={() => setActiveTab('beranda')}
+        />
       )}
 
       {/* Main Content Area */}
       <main className="main-content-area">
-        <TopBar user={currentUser} onLogout={handleLogout} />
-
         {activeTab === 'beranda' && (
           <BerandaView
             onOpenPresensiModal={(type) => setPresensiModalType(type)}
