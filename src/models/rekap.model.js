@@ -205,9 +205,9 @@ class RekapModel {
 
   /**
    * Rekapitulasi Presensi Guru
-   * Returns ALL teachers from master table 'guru'
+   * Returns ALL teachers from master table 'guru' and attendance tables
    */
-  static async getRekapGuru({ bulan, tahun }) {
+  static async getRekapGuru({ bulan, tahun } = {}) {
     try {
       const pParams = [];
       let pWhere = '';
@@ -255,14 +255,21 @@ class RekapModel {
 
       const sql = `
         SELECT 
-          g.kode_guru,
-          g.nama_guru,
+          t.kode_guru,
+          COALESCE(g.nama_guru, CONCAT('Guru #', t.kode_guru)) AS nama_guru,
           COALESCE(g.nip_nuptk, '-') AS nip_nuptk,
           COALESCE(g.status_kepegawaian, 'Guru') AS status_kepegawaian,
           COALESCE(p.total_hadir, 0) AS total_hadir,
           COALESCE(i_sakit.total_sakit, 0) AS total_sakit,
           COALESCE(i_izin.total_izin, 0) AS total_izin
-        FROM guru g
+        FROM (
+          SELECT kode_guru FROM guru
+          UNION
+          SELECT kode_guru FROM presensi WHERE kode_guru IS NOT NULL AND kode_guru != ''
+          UNION
+          SELECT CAST(user_id AS CHAR) AS kode_guru FROM pengajuan_izin WHERE user_id IS NOT NULL AND user_id != ''
+        ) t
+        LEFT JOIN guru g ON (t.kode_guru = g.kode_guru OR t.kode_guru = g.nip_nuptk)
         LEFT JOIN (
           SELECT 
             p.kode_guru, 
@@ -270,7 +277,7 @@ class RekapModel {
           FROM presensi p 
           WHERE 1=1 ${pWhere}
           GROUP BY p.kode_guru
-        ) p ON (g.kode_guru = p.kode_guru OR g.nip_nuptk = p.kode_guru OR g.nama_guru = p.kode_guru)
+        ) p ON (t.kode_guru = p.kode_guru OR g.nip_nuptk = p.kode_guru OR g.nama_guru = p.kode_guru)
         LEFT JOIN (
           SELECT 
             i.user_id,
@@ -279,7 +286,7 @@ class RekapModel {
           FROM pengajuan_izin i 
           WHERE i.jenis = 'Sakit' ${sWhere}
           GROUP BY i.user_id, i.nama_pengaju
-        ) i_sakit ON (g.kode_guru = i_sakit.user_id OR g.nama_guru = i_sakit.nama_pengaju OR g.nip_nuptk = i_sakit.user_id)
+        ) i_sakit ON (t.kode_guru = i_sakit.user_id OR g.nama_guru = i_sakit.nama_pengaju OR g.nip_nuptk = i_sakit.user_id)
         LEFT JOIN (
           SELECT 
             i.user_id,
@@ -288,8 +295,8 @@ class RekapModel {
           FROM pengajuan_izin i 
           WHERE (i.jenis IS NULL OR i.jenis != 'Sakit') ${iWhere}
           GROUP BY i.user_id, i.nama_pengaju
-        ) i_izin ON (g.kode_guru = i_izin.user_id OR g.nama_guru = i_izin.nama_pengaju OR g.nip_nuptk = i_izin.user_id)
-        ORDER BY g.nama_guru ASC
+        ) i_izin ON (t.kode_guru = i_izin.user_id OR g.nama_guru = i_izin.nama_pengaju OR g.nip_nuptk = i_izin.user_id)
+        ORDER BY nama_guru ASC
       `;
 
       const rows = await query(sql, params);
@@ -297,7 +304,7 @@ class RekapModel {
         return rows;
       }
 
-      // Fallback directly from presensi table if guru table is empty
+      // Fallback directly from presensi table if empty
       let fallbackSql = `
         SELECT 
           p.kode_guru,
