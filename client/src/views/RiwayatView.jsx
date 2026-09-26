@@ -163,7 +163,7 @@ export default function RiwayatView() {
       </div>
 
       {/* LIST PRESENSI */}
-      <div className="history-section-wrapper" style={{ padding: 0, background: 'none', boxShadow: 'none' }}>
+      <div className="history-section-wrapper" style={{ width: '100%', padding: 0, background: 'none', boxShadow: 'none' }}>
         {loading ? (
           <div style={{ textAlign: 'center', color: '#0066ff', padding: '40px 20px', fontWeight: 600 }}>
             Memuat data presensi dari database...
