@@ -257,7 +257,11 @@ class RekapModel {
           FROM presensi p 
           WHERE 1=1 ${pWhere}
           GROUP BY p.kode_guru
-        ) p ON (g.kode_guru = p.kode_guru OR g.nip_nuptk = p.kode_guru OR g.nama_guru = p.kode_guru)
+        ) p ON (
+          g.kode_guru = p.kode_guru COLLATE utf8mb4_general_ci 
+          OR g.nip_nuptk = p.kode_guru COLLATE utf8mb4_general_ci 
+          OR g.nama_guru = p.kode_guru COLLATE utf8mb4_general_ci
+        )
         LEFT JOIN (
           SELECT 
             i.user_id,
@@ -266,7 +270,11 @@ class RekapModel {
           FROM pengajuan_izin i 
           WHERE i.jenis = 'Sakit' ${iWhere}
           GROUP BY i.user_id, i.nama_pengaju
-        ) i_sakit ON (g.kode_guru = CAST(i_sakit.user_id AS CHAR) OR g.nama_guru = i_sakit.nama_pengaju OR g.nip_nuptk = CAST(i_sakit.user_id AS CHAR))
+        ) i_sakit ON (
+          g.kode_guru = CAST(i_sakit.user_id AS CHAR) COLLATE utf8mb4_general_ci 
+          OR g.nama_guru = i_sakit.nama_pengaju COLLATE utf8mb4_general_ci 
+          OR g.nip_nuptk = CAST(i_sakit.user_id AS CHAR) COLLATE utf8mb4_general_ci
+        )
         LEFT JOIN (
           SELECT 
             i.user_id,
@@ -275,7 +283,11 @@ class RekapModel {
           FROM pengajuan_izin i 
           WHERE (i.jenis IS NULL OR i.jenis != 'Sakit') ${iWhere}
           GROUP BY i.user_id, i.nama_pengaju
-        ) i_izin ON (g.kode_guru = CAST(i_izin.user_id AS CHAR) OR g.nama_guru = i_izin.nama_pengaju OR g.nip_nuptk = CAST(i_izin.user_id AS CHAR))
+        ) i_izin ON (
+          g.kode_guru = CAST(i_izin.user_id AS CHAR) COLLATE utf8mb4_general_ci 
+          OR g.nama_guru = i_izin.nama_pengaju COLLATE utf8mb4_general_ci 
+          OR g.nip_nuptk = CAST(i_izin.user_id AS CHAR) COLLATE utf8mb4_general_ci
+        )
         ORDER BY g.nama_guru ASC
       `;
 
@@ -295,7 +307,10 @@ class RekapModel {
           0 AS total_sakit,
           0 AS total_izin
         FROM presensi p
-        LEFT JOIN guru g ON (p.kode_guru = g.kode_guru OR p.kode_guru = g.nip_nuptk)
+        LEFT JOIN guru g ON (
+          p.kode_guru = g.kode_guru COLLATE utf8mb4_general_ci 
+          OR p.kode_guru = g.nip_nuptk COLLATE utf8mb4_general_ci
+        )
         WHERE 1=1 ${pWhere}
         GROUP BY p.kode_guru ORDER BY nama_guru ASC
       `;
