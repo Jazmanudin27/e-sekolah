@@ -41,12 +41,29 @@ export default function RiwayatView() {
     }
   };
 
+  const renderTimeRange = (jamIn, jamOut) => {
+    const inText = jamIn || 'Belum Scan';
+    const outText = jamOut || 'Belum Scan';
+
+    return (
+      <div className="history-item-time">
+        <span style={{ color: !jamIn ? '#dc2626' : '#0066ff', fontWeight: !jamIn ? 700 : 600 }}>
+          {inText}
+        </span>
+        <span style={{ color: '#94a3b8', margin: '0 4px' }}>-</span>
+        <span style={{ color: !jamOut ? '#dc2626' : '#0066ff', fontWeight: !jamOut ? 700 : 600 }}>
+          {outText}
+        </span>
+      </div>
+    );
+  };
+
   const defaultHistoryCards = [
     { tanggal: '2026-09-25', jam_in: '06:23:35', jam_out: '15:08:46' },
     { tanggal: '2026-09-24', jam_in: '06:19:20', jam_out: '15:00:12' },
     { tanggal: '2026-09-23', jam_in: '06:20:05', jam_out: '15:05:40' },
     { tanggal: '2026-09-22', jam_in: '06:17:42', jam_out: '15:10:00' },
-    { tanggal: '2026-09-21', jam_in: '06:25:10', jam_out: '15:02:18' }
+    { tanggal: '2026-09-21', jam_in: '06:25:10', jam_out: null }
   ];
 
   const displayList = historyList.length > 0 ? historyList : defaultHistoryCards;
@@ -78,9 +95,7 @@ export default function RiwayatView() {
               </div>
               <div className="history-item-content">
                 <div className="history-item-date">{formatFullDate(item.tanggal || item.date)}</div>
-                <div className="history-item-time">
-                  {item.jam_in || 'Belum Scan'} - {item.jam_out || 'Belum Scan'}
-                </div>
+                {renderTimeRange(item.jam_in, item.jam_out)}
               </div>
             </div>
           ))

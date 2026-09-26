@@ -66,6 +66,23 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
     }
   };
 
+  const renderTimeRange = (jamIn, jamOut) => {
+    const inText = jamIn || 'Belum Scan';
+    const outText = jamOut || 'Belum Scan';
+
+    return (
+      <div className="history-item-time">
+        <span style={{ color: !jamIn ? '#dc2626' : '#0066ff', fontWeight: !jamIn ? 700 : 600 }}>
+          {inText}
+        </span>
+        <span style={{ color: '#94a3b8', margin: '0 4px' }}>-</span>
+        <span style={{ color: !jamOut ? '#dc2626' : '#0066ff', fontWeight: !jamOut ? 700 : 600 }}>
+          {outText}
+        </span>
+      </div>
+    );
+  };
+
   return (
     <div className="beranda-view-container">
 
@@ -217,9 +234,7 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
               </div>
               <div className="history-item-content">
                 <div className="history-item-date">{formatFullDate(item.tanggal || item.date)}</div>
-                <div className="history-item-time">
-                  {item.jam_in || '06:23:35'} - {item.jam_out || '15:08:46'}
-                </div>
+                {renderTimeRange(item.jam_in, item.jam_out)}
               </div>
             </div>
           ))
@@ -231,7 +246,7 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
               </div>
               <div className="history-item-content">
                 <div className="history-item-date">{item.date}</div>
-                <div className="history-item-time">{item.time}</div>
+                {renderTimeRange(item.jam_in, item.jam_out)}
               </div>
             </div>
           ))
