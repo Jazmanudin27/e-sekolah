@@ -32,7 +32,7 @@ class RekapModel {
         SELECT 
           s.kode_siswa,
           s.nama_siswa,
-          COALESCE(s.nis_nisn, s.nis, s.nisn, CONCAT('NIS-', s.kode_siswa)) AS nis_nisn,
+          COALESCE(s.nis, s.nisn, CONCAT('NIS-', s.kode_siswa)) AS nis_nisn,
           s.kode_kelas,
           COALESCE(k.nama_kelas, CONCAT('Kelas ', s.kode_kelas)) AS nama_kelas,
           k.jurusan,
@@ -45,10 +45,10 @@ class RekapModel {
         LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas
         LEFT JOIN absensi_siswa a 
           ON (CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.kode_siswa USING utf8mb4) 
-              OR CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.nis_nisn USING utf8mb4))
+              OR CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.nis USING utf8mb4))
           ${dateWhereA}
         ${mainWhere}
-        GROUP BY s.kode_siswa, s.nama_siswa, s.nis_nisn, s.nis, s.nisn, s.kode_kelas, k.nama_kelas, k.jurusan
+        GROUP BY s.kode_siswa, s.nama_siswa, s.kode_kelas, k.nama_kelas, k.jurusan
         ORDER BY s.nama_siswa ASC
       `;
 
@@ -62,7 +62,7 @@ class RekapModel {
         SELECT 
           a.kode_siswa,
           COALESCE(s.nama_siswa, CONCAT('Siswa #', a.kode_siswa)) AS nama_siswa,
-          COALESCE(s.nis_nisn, CONCAT('NIS-', a.kode_siswa)) AS nis_nisn,
+          COALESCE(s.nis, CONCAT('NIS-', a.kode_siswa)) AS nis_nisn,
           COALESCE(k.nama_kelas, CONCAT('Kelas ', a.kode_kelas)) AS nama_kelas,
           COUNT(DISTINCT a.id) AS total_absen,
           COUNT(DISTINCT CASE WHEN a.status = 'H' THEN a.id END) AS total_hadir,
@@ -72,7 +72,7 @@ class RekapModel {
         FROM absensi_siswa a
         LEFT JOIN siswa s ON (
           CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.kode_siswa USING utf8mb4) 
-          OR CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.nis_nisn USING utf8mb4)
+          OR CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.nis USING utf8mb4)
         )
         LEFT JOIN kelas k ON a.kode_kelas = k.kode_kelas
         WHERE 1=1 ${dateWhereA}
@@ -83,7 +83,7 @@ class RekapModel {
         fbParams.push(kode_kelas);
       }
 
-      fallbackSql += ' GROUP BY a.kode_siswa, s.nama_siswa, s.nis_nisn, k.nama_kelas ORDER BY a.kode_siswa ASC';
+      fallbackSql += ' GROUP BY a.kode_siswa, s.nama_siswa, k.nama_kelas ORDER BY a.kode_siswa ASC';
       return await query(fallbackSql, fbParams);
 
     } catch (e) {
@@ -132,7 +132,7 @@ class RekapModel {
         SELECT 
           s.kode_siswa,
           s.nama_siswa,
-          COALESCE(s.nis_nisn, s.nis, s.nisn, CONCAT('NIS-', s.kode_siswa)) AS nis_nisn,
+          COALESCE(s.nis, s.nisn, CONCAT('NIS-', s.kode_siswa)) AS nis_nisn,
           s.kode_kelas,
           COALESCE(k.nama_kelas, CONCAT('Kelas ', s.kode_kelas)) AS nama_kelas,
           ${kode_mapel ? 'COALESCE(m.nama_mapel, "Mata Pelajaran")' : '"Semua Mapel"'} AS nama_mapel,
@@ -146,10 +146,10 @@ class RekapModel {
         ${kode_mapel ? 'LEFT JOIN mapel m ON m.kode_mapel = ?' : ''}
         LEFT JOIN absensi_mapel a 
           ON (CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.kode_siswa USING utf8mb4) 
-              OR CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.nis_nisn USING utf8mb4))
+              OR CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.nis USING utf8mb4))
           ${dateWhereA}
         ${mainWhere}
-        GROUP BY s.kode_siswa, s.nama_siswa, s.nis_nisn, s.nis, s.nisn, s.kode_kelas, k.nama_kelas ${kode_mapel ? ', m.nama_mapel' : ''}
+        GROUP BY s.kode_siswa, s.nama_siswa, s.kode_kelas, k.nama_kelas ${kode_mapel ? ', m.nama_mapel' : ''}
         ORDER BY s.nama_siswa ASC
       `;
 
@@ -163,7 +163,7 @@ class RekapModel {
         SELECT 
           a.kode_siswa,
           COALESCE(s.nama_siswa, CONCAT('Siswa #', a.kode_siswa)) AS nama_siswa,
-          COALESCE(s.nis_nisn, CONCAT('NIS-', a.kode_siswa)) AS nis_nisn,
+          COALESCE(s.nis, CONCAT('NIS-', a.kode_siswa)) AS nis_nisn,
           COALESCE(k.nama_kelas, CONCAT('Kelas ', a.kode_kelas)) AS nama_kelas,
           COALESCE(m.nama_mapel, CONCAT('Mapel ', a.kode_mapel)) AS nama_mapel,
           COUNT(DISTINCT a.id) AS total_absen,
@@ -174,7 +174,7 @@ class RekapModel {
         FROM absensi_mapel a
         LEFT JOIN siswa s ON (
           CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.kode_siswa USING utf8mb4) 
-          OR CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.nis_nisn USING utf8mb4)
+          OR CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.nis USING utf8mb4)
         )
         LEFT JOIN kelas k ON a.kode_kelas = k.kode_kelas
         LEFT JOIN mapel m ON a.kode_mapel = m.kode_mapel
@@ -186,7 +186,7 @@ class RekapModel {
         fbParams.push(kode_kelas);
       }
 
-      fallbackSql += ' GROUP BY a.kode_siswa, s.nama_siswa, s.nis_nisn, k.nama_kelas, m.nama_mapel ORDER BY a.kode_siswa ASC';
+      fallbackSql += ' GROUP BY a.kode_siswa, s.nama_siswa, k.nama_kelas, m.nama_mapel ORDER BY a.kode_siswa ASC';
       return await query(fallbackSql, fbParams);
 
     } catch (e) {
