@@ -4,7 +4,11 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 async function getRekapSiswa(req, res, next) {
   try {
     const { bulan, tahun, kode_kelas } = req.query;
-    const records = await RekapModel.getRekapSiswa({ bulan, tahun, kode_kelas });
+    const effectiveKodeKelas = (req.user && req.user.type === 'Kelas' && req.user.kode_kelas) 
+      ? req.user.kode_kelas 
+      : kode_kelas;
+
+    const records = await RekapModel.getRekapSiswa({ bulan, tahun, kode_kelas: effectiveKodeKelas });
     sendSuccess(res, 'Laporan rekap absensi siswa berhasil diambil.', records, 200, { count: records.length });
   } catch (error) {
     next(error);
@@ -14,7 +18,11 @@ async function getRekapSiswa(req, res, next) {
 async function getRekapMapel(req, res, next) {
   try {
     const { bulan, tahun, kode_kelas, kode_mapel } = req.query;
-    const records = await RekapModel.getRekapMapel({ bulan, tahun, kode_kelas, kode_mapel });
+    const effectiveKodeKelas = (req.user && req.user.type === 'Kelas' && req.user.kode_kelas) 
+      ? req.user.kode_kelas 
+      : kode_kelas;
+
+    const records = await RekapModel.getRekapMapel({ bulan, tahun, kode_kelas: effectiveKodeKelas, kode_mapel });
     sendSuccess(res, 'Laporan rekap absensi mata pelajaran berhasil diambil.', records, 200, { count: records.length });
   } catch (error) {
     next(error);

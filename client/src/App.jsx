@@ -220,13 +220,13 @@ export default function App() {
           />
         )}
         {activeTab === 'siswa' && <SiswaView showToast={showToast} onSwitchTab={(t) => setActiveTab(t)} />}
-        {activeTab === 'absensiSiswa' && <AbsensiSiswaView showToast={showToast} />}
+        {activeTab === 'absensiSiswa' && <AbsensiSiswaView user={currentUser} showToast={showToast} />}
         {activeTab === 'absensiMapel' && <AbsensiMapelView user={currentUser} showToast={showToast} />}
         {activeTab === 'jadwal' && <JadwalView />}
         {activeTab === 'riwayat' && <RiwayatView />}
         {activeTab === 'izin' && <IzinView showToast={showToast} />}
         {activeTab === 'profil' && <ProfilView user={currentUser} onLogout={handleLogout} />}
-        {activeTab === 'rekapSiswa' && <RekapSiswaView />}
+        {activeTab === 'rekapSiswa' && <RekapSiswaView user={currentUser} />}
         {activeTab === 'rekapMapel' && <RekapMapelView />}
         {activeTab === 'rekapGuru' && <RekapGuruView />}
       </main>
