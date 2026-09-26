@@ -1,58 +1,90 @@
 const { query } = require('../config/database');
 
 class RekapModel {
+  /**
+   * Helper to build SQL date conditions and parameter arrays for subqueries
+   */
+  static buildDateCondition(dateColumn, bulan, tahun) {
+    let sqlStr = '';
+    const params = [];
+
+    if (bulan) {
+      const bInt = parseInt(bulan, 10);
+      const bPad = String(bInt).padStart(2, '0');
+      sqlStr += ` AND (MONTH(${dateColumn}) = ? OR DATE_FORMAT(${dateColumn}, "%c") = ? OR DATE_FORMAT(${dateColumn}, "%m") = ?)`;
+      params.push(bInt, String(bInt), bPad);
+    }
+    if (tahun) {
+      const tInt = parseInt(tahun, 10);
+      sqlStr += ` AND (YEAR(${dateColumn}) = ? OR DATE_FORMAT(${dateColumn}, "%Y") = ?)`;
+      params.push(tInt, String(tInt));
+    }
+
+    return { sqlStr, params };
+  }
+
+  /**
+   * Rekapitulasi Presensi Siswa
+   * Returns ALL students from master table 'siswa' (filtered by class if provided)
+   */
   static async getRekapSiswa({ bulan, tahun, kode_kelas }) {
     try {
-      let sql = `
+      const dateCond = this.buildDateCondition('a.tanggal', bulan, tahun);
+
+      const params = [];
+
+      // Add params for 5 subqueries (total_absen, total_hadir, total_sakit, total_izin, total_alpha)
+      for (let i = 0; i < 5; i++) {
+        params.push(...dateCond.params);
+      }
+
+      let mainWhere = 'WHERE 1=1';
+      if (kode_kelas) {
+        mainWhere += ' AND s.kode_kelas = ?';
+        params.push(kode_kelas);
+      }
+
+      const sql = `
         SELECT 
           s.kode_siswa,
           s.nama_siswa,
           s.nis_nisn,
-          k.nama_kelas,
+          s.kode_kelas,
+          COALESCE(k.nama_kelas, CONCAT('Kelas ', s.kode_kelas)) AS nama_kelas,
           k.jurusan,
-          COUNT(a.id) AS total_absen,
-          SUM(CASE WHEN a.status = 'H' THEN 1 ELSE 0 END) AS total_hadir,
-          SUM(CASE WHEN a.status = 'S' THEN 1 ELSE 0 END) AS total_sakit,
-          SUM(CASE WHEN a.status = 'I' THEN 1 ELSE 0 END) AS total_izin,
-          SUM(CASE WHEN a.status = 'A' THEN 1 ELSE 0 END) AS total_alpha
+          (
+            SELECT COUNT(a.id) FROM absensi_siswa a 
+            WHERE (a.kode_siswa = s.kode_siswa OR a.kode_siswa = s.nis_nisn) ${dateCond.sqlStr}
+          ) AS total_absen,
+          (
+            SELECT COUNT(a.id) FROM absensi_siswa a 
+            WHERE (a.kode_siswa = s.kode_siswa OR a.kode_siswa = s.nis_nisn) AND a.status = 'H' ${dateCond.sqlStr}
+          ) AS total_hadir,
+          (
+            SELECT COUNT(a.id) FROM absensi_siswa a 
+            WHERE (a.kode_siswa = s.kode_siswa OR a.kode_siswa = s.nis_nisn) AND a.status = 'S' ${dateCond.sqlStr}
+          ) AS total_sakit,
+          (
+            SELECT COUNT(a.id) FROM absensi_siswa a 
+            WHERE (a.kode_siswa = s.kode_siswa OR a.kode_siswa = s.nis_nisn) AND a.status = 'I' ${dateCond.sqlStr}
+          ) AS total_izin,
+          (
+            SELECT COUNT(a.id) FROM absensi_siswa a 
+            WHERE (a.kode_siswa = s.kode_siswa OR a.kode_siswa = s.nis_nisn) AND a.status = 'A' ${dateCond.sqlStr}
+          ) AS total_alpha
         FROM siswa s
         LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas
-        LEFT JOIN absensi_siswa a ON s.kode_siswa = a.kode_siswa
+        ${mainWhere}
+        ORDER BY s.nama_siswa ASC
       `;
 
-      const params = [];
-      const joinConditions = [];
-
-      if (bulan) {
-        const bInt = parseInt(bulan, 10);
-        const bPad = String(bInt).padStart(2, '0');
-        joinConditions.push('(MONTH(a.tanggal) = ? OR DATE_FORMAT(a.tanggal, "%c") = ? OR DATE_FORMAT(a.tanggal, "%m") = ?)');
-        params.push(bInt, String(bInt), bPad);
-      }
-      if (tahun) {
-        const tInt = parseInt(tahun, 10);
-        joinConditions.push('(YEAR(a.tanggal) = ? OR DATE_FORMAT(a.tanggal, "%Y") = ?)');
-        params.push(tInt, String(tInt));
-      }
-
-      if (joinConditions.length > 0) {
-        sql += ' AND ' + joinConditions.join(' AND ');
-      }
-
-      sql += ' WHERE 1=1';
-      if (kode_kelas) {
-        sql += ' AND (s.kode_kelas = ? OR a.kode_kelas = ?)';
-        params.push(kode_kelas, kode_kelas);
-      }
-
-      sql += ' GROUP BY s.kode_siswa, s.nama_siswa, s.nis_nisn, k.nama_kelas, k.jurusan ORDER BY s.nama_siswa ASC';
       const rows = await query(sql, params);
 
       if (rows && rows.length > 0) {
         return rows;
       }
 
-      // Fallback directly from absensi_siswa table if JOIN produces 0 rows
+      // Fallback directly from absensi_siswa table if master table 'siswa' is completely empty
       let fallbackSql = `
         SELECT 
           a.kode_siswa,
@@ -86,7 +118,7 @@ class RekapModel {
         fbParams.push(kode_kelas);
       }
 
-      fallbackSql += ' GROUP BY a.kode_siswa, a.kode_kelas ORDER BY a.kode_siswa ASC';
+      fallbackSql += ' GROUP BY a.kode_siswa ORDER BY a.kode_siswa ASC';
       return await query(fallbackSql, fbParams);
 
     } catch (e) {
@@ -95,55 +127,72 @@ class RekapModel {
     }
   }
 
+  /**
+   * Rekapitulasi Presensi Mapel
+   * Returns ALL students from master table 'siswa' (filtered by class and mapel if provided)
+   */
   static async getRekapMapel({ bulan, tahun, kode_kelas, kode_mapel }) {
     try {
-      let sql = `
+      const dateCond = this.buildDateCondition('a.tanggal', bulan, tahun);
+
+      let mapelCond = '';
+      const mapelParams = [];
+      if (kode_mapel) {
+        mapelCond = ' AND a.kode_mapel = ?';
+        mapelParams.push(kode_mapel);
+      }
+
+      const params = [];
+      // Add params for 5 subqueries
+      for (let i = 0; i < 5; i++) {
+        params.push(...mapelParams, ...dateCond.params);
+      }
+
+      if (kode_mapel) {
+        params.push(kode_mapel);
+      }
+
+      let mainWhere = 'WHERE 1=1';
+      if (kode_kelas) {
+        mainWhere += ' AND s.kode_kelas = ?';
+        params.push(kode_kelas);
+      }
+
+      const sql = `
         SELECT 
           s.kode_siswa,
           s.nama_siswa,
           s.nis_nisn,
-          k.nama_kelas,
-          m.nama_mapel,
-          COUNT(a.id) AS total_absen,
-          SUM(CASE WHEN a.status = 'H' THEN 1 ELSE 0 END) AS total_hadir,
-          SUM(CASE WHEN a.status = 'S' THEN 1 ELSE 0 END) AS total_sakit,
-          SUM(CASE WHEN a.status = 'I' THEN 1 ELSE 0 END) AS total_izin,
-          SUM(CASE WHEN a.status = 'A' THEN 1 ELSE 0 END) AS total_alpha
+          s.kode_kelas,
+          COALESCE(k.nama_kelas, CONCAT('Kelas ', s.kode_kelas)) AS nama_kelas,
+          ${kode_mapel ? 'COALESCE(m.nama_mapel, "Mata Pelajaran")' : '"Semua Mapel"'} AS nama_mapel,
+          (
+            SELECT COUNT(a.id) FROM absensi_mapel a 
+            WHERE (a.kode_siswa = s.kode_siswa OR a.kode_siswa = s.nis_nisn) ${mapelCond} ${dateCond.sqlStr}
+          ) AS total_absen,
+          (
+            SELECT COUNT(a.id) FROM absensi_mapel a 
+            WHERE (a.kode_siswa = s.kode_siswa OR a.kode_siswa = s.nis_nisn) AND a.status = 'H' ${mapelCond} ${dateCond.sqlStr}
+          ) AS total_hadir,
+          (
+            SELECT COUNT(a.id) FROM absensi_mapel a 
+            WHERE (a.kode_siswa = s.kode_siswa OR a.kode_siswa = s.nis_nisn) AND a.status = 'S' ${mapelCond} ${dateCond.sqlStr}
+          ) AS total_sakit,
+          (
+            SELECT COUNT(a.id) FROM absensi_mapel a 
+            WHERE (a.kode_siswa = s.kode_siswa OR a.kode_siswa = s.nis_nisn) AND a.status = 'I' ${mapelCond} ${dateCond.sqlStr}
+          ) AS total_izin,
+          (
+            SELECT COUNT(a.id) FROM absensi_mapel a 
+            WHERE (a.kode_siswa = s.kode_siswa OR a.kode_siswa = s.nis_nisn) AND a.status = 'A' ${mapelCond} ${dateCond.sqlStr}
+          ) AS total_alpha
         FROM siswa s
         LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas
-        LEFT JOIN absensi_mapel a ON s.kode_siswa = a.kode_siswa 
+        ${kode_mapel ? 'LEFT JOIN mapel m ON m.kode_mapel = ?' : ''}
+        ${mainWhere}
+        ORDER BY s.nama_siswa ASC
       `;
 
-      const params = [];
-      const joinConditions = [];
-
-      if (bulan) {
-        const bInt = parseInt(bulan, 10);
-        const bPad = String(bInt).padStart(2, '0');
-        joinConditions.push('(MONTH(a.tanggal) = ? OR DATE_FORMAT(a.tanggal, "%c") = ? OR DATE_FORMAT(a.tanggal, "%m") = ?)');
-        params.push(bInt, String(bInt), bPad);
-      }
-      if (tahun) {
-        const tInt = parseInt(tahun, 10);
-        joinConditions.push('(YEAR(a.tanggal) = ? OR DATE_FORMAT(a.tanggal, "%Y") = ?)');
-        params.push(tInt, String(tInt));
-      }
-      if (kode_mapel) {
-        joinConditions.push('a.kode_mapel = ?');
-        params.push(kode_mapel);
-      }
-
-      if (joinConditions.length > 0) {
-        sql += ' AND ' + joinConditions.join(' AND ');
-      }
-
-      sql += ' LEFT JOIN mapel m ON a.kode_mapel = m.kode_mapel WHERE 1=1';
-      if (kode_kelas) {
-        sql += ' AND (s.kode_kelas = ? OR a.kode_kelas = ?)';
-        params.push(kode_kelas, kode_kelas);
-      }
-
-      sql += ' GROUP BY s.kode_siswa, s.nama_siswa, s.nis_nisn, k.nama_kelas, m.nama_mapel ORDER BY s.nama_siswa ASC';
       const rows = await query(sql, params);
 
       if (rows && rows.length > 0) {
@@ -190,7 +239,7 @@ class RekapModel {
         fbParams.push(kode_mapel);
       }
 
-      fallbackSql += ' GROUP BY a.kode_siswa, a.kode_kelas, a.kode_mapel ORDER BY a.kode_siswa ASC';
+      fallbackSql += ' GROUP BY a.kode_siswa ORDER BY a.kode_siswa ASC';
       return await query(fallbackSql, fbParams);
 
     } catch (e) {
@@ -199,44 +248,20 @@ class RekapModel {
     }
   }
 
+  /**
+   * Rekapitulasi Presensi Guru
+   * Returns ALL teachers from master table 'guru'
+   */
   static async getRekapGuru({ bulan, tahun }) {
     try {
-      const bInt = bulan ? parseInt(bulan, 10) : null;
-      const bPad = bInt ? String(bInt).padStart(2, '0') : null;
-      const tInt = tahun ? parseInt(tahun, 10) : null;
+      const pCond = this.buildDateCondition('p.tanggal', bulan, tahun);
+      const iCond = this.buildDateCondition('i.tanggal_mulai', bulan, tahun);
 
-      let presensiWhere = 'WHERE 1=1';
-      let pParams = [];
-      if (bInt) {
-        presensiWhere += ' AND (MONTH(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%c") = ? OR DATE_FORMAT(p.tanggal, "%m") = ?)';
-        pParams.push(bInt, String(bInt), bPad);
-      }
-      if (tInt) {
-        presensiWhere += ' AND (YEAR(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%Y") = ?)';
-        pParams.push(tInt, String(tInt));
-      }
-
-      let izinSakitWhere = 'WHERE i.jenis = "Sakit"';
-      let sParams = [];
-      if (bInt) {
-        izinSakitWhere += ' AND (MONTH(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%c") = ? OR DATE_FORMAT(i.tanggal_mulai, "%m") = ?)';
-        sParams.push(bInt, String(bInt), bPad);
-      }
-      if (tInt) {
-        izinSakitWhere += ' AND (YEAR(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%Y") = ?)';
-        sParams.push(tInt, String(tInt));
-      }
-
-      let izinLainWhere = 'WHERE (i.jenis IS NULL OR i.jenis != "Sakit")';
-      let iParams = [];
-      if (bInt) {
-        izinLainWhere += ' AND (MONTH(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%c") = ? OR DATE_FORMAT(i.tanggal_mulai, "%m") = ?)';
-        iParams.push(bInt, String(bInt), bPad);
-      }
-      if (tInt) {
-        izinLainWhere += ' AND (YEAR(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%Y") = ?)';
-        iParams.push(tInt, String(tInt));
-      }
+      const params = [
+        ...pCond.params,
+        ...iCond.params,
+        ...iCond.params
+      ];
 
       const sql = `
         SELECT 
@@ -246,28 +271,32 @@ class RekapModel {
           g.status_kepegawaian,
           (
             SELECT COUNT(DISTINCT p.id) FROM presensi p 
-            ${presensiWhere} AND (p.kode_guru = g.kode_guru OR p.kode_guru = g.nip_nuptk)
+            WHERE (p.kode_guru = g.kode_guru OR p.kode_guru = g.nip_nuptk OR p.kode_guru = g.nama_guru)
+            ${pCond.sqlStr}
           ) AS total_hadir,
           (
             SELECT COUNT(DISTINCT i.id) FROM pengajuan_izin i 
-            ${izinSakitWhere} AND (i.user_id = g.kode_guru OR i.nama_pengaju = g.nama_guru OR i.user_id = g.nip_nuptk)
+            WHERE (i.user_id = g.kode_guru OR i.nama_pengaju = g.nama_guru OR i.user_id = g.nip_nuptk)
+            AND i.jenis = 'Sakit'
+            ${iCond.sqlStr}
           ) AS total_sakit,
           (
             SELECT COUNT(DISTINCT i.id) FROM pengajuan_izin i 
-            ${izinLainWhere} AND (i.user_id = g.kode_guru OR i.nama_pengaju = g.nama_guru OR i.user_id = g.nip_nuptk)
+            WHERE (i.user_id = g.kode_guru OR i.nama_pengaju = g.nama_guru OR i.user_id = g.nip_nuptk)
+            AND (i.jenis IS NULL OR i.jenis != 'Sakit')
+            ${iCond.sqlStr}
           ) AS total_izin
         FROM guru g
         ORDER BY g.nama_guru ASC
       `;
 
-      const allParams = [...pParams, ...sParams, ...iParams];
-      const rows = await query(sql, allParams);
+      const rows = await query(sql, params);
 
       if (rows && rows.length > 0) {
         return rows;
       }
 
-      // Fallback directly from presensi table if guru table is empty
+      // Fallback directly from presensi table if master table 'guru' is completely empty
       let fallbackSql = `
         SELECT 
           p.kode_guru,
@@ -282,11 +311,14 @@ class RekapModel {
         WHERE 1=1
       `;
       const fbParams = [];
-      if (bInt) {
+      if (bulan) {
+        const bInt = parseInt(bulan, 10);
+        const bPad = String(bInt).padStart(2, '0');
         fallbackSql += ' AND (MONTH(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%c") = ? OR DATE_FORMAT(p.tanggal, "%m") = ?)';
         fbParams.push(bInt, String(bInt), bPad);
       }
-      if (tInt) {
+      if (tahun) {
+        const tInt = parseInt(tahun, 10);
         fallbackSql += ' AND (YEAR(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%Y") = ?)';
         fbParams.push(tInt, String(tInt));
       }
@@ -311,9 +343,9 @@ class RekapModel {
           DATE_FORMAT(tanggal, '%W, %d %b %Y') AS tanggal_format,
           status
         FROM absensi_siswa
-        WHERE kode_siswa = ?
+        WHERE (kode_siswa = ? OR kode_siswa = (SELECT nis_nisn FROM siswa WHERE kode_siswa = ? LIMIT 1))
       `;
-      const params = [kode_siswa];
+      const params = [kode_siswa, kode_siswa];
 
       if (bulan) {
         const bInt = parseInt(bulan, 10);
@@ -349,9 +381,9 @@ class RekapModel {
           a.status
         FROM absensi_mapel a
         LEFT JOIN mapel m ON a.kode_mapel = m.kode_mapel
-        WHERE a.kode_siswa = ?
+        WHERE (a.kode_siswa = ? OR a.kode_siswa = (SELECT nis_nisn FROM siswa WHERE kode_siswa = ? LIMIT 1))
       `;
-      const params = [kode_siswa];
+      const params = [kode_siswa, kode_siswa];
 
       if (kode_mapel) {
         sql += ' AND a.kode_mapel = ?';
@@ -392,10 +424,10 @@ class RekapModel {
           p.lokasi_in,
           p.lokasi_out
         FROM presensi p
-        LEFT JOIN guru g ON p.kode_guru = g.kode_guru
-        WHERE p.kode_guru = ?
+        LEFT JOIN guru g ON (p.kode_guru = g.kode_guru OR p.kode_guru = g.nip_nuptk)
+        WHERE (p.kode_guru = ? OR p.kode_guru = (SELECT nip_nuptk FROM guru WHERE kode_guru = ? LIMIT 1) OR p.kode_guru = (SELECT nama_guru FROM guru WHERE kode_guru = ? LIMIT 1))
       `;
-      const params = [kode_guru];
+      const params = [kode_guru, kode_guru, kode_guru];
 
       if (bulan) {
         const bInt = parseInt(bulan, 10);
