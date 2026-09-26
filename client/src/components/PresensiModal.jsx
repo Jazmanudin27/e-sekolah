@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, MapPin, Send, Smile, ShieldCheck, ToggleLeft, ToggleRight, Navigation } from 'lucide-react';
+import { X, MapPin, Send, Smile, ShieldCheck, Navigation } from 'lucide-react';
 import api from '../api/client';
 
 export default function PresensiModal({ type: initialType = 'in', onClose, onSuccess, showToast }) {
   const [scanType, setScanType] = useState(initialType);
   const [coords, setCoords] = useState({ lat: -7.325205, lng: 108.208354 });
   const [coordsString, setCoordsString] = useState('-7.325205, 108.208354');
-  const [isFakeGpsActive, setIsFakeGpsActive] = useState(false);
-  const [fakeLat, setFakeLat] = useState('-7.325205');
-  const [fakeLng, setFakeLng] = useState('108.208354');
   const [loading, setLoading] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
 
@@ -61,7 +58,7 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
 
   // Real GPS Geolocation Effect
   useEffect(() => {
-    if (!isFakeGpsActive && navigator.geolocation) {
+    if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const lat = pos.coords.latitude;
@@ -77,7 +74,7 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     }
-  }, [isFakeGpsActive]);
+  }, []);
 
   // Leaflet Map Initialization & Update Effect
   useEffect(() => {
@@ -110,9 +107,9 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
       const schoolMarker = L.marker([SCHOOL_LOCATION.lat, SCHOOL_LOCATION.lng]).addTo(map);
       schoolMarker.bindPopup(`<b>${SCHOOL_LOCATION.name}</b><br>Kantor Pusat Presensi`);
 
-      // Custom User / Fake GPS Marker (Hide raw coords from popup)
+      // Custom User Marker (Hide raw coords from popup)
       const userMarker = L.marker([coords.lat, coords.lng]).addTo(map);
-      userMarker.bindPopup(`<b>${isFakeGpsActive ? 'Lokasi Fake GPS' : 'Lokasi Presensi Guru'}</b><br>Status: Terverifikasi`).openPopup();
+      userMarker.bindPopup(`<b>Lokasi Presensi Guru</b><br>Status: Terverifikasi`).openPopup();
 
       markerRef.current = userMarker;
       mapInstanceRef.current = map;
@@ -120,48 +117,10 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
       mapInstanceRef.current.setView([coords.lat, coords.lng], 16);
       if (markerRef.current) {
         markerRef.current.setLatLng([coords.lat, coords.lng]);
-        markerRef.current.setPopupContent(`<b>${isFakeGpsActive ? 'Lokasi Fake GPS' : 'Lokasi Presensi Guru'}</b><br>Status: Terverifikasi`);
+        markerRef.current.setPopupContent(`<b>Lokasi Presensi Guru</b><br>Status: Terverifikasi`);
       }
     }
-  }, [coords, isFakeGpsActive]);
-
-  const handleToggleFakeGps = () => {
-    const nextState = !isFakeGpsActive;
-    setIsFakeGpsActive(nextState);
-
-    if (nextState) {
-      const fLat = parseFloat(fakeLat) || SCHOOL_LOCATION.lat;
-      const fLng = parseFloat(fakeLng) || SCHOOL_LOCATION.lng;
-      setCoords({ lat: fLat, lng: fLng });
-      setCoordsString(`${fLat.toFixed(6)}, ${fLng.toFixed(6)} [FAKE GPS]`);
-      showToast?.('Fake GPS berhasil diaktifkan!', true);
-    } else {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            setCoords({ lat, lng });
-            setCoordsString(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-          },
-          null,
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
-      }
-      showToast?.('Kembali ke Lokasi GPS Asli.', true);
-    }
-  };
-
-  const handleFakeCoordsChange = (newLat, newLng) => {
-    setFakeLat(newLat);
-    setFakeLng(newLng);
-    if (isFakeGpsActive) {
-      const fLat = parseFloat(newLat) || SCHOOL_LOCATION.lat;
-      const fLng = parseFloat(newLng) || SCHOOL_LOCATION.lng;
-      setCoords({ lat: fLat, lng: fLng });
-      setCoordsString(`${fLat.toFixed(6)}, ${fLng.toFixed(6)} [FAKE GPS]`);
-    }
-  };
+  }, [coords]);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -170,7 +129,7 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
       const res = await api.post(endpoint, {
         lokasi: coordsString,
         foto: 'upload/presensi/selfie.jpg',
-        is_fake_gps: isFakeGpsActive
+        is_fake_gps: false
       });
       if (res.data.success) {
         showToast(res.data.message || `Presensi ${scanType === 'in' ? 'Masuk' : 'Pulang'} berhasil!`, true);
@@ -296,49 +255,19 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
           <div ref={mapContainerRef} style={{ height: 160, width: '100%', zIndex: 1 }}></div>
         </div>
 
-        {/* FAKE GPS CONTROL PANEL */}
-        <div style={{ background: isFakeGpsActive ? '#fff7ed' : '#f8fafc', padding: 12, borderRadius: 14, marginBottom: 16, border: isFakeGpsActive ? '1px solid #fdba74' : '1px solid #e2e8f0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <MapPin size={18} color={isFakeGpsActive ? '#ea580c' : '#0066ff'} />
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>
-                  {isFakeGpsActive ? 'Fitur Fake GPS' : 'Status Lokasi GPS'}
-                </div>
-                <div style={{ fontSize: 10, color: isFakeGpsActive ? '#ea580c' : '#16a34a', fontWeight: 600 }}>
-                  {isFakeGpsActive ? 'Menggunakan Fake GPS' : '✓ Lokasi Terdeteksi & Terverifikasi'}
-                </div>
+        {/* REAL GPS STATUS PANEL */}
+        <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: 14, marginBottom: 16, border: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <MapPin size={20} color="#0066ff" />
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>
+                Status Lokasi GPS Real-Time
+              </div>
+              <div style={{ fontSize: 10, color: '#16a34a', fontWeight: 600, marginTop: 2 }}>
+                ✓ Lokasi Terdeteksi & Terverifikasi (Safe Zone)
               </div>
             </div>
-
-            <button onClick={handleToggleFakeGps} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }} title="Toggle Fake GPS">
-              {isFakeGpsActive ? <ToggleRight size={32} color="#ea580c" /> : <ToggleLeft size={32} color="#94a3b8" />}
-            </button>
           </div>
-
-          {/* FAKE COORDINATES INPUT FIELD */}
-          {isFakeGpsActive && (
-            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px dashed #fed7aa', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <div>
-                <label style={{ fontSize: 10, fontWeight: 700, color: '#ea580c' }}>Fake Latitude</label>
-                <input
-                  type="text"
-                  value={fakeLat}
-                  onChange={(e) => handleFakeCoordsChange(e.target.value, fakeLng)}
-                  style={{ width: '100%', padding: '6px 8px', borderRadius: 8, border: '1px solid #fdba74', fontSize: 11, fontWeight: 600 }}
-                />
-              </div>
-              <div>
-                <label style={{ fontSize: 10, fontWeight: 700, color: '#ea580c' }}>Fake Longitude</label>
-                <input
-                  type="text"
-                  value={fakeLng}
-                  onChange={(e) => handleFakeCoordsChange(fakeLat, e.target.value)}
-                  style={{ width: '100%', padding: '6px 8px', borderRadius: 8, border: '1px solid #fdba74', fontSize: 11, fontWeight: 600 }}
-                />
-              </div>
-            </div>
-          )}
         </div>
 
         {/* SUBMIT BUTTON */}
@@ -355,4 +284,5 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
     </div>
   );
 }
+
 

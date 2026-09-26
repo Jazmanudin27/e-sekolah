@@ -47,7 +47,11 @@ async function checkIn(req, res, next) {
       return sendError(res, 'Anda sudah melakukan presensi masuk hari ini.', 400);
     }
 
-    const finalLokasi = is_fake_gps ? `${lokasi} (FAKE GPS)` : lokasi;
+    if (is_fake_gps) {
+      return sendError(res, 'Penggunaan Fake GPS dilarang oleh sistem presensi sekolah.', 403);
+    }
+
+    const finalLokasi = lokasi;
 
     const insertId = await PresensiModel.createCheckIn({
       kode_guru,
@@ -87,7 +91,11 @@ async function checkOut(req, res, next) {
       return sendError(res, 'Anda sudah melakukan presensi pulang hari ini.', 400);
     }
 
-    const finalLokasi = is_fake_gps ? `${lokasi} (FAKE GPS)` : lokasi;
+    if (is_fake_gps) {
+      return sendError(res, 'Penggunaan Fake GPS dilarang oleh sistem presensi sekolah.', 403);
+    }
+
+    const finalLokasi = lokasi;
 
     await PresensiModel.updateCheckOut(existing.id, {
       jam_out: timeNow,
