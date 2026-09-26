@@ -414,12 +414,30 @@ export default function RekapGuruView() {
                           {det.tanggal_format || det.tanggal}
                         </div>
                         <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
-                          Masuk: <span style={{ color: '#16a34a', fontWeight: 700 }}>{det.jam_in || 'Belum Scan'}</span> • Pulang: <span style={{ color: '#0066ff', fontWeight: 700 }}>{det.jam_out || 'Belum Scan'}</span>
+                          Masuk: {det.jam_in ? (
+                            <span style={{ color: '#16a34a', fontWeight: 700 }}>{det.jam_in}</span>
+                          ) : (
+                            <span style={{ color: '#ef4444', fontWeight: 800, background: '#fef2f2', padding: '1px 6px', borderRadius: 6, border: '1px solid #fecaca' }}>Belum Scan</span>
+                          )} • Pulang: {det.jam_out ? (
+                            <span style={{ color: '#0066ff', fontWeight: 700 }}>{det.jam_out}</span>
+                          ) : (
+                            <span style={{ color: '#ef4444', fontWeight: 800, background: '#fef2f2', padding: '1px 6px', borderRadius: 6, border: '1px solid #fecaca' }}>Belum Scan</span>
+                          )}
                         </div>
                       </div>
-                      <span style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', padding: '3px 9px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
-                        Hadir
-                      </span>
+                      {det.jam_in && det.jam_out ? (
+                        <span style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', padding: '3px 9px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
+                          Hadir Lengkap
+                        </span>
+                      ) : det.jam_in ? (
+                        <span style={{ background: '#fffbe6', color: '#b45309', border: '1px solid #fde68a', padding: '3px 9px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
+                          Belum Pulang
+                        </span>
+                      ) : (
+                        <span style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', padding: '3px 9px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
+                          Belum Absen
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
