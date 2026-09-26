@@ -29,7 +29,19 @@ class PresensiModel {
   }
 
   static async getHistory({ kode_guru, bulan, tahun, limit = 30 }) {
-    let sql = 'SELECT * FROM presensi WHERE 1=1';
+    let sql = `
+      SELECT 
+        id,
+        kode_guru,
+        DATE_FORMAT(tanggal, '%Y-%m-%d') AS tanggal,
+        jam_in,
+        jam_out,
+        lokasi_in,
+        lokasi_out,
+        created_at
+      FROM presensi 
+      WHERE 1=1
+    `;
     const params = [];
 
     if (kode_guru) {
@@ -45,7 +57,7 @@ class PresensiModel {
       params.push(parseInt(tahun, 10));
     }
 
-    sql += ' ORDER BY tanggal DESC LIMIT ?';
+    sql += ' ORDER BY tanggal DESC, id DESC LIMIT ?';
     params.push(parseInt(limit, 10));
 
     return await query(sql, params);

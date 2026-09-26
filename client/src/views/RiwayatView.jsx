@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Fingerprint, FolderOpen, CalendarDays } from 'lucide-react';
+import { Fingerprint, CalendarDays, RefreshCw } from 'lucide-react';
 import api from '../api/client';
 
 export default function RiwayatView() {
@@ -13,8 +13,8 @@ export default function RiwayatView() {
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/presensi/history?limit=20');
-      if (res.data.success) {
+      const res = await api.get('/presensi/history?limit=30');
+      if (res.data?.success && Array.isArray(res.data.data)) {
         setHistoryList(res.data.data);
       }
     } catch (err) {
@@ -24,70 +24,68 @@ export default function RiwayatView() {
     }
   };
 
+  const formatFullDate = (dateStr) => {
+    if (!dateStr) return 'Hari ini';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const dayName = days[d.getDay()];
+      const dateNum = d.getDate();
+      const monthName = months[d.getMonth()];
+      const year = d.getFullYear();
+      return `${dayName}, ${dateNum} ${monthName} ${year}`;
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
   const defaultHistoryCards = [
-    { date: 'Friday, 25 September 2026', time: '06:23:35 - 15:08:46', status: 'HADIR' },
-    { date: 'Thursday, 24 September 2026', time: '06:19:20 - 15:00:12', status: 'HADIR' },
-    { date: 'Wednesday, 23 September 2026', time: '06:20:05 - 15:05:40', status: 'HADIR' },
-    { date: 'Tuesday, 22 September 2026', time: '06:17:42 - 15:10:00', status: 'HADIR' },
-    { date: 'Monday, 21 September 2026', time: '06:25:10 - 15:02:18', status: 'HADIR' },
+    { tanggal: '2026-09-25', jam_in: '06:23:35', jam_out: '15:08:46' },
+    { tanggal: '2026-09-24', jam_in: '06:19:20', jam_out: '15:00:12' },
+    { tanggal: '2026-09-23', jam_in: '06:20:05', jam_out: '15:05:40' },
+    { tanggal: '2026-09-22', jam_in: '06:17:42', jam_out: '15:10:00' },
+    { tanggal: '2026-09-21', jam_in: '06:25:10', jam_out: '15:02:18' }
   ];
 
+  const displayList = historyList.length > 0 ? historyList : defaultHistoryCards;
+
   return (
-    <div className="inner-page-wrapper">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+    <div className="inner-page-wrapper" style={{ paddingBottom: 36, paddingTop: 4 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
         <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
           <CalendarDays size={18} color="#0066ff" /> Log Kehadiran Saya
         </h3>
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#0066ff' }}>20 Record Terakhir</span>
+        <button
+          onClick={fetchHistory}
+          style={{ background: 'none', border: 'none', color: '#0066ff', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+        >
+          <RefreshCw size={13} /> Refresh
+        </button>
       </div>
 
-      {loading ? (
-        <div style={{ textAlign: 'center', color: '#0066ff', padding: '40px 20px', fontWeight: 600 }}>
-          Memuat riwayat presensi...
-        </div>
-      ) : historyList.length > 0 ? (
-        historyList.map((item, idx) => (
-          <div key={item.id || idx} className="history-item-card" style={{ justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div className="history-section-wrapper" style={{ padding: 0, background: 'none', boxShadow: 'none' }}>
+        {loading ? (
+          <div style={{ textAlign: 'center', color: '#0066ff', padding: '40px 20px', fontWeight: 600 }}>
+            Memuat data presensi dari database...
+          </div>
+        ) : (
+          displayList.map((item, idx) => (
+            <div key={item.id || idx} className="history-item-card">
               <div className="history-fingerprint-box">
                 <Fingerprint size={24} color="#0066ff" />
               </div>
               <div className="history-item-content">
-                <div className="history-item-date">{item.tanggal || item.date || 'Friday, 25 September 2026'}</div>
+                <div className="history-item-date">{formatFullDate(item.tanggal || item.date)}</div>
                 <div className="history-item-time">
-                  {item.jam_in || '06:23:35'} - {item.jam_out || '15:08:46'}
+                  {item.jam_in || 'Belum Scan'} - {item.jam_out || 'Belum Scan'}
                 </div>
               </div>
             </div>
-            <span style={{
-              fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 12,
-              background: '#dcfce7', color: '#16a34a'
-            }}>
-              HADIR
-            </span>
-          </div>
-        ))
-      ) : (
-        defaultHistoryCards.map((item, idx) => (
-          <div key={idx} className="history-item-card" style={{ justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div className="history-fingerprint-box">
-                <Fingerprint size={24} color="#0066ff" />
-              </div>
-              <div className="history-item-content">
-                <div className="history-item-date">{item.date}</div>
-                <div className="history-item-time">{item.time}</div>
-              </div>
-            </div>
-            <span style={{
-              fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 12,
-              background: '#dcfce7', color: '#16a34a'
-            }}>
-              HADIR
-            </span>
-          </div>
-        ))
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 }

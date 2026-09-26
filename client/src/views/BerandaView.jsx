@@ -50,12 +50,12 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
   ];
 
   const formatFullDate = (dateStr) => {
-    if (!dateStr) return 'Friday, 25 September 2026';
+    if (!dateStr) return 'Hari ini';
     try {
       const d = new Date(dateStr);
       if (isNaN(d.getTime())) return dateStr;
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
       const dayName = days[d.getDay()];
       const dateNum = d.getDate();
       const monthName = months[d.getMonth()];
