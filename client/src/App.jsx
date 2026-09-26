@@ -145,7 +145,11 @@ export default function App() {
       </main>
 
       {/* Bottom Navigation */}
-      <BottomNav activeTab={activeTab} onTabChange={(t) => setActiveTab(t)} />
+      <BottomNav
+        activeTab={activeTab}
+        onTabChange={(t) => setActiveTab(t)}
+        onOpenPresensi={(type) => setPresensiModalType(type || 'in')}
+      />
 
       {/* Presensi Check-In / Check-Out Modal */}
       {presensiModalType && (

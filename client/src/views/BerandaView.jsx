@@ -113,7 +113,6 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
         <button
           className="scan-box-btn scan-masuk-btn"
           onClick={() => onOpenPresensiModal('in')}
-          disabled={isCheckInDisabled}
         >
           <div className="scan-icon-circle-box">
             <Fingerprint size={24} />
@@ -129,7 +128,6 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
         <button
           className="scan-box-btn scan-pulang-btn"
           onClick={() => onOpenPresensiModal('out')}
-          disabled={isCheckOutDisabled}
         >
           <div className="scan-icon-circle-box">
             <Fingerprint size={24} />
