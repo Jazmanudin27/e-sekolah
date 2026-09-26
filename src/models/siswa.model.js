@@ -5,11 +5,7 @@ class SiswaModel {
     try {
       let sql = `
         SELECT 
-          s.kode_siswa, 
-          s.nis_nisn, 
-          s.nama_siswa, 
-          s.jk, 
-          s.kode_kelas,
+          s.*,
           k.nama_kelas, 
           k.jurusan
         FROM siswa s
@@ -25,14 +21,19 @@ class SiswaModel {
       sql += ' ORDER BY k.nama_kelas ASC, s.nama_siswa ASC';
 
       const rows = await query(sql, params);
-      if (rows && rows.length > 0) return rows;
+      if (rows && rows.length > 0) {
+        return rows.map(r => ({
+          ...r,
+          nis_nisn: r.nis_nisn || r.nis || r.nisn || r.nis_siswa || r.nisn_siswa || `NIS-${r.kode_siswa}`
+        }));
+      }
     } catch (e) {
-      console.warn('[SiswaModel] Error querying siswa table:', e.message);
+      console.warn('[SiswaModel] Error querying siswa table with JOIN:', e.message);
     }
 
-    // Try simple query if JOIN fails
+    // Try SELECT * FROM siswa if JOIN fails
     try {
-      let sql = 'SELECT kode_siswa, nis_nisn, nama_siswa, jk, kode_kelas FROM siswa';
+      let sql = 'SELECT * FROM siswa';
       const params = [];
       if (kode_kelas) {
         sql += ' WHERE kode_kelas = ?';
@@ -40,9 +41,14 @@ class SiswaModel {
       }
       sql += ' ORDER BY nama_siswa ASC';
       const rows = await query(sql, params);
-      if (rows && rows.length > 0) return rows;
+      if (rows && rows.length > 0) {
+        return rows.map(r => ({
+          ...r,
+          nis_nisn: r.nis_nisn || r.nis || r.nisn || r.nis_siswa || r.nisn_siswa || `NIS-${r.kode_siswa}`
+        }));
+      }
     } catch (e) {
-      console.warn('[SiswaModel] Fallback failed:', e.message);
+      console.warn('[SiswaModel] Fallback SELECT * failed:', e.message);
     }
 
     return [];
