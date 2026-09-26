@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Award, Filter, Fingerprint, Loader2, X, Calendar, ChevronRight } from 'lucide-react';
+import { Award, Filter, Fingerprint, Loader2, X, Calendar, ChevronRight, Users, CheckCircle2, HeartPulse, FileText } from 'lucide-react';
 import api from '../api/client';
 
 export default function RekapGuruView() {
@@ -82,10 +82,16 @@ export default function RekapGuruView() {
     fetchRekap(selectedBulan, tVal);
   };
 
+  // Calculate totals across all teachers
+  const totalGuruCount = rekapList.length;
+  const totalHadirCount = rekapList.reduce((acc, curr) => acc + parseInt(curr.total_hadir || 0, 10), 0);
+  const totalSakitCount = rekapList.reduce((acc, curr) => acc + parseInt(curr.total_sakit || 0, 10), 0);
+  const totalIzinCount = rekapList.reduce((acc, curr) => acc + parseInt(curr.total_izin || 0, 10), 0);
+
   return (
     <div className="inner-page-wrapper" style={{ paddingTop: 4, paddingBottom: 36 }}>
       {/* FILTER CONTROL CARD */}
-      <div style={{ background: '#ffffff', padding: 14, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)', marginBottom: 16 }}>
+      <div style={{ background: '#ffffff', padding: 14, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)', marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 11, fontWeight: 700, color: '#475569', letterSpacing: '0.3px' }}>
           <Filter size={14} color="#0066ff" />
           FILTER LAPORAN PRESENSI GURU
@@ -120,21 +126,57 @@ export default function RekapGuruView() {
         </div>
       </div>
 
+      {/* SUMMARY STATS CARDS */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
+        {/* Total Guru Card */}
+        <div style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', borderRadius: 14, padding: '10px 8px', color: '#ffffff', boxShadow: '0 4px 12px rgba(37,99,235,0.15)', textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
+            <Users size={12} /> GURU
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>{totalGuruCount}</div>
+        </div>
+
+        {/* Total Hadir Card */}
+        <div style={{ background: 'linear-gradient(135deg, #10b981, #047857)', borderRadius: 14, padding: '10px 8px', color: '#ffffff', boxShadow: '0 4px 12px rgba(16,185,129,0.15)', textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
+            <CheckCircle2 size={12} /> HADIR
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>{totalHadirCount}</div>
+        </div>
+
+        {/* Total Sakit Card */}
+        <div style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', borderRadius: 14, padding: '10px 8px', color: '#ffffff', boxShadow: '0 4px 12px rgba(2,132,199,0.15)', textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
+            <HeartPulse size={12} /> SAKIT
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>{totalSakitCount}</div>
+        </div>
+
+        {/* Total Izin Card */}
+        <div style={{ background: 'linear-gradient(135deg, #f59e0b, #b45309)', borderRadius: 14, padding: '10px 8px', color: '#ffffff', boxShadow: '0 4px 12px rgba(245,158,11,0.15)', textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
+            <FileText size={12} /> IZIN
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>{totalIzinCount}</div>
+        </div>
+      </div>
+
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px 20px', color: '#0066ff' }}>
           <Loader2 size={30} className="spin" style={{ margin: '0 auto' }} />
           <p style={{ marginTop: 10, fontSize: 13, fontWeight: 700 }}>Memuat laporan presensi guru...</p>
         </div>
       ) : rekapList.length > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>Daftar Rekapitulasi Presensi Guru ({rekapList.length})</span>
-            <span style={{ fontSize: 11, color: '#0066ff', fontWeight: 600 }}>Klik item untuk lihat detail presensi</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>Daftar Presensi Guru ({rekapList.length})</span>
+            <span style={{ fontSize: 11, color: '#0066ff', fontWeight: 600 }}>Klik item untuk rincian</span>
           </div>
 
           {rekapList.map((item, idx) => {
             const totalH = parseInt(item.total_hadir || 0, 10);
-            const totalA = parseInt(item.total_alpha || 0, 10);
+            const totalS = parseInt(item.total_sakit || 0, 10);
+            const totalI = parseInt(item.total_izin || 0, 10);
 
             return (
               <div
@@ -142,7 +184,7 @@ export default function RekapGuruView() {
                 onClick={() => openGuruDetail(item)}
                 style={{
                   background: '#ffffff',
-                  borderRadius: 14,
+                  borderRadius: 16,
                   padding: '12px 14px',
                   border: '1px solid #e2e8f0',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
@@ -156,33 +198,45 @@ export default function RekapGuruView() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div
                     style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: 10,
-                      background: '#e0f2fe',
-                      color: '#0066ff',
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      background: '#eff6ff',
+                      color: '#2563eb',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       flexShrink: 0
                     }}
                   >
-                    <Fingerprint size={20} />
+                    <Fingerprint size={22} />
                   </div>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{item.nama_guru}</div>
                     <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600, marginTop: 2 }}>
-                      NIP: {item.nip_nuptk} • {item.status_kepegawaian || 'PNS/GTT'}
+                      NIP: {item.nip_nuptk || '-'} • {item.status_kepegawaian || 'Guru'}
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ display: 'flex', gap: 6, fontSize: 11, fontWeight: 700 }}>
-                    <span style={{ background: '#f0fdf4', color: '#16a34a', padding: '3px 8px', borderRadius: 6, border: '1px solid #bbf7d0' }} title="Presensi Hadir">Hadir: {totalH} Scan</span>
-                    {totalA > 0 && (
-                      <span style={{ background: '#fef2f2', color: '#dc2626', padding: '3px 8px', borderRadius: 6, border: '1px solid #fecaca', fontWeight: 800 }} title="Alpha">Alfa: {totalA}</span>
-                    )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                    {/* BADGES FOR HADIR, SAKIT, IZIN */}
+                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <span style={{ background: '#f0fdf4', color: '#15803d', padding: '3px 8px', borderRadius: 6, border: '1px solid #bbf7d0', fontSize: 10, fontWeight: 700 }} title="Presensi Hadir">
+                        Hadir: {totalH}
+                      </span>
+                      {totalS > 0 && (
+                        <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '3px 8px', borderRadius: 6, border: '1px solid #bfdbfe', fontSize: 10, fontWeight: 700 }} title="Sakit">
+                          Sakit: {totalS}
+                        </span>
+                      )}
+                      {totalI > 0 && (
+                        <span style={{ background: '#fffbe6', color: '#b45309', padding: '3px 8px', borderRadius: 6, border: '1px solid #fde68a', fontSize: 10, fontWeight: 700 }} title="Izin">
+                          Izin: {totalI}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <ChevronRight size={16} color="#94a3b8" />
                 </div>
@@ -238,9 +292,12 @@ export default function RekapGuruView() {
               }}
             >
               <div>
-                <h3 style={{ fontSize: 15, fontWeight: 800, margin: 0 }}>Detail Presensi: {selectedGuru.nama_guru}</h3>
-                <div style={{ fontSize: 11, opacity: 0.9, marginTop: 2, fontWeight: 600 }}>
-                  NIP: {selectedGuru.nip_nuptk} • {daftarBulan.find(b => b.value === selectedBulan)?.label} {selectedTahun}
+                <h3 style={{ fontSize: 15, fontWeight: 800, margin: 0 }}>Rincian Presensi Guru</h3>
+                <div style={{ fontSize: 12, fontWeight: 700, marginTop: 2, opacity: 0.95 }}>
+                  {selectedGuru.nama_guru}
+                </div>
+                <div style={{ fontSize: 10, opacity: 0.8, marginTop: 2, fontWeight: 600 }}>
+                  NIP: {selectedGuru.nip_nuptk || '-'} • {daftarBulan.find(b => b.value === selectedBulan)?.label} {selectedTahun}
                 </div>
               </div>
               <button
@@ -300,3 +357,4 @@ export default function RekapGuruView() {
     </div>
   );
 }
+

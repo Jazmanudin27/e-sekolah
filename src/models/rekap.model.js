@@ -201,67 +201,92 @@ class RekapModel {
 
   static async getRekapGuru({ bulan, tahun }) {
     try {
-      let sql = `
+      const bInt = bulan ? parseInt(bulan, 10) : null;
+      const bPad = bInt ? String(bInt).padStart(2, '0') : null;
+      const tInt = tahun ? parseInt(tahun, 10) : null;
+
+      let presensiWhere = 'WHERE 1=1';
+      let pParams = [];
+      if (bInt) {
+        presensiWhere += ' AND (MONTH(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%c") = ? OR DATE_FORMAT(p.tanggal, "%m") = ?)';
+        pParams.push(bInt, String(bInt), bPad);
+      }
+      if (tInt) {
+        presensiWhere += ' AND (YEAR(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%Y") = ?)';
+        pParams.push(tInt, String(tInt));
+      }
+
+      let izinSakitWhere = 'WHERE i.jenis = "Sakit"';
+      let sParams = [];
+      if (bInt) {
+        izinSakitWhere += ' AND (MONTH(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%c") = ? OR DATE_FORMAT(i.tanggal_mulai, "%m") = ?)';
+        sParams.push(bInt, String(bInt), bPad);
+      }
+      if (tInt) {
+        izinSakitWhere += ' AND (YEAR(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%Y") = ?)';
+        sParams.push(tInt, String(tInt));
+      }
+
+      let izinLainWhere = 'WHERE i.jenis != "Sakit"';
+      let iParams = [];
+      if (bInt) {
+        izinLainWhere += ' AND (MONTH(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%c") = ? OR DATE_FORMAT(i.tanggal_mulai, "%m") = ?)';
+        iParams.push(bInt, String(bInt), bPad);
+      }
+      if (tInt) {
+        izinLainWhere += ' AND (YEAR(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%Y") = ?)';
+        iParams.push(tInt, String(tInt));
+      }
+
+      const sql = `
         SELECT 
           g.kode_guru,
           g.nama_guru,
           g.nip_nuptk,
           g.status_kepegawaian,
-          COUNT(p.id) AS total_presensi,
-          SUM(CASE WHEN p.jam_in IS NOT NULL THEN 1 ELSE 0 END) AS total_hadir,
-          SUM(CASE WHEN p.jam_in IS NULL THEN 1 ELSE 0 END) AS total_alpha
+          (
+            SELECT COUNT(DISTINCT p.id) FROM presensi p 
+            ${presensiWhere} AND p.kode_guru = g.kode_guru
+          ) AS total_hadir,
+          (
+            SELECT COUNT(DISTINCT i.id) FROM pengajuan_izin i 
+            ${izinSakitWhere} AND (i.user_id = g.kode_guru OR i.nama_pengaju = g.nama_guru)
+          ) AS total_sakit,
+          (
+            SELECT COUNT(DISTINCT i.id) FROM pengajuan_izin i 
+            ${izinLainWhere} AND (i.user_id = g.kode_guru OR i.nama_pengaju = g.nama_guru)
+          ) AS total_izin
         FROM guru g
-        LEFT JOIN presensi p ON g.kode_guru = p.kode_guru
+        ORDER BY g.nama_guru ASC
       `;
-      const params = [];
-      const joinConditions = [];
 
-      if (bulan) {
-        const bInt = parseInt(bulan, 10);
-        const bPad = String(bInt).padStart(2, '0');
-        joinConditions.push('(MONTH(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%c") = ? OR DATE_FORMAT(p.tanggal, "%m") = ?)');
-        params.push(bInt, String(bInt), bPad);
-      }
-      if (tahun) {
-        const tInt = parseInt(tahun, 10);
-        joinConditions.push('(YEAR(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%Y") = ?)');
-        params.push(tInt, String(tInt));
-      }
-
-      if (joinConditions.length > 0) {
-        sql += ' AND ' + joinConditions.join(' AND ');
-      }
-
-      sql += ' GROUP BY g.kode_guru, g.nama_guru, g.nip_nuptk, g.status_kepegawaian ORDER BY g.nama_guru ASC';
-      const rows = await query(sql, params);
+      const allParams = [...pParams, ...sParams, ...iParams];
+      const rows = await query(sql, allParams);
 
       if (rows && rows.length > 0) {
         return rows;
       }
 
-      // Fallback directly from presensi
+      // Fallback directly from presensi table if guru table is empty
       let fallbackSql = `
         SELECT 
           p.kode_guru,
           COALESCE(g.nama_guru, CONCAT('Guru #', p.kode_guru)) AS nama_guru,
           COALESCE(g.nip_nuptk, '-') AS nip_nuptk,
           COALESCE(g.status_kepegawaian, 'PNS/GTT') AS status_kepegawaian,
-          COUNT(p.id) AS total_presensi,
-          SUM(CASE WHEN p.jam_in IS NOT NULL THEN 1 ELSE 0 END) AS total_hadir,
-          0 AS total_alpha
+          COUNT(DISTINCT p.id) AS total_hadir,
+          0 AS total_sakit,
+          0 AS total_izin
         FROM presensi p
         LEFT JOIN guru g ON p.kode_guru = g.kode_guru
         WHERE 1=1
       `;
       const fbParams = [];
-      if (bulan) {
-        const bInt = parseInt(bulan, 10);
-        const bPad = String(bInt).padStart(2, '0');
+      if (bInt) {
         fallbackSql += ' AND (MONTH(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%c") = ? OR DATE_FORMAT(p.tanggal, "%m") = ?)';
         fbParams.push(bInt, String(bInt), bPad);
       }
-      if (tahun) {
-        const tInt = parseInt(tahun, 10);
+      if (tInt) {
         fallbackSql += ' AND (YEAR(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%Y") = ?)';
         fbParams.push(tInt, String(tInt));
       }
