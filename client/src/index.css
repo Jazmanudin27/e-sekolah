@@ -38,86 +38,168 @@ body {
   flex-direction: column;
 }
 
-/* HEADER HERO BANNER (VIBRANT BLUE) */
+/* HEADER HERO BANNER (VIBRANT BLUE MODERN GRADIENT) */
 .header-blue-hero {
-  background: linear-gradient(135deg, #0052cc, #0072ff);
-  padding: 24px 20px 48px 20px;
+  background: linear-gradient(135deg, #0b1e42 0%, #0052cc 50%, #0072ff 100%);
+  padding: 24px 20px 52px 20px;
   color: #ffffff;
   position: relative;
   width: 100%;
-  border-bottom-left-radius: 28px;
-  border-bottom-right-radius: 28px;
+  border-bottom-left-radius: 32px;
+  border-bottom-right-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 82, 204, 0.25);
+}
+
+.hero-glow-circle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-glow-1 {
+  width: 220px;
+  height: 220px;
+  top: -80px;
+  right: -60px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(59, 130, 246, 0) 70%);
+}
+
+.hero-glow-2 {
+  width: 180px;
+  height: 180px;
+  bottom: -60px;
+  left: -40px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(168, 85, 247, 0) 70%);
 }
 
 .header-inner {
   max-width: 680px;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .header-top-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 20px;
 }
 
 .brand-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 16px;
+  gap: 10px;
+}
+
+.brand-logo-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.brand-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.brand-name {
+  font-size: 17px;
   font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+}
+
+.brand-badge {
+  font-size: 9px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 6px;
   letter-spacing: 0.5px;
 }
 
 .header-icons {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .header-icon-btn {
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   cursor: pointer;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
+}
+
+.header-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateY(-2px);
+}
+
+.logout-btn-hero:hover {
+  background: rgba(239, 68, 68, 0.4);
+  border-color: rgba(239, 68, 68, 0.6);
 }
 
 .bell-dot {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: 7px;
+  right: 7px;
   width: 8px;
   height: 8px;
   background: #ef4444;
   border-radius: 50%;
-  border: 2px solid #0072ff;
+  border: 2px solid #0052cc;
+  box-shadow: 0 0 6px #ef4444;
 }
 
-.user-profile-row {
+/* HERO WELCOME USER CARD */
+.hero-welcome-card {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  padding: 4px 0;
+}
+
+.hero-avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
 }
 
 .user-avatar-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #e2e8f0;
-  border: 2px solid #ffffff;
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border: 2.5px solid rgba(255, 255, 255, 0.9);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  color: #0066ff;
-  font-size: 18px;
-  flex-shrink: 0;
+  color: #ffffff;
+  font-size: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .user-avatar-circle img {
@@ -126,17 +208,114 @@ body {
   object-fit: cover;
 }
 
-.greeting-text {
-  font-size: 16px;
-  font-weight: 800;
-  line-height: 1.2;
+.avatar-online-dot {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 14px;
+  height: 14px;
+  background: #22c55e;
+  border: 2.5px solid #0052cc;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #22c55e;
 }
 
-.date-time-text {
+.hero-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hero-greeting-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.greeting-emoji {
+  font-size: 15px;
+}
+
+.greeting-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.2px;
+}
+
+.hero-user-name {
+  font-size: 19px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.25;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.hero-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 3px;
+  flex-wrap: wrap;
+}
+
+.hero-role-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(6px);
+  color: #ffffff;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.hero-nip-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.hero-clock-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
-  opacity: 0.85;
-  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 500;
+  margin-top: 4px;
+}
+
+.hero-clock-icon {
+  color: #60a5fa;
+  flex-shrink: 0;
+}
+
+.hero-date-text {
+  font-weight: 600;
+}
+
+.hero-time-divider {
+  opacity: 0.5;
+}
+
+.hero-time-text {
+  font-weight: 700;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* FLOATING OVERLAPPING SUMMARY CARD (4 VERTICAL ICON COLUMNS) */
