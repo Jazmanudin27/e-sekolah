@@ -214,13 +214,13 @@ class RekapModel {
       if (bulan) {
         const bInt = parseInt(bulan, 10);
         const bPad = String(bInt).padStart(2, '0');
-        pWhere += ' AND (MONTH(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%c") = ? OR DATE_FORMAT(p.tanggal, "%m") = ?)';
-        pParams.push(bInt, String(bInt), bPad);
+        pWhere += ' AND (MONTH(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%c") = ? OR DATE_FORMAT(p.tanggal, "%m") = ? OR p.tanggal LIKE ?)';
+        pParams.push(bInt, String(bInt), bPad, `%-${bPad}-%`);
       }
       if (tahun) {
         const tInt = parseInt(tahun, 10);
-        pWhere += ' AND (YEAR(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%Y") = ?)';
-        pParams.push(tInt, String(tInt));
+        pWhere += ' AND (YEAR(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%Y") = ? OR p.tanggal LIKE ?)';
+        pParams.push(tInt, String(tInt), `${tInt}-%`);
       }
 
       const sParams = [];
@@ -228,13 +228,13 @@ class RekapModel {
       if (bulan) {
         const bInt = parseInt(bulan, 10);
         const bPad = String(bInt).padStart(2, '0');
-        sWhere += ' AND (MONTH(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%c") = ? OR DATE_FORMAT(i.tanggal_mulai, "%m") = ?)';
-        sParams.push(bInt, String(bInt), bPad);
+        sWhere += ' AND (MONTH(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%c") = ? OR DATE_FORMAT(i.tanggal_mulai, "%m") = ? OR i.tanggal_mulai LIKE ?)';
+        sParams.push(bInt, String(bInt), bPad, `%-${bPad}-%`);
       }
       if (tahun) {
         const tInt = parseInt(tahun, 10);
-        sWhere += ' AND (YEAR(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%Y") = ?)';
-        sParams.push(tInt, String(tInt));
+        sWhere += ' AND (YEAR(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%Y") = ? OR i.tanggal_mulai LIKE ?)';
+        sParams.push(tInt, String(tInt), `${tInt}-%`);
       }
 
       const iParams = [];
@@ -242,18 +242,64 @@ class RekapModel {
       if (bulan) {
         const bInt = parseInt(bulan, 10);
         const bPad = String(bInt).padStart(2, '0');
-        iWhere += ' AND (MONTH(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%c") = ? OR DATE_FORMAT(i.tanggal_mulai, "%m") = ?)';
-        iParams.push(bInt, String(bInt), bPad);
+        iWhere += ' AND (MONTH(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%c") = ? OR DATE_FORMAT(i.tanggal_mulai, "%m") = ? OR i.tanggal_mulai LIKE ?)';
+        iParams.push(bInt, String(bInt), bPad, `%-${bPad}-%`);
       }
       if (tahun) {
         const tInt = parseInt(tahun, 10);
-        iWhere += ' AND (YEAR(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%Y") = ?)';
-        iParams.push(tInt, String(tInt));
+        iWhere += ' AND (YEAR(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%Y") = ? OR i.tanggal_mulai LIKE ?)';
+        iParams.push(tInt, String(tInt), `${tInt}-%`);
       }
 
       const params = [...pParams, ...sParams, ...iParams];
 
-      const sql = `
+      // Primary query directly from master table 'guru'
+      const sqlPrimary = `
+        SELECT 
+          g.kode_guru,
+          COALESCE(g.nama_guru, CONCAT('Guru #', g.kode_guru)) AS nama_guru,
+          COALESCE(g.nip_nuptk, '-') AS nip_nuptk,
+          COALESCE(g.status_kepegawaian, 'Guru') AS status_kepegawaian,
+          COALESCE(p.total_hadir, 0) AS total_hadir,
+          COALESCE(i_sakit.total_sakit, 0) AS total_sakit,
+          COALESCE(i_izin.total_izin, 0) AS total_izin
+        FROM guru g
+        LEFT JOIN (
+          SELECT 
+            p.kode_guru, 
+            COUNT(DISTINCT p.id) AS total_hadir 
+          FROM presensi p 
+          WHERE 1=1 ${pWhere}
+          GROUP BY p.kode_guru
+        ) p ON (g.kode_guru = p.kode_guru OR g.nip_nuptk = p.kode_guru OR g.nama_guru = p.kode_guru)
+        LEFT JOIN (
+          SELECT 
+            i.user_id,
+            i.nama_pengaju,
+            COUNT(DISTINCT i.id) AS total_sakit 
+          FROM pengajuan_izin i 
+          WHERE i.jenis = 'Sakit' ${sWhere}
+          GROUP BY i.user_id, i.nama_pengaju
+        ) i_sakit ON (g.kode_guru = i_sakit.user_id OR g.nama_guru = i_sakit.nama_pengaju OR g.nip_nuptk = i_sakit.user_id)
+        LEFT JOIN (
+          SELECT 
+            i.user_id,
+            i.nama_pengaju,
+            COUNT(DISTINCT i.id) AS total_izin 
+          FROM pengajuan_izin i 
+          WHERE (i.jenis IS NULL OR i.jenis != 'Sakit') ${iWhere}
+          GROUP BY i.user_id, i.nama_pengaju
+        ) i_izin ON (g.kode_guru = i_izin.user_id OR g.nama_guru = i_izin.nama_pengaju OR g.nip_nuptk = i_izin.user_id)
+        ORDER BY g.nama_guru ASC
+      `;
+
+      const rows = await query(sqlPrimary, params);
+      if (rows && rows.length > 0) {
+        return rows;
+      }
+
+      // Fallback from UNION query if master table 'guru' is empty
+      const sqlUnion = `
         SELECT 
           t.kode_guru,
           COALESCE(g.nama_guru, CONCAT('Guru #', t.kode_guru)) AS nama_guru,
@@ -263,8 +309,6 @@ class RekapModel {
           COALESCE(i_sakit.total_sakit, 0) AS total_sakit,
           COALESCE(i_izin.total_izin, 0) AS total_izin
         FROM (
-          SELECT kode_guru FROM guru
-          UNION
           SELECT kode_guru FROM presensi WHERE kode_guru IS NOT NULL AND kode_guru != ''
           UNION
           SELECT CAST(user_id AS CHAR) AS kode_guru FROM pengajuan_izin WHERE user_id IS NOT NULL AND user_id != ''
@@ -299,28 +343,7 @@ class RekapModel {
         ORDER BY nama_guru ASC
       `;
 
-      const rows = await query(sql, params);
-      if (rows && rows.length > 0) {
-        return rows;
-      }
-
-      // Fallback directly from presensi table if empty
-      let fallbackSql = `
-        SELECT 
-          p.kode_guru,
-          COALESCE(g.nama_guru, CONCAT('Guru #', p.kode_guru)) AS nama_guru,
-          COALESCE(g.nip_nuptk, '-') AS nip_nuptk,
-          COALESCE(g.status_kepegawaian, 'PNS/GTT') AS status_kepegawaian,
-          COUNT(DISTINCT p.id) AS total_hadir,
-          0 AS total_sakit,
-          0 AS total_izin
-        FROM presensi p
-        LEFT JOIN guru g ON (p.kode_guru = g.kode_guru OR p.kode_guru = g.nip_nuptk)
-        WHERE 1=1 ${pWhere}
-        GROUP BY p.kode_guru ORDER BY p.kode_guru ASC
-      `;
-      return await query(fallbackSql, pParams);
-
+      return await query(sqlUnion, params);
     } catch (e) {
       console.error('[RekapModel.getRekapGuru] Error:', e.message);
       return [];

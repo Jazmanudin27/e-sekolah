@@ -15,6 +15,7 @@ export default function RekapGuruView() {
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   const daftarBulan = [
+    { value: '', label: 'Semua Bulan (Total)' },
     { value: 1, label: 'Januari' },
     { value: 2, label: 'Februari' },
     { value: 3, label: 'Maret' },
@@ -29,16 +30,22 @@ export default function RekapGuruView() {
     { value: 12, label: 'Desember' }
   ];
 
-  const daftarTahun = [2024, 2025, 2026, 2027];
+  const daftarTahun = [
+    { value: '', label: 'Semua Tahun' },
+    { value: 2024, label: '2024' },
+    { value: 2025, label: '2025' },
+    { value: 2026, label: '2026' },
+    { value: 2027, label: '2027' }
+  ];
 
   useEffect(() => {
-    fetchRekap();
+    fetchRekap(selectedBulan, selectedTahun);
   }, []);
 
-  const fetchRekap = async () => {
+  const fetchRekap = async (bul = selectedBulan, thn = selectedTahun) => {
     setLoading(true);
     try {
-      const res = await api.get('/rekap/guru');
+      const res = await api.get(`/rekap/guru?bulan=${bul || ''}&tahun=${thn || ''}`);
       if (res.data?.success && Array.isArray(res.data.data)) {
         setRekapList(res.data.data);
       } else {
@@ -53,11 +60,15 @@ export default function RekapGuruView() {
   };
 
   const handleBulanChange = (e) => {
-    setSelectedBulan(parseInt(e.target.value, 10));
+    const val = e.target.value;
+    setSelectedBulan(val);
+    fetchRekap(val, selectedTahun);
   };
 
   const handleTahunChange = (e) => {
-    setSelectedTahun(parseInt(e.target.value, 10));
+    const val = e.target.value;
+    setSelectedTahun(val);
+    fetchRekap(selectedBulan, val);
   };
 
   const openGuruDetail = async (guru) => {
@@ -91,12 +102,12 @@ export default function RekapGuruView() {
       <div style={{ background: '#ffffff', padding: 14, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)', marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 11, fontWeight: 700, color: '#475569', letterSpacing: '0.3px' }}>
           <Filter size={14} color="#0066ff" />
-          FILTER PERIODE DETAIL PRESENSI GURU
+          FILTER LAPORAN PRESENSI GURU
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <div>
-            <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>BULAN DETAIL</label>
+            <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>BULAN</label>
             <select
               value={selectedBulan}
               onChange={handleBulanChange}
@@ -109,20 +120,17 @@ export default function RekapGuruView() {
           </div>
 
           <div>
-            <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>TAHUN DETAIL</label>
+            <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>TAHUN</label>
             <select
               value={selectedTahun}
               onChange={handleTahunChange}
               style={{ width: '100%', padding: '9px 10px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, fontWeight: 700, background: '#f8fafc', color: '#0f172a', outline: 'none' }}
             >
               {daftarTahun.map(t => (
-                <option key={t} value={t}>{t}</option>
+                <option key={t.value} value={t.value}>{t.label}</option>
               ))}
             </select>
           </div>
-        </div>
-        <div style={{ fontSize: 10, color: '#64748b', marginTop: 8, fontStyle: 'italic', fontWeight: 500 }}>
-          * Filter ini berlaku untuk rincian riwayat presensi saat item guru diklik.
         </div>
       </div>
 
@@ -348,7 +356,7 @@ export default function RekapGuruView() {
                   {selectedGuru.nama_guru}
                 </div>
                 <div style={{ fontSize: 11, opacity: 0.85, marginTop: 2, fontWeight: 600 }}>
-                  NIP: {selectedGuru.nip_nuptk || '-'} • {daftarBulan.find(b => b.value === selectedBulan)?.label} {selectedTahun}
+                  NIP: {selectedGuru.nip_nuptk || '-'} • {daftarBulan.find(b => String(b.value) === String(selectedBulan))?.label || 'Semua Bulan'} {selectedTahun || ''}
                 </div>
               </div>
               <button
