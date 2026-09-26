@@ -13,6 +13,9 @@ import JadwalView from './views/JadwalView';
 import RiwayatView from './views/RiwayatView';
 import IzinView from './views/IzinView';
 import ProfilView from './views/ProfilView';
+import RekapSiswaView from './views/RekapSiswaView';
+import RekapMapelView from './views/RekapMapelView';
+import RekapGuruView from './views/RekapGuruView';
 import api from './api/client';
 
 export default function App() {
@@ -182,6 +185,30 @@ export default function App() {
         />
       )}
 
+      {activeTab === 'rekapSiswa' && (
+        <SubHeader
+          title="Rekap Absensi Siswa"
+          subtitle="Laporan hasil absensi harian siswa"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
+      {activeTab === 'rekapMapel' && (
+        <SubHeader
+          title="Rekap Absensi Mapel"
+          subtitle="Laporan hasil absensi mata pelajaran siswa"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
+      {activeTab === 'rekapGuru' && (
+        <SubHeader
+          title="Rekap Presensi Guru"
+          subtitle="Laporan kehadiran dan presensi semua guru"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
       {/* Main Content Area */}
       <main className="main-content-area">
         {activeTab === 'beranda' && (
@@ -199,6 +226,9 @@ export default function App() {
         {activeTab === 'riwayat' && <RiwayatView />}
         {activeTab === 'izin' && <IzinView showToast={showToast} />}
         {activeTab === 'profil' && <ProfilView user={currentUser} onLogout={handleLogout} />}
+        {activeTab === 'rekapSiswa' && <RekapSiswaView />}
+        {activeTab === 'rekapMapel' && <RekapMapelView />}
+        {activeTab === 'rekapGuru' && <RekapGuruView />}
       </main>
 
       {/* Bottom Navigation */}
@@ -208,13 +238,19 @@ export default function App() {
         onOpenPresensi={(type) => setPresensiModalType(type || 'in')}
       />
 
-      {/* Presensi Check-In / Check-Out Modal */}
+      {/* Presensi CheckIn/Out Modal */}
       {presensiModalType && (
         <PresensiModal
           type={presensiModalType}
+          user={currentUser}
           onClose={() => setPresensiModalType(null)}
-          onSuccess={() => setActiveTab('beranda')}
-          showToast={showToast}
+          onSuccess={() => {
+            setPresensiModalType(null);
+            showToast(
+              `Presensi Scan ${presensiModalType === 'in' ? 'Masuk' : 'Pulang'} Berhasil!`,
+              true
+            );
+          }}
         />
       )}
     </div>

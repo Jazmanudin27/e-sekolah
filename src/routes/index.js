@@ -12,6 +12,7 @@ const absensiMapelRoutes = require('./absensiMapel.routes');
 const dashboardRoutes = require('./dashboard.routes');
 const siswaRoutes = require('./siswa.routes');
 const izinRoutes = require('./izin.routes');
+const rekapRoutes = require('./rekap.routes');
 
 // System Health Check
 router.get('/health', (req, res) => {
@@ -35,5 +36,6 @@ router.use('/absensi-mapel', absensiMapelRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/siswa', siswaRoutes);
 router.use('/izin', izinRoutes);
+router.use('/rekap', rekapRoutes);
 
 module.exports = router;

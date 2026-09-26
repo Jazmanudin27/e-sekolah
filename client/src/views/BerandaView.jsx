@@ -196,21 +196,21 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
             <span>Absen Mapel</span>
           </button>
 
-          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('rekapSiswa')}>
             <div className="menu-icon-circle">
               <FileBarChart size={22} />
             </div>
             <span>Rekap Siswa</span>
           </button>
 
-          <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('rekapMapel')}>
             <div className="menu-icon-circle">
               <PieChart size={22} />
             </div>
             <span>Rekap Mapel</span>
           </button>
 
-          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('rekapGuru')}>
             <div className="menu-icon-circle">
               <Award size={22} />
             </div>

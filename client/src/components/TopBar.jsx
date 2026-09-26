@@ -3,6 +3,7 @@ import { GraduationCap, Bell, Search, LogOut, Calendar } from 'lucide-react';
 
 export default function TopBar({ user, onLogout }) {
   const [currentDate, setCurrentDate] = useState('');
+  const [currentTime, setCurrentTime] = useState('');
   const [greeting, setGreeting] = useState({ text: 'Selamat Datang', emoji: '👋' });
 
   useEffect(() => {
@@ -22,9 +23,12 @@ export default function TopBar({ user, onLogout }) {
 
       const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
       setCurrentDate(now.toLocaleDateString('id-ID', options));
+      setCurrentTime(now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB');
     };
 
     updateTime();
+    const interval = setInterval(updateTime, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const displayName = user?.nama_guru || user?.username || 'Pengajar';
@@ -86,7 +90,7 @@ export default function TopBar({ user, onLogout }) {
 
             <div className="hero-date-row">
               <Calendar size={12} className="hero-date-icon" />
-              <span className="hero-date-text">{currentDate}</span>
+              <span className="hero-date-text">{currentDate} • {currentTime}</span>
             </div>
           </div>
         </div>
