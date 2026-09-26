@@ -85,42 +85,16 @@ export default function IzinView({ showToast }) {
         </div>
       </div>
 
-      {/* BUAT PENGAJUAN BUTTON */}
-      {!showForm && (
-        <button
-          onClick={() => setShowForm(true)}
-          style={{
-            width: '100%',
-            padding: '14px',
-            borderRadius: 16,
-            background: 'linear-gradient(135deg, #0052cc 0%, #0072ff 100%)',
-            color: '#ffffff',
-            border: 'none',
-            fontWeight: 700,
-            fontSize: 14,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            boxShadow: '0 8px 20px rgba(0, 102, 255, 0.25)',
-            cursor: 'pointer',
-            marginBottom: 20,
-            transition: 'transform 0.15s ease'
-          }}
-        >
-          <Plus size={18} />
-          Buat Pengajuan Izin / Sakit Baru
-        </button>
-      )}
+
 
       {/* FORM PENGAJUAN */}
       {showForm && (
-        <div style={{ background: '#ffffff', padding: 18, borderRadius: 18, border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)', marginBottom: 20 }}>
+        <div style={{ background: '#ffffff', padding: 18, borderRadius: 18, border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.06)', marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Form Pengajuan Izin</h3>
             <button
               onClick={() => setShowForm(false)}
-              style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: 600, fontSize: 12, cursor: 'pointer' }}
+              style={{ background: '#f1f5f9', border: 'none', color: '#64748b', fontWeight: 700, fontSize: 12, padding: '4px 10px', borderRadius: 8, cursor: 'pointer' }}
             >
               Batal
             </button>
@@ -253,6 +227,59 @@ export default function IzinView({ showToast }) {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* FLOATING ACTION BUTTON (LIVE CHAT STYLE - BOTTOM RIGHT) */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 90,
+          right: 20,
+          zIndex: 150,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8
+        }}
+      >
+        {!showForm && (
+          <span
+            style={{
+              background: '#0f172a',
+              color: '#ffffff',
+              fontSize: 12,
+              fontWeight: 700,
+              padding: '6px 12px',
+              borderRadius: 20,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
+              pointerEvents: 'none'
+            }}
+          >
+            + Buat Izin
+          </span>
+        )}
+        <button
+          onClick={() => setShowForm(!showForm)}
+          title={showForm ? 'Tutup Form' : 'Buat Pengajuan Izin Baru'}
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            background: showForm
+              ? '#dc2626'
+              : 'linear-gradient(135deg, #0052cc 0%, #0072ff 50%, #0284c7 100%)',
+            color: '#ffffff',
+            border: '3px solid #ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 24px rgba(0, 102, 255, 0.45)',
+            cursor: 'pointer',
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: showForm ? 'rotate(45deg)' : 'none'
+          }}
+        >
+          <Plus size={28} color="#ffffff" />
+        </button>
       </div>
     </div>
   );
