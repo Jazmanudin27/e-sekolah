@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, CheckCircle, Clock, Calendar, AlertCircle } from 'lucide-react';
+import { FileText, Plus, CheckCircle, Clock, Calendar, AlertCircle, Trash2 } from 'lucide-react';
+import Swal from 'sweetalert2';
 import api from '../api/client';
 
 export default function IzinView({ showToast }) {
@@ -32,7 +33,7 @@ export default function IzinView({ showToast }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tanggalMulai || !keterangan) {
-      showToast?.('Mohon isi tanggal dan keterangan pengajuan', 'error');
+      showToast?.('Mohon isi tanggal dan keterangan pengajuan', false);
       return;
     }
 
@@ -46,19 +47,57 @@ export default function IzinView({ showToast }) {
 
       const res = await api.post('/izin', payload);
       if (res.data?.success) {
-        showToast?.('Pengajuan izin berhasil disimpan ke database!', 'success');
+        showToast?.('Pengajuan izin berhasil disimpan ke database!', true);
         setShowForm(false);
         setKeterangan('');
         setTanggalMulai('');
         setTanggalSelesai('');
         fetchIzin();
       } else {
-        showToast?.(res.data?.message || 'Gagal menyimpan pengajuan izin', 'error');
+        showToast?.(res.data?.message || 'Gagal menyimpan pengajuan izin', false);
       }
     } catch (err) {
       console.error(err);
-      showToast?.('Terjadi kesalahan saat menyimpan pengajuan izin', 'error');
+      showToast?.('Terjadi kesalahan saat menyimpan pengajuan izin', false);
     }
+  };
+
+  const handleDelete = (id) => {
+    Swal.fire({
+      title: 'Hapus Pengajuan Izin?',
+      text: 'Apakah Anda yakin ingin menghapus pengajuan izin ini?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal',
+      reverseButtons: true,
+      customClass: {
+        popup: 'swal2-custom-popup'
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await api.delete(`/izin/${id}`);
+          if (res.data?.success) {
+            Swal.fire({
+              title: 'Terhapus!',
+              text: 'Pengajuan izin berhasil dihapus.',
+              icon: 'success',
+              timer: 1600,
+              showConfirmButton: false,
+              customClass: { popup: 'swal2-custom-popup' }
+            });
+            fetchIzin();
+          } else {
+            showToast?.(res.data?.message || 'Gagal menghapus izin', false);
+          }
+        } catch (err) {
+          showToast?.(err.response?.data?.message || 'Gagal menghapus pengajuan izin.', false);
+        }
+      }
+    });
   };
 
   return (
@@ -73,19 +112,17 @@ export default function IzinView({ showToast }) {
         <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
           <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Disetujui</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: '#16a34a', marginTop: 4 }}>
-            {riwayatIzin.filter(i => i.status === 'Disetujui').length}
+            {riwayatIzin.filter(i => i.status === 'Disetujui' || i.status === 'APPROVED').length}
           </div>
         </div>
 
         <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
           <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Menunggu</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: '#d97706', marginTop: 4 }}>
-            {riwayatIzin.filter(i => i.status === 'Menunggu').length}
+            {riwayatIzin.filter(i => i.status !== 'Disetujui' && i.status !== 'APPROVED').length}
           </div>
         </div>
       </div>
-
-
 
       {/* FORM PENGAJUAN */}
       {showForm && (
@@ -171,61 +208,96 @@ export default function IzinView({ showToast }) {
       <div>
         <h4 style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 12 }}>Riwayat Pengajuan Izin</h4>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {riwayatIzin.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                background: '#ffffff',
-                borderRadius: 16,
-                padding: 14,
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-            >
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                  <span
-                    style={{
-                      background: item.jenis === 'Sakit' ? '#fee2e2' : '#e0f2fe',
-                      color: item.jenis === 'Sakit' ? '#dc2626' : '#0284c7',
-                      fontSize: 11,
-                      fontWeight: 800,
-                      padding: '2px 8px',
-                      borderRadius: 6
-                    }}
-                  >
-                    {item.jenis}
-                  </span>
-                  <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{item.tanggal}</span>
-                </div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{item.keterangan}</div>
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{item.disetujuiOleh}</div>
-              </div>
+          {riwayatIzin.length > 0 ? (
+            riwayatIzin.map((item) => {
+              const isApproved = item.status === 'Disetujui' || item.status === 'APPROVED';
 
-              <div style={{ textAlign: 'right' }}>
-                <span
+              return (
+                <div
+                  key={item.id}
                   style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: item.status === 'Disetujui' ? '#16a34a' : '#d97706',
-                    background: item.status === 'Disetujui' ? '#f0fdf4' : '#fffbeb',
-                    padding: '4px 10px',
-                    borderRadius: 20,
-                    border: item.status === 'Disetujui' ? '1px solid #bbf7d0' : '1px solid #fef3c7'
+                    background: '#ffffff',
+                    borderRadius: 16,
+                    padding: 14,
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
                   }}
                 >
-                  {item.status === 'Disetujui' ? <CheckCircle size={12} /> : <Clock size={12} />}
-                  {item.status}
-                </span>
-              </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <span
+                        style={{
+                          background: item.jenis === 'Sakit' ? '#fee2e2' : '#e0f2fe',
+                          color: item.jenis === 'Sakit' ? '#dc2626' : '#0284c7',
+                          fontSize: 11,
+                          fontWeight: 800,
+                          padding: '2px 8px',
+                          borderRadius: 6
+                        }}
+                      >
+                        {item.jenis}
+                      </span>
+                      <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{item.tanggal}</span>
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{item.keterangan}</div>
+                    <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{item.disetujui_oleh || item.disetujuiOleh}</div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: isApproved ? '#16a34a' : '#d97706',
+                        background: isApproved ? '#f0fdf4' : '#fffbeb',
+                        padding: '4px 10px',
+                        borderRadius: 20,
+                        border: isApproved ? '1px solid #bbf7d0' : '1px solid #fef3c7'
+                      }}
+                    >
+                      {isApproved ? <CheckCircle size={12} /> : <Clock size={12} />}
+                      {item.status}
+                    </span>
+
+                    {/* ONLY SHOW DELETE BUTTON IF NOT APPROVED YET */}
+                    {!isApproved && (
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        title="Hapus Pengajuan Izin"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          background: '#fef2f2',
+                          color: '#dc2626',
+                          border: '1px solid #fecaca',
+                          borderRadius: 8,
+                          padding: '3px 8px',
+                          fontSize: 11,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <Trash2 size={12} />
+                        Hapus
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div style={{ background: '#ffffff', padding: 24, borderRadius: 16, border: '1px solid #e2e8f0', textAlign: 'center', color: '#94a3b8' }}>
+              Belum ada riwayat pengajuan izin.
             </div>
-          ))}
+          )}
         </div>
       </div>
 

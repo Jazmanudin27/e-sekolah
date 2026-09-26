@@ -49,6 +49,12 @@ class IzinModel {
     }
   }
 
+  static async findById(id) {
+    await this.initTable();
+    const rows = await query('SELECT * FROM pengajuan_izin WHERE id = ?', [id]);
+    return rows[0] || null;
+  }
+
   static async create({ user_id, nama_pengaju, jenis, tanggal_mulai, tanggal_selesai, durasi, keterangan }) {
     await this.initTable();
     const res = await query(
@@ -66,6 +72,11 @@ class IzinModel {
       ]
     );
     return res.insertId;
+  }
+
+  static async delete(id) {
+    await this.initTable();
+    await query('DELETE FROM pengajuan_izin WHERE id = ?', [id]);
   }
 }
 

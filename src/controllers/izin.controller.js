@@ -42,7 +42,28 @@ async function createIzin(req, res, next) {
   }
 }
 
+async function deleteIzin(req, res, next) {
+  try {
+    const { id } = req.params;
+    const existing = await IzinModel.findById(id);
+
+    if (!existing) {
+      return sendError(res, 'Data pengajuan izin tidak ditemukan.', 404);
+    }
+
+    if (existing.status === 'Disetujui' || existing.status === 'APPROVED') {
+      return sendError(res, 'Pengajuan izin yang sudah disetujui tidak dapat dihapus.', 400);
+    }
+
+    await IzinModel.delete(id);
+    sendSuccess(res, 'Pengajuan izin berhasil dihapus.', { id });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getIzin,
-  createIzin
+  createIzin,
+  deleteIzin
 };
