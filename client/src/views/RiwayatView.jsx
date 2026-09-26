@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Fingerprint, CalendarDays, RefreshCw, Filter, Calendar } from 'lucide-react';
+import { Fingerprint, Filter } from 'lucide-react';
 import api from '../api/client';
 
 export default function RiwayatView() {
@@ -93,19 +93,6 @@ export default function RiwayatView() {
 
   return (
     <div className="inner-page-wrapper" style={{ paddingBottom: 36, paddingTop: 4 }}>
-      {/* HEADER ROW */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <CalendarDays size={18} color="#0066ff" /> Log Kehadiran Saya
-        </h3>
-        <button
-          onClick={fetchHistory}
-          style={{ background: 'none', border: 'none', color: '#0066ff', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
-        >
-          <RefreshCw size={13} /> Refresh
-        </button>
-      </div>
-
       {/* FILTER BULAN & TAHUN CONTROL CARD */}
       <div style={{ background: '#ffffff', padding: 14, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)', marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 11, fontWeight: 700, color: '#475569', letterSpacing: '0.3px' }}>
