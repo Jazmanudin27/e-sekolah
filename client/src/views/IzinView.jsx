@@ -103,22 +103,31 @@ export default function IzinView({ showToast }) {
   return (
     <div className="inner-page-wrapper" style={{ paddingBottom: 36, paddingTop: 4 }}>
       {/* OVERVIEW STATS CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 18 }}>
-        <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
-          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Total Pengajuan</div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: '#0066ff', marginTop: 4 }}>{riwayatIzin.length}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 18 }}>
+        {/* Total Pengajuan Card */}
+        <div style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', padding: '12px 10px', borderRadius: 16, color: '#ffffff', boxShadow: '0 4px 14px rgba(37,99,235,0.2)', textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
+            <FileText size={12} /> TOTAL PENGAJUAN
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 900, lineHeight: 1.1 }}>{riwayatIzin.length}</div>
         </div>
 
-        <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
-          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Disetujui</div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: '#16a34a', marginTop: 4 }}>
+        {/* Disetujui Card */}
+        <div style={{ background: 'linear-gradient(135deg, #10b981, #047857)', padding: '12px 10px', borderRadius: 16, color: '#ffffff', boxShadow: '0 4px 14px rgba(16,185,129,0.2)', textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
+            <CheckCircle size={12} /> DISETUJUI
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 900, lineHeight: 1.1 }}>
             {riwayatIzin.filter(i => i.status === 'Disetujui' || i.status === 'APPROVED').length}
           </div>
         </div>
 
-        <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
-          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Menunggu</div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: '#d97706', marginTop: 4 }}>
+        {/* Menunggu Card */}
+        <div style={{ background: 'linear-gradient(135deg, #f59e0b, #b45309)', padding: '12px 10px', borderRadius: 16, color: '#ffffff', boxShadow: '0 4px 14px rgba(245,158,11,0.2)', textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
+            <Clock size={12} /> MENUNGGU
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 900, lineHeight: 1.1 }}>
             {riwayatIzin.filter(i => i.status !== 'Disetujui' && i.status !== 'APPROVED').length}
           </div>
         </div>
