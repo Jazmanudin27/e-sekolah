@@ -6,14 +6,11 @@ export default function SubHeader({ title, subtitle, onBack }) {
     <div className="subheader-wrapper">
       <div className="subheader-inner">
         <button className="subheader-back-btn" onClick={onBack} title="Kembali ke Beranda">
-          <ArrowLeft size={18} />
+          <ArrowLeft size={19} />
         </button>
         <div className="subheader-title-col">
           <h1 className="subheader-title">{title}</h1>
           {subtitle && <p className="subheader-subtitle">{subtitle}</p>}
-        </div>
-        <div className="subheader-right">
-          <span className="subheader-badge">E-Sekolah</span>
         </div>
       </div>
     </div>
