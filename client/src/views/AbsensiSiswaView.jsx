@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, UserCheck, Loader2, Calendar, CheckCircle2, AlertCircle, RefreshCw, Users } from 'lucide-react';
+import { Save, UserCheck, Loader2, Calendar, CheckCircle2, AlertCircle, RefreshCw, Users, Filter } from 'lucide-react';
 import api from '../api/client';
 
 export default function AbsensiSiswaView({ showToast }) {
@@ -54,7 +54,6 @@ export default function AbsensiSiswaView({ showToast }) {
 
       setStudentList(students);
 
-      // Build existing absensi map { [kode_siswa]: status }
       const existingMap = {};
       let hasRecords = false;
       if (absensiRes.data.success && Array.isArray(absensiRes.data.data) && absensiRes.data.data.length > 0) {
@@ -66,7 +65,6 @@ export default function AbsensiSiswaView({ showToast }) {
 
       setIsExistingData(hasRecords);
 
-      // Set initial status for each student (from DB or default 'H')
       const initialStatus = {};
       students.forEach(s => {
         initialStatus[s.id] = existingMap[s.id] || 'H';
@@ -145,7 +143,6 @@ export default function AbsensiSiswaView({ showToast }) {
     }
   };
 
-  // Calculate summary counts
   const counts = { H: 0, S: 0, I: 0, A: 0 };
   Object.values(studentStatus).forEach(st => {
     if (counts[st] !== undefined) counts[st]++;
@@ -163,15 +160,32 @@ export default function AbsensiSiswaView({ showToast }) {
   };
 
   return (
-    <div className="inner-page-wrapper">
-      {/* FILTER CARD */}
-      <div className="white-card shadow-sm" style={{ padding: 18, borderRadius: 20 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-          <div className="form-group-custom">
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, color: '#334155' }}>
-              <Users size={15} color="#0066ff" /> PILIH KELAS
-            </label>
-            <select value={selectedKelas} onChange={handleKelasChange}>
+    <div className="inner-page-wrapper" style={{ paddingTop: 4 }}>
+      {/* FILTER CONTROL CARD (SAMAIN SAMA HISTORI PRESENSI) */}
+      <div style={{ background: '#ffffff', padding: 14, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 11, fontWeight: 700, color: '#475569', letterSpacing: '0.3px' }}>
+          <Filter size={14} color="#0066ff" />
+          FILTER ABSENSI SISWA
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div>
+            <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>PILIH KELAS</label>
+            <select
+              value={selectedKelas}
+              onChange={handleKelasChange}
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                borderRadius: 10,
+                border: '1px solid #cbd5e1',
+                fontSize: 12,
+                fontWeight: 700,
+                background: '#f8fafc',
+                color: '#0f172a',
+                outline: 'none'
+              }}
+            >
               <option value="">-- Pilih Kelas --</option>
               {kelasList.map(k => (
                 <option key={k.kode_kelas} value={k.kode_kelas}>
@@ -181,28 +195,41 @@ export default function AbsensiSiswaView({ showToast }) {
             </select>
           </div>
 
-          <div className="form-group-custom">
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, color: '#334155' }}>
-              <Calendar size={15} color="#0066ff" /> TANGGAL
-            </label>
-            <input type="date" value={tanggal} onChange={handleTanggalChange} />
+          <div>
+            <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>TANGGAL</label>
+            <input
+              type="date"
+              value={tanggal}
+              onChange={handleTanggalChange}
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                borderRadius: 10,
+                border: '1px solid #cbd5e1',
+                fontSize: 12,
+                fontWeight: 700,
+                background: '#f8fafc',
+                color: '#0f172a',
+                outline: 'none'
+              }}
+            />
           </div>
         </div>
       </div>
 
       {loadingStudents ? (
         <div style={{ textAlign: 'center', padding: '40px 20px', color: '#0066ff' }}>
-          <Loader2 size={32} className="spin" style={{ margin: '0 auto' }} />
-          <p style={{ marginTop: 12, fontSize: 13, fontWeight: 700 }}>Memuat data absensi siswa...</p>
+          <Loader2 size={30} className="spin" style={{ margin: '0 auto' }} />
+          <p style={{ marginTop: 10, fontSize: 13, fontWeight: 700 }}>Memuat data absensi siswa...</p>
         </div>
       ) : studentList.length > 0 ? (
         <div>
           {/* DATE STATUS BADGE */}
           <div
             style={{
-              padding: '10px 14px',
-              borderRadius: 14,
-              marginBottom: 14,
+              padding: '9px 12px',
+              borderRadius: 12,
+              marginBottom: 12,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -212,10 +239,10 @@ export default function AbsensiSiswaView({ showToast }) {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 700 }}>
-              {isExistingData ? <CheckCircle2 size={16} color="#16a34a" /> : <AlertCircle size={16} color="#2563eb" />}
+              {isExistingData ? <CheckCircle2 size={15} color="#16a34a" /> : <AlertCircle size={15} color="#2563eb" />}
               <span>
                 {isExistingData
-                  ? `Absensi ${formatDateLabel(tanggal)} tersimpan di DB (Dapat Di-edit)`
+                  ? `Absensi ${formatDateLabel(tanggal)} tersimpan (Dapat Di-edit)`
                   : `Belum ada absensi ${formatDateLabel(tanggal)} di DB`}
               </span>
             </div>
@@ -240,35 +267,35 @@ export default function AbsensiSiswaView({ showToast }) {
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(5, 1fr)',
-              gap: 8,
-              marginBottom: 14,
+              gap: 6,
+              marginBottom: 12,
               textAlign: 'center'
             }}
           >
-            <div style={{ background: '#ffffff', padding: '8px 4px', borderRadius: 12, border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b' }}>TOTAL</div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>{studentList.length}</div>
+            <div style={{ background: '#ffffff', padding: '7px 4px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#64748b' }}>TOTAL</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{studentList.length}</div>
             </div>
-            <div style={{ background: '#f0fdf4', padding: '8px 4px', borderRadius: 12, border: '1px solid #bbf7d0' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#16a34a' }}>HADIR</div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: '#15803d' }}>{counts.H}</div>
+            <div style={{ background: '#f0fdf4', padding: '7px 4px', borderRadius: 10, border: '1px solid #bbf7d0' }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#16a34a' }}>HADIR</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#15803d' }}>{counts.H}</div>
             </div>
-            <div style={{ background: '#e0f2fe', padding: '8px 4px', borderRadius: 12, border: '1px solid #bae6fd' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#0284c7' }}>SAKIT</div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: '#0369a1' }}>{counts.S}</div>
+            <div style={{ background: '#e0f2fe', padding: '7px 4px', borderRadius: 10, border: '1px solid #bae6fd' }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#0284c7' }}>SAKIT</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#0369a1' }}>{counts.S}</div>
             </div>
-            <div style={{ background: '#fef3c7', padding: '8px 4px', borderRadius: 12, border: '1px solid #fde68a' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#d97706' }}>IZIN</div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: '#b45309' }}>{counts.I}</div>
+            <div style={{ background: '#fef3c7', padding: '7px 4px', borderRadius: 10, border: '1px solid #fde68a' }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#d97706' }}>IZIN</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#b45309' }}>{counts.I}</div>
             </div>
-            <div style={{ background: '#fef2f2', padding: '8px 4px', borderRadius: 12, border: '1px solid #fecaca' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#dc2626' }}>ALPHA</div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: '#b91c1c' }}>{counts.A}</div>
+            <div style={{ background: '#fef2f2', padding: '7px 4px', borderRadius: 10, border: '1px solid #fecaca' }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#dc2626' }}>ALPHA</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#b91c1c' }}>{counts.A}</div>
             </div>
           </div>
 
-          {/* ACTION BUTTON: TANDAI SEMUA HADIR */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          {/* ACTION BAR */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>Daftar Siswa ({studentList.length})</span>
             <button
               onClick={markAllPresent}
@@ -276,8 +303,8 @@ export default function AbsensiSiswaView({ showToast }) {
                 background: '#eff6ff',
                 border: '1px solid #bfdbfe',
                 color: '#1d4ed8',
-                borderRadius: 10,
-                padding: '4px 10px',
+                borderRadius: 8,
+                padding: '4px 9px',
                 fontSize: 11,
                 fontWeight: 700,
                 cursor: 'pointer'
@@ -289,14 +316,14 @@ export default function AbsensiSiswaView({ showToast }) {
 
           {/* STUDENT LIST CARDS */}
           {studentList.map((s, idx) => (
-            <div key={s.id} className="student-item-card">
+            <div key={s.id} className="student-item-card" style={{ padding: '10px 12px', marginBottom: 6 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div
                   style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 10,
-                    background: '#e2e8f0',
+                    width: 30,
+                    height: 30,
+                    borderRadius: 8,
+                    background: '#f1f5f9',
                     color: '#334155',
                     fontSize: 11,
                     fontWeight: 800,
@@ -308,12 +335,12 @@ export default function AbsensiSiswaView({ showToast }) {
                   {idx + 1}
                 </div>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{s.nama}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{s.nama}</div>
                   <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>NIS: {s.nis}</div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 6 }}>
+              <div style={{ display: 'flex', gap: 5 }}>
                 {['H', 'S', 'I', 'A'].map(st => {
                   const isActive = studentStatus[s.id] === st;
                   return (
@@ -331,38 +358,46 @@ export default function AbsensiSiswaView({ showToast }) {
             </div>
           ))}
 
-          {/* SAVE BUTTON */}
-          <button
-            className="btn btn-primary btn-block"
-            onClick={handleSubmit}
-            disabled={saving}
-            style={{
-              marginTop: 18,
-              background: 'linear-gradient(135deg, #0066ff, #0041a8)',
-              height: 48,
-              borderRadius: 16,
-              fontWeight: 800,
-              fontSize: 14,
-              boxShadow: '0 8px 20px rgba(0, 102, 255, 0.28)'
-            }}
-          >
-            {saving ? (
-              <>
-                <Loader2 size={18} className="spin" />
-                <span>Menyimpan Absensi...</span>
-              </>
-            ) : (
-              <>
-                <Save size={18} />
-                <span>{isExistingData ? 'Simpan Perubahan Absensi' : 'Simpan Absensi Siswa'}</span>
-              </>
-            )}
-          </button>
+          {/* COMPACT & ELEGANT SAVE BUTTON */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14, marginBottom: 12 }}>
+            <button
+              onClick={handleSubmit}
+              disabled={saving}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 7,
+                padding: '9px 18px',
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, #0066ff 0%, #0052cc 100%)',
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: saving ? 'not-allowed' : 'pointer',
+                boxShadow: '0 4px 14px rgba(0, 102, 255, 0.3)',
+                transition: 'all 0.15s ease',
+                opacity: saving ? 0.7 : 1
+              }}
+            >
+              {saving ? (
+                <>
+                  <Loader2 size={15} className="spin" />
+                  <span>Menyimpan...</span>
+                </>
+              ) : (
+                <>
+                  <Save size={15} />
+                  <span>{isExistingData ? 'Simpan Perubahan' : 'Simpan Absensi'}</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="white-card" style={{ textAlign: 'center', padding: '48px 20px', color: '#94a3b8' }}>
-          <UserCheck size={52} style={{ opacity: 0.3, marginBottom: 12, margin: '0 auto' }} />
-          <p style={{ fontWeight: 700, color: '#64748b', fontSize: 14 }}>
+        <div style={{ background: '#ffffff', borderRadius: 16, border: '1px solid #e2e8f0', textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
+          <UserCheck size={48} style={{ opacity: 0.3, marginBottom: 10, margin: '0 auto' }} />
+          <p style={{ fontWeight: 700, color: '#64748b', fontSize: 13 }}>
             {selectedKelas ? 'Tidak ada data siswa pada kelas ini.' : 'Silakan pilih kelas & tanggal di atas.'}
           </p>
         </div>
