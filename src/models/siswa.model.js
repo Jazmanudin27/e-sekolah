@@ -1,36 +1,55 @@
 const { query } = require('../config/database');
 
 class SiswaModel {
-  static async findByKelas(kode_kelas) {
+  static async findAll(kode_kelas = null) {
     try {
-      // Query real siswa table
-      const rows = await query(
-        'SELECT kode_siswa, nis_nisn, nama_siswa, jk FROM siswa WHERE kode_kelas = ? ORDER BY nama_siswa ASC',
-        [kode_kelas]
-      );
+      let sql = `
+        SELECT 
+          s.kode_siswa, 
+          s.nis_nisn, 
+          s.nama_siswa, 
+          s.jk, 
+          s.kode_kelas,
+          k.nama_kelas, 
+          k.jurusan
+        FROM siswa s
+        LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas
+      `;
+      const params = [];
+
+      if (kode_kelas) {
+        sql += ' WHERE s.kode_kelas = ?';
+        params.push(kode_kelas);
+      }
+
+      sql += ' ORDER BY k.nama_kelas ASC, s.nama_siswa ASC';
+
+      const rows = await query(sql, params);
       if (rows && rows.length > 0) return rows;
     } catch (e) {
-      console.warn('[SiswaModel] Table siswa fallback or different schema:', e.message);
+      console.warn('[SiswaModel] Error querying siswa table:', e.message);
     }
 
-    // Fallback try selecting from absensi_siswa distinct student IDs if table schema differs
+    // Try simple query if JOIN fails
     try {
-      const rows = await query(
-        'SELECT DISTINCT kode_siswa FROM absensi_siswa WHERE kode_kelas = ?',
-        [kode_kelas]
-      );
-      if (rows && rows.length > 0) {
-        return rows.map(r => ({
-          kode_siswa: r.kode_siswa,
-          nis_nisn: `NIS-${r.kode_siswa}`,
-          nama_siswa: `Siswa ID #${r.kode_siswa}`
-        }));
+      let sql = 'SELECT kode_siswa, nis_nisn, nama_siswa, jk, kode_kelas FROM siswa';
+      const params = [];
+      if (kode_kelas) {
+        sql += ' WHERE kode_kelas = ?';
+        params.push(kode_kelas);
       }
+      sql += ' ORDER BY nama_siswa ASC';
+      const rows = await query(sql, params);
+      if (rows && rows.length > 0) return rows;
     } catch (e) {
-      console.warn(e.message);
+      console.warn('[SiswaModel] Fallback failed:', e.message);
     }
 
     return [];
+  }
+
+  static async findByKelas(kode_kelas) {
+    return this.findAll(kode_kelas);
   }
 }
 

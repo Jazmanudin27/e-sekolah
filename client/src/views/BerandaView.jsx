@@ -144,7 +144,7 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
       {/* 3. 8-GRID BLUE MENU CARDS */}
       <div className="grid-8-menu-wrapper">
         <div className="grid-8-menu">
-          <button className="menu-blue-card" onClick={() => onSwitchTab('absensiSiswa')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('siswa')}>
             <div className="menu-icon-circle">
               <Users size={22} />
             </div>

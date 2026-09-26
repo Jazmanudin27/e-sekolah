@@ -6,6 +6,7 @@ import BottomNav from './components/BottomNav';
 import PresensiModal from './components/PresensiModal';
 import LoginView from './views/LoginView';
 import BerandaView from './views/BerandaView';
+import SiswaView from './views/SiswaView';
 import AbsensiSiswaView from './views/AbsensiSiswaView';
 import AbsensiMapelView from './views/AbsensiMapelView';
 import JadwalView from './views/JadwalView';
@@ -96,6 +97,14 @@ export default function App() {
   return (
     <div className="app-shell">
       {/* SubHeaders for non-beranda views */}
+      {activeTab === 'siswa' && (
+        <SubHeader
+          title="Data Siswa & Kelas"
+          subtitle="Direktori siswa, kelas, dan jurusan"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
       {activeTab === 'absensiSiswa' && (
         <SubHeader
           title="Absensi Siswa"
@@ -138,6 +147,7 @@ export default function App() {
             onSwitchTab={(t) => setActiveTab(t)}
           />
         )}
+        {activeTab === 'siswa' && <SiswaView showToast={showToast} onSwitchTab={(t) => setActiveTab(t)} />}
         {activeTab === 'absensiSiswa' && <AbsensiSiswaView showToast={showToast} />}
         {activeTab === 'absensiMapel' && <AbsensiMapelView user={currentUser} showToast={showToast} />}
         {activeTab === 'jadwal' && <JadwalView />}

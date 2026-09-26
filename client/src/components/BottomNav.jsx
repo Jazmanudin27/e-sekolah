@@ -14,8 +14,8 @@ export default function BottomNav({ activeTab, onTabChange, onOpenPresensi }) {
         </button>
 
         <button
-          className={`nav-link-item ${activeTab === 'absensiSiswa' ? 'active' : ''}`}
-          onClick={() => onTabChange('absensiSiswa')}
+          className={`nav-link-item ${activeTab === 'siswa' || activeTab === 'absensiSiswa' ? 'active' : ''}`}
+          onClick={() => onTabChange('siswa')}
         >
           <Users size={20} />
           <span>Siswa</span>
