@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Bell, LogOut, Calendar } from 'lucide-react';
+import { GraduationCap, Bell, LogOut, Calendar, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default function TopBar({ user, onLogout }) {
   const [currentDate, setCurrentDate] = useState('');
@@ -32,34 +32,43 @@ export default function TopBar({ user, onLogout }) {
   }, []);
 
   const displayName = user?.nama_guru || user?.username || 'Pengajar';
+  const roleTitle = user?.type === 'Kelas' ? `Akun ${user.nama_kelas}` : (user?.role || 'Pengajar');
   const initials = displayName.split(' ').filter(Boolean).slice(0, 2).map(n => n[0]).join('').toUpperCase();
 
   return (
     <header className="header-blue-hero">
-      {/* Decorative Glow Elements */}
+      {/* Decorative Glow & Ambient Blur Elements */}
       <div className="hero-glow-circle hero-glow-1"></div>
       <div className="hero-glow-circle hero-glow-2"></div>
+      <div className="hero-glow-circle hero-glow-3"></div>
 
       <div className="header-inner">
         {/* TOP BRAND & CONTROLS */}
         <div className="header-top-row">
           <div className="brand-title">
             <div className="brand-logo-icon">
-              <GraduationCap size={18} color="#ffffff" />
+              <GraduationCap size={22} color="#ffffff" strokeWidth={2.2} />
             </div>
             <div className="brand-text">
-              <span className="brand-name">E-Sekolah</span>
-              <span className="brand-badge">PRO</span>
+              <span className="brand-name">E-SEKOLAH</span>
+              <span className="brand-badge">
+                <Sparkles size={10} color="#ffffff" style={{ marginRight: 3 }} />
+                PRO
+              </span>
             </div>
           </div>
 
           <div className="header-icons">
-            <button className="header-icon-btn" title="Notifikasi">
-              <Bell size={18} />
-              <span className="bell-dot"></span>
+            {/* NOTIFICATION BUTTON WITH COUNTER BADGE */}
+            <button className="header-icon-btn notif-btn-modern" title="Notifikasi Sistem">
+              <Bell size={19} color="#ffffff" />
+              <span className="notif-badge-pill">3</span>
             </button>
-            <button className="header-icon-btn logout-btn-hero" onClick={onLogout} title="Keluar Akun">
-              <LogOut size={16} />
+
+            {/* LOGOUT CRIMSON CAPSULE BUTTON */}
+            <button className="logout-capsule-btn" onClick={onLogout} title="Keluar Akun">
+              <LogOut size={15} color="#ffffff" />
+              <span>Keluar</span>
             </button>
           </div>
         </div>
@@ -81,12 +90,16 @@ export default function TopBar({ user, onLogout }) {
             <div className="hero-greeting-line">
               <span className="greeting-emoji">{greeting.emoji}</span>
               <span className="greeting-label">{greeting.text},</span>
+              <span className="user-role-badge">
+                <ShieldCheck size={11} color="#38bdf8" />
+                {roleTitle}
+              </span>
             </div>
 
             <h2 className="hero-user-name">{displayName}</h2>
 
             <div className="hero-date-row">
-              <Calendar size={12} className="hero-date-icon" />
+              <Calendar size={13} className="hero-date-icon" />
               <span className="hero-date-text">{currentDate} • {currentTime}</span>
             </div>
           </div>
