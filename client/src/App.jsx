@@ -76,8 +76,35 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('esekolah_token');
-    setCurrentUser(null);
+    Swal.fire({
+      title: 'Konfirmasi Logout',
+      text: 'Apakah Anda yakin ingin keluar dari aplikasi E-Sekolah?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Keluar',
+      cancelButtonText: 'Batal',
+      reverseButtons: true,
+      customClass: {
+        popup: 'swal2-custom-popup'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem('esekolah_token');
+        setCurrentUser(null);
+        Swal.fire({
+          title: 'Berhasil Keluar',
+          text: 'Anda telah keluar dari aplikasi.',
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false,
+          customClass: {
+            popup: 'swal2-custom-popup'
+          }
+        });
+      }
+    });
   };
 
   if (loading) {
