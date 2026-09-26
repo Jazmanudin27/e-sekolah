@@ -41,14 +41,14 @@ body {
 /* HEADER HERO BANNER (VIBRANT BLUE MODERN GRADIENT) */
 .header-blue-hero {
   background: linear-gradient(135deg, #0b1e42 0%, #0052cc 50%, #0072ff 100%);
-  padding: 24px 20px 52px 20px;
+  padding: 16px 18px 36px 18px;
   color: #ffffff;
   position: relative;
   width: 100%;
-  border-bottom-left-radius: 32px;
-  border-bottom-right-radius: 32px;
+  border-bottom-left-radius: 28px;
+  border-bottom-right-radius: 28px;
   overflow: hidden;
-  box-shadow: 0 12px 32px rgba(0, 82, 204, 0.25);
+  box-shadow: 0 10px 28px rgba(0, 82, 204, 0.22);
 }
 
 .hero-glow-circle {
@@ -84,7 +84,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .brand-title {

@@ -27,23 +27,8 @@ export default function TopBar({ user, onLogout }) {
     updateTime();
   }, []);
 
-  const rawName = user?.nama_guru || user?.username || 'Pengajar';
-
-  const getCleanName = (name) => {
-    if (!name) return 'Pengajar';
-    let clean = name.split(',')[0].trim();
-    if (clean.startsWith('Pak') || clean.startsWith('Bu') || clean.startsWith('Guru')) {
-      return clean;
-    }
-    const parts = clean.split(' ').filter(Boolean);
-    if (parts.length > 2) {
-      clean = parts.slice(0, 2).join(' ');
-    }
-    return `Pak ${clean}`;
-  };
-
-  const displayName = getCleanName(rawName);
-  const initials = rawName.split(' ').filter(Boolean).slice(0, 2).map(n => n[0]).join('').toUpperCase();
+  const displayName = user?.nama_guru || user?.username || 'Pengajar';
+  const initials = displayName.split(' ').filter(Boolean).slice(0, 2).map(n => n[0]).join('').toUpperCase();
 
   return (
     <header className="header-blue-hero">
@@ -56,7 +41,7 @@ export default function TopBar({ user, onLogout }) {
         <div className="header-top-row">
           <div className="brand-title">
             <div className="brand-logo-icon">
-              <GraduationCap size={20} color="#ffffff" />
+              <GraduationCap size={18} color="#ffffff" />
             </div>
             <div className="brand-text">
               <span className="brand-name">E-Sekolah</span>
@@ -66,14 +51,14 @@ export default function TopBar({ user, onLogout }) {
 
           <div className="header-icons">
             <button className="header-icon-btn" title="Notifikasi">
-              <Bell size={19} />
+              <Bell size={18} />
               <span className="bell-dot"></span>
             </button>
             <button className="header-icon-btn" title="Cari Data">
-              <Search size={19} />
+              <Search size={18} />
             </button>
             <button className="header-icon-btn logout-btn-hero" onClick={onLogout} title="Keluar Akun">
-              <LogOut size={17} />
+              <LogOut size={16} />
             </button>
           </div>
         </div>
@@ -100,7 +85,7 @@ export default function TopBar({ user, onLogout }) {
             <h2 className="hero-user-name">{displayName}</h2>
 
             <div className="hero-date-row">
-              <Calendar size={13} className="hero-date-icon" />
+              <Calendar size={12} className="hero-date-icon" />
               <span className="hero-date-text">{currentDate}</span>
             </div>
           </div>
