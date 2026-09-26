@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   CheckSquare, Building2, FileText, Clock, Fingerprint,
   Users, GraduationCap, History, UserCheck, BookOpen,
-  FileBarChart, PieChart, Award
+  FileBarChart, PieChart, Award, Calendar
 } from 'lucide-react';
 import api from '../api/client';
 import TopBar from '../components/TopBar';
@@ -170,9 +170,9 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
 
           <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>
             <div className="menu-icon-circle">
-              <GraduationCap size={22} />
+              <Calendar size={22} />
             </div>
-            <span>Pengajar</span>
+            <span>Jadwal</span>
           </button>
 
           <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
