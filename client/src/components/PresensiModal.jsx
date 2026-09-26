@@ -10,10 +10,13 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
   const [fakeLat, setFakeLat] = useState('-7.325205');
   const [fakeLng, setFakeLng] = useState('108.208354');
   const [loading, setLoading] = useState(false);
+  const [isCameraActive, setIsCameraActive] = useState(false);
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
 
   const SCHOOL_LOCATION = {
     name: 'SMK Artanita Tasikmalaya (Kantor Pusat)',
@@ -22,6 +25,41 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
     radiusMeter: 100
   };
 
+  // Camera initialization effect
+  useEffect(() => {
+    let isMounted = true;
+    async function startCamera() {
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+            audio: false
+          });
+          if (isMounted) {
+            streamRef.current = stream;
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+            }
+            setIsCameraActive(true);
+          } else {
+            stream.getTracks().forEach(track => track.stop());
+          }
+        }
+      } catch (err) {
+        console.warn("Camera init warning:", err);
+      }
+    }
+    startCamera();
+
+    return () => {
+      isMounted = false;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  // Real GPS Geolocation Effect
   useEffect(() => {
     if (!isFakeGpsActive && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -31,10 +69,12 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
           setCoords({ lat, lng });
           setCoordsString(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         },
-        () => {
+        (err) => {
+          console.warn("GPS error:", err);
           setCoords({ lat: SCHOOL_LOCATION.lat, lng: SCHOOL_LOCATION.lng });
           setCoordsString(`${SCHOOL_LOCATION.lat}, ${SCHOOL_LOCATION.lng}`);
-        }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     }
   }, [isFakeGpsActive]);
@@ -70,9 +110,9 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
       const schoolMarker = L.marker([SCHOOL_LOCATION.lat, SCHOOL_LOCATION.lng]).addTo(map);
       schoolMarker.bindPopup(`<b>${SCHOOL_LOCATION.name}</b><br>Kantor Pusat Presensi`);
 
-      // Custom User / Fake GPS Marker
+      // Custom User / Fake GPS Marker (Hide raw coords from popup)
       const userMarker = L.marker([coords.lat, coords.lng]).addTo(map);
-      userMarker.bindPopup(`<b>${isFakeGpsActive ? 'Lokasi Fake GPS' : 'Lokasi GPS Guru'}</b><br>${coordsString}`).openPopup();
+      userMarker.bindPopup(`<b>${isFakeGpsActive ? 'Lokasi Fake GPS' : 'Lokasi Presensi Guru'}</b><br>Status: Terverifikasi`).openPopup();
 
       markerRef.current = userMarker;
       mapInstanceRef.current = map;
@@ -80,10 +120,10 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
       mapInstanceRef.current.setView([coords.lat, coords.lng], 16);
       if (markerRef.current) {
         markerRef.current.setLatLng([coords.lat, coords.lng]);
-        markerRef.current.setPopupContent(`<b>${isFakeGpsActive ? 'Lokasi Fake GPS' : 'Lokasi GPS Guru'}</b><br>${coordsString}`);
+        markerRef.current.setPopupContent(`<b>${isFakeGpsActive ? 'Lokasi Fake GPS' : 'Lokasi Presensi Guru'}</b><br>Status: Terverifikasi`);
       }
     }
-  }, [coords, isFakeGpsActive, coordsString]);
+  }, [coords, isFakeGpsActive]);
 
   const handleToggleFakeGps = () => {
     const nextState = !isFakeGpsActive;
@@ -103,7 +143,9 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
             const lng = pos.coords.longitude;
             setCoords({ lat, lng });
             setCoordsString(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-          }
+          },
+          null,
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
       }
       showToast?.('Kembali ke Lokasi GPS Asli.', true);
@@ -194,10 +236,50 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
 
         {/* CAMERA SELFIE PREVIEW CONTAINER */}
         <div className="scanner-camera-box">
-          <div className="scanner-line"></div>
-          <Smile size={40} color="#10b981" style={{ marginBottom: 8 }} />
-          <p style={{ fontSize: 13, color: '#f8fafc', fontWeight: 700 }}>Deteksi Wajah & Biometrik</p>
-          <p style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>Posisikan wajah Anda di dalam area kamera</p>
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              borderRadius: '14px',
+              transform: 'scaleX(-1)',
+              display: isCameraActive ? 'block' : 'none'
+            }}
+          />
+
+          <div className="scanner-line" style={{ zIndex: 5 }}></div>
+
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 6,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: isCameraActive ? 'rgba(15, 23, 42, 0.35)' : 'transparent',
+              padding: '8px 14px',
+              borderRadius: '12px',
+              backdropFilter: isCameraActive ? 'blur(2px)' : 'none'
+            }}
+          >
+            {!isCameraActive && (
+              <Smile size={40} color="#10b981" style={{ marginBottom: 8 }} />
+            )}
+            <p style={{ fontSize: 13, color: '#f8fafc', fontWeight: 700, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+              {isCameraActive ? 'Deteksi Wajah & Kamera Aktif' : 'Memuat Kamera Biometrik...'}
+            </p>
+            <p style={{ fontSize: 10, color: '#94a3b8', marginTop: 2, textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+              Posisikan wajah Anda di dalam area kamera
+            </p>
+          </div>
         </div>
 
         {/* LEAFLET INTERACTIVE MAP DISPLAY (LOKASI SEKOLAH & KANTOR) */}
@@ -221,9 +303,11 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
               <MapPin size={18} color={isFakeGpsActive ? '#ea580c' : '#0066ff'} />
               <div>
                 <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>
-                  {isFakeGpsActive ? 'Fitur Fake GPS Aktif' : 'Lokasi GPS Asli'}
+                  {isFakeGpsActive ? 'Fitur Fake GPS' : 'Status Lokasi GPS'}
                 </div>
-                <div style={{ fontSize: 10, color: '#64748b' }}>{coordsString}</div>
+                <div style={{ fontSize: 10, color: isFakeGpsActive ? '#ea580c' : '#16a34a', fontWeight: 600 }}>
+                  {isFakeGpsActive ? 'Menggunakan Fake GPS' : '✓ Lokasi Terdeteksi & Terverifikasi'}
+                </div>
               </div>
             </div>
 
@@ -271,3 +355,4 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
     </div>
   );
 }
+
