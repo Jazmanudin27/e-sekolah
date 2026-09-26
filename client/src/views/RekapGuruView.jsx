@@ -185,60 +185,111 @@ export default function RekapGuruView() {
                 style={{
                   background: '#ffffff',
                   borderRadius: 16,
-                  padding: '12px 14px',
+                  padding: '14px 16px',
                   border: '1px solid #e2e8f0',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+                  flexDirection: 'column',
+                  gap: 12,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {/* TOP ROW: TEACHER INFO & CHEVRON */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div
+                      style={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: 12,
+                        background: 'linear-gradient(135deg, #e0f2fe, #bae6fd)',
+                        color: '#0284c7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        boxShadow: '0 2px 6px rgba(2,132,199,0.12)'
+                      }}
+                    >
+                      <Fingerprint size={22} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{item.nama_guru}</div>
+                      <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600, marginTop: 2 }}>
+                        NIP: {item.nip_nuptk || '-'} • <span style={{ color: '#0066ff', fontWeight: 700 }}>{item.status_kepegawaian || 'Guru'}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} color="#94a3b8" />
+                </div>
+
+                {/* BOTTOM ROW: STATS SUMMARY BADGES (HADIR, SAKIT, IZIN) */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: 8,
+                    paddingTop: 10,
+                    borderTop: '1px dashed #e2e8f0'
+                  }}
+                >
+                  {/* Hadir Pill */}
                   <div
                     style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 12,
-                      background: '#eff6ff',
-                      color: '#2563eb',
+                      background: '#f0fdf4',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: 10,
+                      padding: '6px 8px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      flexShrink: 0
+                      gap: 5
                     }}
                   >
-                    <Fingerprint size={22} />
+                    <CheckCircle2 size={13} color="#16a34a" />
+                    <span style={{ fontSize: 11, fontWeight: 800, color: '#15803d' }}>
+                      Hadir: {totalH}
+                    </span>
                   </div>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{item.nama_guru}</div>
-                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600, marginTop: 2 }}>
-                      NIP: {item.nip_nuptk || '-'} • {item.status_kepegawaian || 'Guru'}
-                    </div>
-                  </div>
-                </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                    {/* BADGES FOR HADIR, SAKIT, IZIN */}
-                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                      <span style={{ background: '#f0fdf4', color: '#15803d', padding: '3px 8px', borderRadius: 6, border: '1px solid #bbf7d0', fontSize: 10, fontWeight: 700 }} title="Presensi Hadir">
-                        Hadir: {totalH}
-                      </span>
-                      {totalS > 0 && (
-                        <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '3px 8px', borderRadius: 6, border: '1px solid #bfdbfe', fontSize: 10, fontWeight: 700 }} title="Sakit">
-                          Sakit: {totalS}
-                        </span>
-                      )}
-                      {totalI > 0 && (
-                        <span style={{ background: '#fffbe6', color: '#b45309', padding: '3px 8px', borderRadius: 6, border: '1px solid #fde68a', fontSize: 10, fontWeight: 700 }} title="Izin">
-                          Izin: {totalI}
-                        </span>
-                      )}
-                    </div>
+                  {/* Sakit Pill */}
+                  <div
+                    style={{
+                      background: '#eff6ff',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: 10,
+                      padding: '6px 8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 5
+                    }}
+                  >
+                    <HeartPulse size={13} color="#2563eb" />
+                    <span style={{ fontSize: 11, fontWeight: 800, color: '#1d4ed8' }}>
+                      Sakit: {totalS}
+                    </span>
                   </div>
-                  <ChevronRight size={16} color="#94a3b8" />
+
+                  {/* Izin Pill */}
+                  <div
+                    style={{
+                      background: '#fffbe6',
+                      border: '1px solid #fde68a',
+                      borderRadius: 10,
+                      padding: '6px 8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 5
+                    }}
+                  >
+                    <FileText size={13} color="#d97706" />
+                    <span style={{ fontSize: 11, fontWeight: 800, color: '#b45309' }}>
+                      Izin: {totalI}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
@@ -293,10 +344,10 @@ export default function RekapGuruView() {
             >
               <div>
                 <h3 style={{ fontSize: 15, fontWeight: 800, margin: 0 }}>Rincian Presensi Guru</h3>
-                <div style={{ fontSize: 12, fontWeight: 700, marginTop: 2, opacity: 0.95 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, marginTop: 2, opacity: 0.95 }}>
                   {selectedGuru.nama_guru}
                 </div>
-                <div style={{ fontSize: 10, opacity: 0.8, marginTop: 2, fontWeight: 600 }}>
+                <div style={{ fontSize: 11, opacity: 0.85, marginTop: 2, fontWeight: 600 }}>
                   NIP: {selectedGuru.nip_nuptk || '-'} • {daftarBulan.find(b => b.value === selectedBulan)?.label} {selectedTahun}
                 </div>
               </div>
@@ -308,8 +359,24 @@ export default function RekapGuruView() {
               </button>
             </div>
 
-            {/* MODAL BODY LIST OF DATES */}
+            {/* MODAL BODY */}
             <div style={{ padding: 16, overflowY: 'auto', flex: 1 }}>
+              {/* SUMMARY STATS ROW IN MODAL */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
+                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '8px 6px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#15803d' }}>HADIR</div>
+                  <div style={{ fontSize: 15, fontWeight: 900, color: '#16a34a', marginTop: 2 }}>{selectedGuru.total_hadir || 0}</div>
+                </div>
+                <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '8px 6px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#1d4ed8' }}>SAKIT</div>
+                  <div style={{ fontSize: 15, fontWeight: 900, color: '#2563eb', marginTop: 2 }}>{selectedGuru.total_sakit || 0}</div>
+                </div>
+                <div style={{ background: '#fffbe6', border: '1px solid #fde68a', borderRadius: 10, padding: '8px 6px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#b45309' }}>IZIN</div>
+                  <div style={{ fontSize: 15, fontWeight: 900, color: '#d97706', marginTop: 2 }}>{selectedGuru.total_izin || 0}</div>
+                </div>
+              </div>
+
               {loadingDetail ? (
                 <div style={{ textAlign: 'center', padding: '30px 0', color: '#0066ff' }}>
                   <Loader2 size={26} className="spin" style={{ margin: '0 auto' }} />
@@ -317,6 +384,9 @@ export default function RekapGuruView() {
                 </div>
               ) : guruDetails.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 2 }}>
+                    Riwayat Scan Kehadiran:
+                  </div>
                   {guruDetails.map((det) => (
                     <div
                       key={det.id}
@@ -347,7 +417,7 @@ export default function RekapGuruView() {
                 </div>
               ) : (
                 <div style={{ textAlign: 'center', padding: '30px 10px', color: '#64748b', fontSize: 13, fontWeight: 600 }}>
-                  Belum ada catatan rincian presensi guru di database pada periode ini.
+                  Belum ada catatan scan presensi guru di database pada periode ini.
                 </div>
               )}
             </div>

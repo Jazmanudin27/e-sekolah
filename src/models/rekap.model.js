@@ -227,7 +227,7 @@ class RekapModel {
         sParams.push(tInt, String(tInt));
       }
 
-      let izinLainWhere = 'WHERE i.jenis != "Sakit"';
+      let izinLainWhere = 'WHERE (i.jenis IS NULL OR i.jenis != "Sakit")';
       let iParams = [];
       if (bInt) {
         izinLainWhere += ' AND (MONTH(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%c") = ? OR DATE_FORMAT(i.tanggal_mulai, "%m") = ?)';
@@ -246,15 +246,15 @@ class RekapModel {
           g.status_kepegawaian,
           (
             SELECT COUNT(DISTINCT p.id) FROM presensi p 
-            ${presensiWhere} AND p.kode_guru = g.kode_guru
+            ${presensiWhere} AND (p.kode_guru = g.kode_guru OR p.kode_guru = g.nip_nuptk)
           ) AS total_hadir,
           (
             SELECT COUNT(DISTINCT i.id) FROM pengajuan_izin i 
-            ${izinSakitWhere} AND (i.user_id = g.kode_guru OR i.nama_pengaju = g.nama_guru)
+            ${izinSakitWhere} AND (i.user_id = g.kode_guru OR i.nama_pengaju = g.nama_guru OR i.user_id = g.nip_nuptk)
           ) AS total_sakit,
           (
             SELECT COUNT(DISTINCT i.id) FROM pengajuan_izin i 
-            ${izinLainWhere} AND (i.user_id = g.kode_guru OR i.nama_pengaju = g.nama_guru)
+            ${izinLainWhere} AND (i.user_id = g.kode_guru OR i.nama_pengaju = g.nama_guru OR i.user_id = g.nip_nuptk)
           ) AS total_izin
         FROM guru g
         ORDER BY g.nama_guru ASC
@@ -278,7 +278,7 @@ class RekapModel {
           0 AS total_sakit,
           0 AS total_izin
         FROM presensi p
-        LEFT JOIN guru g ON p.kode_guru = g.kode_guru
+        LEFT JOIN guru g ON (p.kode_guru = g.kode_guru OR p.kode_guru = g.nip_nuptk)
         WHERE 1=1
       `;
       const fbParams = [];
