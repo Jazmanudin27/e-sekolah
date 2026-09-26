@@ -12,13 +12,13 @@ class RekapModel {
       if (bulan) {
         const bInt = parseInt(bulan, 10);
         const bPad = String(bInt).padStart(2, '0');
-        dateWhereA += ' AND (MONTH(a.tanggal) = ? OR DATE_FORMAT(a.tanggal, "%c") = ? OR DATE_FORMAT(a.tanggal, "%m") = ?)';
-        aParams.push(bInt, String(bInt), bPad);
+        dateWhereA += ' AND (MONTH(a.tanggal) = ? OR a.tanggal LIKE ?)';
+        aParams.push(bInt, `%-${bPad}-%`);
       }
       if (tahun) {
         const tInt = parseInt(tahun, 10);
-        dateWhereA += ' AND (YEAR(a.tanggal) = ? OR DATE_FORMAT(a.tanggal, "%Y") = ?)';
-        aParams.push(tInt, String(tInt));
+        dateWhereA += ' AND (YEAR(a.tanggal) = ? OR a.tanggal LIKE ?)';
+        aParams.push(tInt, `${tInt}-%`);
       }
 
       const params = [...aParams];
@@ -28,7 +28,7 @@ class RekapModel {
         params.push(kode_kelas);
       }
 
-      const sql = `
+      const sqlPrimary = `
         SELECT 
           s.kode_siswa,
           s.nama_siswa,
@@ -36,30 +36,23 @@ class RekapModel {
           s.kode_kelas,
           COALESCE(k.nama_kelas, CONCAT('Kelas ', s.kode_kelas)) AS nama_kelas,
           k.jurusan,
-          COALESCE(a.total_absen, 0) AS total_absen,
-          COALESCE(a.total_hadir, 0) AS total_hadir,
-          COALESCE(a.total_sakit, 0) AS total_sakit,
-          COALESCE(a.total_izin, 0) AS total_izin,
-          COALESCE(a.total_alpha, 0) AS total_alpha
+          COUNT(DISTINCT a.id) AS total_absen,
+          COUNT(DISTINCT CASE WHEN a.status = 'H' THEN a.id END) AS total_hadir,
+          COUNT(DISTINCT CASE WHEN a.status = 'S' THEN a.id END) AS total_sakit,
+          COUNT(DISTINCT CASE WHEN a.status = 'I' THEN a.id END) AS total_izin,
+          COUNT(DISTINCT CASE WHEN a.status = 'A' THEN a.id END) AS total_alpha
         FROM siswa s
         LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas
-        LEFT JOIN (
-          SELECT 
-            a.kode_siswa,
-            COUNT(a.id) AS total_absen,
-            SUM(CASE WHEN a.status = 'H' THEN 1 ELSE 0 END) AS total_hadir,
-            SUM(CASE WHEN a.status = 'S' THEN 1 ELSE 0 END) AS total_sakit,
-            SUM(CASE WHEN a.status = 'I' THEN 1 ELSE 0 END) AS total_izin,
-            SUM(CASE WHEN a.status = 'A' THEN 1 ELSE 0 END) AS total_alpha
-          FROM absensi_siswa a
-          WHERE 1=1 ${dateWhereA}
-          GROUP BY a.kode_siswa
-        ) a ON (s.kode_siswa = a.kode_siswa OR s.nis_nisn = a.kode_siswa)
+        LEFT JOIN absensi_siswa a 
+          ON (CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.kode_siswa USING utf8mb4) 
+              OR CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.nis_nisn USING utf8mb4))
+          ${dateWhereA}
         ${mainWhere}
+        GROUP BY s.kode_siswa, s.nama_siswa, s.nis_nisn, s.nis, s.nisn, s.kode_kelas, k.nama_kelas, k.jurusan
         ORDER BY s.nama_siswa ASC
       `;
 
-      const rows = await query(sql, params);
+      const rows = await query(sqlPrimary, params);
       if (rows && rows.length > 0) {
         return rows;
       }
@@ -71,13 +64,16 @@ class RekapModel {
           COALESCE(s.nama_siswa, CONCAT('Siswa #', a.kode_siswa)) AS nama_siswa,
           COALESCE(s.nis_nisn, CONCAT('NIS-', a.kode_siswa)) AS nis_nisn,
           COALESCE(k.nama_kelas, CONCAT('Kelas ', a.kode_kelas)) AS nama_kelas,
-          COUNT(a.id) AS total_absen,
-          SUM(CASE WHEN a.status = 'H' THEN 1 ELSE 0 END) AS total_hadir,
-          SUM(CASE WHEN a.status = 'S' THEN 1 ELSE 0 END) AS total_sakit,
-          SUM(CASE WHEN a.status = 'I' THEN 1 ELSE 0 END) AS total_izin,
-          SUM(CASE WHEN a.status = 'A' THEN 1 ELSE 0 END) AS total_alpha
+          COUNT(DISTINCT a.id) AS total_absen,
+          COUNT(DISTINCT CASE WHEN a.status = 'H' THEN a.id END) AS total_hadir,
+          COUNT(DISTINCT CASE WHEN a.status = 'S' THEN a.id END) AS total_sakit,
+          COUNT(DISTINCT CASE WHEN a.status = 'I' THEN a.id END) AS total_izin,
+          COUNT(DISTINCT CASE WHEN a.status = 'A' THEN a.id END) AS total_alpha
         FROM absensi_siswa a
-        LEFT JOIN siswa s ON (a.kode_siswa = s.kode_siswa OR a.kode_siswa = s.nis_nisn)
+        LEFT JOIN siswa s ON (
+          CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.kode_siswa USING utf8mb4) 
+          OR CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.nis_nisn USING utf8mb4)
+        )
         LEFT JOIN kelas k ON a.kode_kelas = k.kode_kelas
         WHERE 1=1 ${dateWhereA}
       `;
@@ -87,7 +83,7 @@ class RekapModel {
         fbParams.push(kode_kelas);
       }
 
-      fallbackSql += ' GROUP BY a.kode_siswa ORDER BY a.kode_siswa ASC';
+      fallbackSql += ' GROUP BY a.kode_siswa, s.nama_siswa, s.nis_nisn, k.nama_kelas ORDER BY a.kode_siswa ASC';
       return await query(fallbackSql, fbParams);
 
     } catch (e) {
@@ -111,13 +107,13 @@ class RekapModel {
       if (bulan) {
         const bInt = parseInt(bulan, 10);
         const bPad = String(bInt).padStart(2, '0');
-        dateWhereA += ' AND (MONTH(a.tanggal) = ? OR DATE_FORMAT(a.tanggal, "%c") = ? OR DATE_FORMAT(a.tanggal, "%m") = ?)';
-        aParams.push(bInt, String(bInt), bPad);
+        dateWhereA += ' AND (MONTH(a.tanggal) = ? OR a.tanggal LIKE ?)';
+        aParams.push(bInt, `%-${bPad}-%`);
       }
       if (tahun) {
         const tInt = parseInt(tahun, 10);
-        dateWhereA += ' AND (YEAR(a.tanggal) = ? OR DATE_FORMAT(a.tanggal, "%Y") = ?)';
-        aParams.push(tInt, String(tInt));
+        dateWhereA += ' AND (YEAR(a.tanggal) = ? OR a.tanggal LIKE ?)';
+        aParams.push(tInt, `${tInt}-%`);
       }
 
       const params = [];
@@ -132,7 +128,7 @@ class RekapModel {
         params.push(kode_kelas);
       }
 
-      const sql = `
+      const sqlPrimary = `
         SELECT 
           s.kode_siswa,
           s.nama_siswa,
@@ -140,31 +136,24 @@ class RekapModel {
           s.kode_kelas,
           COALESCE(k.nama_kelas, CONCAT('Kelas ', s.kode_kelas)) AS nama_kelas,
           ${kode_mapel ? 'COALESCE(m.nama_mapel, "Mata Pelajaran")' : '"Semua Mapel"'} AS nama_mapel,
-          COALESCE(a.total_absen, 0) AS total_absen,
-          COALESCE(a.total_hadir, 0) AS total_hadir,
-          COALESCE(a.total_sakit, 0) AS total_sakit,
-          COALESCE(a.total_izin, 0) AS total_izin,
-          COALESCE(a.total_alpha, 0) AS total_alpha
+          COUNT(DISTINCT a.id) AS total_absen,
+          COUNT(DISTINCT CASE WHEN a.status = 'H' THEN a.id END) AS total_hadir,
+          COUNT(DISTINCT CASE WHEN a.status = 'S' THEN a.id END) AS total_sakit,
+          COUNT(DISTINCT CASE WHEN a.status = 'I' THEN a.id END) AS total_izin,
+          COUNT(DISTINCT CASE WHEN a.status = 'A' THEN a.id END) AS total_alpha
         FROM siswa s
         LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas
         ${kode_mapel ? 'LEFT JOIN mapel m ON m.kode_mapel = ?' : ''}
-        LEFT JOIN (
-          SELECT 
-            a.kode_siswa,
-            COUNT(a.id) AS total_absen,
-            SUM(CASE WHEN a.status = 'H' THEN 1 ELSE 0 END) AS total_hadir,
-            SUM(CASE WHEN a.status = 'S' THEN 1 ELSE 0 END) AS total_sakit,
-            SUM(CASE WHEN a.status = 'I' THEN 1 ELSE 0 END) AS total_izin,
-            SUM(CASE WHEN a.status = 'A' THEN 1 ELSE 0 END) AS total_alpha
-          FROM absensi_mapel a
-          WHERE 1=1 ${dateWhereA}
-          GROUP BY a.kode_siswa
-        ) a ON (s.kode_siswa = a.kode_siswa OR s.nis_nisn = a.kode_siswa)
+        LEFT JOIN absensi_mapel a 
+          ON (CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.kode_siswa USING utf8mb4) 
+              OR CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.nis_nisn USING utf8mb4))
+          ${dateWhereA}
         ${mainWhere}
+        GROUP BY s.kode_siswa, s.nama_siswa, s.nis_nisn, s.nis, s.nisn, s.kode_kelas, k.nama_kelas ${kode_mapel ? ', m.nama_mapel' : ''}
         ORDER BY s.nama_siswa ASC
       `;
 
-      const rows = await query(sql, params);
+      const rows = await query(sqlPrimary, params);
       if (rows && rows.length > 0) {
         return rows;
       }
@@ -177,13 +166,16 @@ class RekapModel {
           COALESCE(s.nis_nisn, CONCAT('NIS-', a.kode_siswa)) AS nis_nisn,
           COALESCE(k.nama_kelas, CONCAT('Kelas ', a.kode_kelas)) AS nama_kelas,
           COALESCE(m.nama_mapel, CONCAT('Mapel ', a.kode_mapel)) AS nama_mapel,
-          COUNT(a.id) AS total_absen,
-          SUM(CASE WHEN a.status = 'H' THEN 1 ELSE 0 END) AS total_hadir,
-          SUM(CASE WHEN a.status = 'S' THEN 1 ELSE 0 END) AS total_sakit,
-          SUM(CASE WHEN a.status = 'I' THEN 1 ELSE 0 END) AS total_izin,
-          SUM(CASE WHEN a.status = 'A' THEN 1 ELSE 0 END) AS total_alpha
+          COUNT(DISTINCT a.id) AS total_absen,
+          COUNT(DISTINCT CASE WHEN a.status = 'H' THEN a.id END) AS total_hadir,
+          COUNT(DISTINCT CASE WHEN a.status = 'S' THEN a.id END) AS total_sakit,
+          COUNT(DISTINCT CASE WHEN a.status = 'I' THEN a.id END) AS total_izin,
+          COUNT(DISTINCT CASE WHEN a.status = 'A' THEN a.id END) AS total_alpha
         FROM absensi_mapel a
-        LEFT JOIN siswa s ON (a.kode_siswa = s.kode_siswa OR a.kode_siswa = s.nis_nisn)
+        LEFT JOIN siswa s ON (
+          CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.kode_siswa USING utf8mb4) 
+          OR CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(s.nis_nisn USING utf8mb4)
+        )
         LEFT JOIN kelas k ON a.kode_kelas = k.kode_kelas
         LEFT JOIN mapel m ON a.kode_mapel = m.kode_mapel
         WHERE 1=1 ${dateWhereA}
@@ -194,7 +186,7 @@ class RekapModel {
         fbParams.push(kode_kelas);
       }
 
-      fallbackSql += ' GROUP BY a.kode_siswa ORDER BY a.kode_siswa ASC';
+      fallbackSql += ' GROUP BY a.kode_siswa, s.nama_siswa, s.nis_nisn, k.nama_kelas, m.nama_mapel ORDER BY a.kode_siswa ASC';
       return await query(fallbackSql, fbParams);
 
     } catch (e) {
