@@ -237,57 +237,29 @@ class RekapModel {
         iParams.push(tInt, `${tInt}-%`);
       }
 
-      const params = [...pParams, ...iParams, ...iParams];
+      const params = [...pParams, ...iParams];
 
-      // Primary query directly from master table 'guru'
+      // Optimized single-pass query directly from master table 'guru'
       const sqlPrimary = `
         SELECT 
           g.kode_guru,
           COALESCE(g.nama_guru, CONCAT('Guru #', g.kode_guru)) AS nama_guru,
           COALESCE(g.nip_nuptk, '-') AS nip_nuptk,
           COALESCE(g.status_kepegawaian, 'Guru') AS status_kepegawaian,
-          COALESCE(p.total_hadir, 0) AS total_hadir,
-          COALESCE(i_sakit.total_sakit, 0) AS total_sakit,
-          COALESCE(i_izin.total_izin, 0) AS total_izin
+          COUNT(DISTINCT p.id) AS total_hadir,
+          COUNT(DISTINCT CASE WHEN i.jenis = 'Sakit' THEN i.id END) AS total_sakit,
+          COUNT(DISTINCT CASE WHEN i.jenis IS NOT NULL AND i.jenis != 'Sakit' THEN i.id END) AS total_izin
         FROM guru g
-        LEFT JOIN (
-          SELECT 
-            p.kode_guru, 
-            COUNT(DISTINCT p.id) AS total_hadir 
-          FROM presensi p 
-          WHERE 1=1 ${pWhere}
-          GROUP BY p.kode_guru
-        ) p ON (
-          CONVERT(g.kode_guru USING utf8mb4) = CONVERT(p.kode_guru USING utf8mb4)
-          OR CONVERT(g.nip_nuptk USING utf8mb4) = CONVERT(p.kode_guru USING utf8mb4)
-          OR CONVERT(g.nama_guru USING utf8mb4) = CONVERT(p.kode_guru USING utf8mb4)
-        )
-        LEFT JOIN (
-          SELECT 
-            i.user_id,
-            i.nama_pengaju,
-            COUNT(DISTINCT i.id) AS total_sakit 
-          FROM pengajuan_izin i 
-          WHERE i.jenis = 'Sakit' ${iWhere}
-          GROUP BY i.user_id, i.nama_pengaju
-        ) i_sakit ON (
-          CONVERT(g.kode_guru USING utf8mb4) = CONVERT(i_sakit.user_id USING utf8mb4)
-          OR CONVERT(g.nama_guru USING utf8mb4) = CONVERT(i_sakit.nama_pengaju USING utf8mb4)
-          OR CONVERT(g.nip_nuptk USING utf8mb4) = CONVERT(i_sakit.user_id USING utf8mb4)
-        )
-        LEFT JOIN (
-          SELECT 
-            i.user_id,
-            i.nama_pengaju,
-            COUNT(DISTINCT i.id) AS total_izin 
-          FROM pengajuan_izin i 
-          WHERE (i.jenis IS NULL OR i.jenis != 'Sakit') ${iWhere}
-          GROUP BY i.user_id, i.nama_pengaju
-        ) i_izin ON (
-          CONVERT(g.kode_guru USING utf8mb4) = CONVERT(i_izin.user_id USING utf8mb4)
-          OR CONVERT(g.nama_guru USING utf8mb4) = CONVERT(i_izin.nama_pengaju USING utf8mb4)
-          OR CONVERT(g.nip_nuptk USING utf8mb4) = CONVERT(i_izin.user_id USING utf8mb4)
-        )
+        LEFT JOIN presensi p 
+          ON (CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.kode_guru USING utf8mb4) 
+              OR CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.nip_nuptk USING utf8mb4))
+          ${pWhere}
+        LEFT JOIN pengajuan_izin i 
+          ON (CONVERT(i.user_id USING utf8mb4) = CONVERT(g.kode_guru USING utf8mb4) 
+              OR CONVERT(i.user_id USING utf8mb4) = CONVERT(g.nip_nuptk USING utf8mb4) 
+              OR CONVERT(i.nama_pengaju USING utf8mb4) = CONVERT(g.nama_guru USING utf8mb4))
+          ${iWhere}
+        GROUP BY g.kode_guru, g.nama_guru, g.nip_nuptk, g.status_kepegawaian
         ORDER BY g.nama_guru ASC
       `;
 
@@ -312,7 +284,8 @@ class RekapModel {
           OR CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.nip_nuptk USING utf8mb4)
         )
         WHERE 1=1 ${pWhere}
-        GROUP BY p.kode_guru ORDER BY nama_guru ASC
+        GROUP BY p.kode_guru, g.nama_guru, g.nip_nuptk, g.status_kepegawaian
+        ORDER BY nama_guru ASC
       `;
       return await query(sqlFallback, pParams);
 
