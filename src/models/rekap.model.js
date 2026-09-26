@@ -298,20 +298,27 @@ class RekapModel {
           DATE_FORMAT(tanggal, '%W, %d %b %Y') AS tanggal_format,
           status
         FROM absensi_siswa
-        WHERE (kode_siswa = ? OR kode_siswa = (SELECT nis_nisn FROM siswa WHERE kode_siswa = ? LIMIT 1))
+        WHERE (
+          CONVERT(kode_siswa USING utf8mb4) = CONVERT(? USING utf8mb4) 
+          OR CONVERT(kode_siswa USING utf8mb4) IN (
+            SELECT CONVERT(nis USING utf8mb4) FROM siswa WHERE CONVERT(kode_siswa USING utf8mb4) = CONVERT(? USING utf8mb4)
+            UNION
+            SELECT CONVERT(nisn USING utf8mb4) FROM siswa WHERE CONVERT(kode_siswa USING utf8mb4) = CONVERT(? USING utf8mb4)
+          )
+        )
       `;
-      const params = [kode_siswa, kode_siswa];
+      const params = [kode_siswa, kode_siswa, kode_siswa];
 
       if (bulan) {
         const bInt = parseInt(bulan, 10);
         const bPad = String(bInt).padStart(2, '0');
-        sql += ' AND (MONTH(tanggal) = ? OR DATE_FORMAT(tanggal, "%c") = ? OR DATE_FORMAT(tanggal, "%m") = ?)';
-        params.push(bInt, String(bInt), bPad);
+        sql += ' AND (MONTH(tanggal) = ? OR DATE_FORMAT(tanggal, "%c") = ? OR DATE_FORMAT(tanggal, "%m") = ? OR tanggal LIKE ?)';
+        params.push(bInt, String(bInt), bPad, `%-${bPad}-%`);
       }
       if (tahun) {
         const tInt = parseInt(tahun, 10);
-        sql += ' AND (YEAR(tanggal) = ? OR DATE_FORMAT(tanggal, "%Y") = ?)';
-        params.push(tInt, String(tInt));
+        sql += ' AND (YEAR(tanggal) = ? OR DATE_FORMAT(tanggal, "%Y") = ? OR tanggal LIKE ?)';
+        params.push(tInt, String(tInt), `${tInt}-%`);
       }
 
       sql += ' ORDER BY tanggal DESC';
@@ -336,9 +343,16 @@ class RekapModel {
           a.status
         FROM absensi_mapel a
         LEFT JOIN mapel m ON a.kode_mapel = m.kode_mapel
-        WHERE (a.kode_siswa = ? OR a.kode_siswa = (SELECT nis_nisn FROM siswa WHERE kode_siswa = ? LIMIT 1))
+        WHERE (
+          CONVERT(a.kode_siswa USING utf8mb4) = CONVERT(? USING utf8mb4) 
+          OR CONVERT(a.kode_siswa USING utf8mb4) IN (
+            SELECT CONVERT(nis USING utf8mb4) FROM siswa WHERE CONVERT(kode_siswa USING utf8mb4) = CONVERT(? USING utf8mb4)
+            UNION
+            SELECT CONVERT(nisn USING utf8mb4) FROM siswa WHERE CONVERT(kode_siswa USING utf8mb4) = CONVERT(? USING utf8mb4)
+          )
+        )
       `;
-      const params = [kode_siswa, kode_siswa];
+      const params = [kode_siswa, kode_siswa, kode_siswa];
 
       if (kode_mapel) {
         sql += ' AND a.kode_mapel = ?';
@@ -347,13 +361,13 @@ class RekapModel {
       if (bulan) {
         const bInt = parseInt(bulan, 10);
         const bPad = String(bInt).padStart(2, '0');
-        sql += ' AND (MONTH(a.tanggal) = ? OR DATE_FORMAT(a.tanggal, "%c") = ? OR DATE_FORMAT(a.tanggal, "%m") = ?)';
-        params.push(bInt, String(bInt), bPad);
+        sql += ' AND (MONTH(a.tanggal) = ? OR DATE_FORMAT(a.tanggal, "%c") = ? OR DATE_FORMAT(a.tanggal, "%m") = ? OR a.tanggal LIKE ?)';
+        params.push(bInt, String(bInt), bPad, `%-${bPad}-%`);
       }
       if (tahun) {
         const tInt = parseInt(tahun, 10);
-        sql += ' AND (YEAR(a.tanggal) = ? OR DATE_FORMAT(a.tanggal, "%Y") = ?)';
-        params.push(tInt, String(tInt));
+        sql += ' AND (YEAR(a.tanggal) = ? OR DATE_FORMAT(a.tanggal, "%Y") = ? OR a.tanggal LIKE ?)';
+        params.push(tInt, String(tInt), `${tInt}-%`);
       }
 
       sql += ' ORDER BY a.tanggal DESC';
@@ -379,21 +393,28 @@ class RekapModel {
           p.lokasi_in,
           p.lokasi_out
         FROM presensi p
-        LEFT JOIN guru g ON (p.kode_guru = g.kode_guru OR p.kode_guru = g.nip_nuptk)
-        WHERE (p.kode_guru = ? OR p.kode_guru = (SELECT nip_nuptk FROM guru WHERE kode_guru = ? LIMIT 1) OR p.kode_guru = (SELECT nama_guru FROM guru WHERE kode_guru = ? LIMIT 1))
+        LEFT JOIN guru g ON (
+          CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.kode_guru USING utf8mb4) 
+          OR CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.nip_nuptk USING utf8mb4)
+        )
+        WHERE (
+          CONVERT(p.kode_guru USING utf8mb4) = CONVERT(? USING utf8mb4) 
+          OR CONVERT(p.kode_guru USING utf8mb4) = (SELECT CONVERT(nip_nuptk USING utf8mb4) FROM guru WHERE CONVERT(kode_guru USING utf8mb4) = CONVERT(? USING utf8mb4) LIMIT 1) 
+          OR CONVERT(p.kode_guru USING utf8mb4) = (SELECT CONVERT(nama_guru USING utf8mb4) FROM guru WHERE CONVERT(kode_guru USING utf8mb4) = CONVERT(? USING utf8mb4) LIMIT 1)
+        )
       `;
       const params = [kode_guru, kode_guru, kode_guru];
 
       if (bulan) {
         const bInt = parseInt(bulan, 10);
         const bPad = String(bInt).padStart(2, '0');
-        sql += ' AND (MONTH(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%c") = ? OR DATE_FORMAT(p.tanggal, "%m") = ?)';
-        params.push(bInt, String(bInt), bPad);
+        sql += ' AND (MONTH(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%c") = ? OR DATE_FORMAT(p.tanggal, "%m") = ? OR p.tanggal LIKE ?)';
+        params.push(bInt, String(bInt), bPad, `%-${bPad}-%`);
       }
       if (tahun) {
         const tInt = parseInt(tahun, 10);
-        sql += ' AND (YEAR(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%Y") = ?)';
-        params.push(tInt, String(tInt));
+        sql += ' AND (YEAR(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%Y") = ? OR p.tanggal LIKE ?)';
+        params.push(tInt, String(tInt), `${tInt}-%`);
       }
 
       sql += ' ORDER BY p.tanggal DESC';
