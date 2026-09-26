@@ -11,6 +11,8 @@ import AbsensiSiswaView from './views/AbsensiSiswaView';
 import AbsensiMapelView from './views/AbsensiMapelView';
 import JadwalView from './views/JadwalView';
 import RiwayatView from './views/RiwayatView';
+import IzinView from './views/IzinView';
+import ProfilView from './views/ProfilView';
 import api from './api/client';
 
 export default function App() {
@@ -137,6 +139,22 @@ export default function App() {
         />
       )}
 
+      {activeTab === 'izin' && (
+        <SubHeader
+          title="Pengajuan & Data Izin"
+          subtitle="Permohonan izin, sakit, dan dinas sekolah"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
+      {activeTab === 'profil' && (
+        <SubHeader
+          title="Profil Saya"
+          subtitle="Informasi akun pengguna dan instansi"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
       {/* Main Content Area */}
       <main className="main-content-area">
         {activeTab === 'beranda' && (
@@ -152,6 +170,8 @@ export default function App() {
         {activeTab === 'absensiMapel' && <AbsensiMapelView user={currentUser} showToast={showToast} />}
         {activeTab === 'jadwal' && <JadwalView />}
         {activeTab === 'riwayat' && <RiwayatView />}
+        {activeTab === 'izin' && <IzinView showToast={showToast} />}
+        {activeTab === 'profil' && <ProfilView user={currentUser} onLogout={handleLogout} />}
       </main>
 
       {/* Bottom Navigation */}
