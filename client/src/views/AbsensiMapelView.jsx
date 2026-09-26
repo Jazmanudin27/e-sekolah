@@ -243,7 +243,7 @@ export default function AbsensiMapelView({ user, showToast }) {
                 <option value="">-- Pilih Kelas --</option>
                 {kelasList.map(k => (
                   <option key={k.kode_kelas} value={k.kode_kelas}>
-                    {k.nama_kelas} {k.jurusan ? `(${k.jurusan})` : ''}
+                    {k.nama_kelas}{k.jurusan && k.jurusan.trim() !== '-' ? ` (${k.jurusan.trim()})` : ''}
                   </option>
                 ))}
               </select>
