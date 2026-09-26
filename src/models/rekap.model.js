@@ -258,9 +258,9 @@ class RekapModel {
           WHERE 1=1 ${pWhere}
           GROUP BY p.kode_guru
         ) p ON (
-          g.kode_guru = p.kode_guru COLLATE utf8mb4_general_ci 
-          OR g.nip_nuptk = p.kode_guru COLLATE utf8mb4_general_ci 
-          OR g.nama_guru = p.kode_guru COLLATE utf8mb4_general_ci
+          CONVERT(g.kode_guru USING utf8mb4) = CONVERT(p.kode_guru USING utf8mb4)
+          OR CONVERT(g.nip_nuptk USING utf8mb4) = CONVERT(p.kode_guru USING utf8mb4)
+          OR CONVERT(g.nama_guru USING utf8mb4) = CONVERT(p.kode_guru USING utf8mb4)
         )
         LEFT JOIN (
           SELECT 
@@ -271,9 +271,9 @@ class RekapModel {
           WHERE i.jenis = 'Sakit' ${iWhere}
           GROUP BY i.user_id, i.nama_pengaju
         ) i_sakit ON (
-          g.kode_guru = CAST(i_sakit.user_id AS CHAR) COLLATE utf8mb4_general_ci 
-          OR g.nama_guru = i_sakit.nama_pengaju COLLATE utf8mb4_general_ci 
-          OR g.nip_nuptk = CAST(i_sakit.user_id AS CHAR) COLLATE utf8mb4_general_ci
+          CONVERT(g.kode_guru USING utf8mb4) = CONVERT(i_sakit.user_id USING utf8mb4)
+          OR CONVERT(g.nama_guru USING utf8mb4) = CONVERT(i_sakit.nama_pengaju USING utf8mb4)
+          OR CONVERT(g.nip_nuptk USING utf8mb4) = CONVERT(i_sakit.user_id USING utf8mb4)
         )
         LEFT JOIN (
           SELECT 
@@ -284,9 +284,9 @@ class RekapModel {
           WHERE (i.jenis IS NULL OR i.jenis != 'Sakit') ${iWhere}
           GROUP BY i.user_id, i.nama_pengaju
         ) i_izin ON (
-          g.kode_guru = CAST(i_izin.user_id AS CHAR) COLLATE utf8mb4_general_ci 
-          OR g.nama_guru = i_izin.nama_pengaju COLLATE utf8mb4_general_ci 
-          OR g.nip_nuptk = CAST(i_izin.user_id AS CHAR) COLLATE utf8mb4_general_ci
+          CONVERT(g.kode_guru USING utf8mb4) = CONVERT(i_izin.user_id USING utf8mb4)
+          OR CONVERT(g.nama_guru USING utf8mb4) = CONVERT(i_izin.nama_pengaju USING utf8mb4)
+          OR CONVERT(g.nip_nuptk USING utf8mb4) = CONVERT(i_izin.user_id USING utf8mb4)
         )
         ORDER BY g.nama_guru ASC
       `;
@@ -308,8 +308,8 @@ class RekapModel {
           0 AS total_izin
         FROM presensi p
         LEFT JOIN guru g ON (
-          p.kode_guru = g.kode_guru COLLATE utf8mb4_general_ci 
-          OR p.kode_guru = g.nip_nuptk COLLATE utf8mb4_general_ci
+          CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.kode_guru USING utf8mb4)
+          OR CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.nip_nuptk USING utf8mb4)
         )
         WHERE 1=1 ${pWhere}
         GROUP BY p.kode_guru ORDER BY nama_guru ASC
