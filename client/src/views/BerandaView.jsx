@@ -121,7 +121,7 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
           <div>
             <div className="scan-main-title">Scan Masuk</div>
             <div className="scan-sub-text">
-              {todayStatus?.jam_in ? `Jam: ${todayStatus.jam_in}` : 'Ketuk untuk Absen Masuk'}
+              {todayStatus?.jam_in ? `Jam: ${todayStatus.jam_in}` : 'Belum Scan'}
             </div>
           </div>
         </button>
@@ -137,7 +137,7 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
           <div>
             <div className="scan-main-title">Scan Pulang</div>
             <div className="scan-sub-text">
-              {todayStatus?.jam_out ? `Jam: ${todayStatus.jam_out}` : 'Ketuk untuk Absen Pulang'}
+              {todayStatus?.jam_out ? `Jam: ${todayStatus.jam_out}` : 'Belum Scan'}
             </div>
           </div>
         </button>
