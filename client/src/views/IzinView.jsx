@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, Plus, CheckCircle, Clock, Calendar, AlertCircle } from 'lucide-react';
+import api from '../api/client';
 
 export default function IzinView({ showToast }) {
   const [showForm, setShowForm] = useState(false);
@@ -7,51 +8,57 @@ export default function IzinView({ showToast }) {
   const [tanggalMulai, setTanggalMulai] = useState('');
   const [tanggalSelesai, setTanggalSelesai] = useState('');
   const [keterangan, setKeterangan] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [riwayatIzin, setRiwayatIzin] = useState([]);
 
-  const [riwayatIzin, setRiwayatIzin] = useState([
-    {
-      id: 1,
-      jenis: 'Sakit',
-      tanggal: '24 Sep 2026',
-      durasi: '1 Hari',
-      keterangan: 'Demam dan flu berat',
-      status: 'Disetujui',
-      disetujuiOleh: 'Pak Bambang (Waka Kesiswaan)'
-    },
-    {
-      id: 2,
-      jenis: 'Izin',
-      tanggal: '15 Aug 2026',
-      durasi: '2 Hari',
-      keterangan: 'Acara keluarga di luar kota',
-      status: 'Disetujui',
-      disetujuiOleh: 'Bu Citra (Wali Kelas)'
+  useEffect(() => {
+    fetchIzin();
+  }, []);
+
+  const fetchIzin = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/izin');
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        setRiwayatIzin(res.data.data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tanggalMulai || !keterangan) {
       showToast?.('Mohon isi tanggal dan keterangan pengajuan', 'error');
       return;
     }
 
-    const newIzin = {
-      id: Date.now(),
-      jenis: jenisIzin,
-      tanggal: tanggalMulai,
-      durasi: tanggalSelesai ? 'Multi Hari' : '1 Hari',
-      keterangan,
-      status: 'Menunggu',
-      disetujuiOleh: 'Proses Verifikasi Guru/Admin'
-    };
+    try {
+      const payload = {
+        jenis: jenisIzin,
+        tanggal_mulai: tanggalMulai,
+        tanggal_selesai: tanggalSelesai || null,
+        keterangan
+      };
 
-    setRiwayatIzin([newIzin, ...riwayatIzin]);
-    setShowForm(false);
-    setKeterangan('');
-    setTanggalMulai('');
-    setTanggalSelesai('');
-    showToast?.('Pengajuan izin berhasil dikirimkan!', 'success');
+      const res = await api.post('/izin', payload);
+      if (res.data?.success) {
+        showToast?.('Pengajuan izin berhasil disimpan ke database!', 'success');
+        setShowForm(false);
+        setKeterangan('');
+        setTanggalMulai('');
+        setTanggalSelesai('');
+        fetchIzin();
+      } else {
+        showToast?.(res.data?.message || 'Gagal menyimpan pengajuan izin', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast?.('Terjadi kesalahan saat menyimpan pengajuan izin', 'error');
+    }
   };
 
   return (
