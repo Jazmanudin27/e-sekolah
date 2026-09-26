@@ -177,8 +177,8 @@ body {
 .hero-welcome-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 4px 0;
+  gap: 18px;
+  padding: 10px 0 6px 0;
 }
 
 .hero-avatar-wrapper {
@@ -223,7 +223,7 @@ body {
 .hero-user-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .hero-greeting-line {
@@ -244,7 +244,7 @@ body {
 }
 
 .hero-user-name {
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 800;
   color: #ffffff;
   line-height: 1.25;
@@ -252,70 +252,30 @@ body {
   letter-spacing: -0.3px;
 }
 
-.hero-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 3px;
-  flex-wrap: wrap;
-}
-
-.hero-role-badge {
+.hero-date-row {
   display: inline-flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(6px);
-  color: #ffffff;
-  padding: 3px 9px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-}
-
-.hero-nip-badge {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.9);
-  padding: 3px 9px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.hero-clock-row {
-  display: flex;
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
   margin-top: 4px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  padding: 3px 10px;
+  border-radius: 20px;
+  backdrop-filter: blur(6px);
+  width: fit-content;
 }
 
-.hero-clock-icon {
-  color: #60a5fa;
+.hero-date-icon {
+  color: #93c5fd;
   flex-shrink: 0;
 }
 
 .hero-date-text {
   font-weight: 600;
-}
-
-.hero-time-divider {
-  opacity: 0.5;
-}
-
-.hero-time-text {
-  font-weight: 700;
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 1px 6px;
-  border-radius: 6px;
-  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.2px;
 }
 
 /* FLOATING OVERLAPPING SUMMARY CARD (4 VERTICAL ICON COLUMNS) */

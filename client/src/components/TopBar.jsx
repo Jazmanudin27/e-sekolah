@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Bell, Search, LogOut, Sparkles, Clock, ShieldCheck } from 'lucide-react';
+import { GraduationCap, Bell, Search, LogOut, Calendar } from 'lucide-react';
 
 export default function TopBar({ user, onLogout }) {
   const [currentDate, setCurrentDate] = useState('');
-  const [currentTime, setCurrentTime] = useState('');
   const [greeting, setGreeting] = useState({ text: 'Selamat Datang', emoji: '👋' });
 
   useEffect(() => {
@@ -21,14 +20,11 @@ export default function TopBar({ user, onLogout }) {
         setGreeting({ text: 'Selamat Malam', emoji: '🌙' });
       }
 
-      const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+      const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
       setCurrentDate(now.toLocaleDateString('id-ID', options));
-      setCurrentTime(now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB');
     };
 
     updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
   }, []);
 
   const rawName = user?.nama_guru || user?.username || 'Pengajar';
@@ -48,7 +44,6 @@ export default function TopBar({ user, onLogout }) {
 
   const displayName = getCleanName(rawName);
   const initials = rawName.split(' ').filter(Boolean).slice(0, 2).map(n => n[0]).join('').toUpperCase();
-  const userRole = user?.role ? user.role.toUpperCase() : 'GURU PENGAJAR';
 
   return (
     <header className="header-blue-hero">
@@ -104,24 +99,9 @@ export default function TopBar({ user, onLogout }) {
 
             <h2 className="hero-user-name">{displayName}</h2>
 
-            <div className="hero-meta-row">
-              <span className="hero-role-badge">
-                <Sparkles size={12} style={{ marginRight: 4 }} />
-                {userRole}
-              </span>
-              {user?.nip_nuptk && (
-                <span className="hero-nip-badge">
-                  <ShieldCheck size={12} style={{ marginRight: 4 }} />
-                  {user.nip_nuptk}
-                </span>
-              )}
-            </div>
-
-            <div className="hero-clock-row">
-              <Clock size={13} className="hero-clock-icon" />
+            <div className="hero-date-row">
+              <Calendar size={13} className="hero-date-icon" />
               <span className="hero-date-text">{currentDate}</span>
-              <span className="hero-time-divider">•</span>
-              <span className="hero-time-text">{currentTime}</span>
             </div>
           </div>
         </div>
