@@ -175,9 +175,9 @@ export default function SiswaView({ showToast }) {
                     {s.nama_siswa}
                   </div>
                   <div style={{ fontSize: 12, color: '#64748b', marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>NISN: <strong style={{ color: '#334155' }}>{s.nis_nisn || '-'}</strong></span>
+                    <span style={{ fontWeight: 600, color: '#334155' }}>{s.nis_nisn || '-'}</span>
                     <span>•</span>
-                    <span>JK: {s.jk === 'P' ? 'Perempuan' : 'Laki-laki'}</span>
+                    <span style={{ fontWeight: 700, color: s.jk === 'P' ? '#be185d' : '#1e40af' }}>{s.jk === 'P' ? 'P' : 'L'}</span>
                   </div>
                 </div>
               </div>
