@@ -5,8 +5,9 @@ import {
   FileBarChart, PieChart, Award
 } from 'lucide-react';
 import api from '../api/client';
+import TopBar from '../components/TopBar';
 
-export default function BerandaView({ onOpenPresensiModal, onSwitchTab }) {
+export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwitchTab }) {
   const [todayStatus, setTodayStatus] = useState(null);
   const [historyItems, setHistoryItems] = useState([]);
 
@@ -67,6 +68,9 @@ export default function BerandaView({ onOpenPresensiModal, onSwitchTab }) {
 
   return (
     <div className="beranda-view-container">
+
+      {/* HERO BLUE HEADER */}
+      <TopBar user={user} onLogout={onLogout} />
 
       {/* 1. FLOATING OVERLAPPING SUMMARY CARD (4 VERTICAL ICON COLUMNS) */}
       <div className="summary-overlap-card">

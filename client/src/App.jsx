@@ -95,11 +95,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      {/* Conditionally Render Header based on activeTab */}
-      {activeTab === 'beranda' && (
-        <TopBar user={currentUser} onLogout={handleLogout} />
-      )}
-
+      {/* SubHeaders for non-beranda views */}
       {activeTab === 'absensiSiswa' && (
         <SubHeader
           title="Absensi Siswa"
@@ -136,6 +132,8 @@ export default function App() {
       <main className="main-content-area">
         {activeTab === 'beranda' && (
           <BerandaView
+            user={currentUser}
+            onLogout={handleLogout}
             onOpenPresensiModal={(type) => setPresensiModalType(type)}
             onSwitchTab={(t) => setActiveTab(t)}
           />
