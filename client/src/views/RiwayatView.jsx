@@ -91,7 +91,7 @@ export default function RiwayatView() {
           displayList.map((item, idx) => (
             <div key={item.id || idx} className="history-item-card">
               <div className="history-fingerprint-box">
-                <Fingerprint size={24} color="#0066ff" />
+                <Fingerprint size={20} color="#0066ff" />
               </div>
               <div className="history-item-content">
                 <div className="history-item-date">{formatFullDate(item.tanggal || item.date)}</div>
