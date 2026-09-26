@@ -3,14 +3,20 @@ import { Clock, Users, User, CalendarX, BookOpen, Filter } from 'lucide-react';
 import api from '../api/client';
 
 export default function JadwalView() {
-  const [activeHari, setActiveHari] = useState('ALL');
-  const [selectedKelas, setSelectedKelas] = useState('ALL');
+  const getTodayIndonesianDay = () => {
+    const listDays = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const idx = new Date().getDay();
+    const day = listDays[idx];
+    return day === 'Minggu' ? 'Senin' : day;
+  };
+
+  const [activeHari, setActiveHari] = useState(getTodayIndonesianDay());
+  const [selectedKelas, setSelectedKelas] = useState('');
   const [kelasList, setKelasList] = useState([]);
   const [jadwalList, setJadwalList] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const days = [
-    { value: 'ALL', label: 'Semua Hari' },
     { value: 'Senin', label: 'Senin' },
     { value: 'Selasa', label: 'Selasa' },
     { value: 'Rabu', label: 'Rabu' },
@@ -24,26 +30,43 @@ export default function JadwalView() {
   }, []);
 
   useEffect(() => {
-    fetchJadwal();
+    if (selectedKelas) {
+      fetchJadwal();
+    }
   }, [activeHari, selectedKelas]);
 
   const fetchKelas = async () => {
     try {
       const res = await api.get('/kelas');
-      if (res.data?.success && Array.isArray(res.data.data)) {
+      if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
         setKelasList(res.data.data);
+        const firstVal = res.data.data[0].kode_kelas || res.data.data[0].id || res.data.data[0].nama_kelas;
+        setSelectedKelas(firstVal);
+      } else {
+        const defaultKelas = [
+          { kode_kelas: '1', nama_kelas: 'X RPL 1' },
+          { kode_kelas: '2', nama_kelas: 'XI RPL 2' },
+          { kode_kelas: '3', nama_kelas: 'XI TKJ 1' },
+          { kode_kelas: '4', nama_kelas: 'XII MM 1' }
+        ];
+        setKelasList(defaultKelas);
+        setSelectedKelas('1');
       }
     } catch (err) {
       console.error(err);
+      const defaultKelas = [
+        { kode_kelas: '1', nama_kelas: 'X RPL 1' },
+        { kode_kelas: '2', nama_kelas: 'XI RPL 2' }
+      ];
+      setKelasList(defaultKelas);
+      setSelectedKelas('1');
     }
   };
 
   const fetchJadwal = async () => {
     setLoading(true);
     try {
-      let url = '/jadwal?';
-      if (activeHari !== 'ALL') url += `hari=${activeHari}&`;
-      if (selectedKelas !== 'ALL') url += `kode_kelas=${selectedKelas}&`;
+      let url = `/jadwal?hari=${activeHari}&kode_kelas=${selectedKelas}`;
 
       const res = await api.get(url);
       if (res.data?.success && Array.isArray(res.data.data)) {
@@ -63,12 +86,13 @@ export default function JadwalView() {
     { kode_jadwal: 1, hari: 'Senin', jam_ke: 1, jam: '07:30 - 09:00', nama_mapel: 'Pemrograman Web & Perangkat Bergerak', kode_kelas: '1', nama_kelas: 'X RPL 1', nama_guru: 'Citra Dewi, S.Pd.' },
     { kode_jadwal: 2, hari: 'Senin', jam_ke: 2, jam: '09:15 - 10:45', nama_mapel: 'Basis Data Lanjutan', kode_kelas: '2', nama_kelas: 'XI RPL 2', nama_guru: 'Budi Santoso, M.Kom.' },
     { kode_jadwal: 3, hari: 'Selasa', jam_ke: 1, jam: '07:30 - 09:00', nama_mapel: 'Administrasi Infrastruktur Jaringan', kode_kelas: '3', nama_kelas: 'XI TKJ 1', nama_guru: 'Ahmad Fauzi, S.ST.' },
-    { kode_jadwal: 4, hari: 'Rabu', jam_ke: 1, jam: '07:30 - 09:00', nama_mapel: 'Desain Grafis & Multimedia', kode_kelas: '4', nama_kelas: 'XII MM 1', nama_guru: 'Eko Prasetyo, S.Kom.' }
+    { kode_jadwal: 4, hari: 'Rabu', jam_ke: 1, jam: '07:30 - 09:00', nama_mapel: 'Desain Grafis & Multimedia', kode_kelas: '4', nama_kelas: 'XII MM 1', nama_guru: 'Eko Prasetyo, S.Kom.' },
+    { kode_jadwal: 5, hari: 'Sabtu', jam_ke: 1, jam: '07:30 - 09:00', nama_mapel: 'Project Kreatif & Kewirausahaan', kode_kelas: '1', nama_kelas: 'X RPL 1', nama_guru: 'Citra Dewi, S.Pd.' }
   ];
 
   const filteredDemo = demoJadwal.filter(j => {
-    const matchHari = activeHari === 'ALL' || j.hari === activeHari;
-    const matchKelas = selectedKelas === 'ALL' || String(j.kode_kelas) === String(selectedKelas) || j.nama_kelas === selectedKelas;
+    const matchHari = j.hari === activeHari;
+    const matchKelas = String(j.kode_kelas) === String(selectedKelas) || j.nama_kelas === selectedKelas;
     return matchHari && matchKelas;
   });
 
@@ -131,7 +155,6 @@ export default function JadwalView() {
                 outline: 'none'
               }}
             >
-              <option value="ALL">Semua Kelas</option>
               {kelasList.map(k => (
                 <option key={k.kode_kelas || k.id} value={k.kode_kelas || k.id}>
                   {k.nama_kelas}
@@ -172,7 +195,7 @@ export default function JadwalView() {
                 </div>
 
                 <span style={{ fontSize: 11, fontWeight: 800, background: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: 10 }}>
-                  {j.hari || 'Senin'}
+                  {j.hari || activeHari}
                 </span>
               </div>
 
