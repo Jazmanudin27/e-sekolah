@@ -80,7 +80,14 @@ export default function AbsensiSiswaView({ user, showToast }) {
       if (absensiRes.data.success && Array.isArray(absensiRes.data.data) && absensiRes.data.data.length > 0) {
         hasRecords = true;
         absensiRes.data.data.forEach(item => {
-          existingMap[item.kode_siswa] = item.status;
+          if (item.kode_siswa !== undefined && item.kode_siswa !== null) {
+            existingMap[item.kode_siswa] = item.status;
+            existingMap[String(item.kode_siswa)] = item.status;
+          }
+          if (item.nis) {
+            existingMap[item.nis] = item.status;
+            existingMap[String(item.nis)] = item.status;
+          }
         });
       }
 
@@ -88,7 +95,8 @@ export default function AbsensiSiswaView({ user, showToast }) {
 
       const initialStatus = {};
       students.forEach(s => {
-        initialStatus[s.id] = existingMap[s.id] || 'H';
+        const matchedStatus = existingMap[s.id] ?? existingMap[String(s.id)] ?? (s.nis ? existingMap[s.nis] : undefined) ?? 'H';
+        initialStatus[s.id] = matchedStatus;
       });
       setStudentStatus(initialStatus);
 

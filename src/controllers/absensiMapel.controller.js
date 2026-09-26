@@ -15,8 +15,8 @@ async function saveAbsensiMapel(req, res, next) {
   try {
     const { tanggal, kode_kelas, kode_guru, kode_mapel, list_absensi } = req.body;
 
-    if (!tanggal || !kode_kelas || !kode_guru || !kode_mapel || !Array.isArray(list_absensi)) {
-      return sendError(res, 'Data tanggal, kode_kelas, kode_guru, kode_mapel, dan list_absensi wajib diisi.', 400);
+    if (!tanggal || !kode_kelas || !kode_mapel || !Array.isArray(list_absensi)) {
+      return sendError(res, 'Data tanggal, kode_kelas, kode_mapel, dan list_absensi wajib diisi.', 400);
     }
 
     const savedRecords = [];
@@ -28,13 +28,12 @@ async function saveAbsensiMapel(req, res, next) {
       const existing = await AbsensiMapelModel.findExisting({
         tanggal,
         kode_kelas,
-        kode_guru,
         kode_mapel,
         kode_siswa
       });
 
       if (existing) {
-        await AbsensiMapelModel.updateStatus(existing.id, status);
+        await AbsensiMapelModel.updateStatus(existing.id, status, kode_guru);
         savedRecords.push({ id: existing.id, kode_siswa, status, action: 'updated' });
       } else {
         const id = await AbsensiMapelModel.create({

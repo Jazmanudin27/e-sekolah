@@ -75,17 +75,16 @@ export default function AbsensiMapelView({ user, showToast }) {
 
     setLoadingStudents(true);
     try {
-      const gId = user?.kode_guru || '';
       const [siswaRes, absensiRes] = await Promise.all([
         api.get(`/siswa?kode_kelas=${kId}`),
-        api.get(`/absensi-mapel?tanggal=${tgl}&kode_kelas=${kId}&kode_mapel=${mId}${gId ? `&kode_guru=${gId}` : ''}`)
+        api.get(`/absensi-mapel?tanggal=${tgl}&kode_kelas=${kId}&kode_mapel=${mId}`)
       ]);
 
       let students = [];
       if (siswaRes.data.success && Array.isArray(siswaRes.data.data)) {
         students = siswaRes.data.data.map(s => ({
           id: s.kode_siswa,
-          nis: s.nis_nisn || `NIS-${s.kode_siswa}`,
+          nis: s.nis_nisn || s.nis || `NIS-${s.kode_siswa}`,
           nama: s.nama_siswa || `Siswa ID #${s.kode_siswa}`
         }));
       }
@@ -97,7 +96,14 @@ export default function AbsensiMapelView({ user, showToast }) {
       if (absensiRes.data.success && Array.isArray(absensiRes.data.data) && absensiRes.data.data.length > 0) {
         hasRecords = true;
         absensiRes.data.data.forEach(item => {
-          existingMap[item.kode_siswa] = item.status;
+          if (item.kode_siswa !== undefined && item.kode_siswa !== null) {
+            existingMap[item.kode_siswa] = item.status;
+            existingMap[String(item.kode_siswa)] = item.status;
+          }
+          if (item.nis) {
+            existingMap[item.nis] = item.status;
+            existingMap[String(item.nis)] = item.status;
+          }
         });
       }
 
@@ -105,7 +111,8 @@ export default function AbsensiMapelView({ user, showToast }) {
 
       const initial = {};
       students.forEach(s => {
-        initial[s.id] = existingMap[s.id] || 'H';
+        const matchedStatus = existingMap[s.id] ?? existingMap[String(s.id)] ?? (s.nis ? existingMap[s.nis] : undefined) ?? 'H';
+        initial[s.id] = matchedStatus;
       });
       setMapelStatus(initial);
 
