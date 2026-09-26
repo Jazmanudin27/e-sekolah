@@ -32,13 +32,13 @@ export default function RekapGuruView() {
   const daftarTahun = [2024, 2025, 2026, 2027];
 
   useEffect(() => {
-    fetchRekap(selectedBulan, selectedTahun);
+    fetchRekap();
   }, []);
 
-  const fetchRekap = async (bul = selectedBulan, thn = selectedTahun) => {
+  const fetchRekap = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/rekap/guru?bulan=${bul}&tahun=${thn}`);
+      const res = await api.get('/rekap/guru');
       if (res.data?.success && Array.isArray(res.data.data)) {
         setRekapList(res.data.data);
       } else {
@@ -53,15 +53,11 @@ export default function RekapGuruView() {
   };
 
   const handleBulanChange = (e) => {
-    const bVal = parseInt(e.target.value, 10);
-    setSelectedBulan(bVal);
-    fetchRekap(bVal, selectedTahun);
+    setSelectedBulan(parseInt(e.target.value, 10));
   };
 
   const handleTahunChange = (e) => {
-    const tVal = parseInt(e.target.value, 10);
-    setSelectedTahun(tVal);
-    fetchRekap(selectedBulan, tVal);
+    setSelectedTahun(parseInt(e.target.value, 10));
   };
 
   const openGuruDetail = async (guru) => {
@@ -95,12 +91,12 @@ export default function RekapGuruView() {
       <div style={{ background: '#ffffff', padding: 14, borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)', marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 11, fontWeight: 700, color: '#475569', letterSpacing: '0.3px' }}>
           <Filter size={14} color="#0066ff" />
-          FILTER LAPORAN PRESENSI GURU
+          FILTER PERIODE DETAIL PRESENSI GURU
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <div>
-            <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>BULAN</label>
+            <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>BULAN DETAIL</label>
             <select
               value={selectedBulan}
               onChange={handleBulanChange}
@@ -113,7 +109,7 @@ export default function RekapGuruView() {
           </div>
 
           <div>
-            <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>TAHUN</label>
+            <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>TAHUN DETAIL</label>
             <select
               value={selectedTahun}
               onChange={handleTahunChange}
@@ -124,6 +120,9 @@ export default function RekapGuruView() {
               ))}
             </select>
           </div>
+        </div>
+        <div style={{ fontSize: 10, color: '#64748b', marginTop: 8, fontStyle: 'italic', fontWeight: 500 }}>
+          * Filter ini berlaku untuk rincian riwayat presensi saat item guru diklik.
         </div>
       </div>
 
