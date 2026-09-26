@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Bell, Search, LogOut, Calendar } from 'lucide-react';
+import { GraduationCap, Bell, LogOut, Calendar } from 'lucide-react';
 
 export default function TopBar({ user, onLogout }) {
   const [currentDate, setCurrentDate] = useState('');
@@ -57,9 +57,6 @@ export default function TopBar({ user, onLogout }) {
             <button className="header-icon-btn" title="Notifikasi">
               <Bell size={18} />
               <span className="bell-dot"></span>
-            </button>
-            <button className="header-icon-btn" title="Cari Data">
-              <Search size={18} />
             </button>
             <button className="header-icon-btn logout-btn-hero" onClick={onLogout} title="Keluar Akun">
               <LogOut size={16} />
