@@ -31,8 +31,50 @@ async function getRekapGuru(req, res, next) {
   }
 }
 
+async function getDetailSiswa(req, res, next) {
+  try {
+    const { kode_siswa, bulan, tahun } = req.query;
+    if (!kode_siswa) {
+      return sendError(res, 'kode_siswa wajib diisi.', 400);
+    }
+    const records = await RekapModel.getDetailSiswa({ kode_siswa, bulan, tahun });
+    sendSuccess(res, 'Detail absensi siswa berhasil diambil.', records, 200, { count: records.length });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function getDetailMapel(req, res, next) {
+  try {
+    const { kode_siswa, kode_mapel, bulan, tahun } = req.query;
+    if (!kode_siswa) {
+      return sendError(res, 'kode_siswa wajib diisi.', 400);
+    }
+    const records = await RekapModel.getDetailMapel({ kode_siswa, kode_mapel, bulan, tahun });
+    sendSuccess(res, 'Detail absensi mapel siswa berhasil diambil.', records, 200, { count: records.length });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function getDetailGuru(req, res, next) {
+  try {
+    const { kode_guru, bulan, tahun } = req.query;
+    if (!kode_guru) {
+      return sendError(res, 'kode_guru wajib diisi.', 400);
+    }
+    const records = await RekapModel.getDetailGuru({ kode_guru, bulan, tahun });
+    sendSuccess(res, 'Detail presensi guru berhasil diambil.', records, 200, { count: records.length });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getRekapSiswa,
   getRekapMapel,
-  getRekapGuru
+  getRekapGuru,
+  getDetailSiswa,
+  getDetailMapel,
+  getDetailGuru
 };
