@@ -57,20 +57,26 @@ export default function SiswaView({ showToast }) {
     return matchSearch && matchKelas;
   });
 
+  const totalLaki = filteredSiswa.filter(s => (s.jk || '').toUpperCase() === 'L').length;
+  const totalPerempuan = filteredSiswa.filter(s => (s.jk || '').toUpperCase() === 'P').length;
+
   return (
     <div className="inner-page-wrapper" style={{ paddingBottom: 36, paddingTop: 4 }}>
       {/* STATS OVERVIEW CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 18 }}>
-        <div style={{ background: '#ffffff', padding: '14px 16px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
-          <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Total Siswa</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: '#0066ff', marginTop: 4 }}>{siswaList.length}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 18 }}>
+        <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
+          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Total Siswa</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: '#0066ff', marginTop: 4 }}>{filteredSiswa.length}</div>
         </div>
 
-        <div style={{ background: '#ffffff', padding: '14px 16px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
-          <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Total Kelas</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: '#16a34a', marginTop: 4 }}>
-            {kelasList.length > 0 ? kelasList.length : Array.from(new Set(siswaList.map(s => s.nama_kelas))).length}
-          </div>
+        <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
+          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Laki-laki (L)</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: '#1e40af', marginTop: 4 }}>{totalLaki}</div>
+        </div>
+
+        <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
+          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Perempuan (P)</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: '#be185d', marginTop: 4 }}>{totalPerempuan}</div>
         </div>
       </div>
 
@@ -118,7 +124,7 @@ export default function SiswaView({ showToast }) {
                 cursor: 'pointer'
               }}
             >
-              <option value="ALL">Semua Kelas ({siswaList.length} Siswa)</option>
+              <option value="ALL">Semua Kelas</option>
               {kelasList.map(k => (
                 <option key={k.kode_kelas} value={k.kode_kelas}>
                   {k.nama_kelas}
