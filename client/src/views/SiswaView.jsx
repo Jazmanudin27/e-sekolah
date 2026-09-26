@@ -70,12 +70,12 @@ export default function SiswaView({ showToast }) {
         </div>
 
         <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
-          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Laki-laki (L)</div>
+          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Laki-laki</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: '#1e40af', marginTop: 4 }}>{totalLaki}</div>
         </div>
 
         <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(0,0,0,0.03)' }}>
-          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Perempuan (P)</div>
+          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Perempuan</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: '#be185d', marginTop: 4 }}>{totalPerempuan}</div>
         </div>
       </div>
