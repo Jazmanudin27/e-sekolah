@@ -59,16 +59,12 @@ export default function SearchableSelect({
       const updatePosition = () => {
         if (!containerRef.current) return;
         const rect = containerRef.current.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const dropdownHeight = 220;
-        const openUpwards = spaceBelow < dropdownHeight && rect.top > dropdownHeight;
 
         setDropdownStyle({
           position: 'fixed',
           left: `${rect.left}px`,
           width: `${rect.width}px`,
-          top: openUpwards ? `${rect.top - 6}px` : `${rect.bottom + 4}px`,
-          transform: openUpwards ? 'translateY(-100%)' : 'none',
+          top: `${rect.bottom + 4}px`,
           zIndex
         });
       };
