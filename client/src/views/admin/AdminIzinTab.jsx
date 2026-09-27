@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   FileText, Search, Filter, Calendar, CheckCircle2, XCircle,
-  Clock, Trash2, Printer, RefreshCw, Plus, User, AlertCircle
+  Clock, Trash2, RefreshCw, Plus, User, AlertCircle
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
@@ -173,9 +173,6 @@ export default function AdminIzinTab() {
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
-            <button className="btn-outline-admin" onClick={() => window.print()}>
-              <Printer size={16} /> Cetak Daftar
-            </button>
             <button className="btn-outline-admin" onClick={fetchIzin} title="Segarkan Data">
               <RefreshCw size={16} /> Refresh
             </button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  GraduationCap, Plus, Search, Edit2, Trash2, Printer, RefreshCw, X, Filter
+  GraduationCap, Plus, Search, Edit2, Trash2, RefreshCw, X, Filter
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
@@ -159,9 +159,6 @@ export default function AdminSiswaTab() {
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
-            <button className="btn-outline-admin" onClick={() => window.print()}>
-              <Printer size={16} /> Cetak / Print
-            </button>
             <button className="btn-primary-admin" onClick={handleOpenAdd}>
               <Plus size={16} /> Tambah Siswa Baru
             </button>

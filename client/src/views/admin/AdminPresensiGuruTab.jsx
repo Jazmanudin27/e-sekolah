@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Fingerprint, Search, Filter, Calendar, Clock, CheckCircle2,
-  AlertCircle, RefreshCw, Printer, User, MapPin, Eye, X, Download,
+  AlertCircle, RefreshCw, User, MapPin, Eye, X, Download,
   ExternalLink, Navigation
 } from 'lucide-react';
 import api from '../../api/client';
@@ -217,9 +217,6 @@ export default function AdminPresensiGuruTab() {
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
-            <button className="btn-outline-admin" onClick={() => window.print()}>
-              <Printer size={16} /> Cetak Laporan
-            </button>
             <button className="btn-outline-admin" onClick={fetchPresensi} title="Segarkan Data">
               <RefreshCw size={16} /> Refresh
             </button>

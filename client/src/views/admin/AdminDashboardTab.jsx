@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Users, GraduationCap, Building2, BookOpen, Calendar,
   Clock, RefreshCw, ChevronDown, ChevronRight, List, FileSpreadsheet,
-  X, Search, Printer, UserCheck, CheckCircle2, AlertCircle, CalendarDays,
+  X, Search, UserCheck, CheckCircle2, AlertCircle, CalendarDays,
   UserX, Sparkles
 } from 'lucide-react';
 import api from '../../api/client';
@@ -996,29 +996,6 @@ export default function AdminDashboardTab({ onSwitchTab }) {
                   </tbody>
                 </table>
               </div>
-            </div>
-
-            {/* MODAL FOOTER */}
-            <div className="portal-modal-footer" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', padding: '12px 20px', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
-              <button
-                type="button"
-                onClick={() => handlePrintClassRecap(selectedDetailClass)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '7px 14px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#334155',
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                <Printer size={15} /> Cetak Rekap Kelas
-              </button>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Calendar, Search, Printer, RefreshCw, Clock, Building2, User, BookOpen
+  Calendar, Search, RefreshCw, Clock, Building2, User, BookOpen
 } from 'lucide-react';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
@@ -170,9 +170,6 @@ export default function AdminJadwalTab() {
               }}
             >
               Daftar Baris Data
-            </button>
-            <button className="btn-outline-admin" onClick={() => window.print()}>
-              <Printer size={16} /> Cetak / Print
             </button>
           </div>
         </div>

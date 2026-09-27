@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  FileBarChart, Printer, RefreshCw, Users, GraduationCap, BookOpen,
+  FileBarChart, RefreshCw, Users, GraduationCap, BookOpen,
   Calendar, CheckCircle2, HeartPulse, FileText, AlertCircle, X, ChevronRight
 } from 'lucide-react';
 import api from '../../api/client';
@@ -191,9 +191,6 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
-            <button className="btn-outline-admin" onClick={printReport}>
-              <Printer size={16} /> Cetak Laporan
-            </button>
             <button className="btn-outline-admin" onClick={fetchCurrentRekap} title="Refresh">
               <RefreshCw size={16} />
             </button>
