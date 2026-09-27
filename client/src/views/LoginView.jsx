@@ -93,10 +93,10 @@ export default function LoginView({ onLoginSuccess, showToast }) {
             marginTop: 'auto'
           }}>
             <h2 style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.35, marginBottom: 8, color: '#ffffff' }}>
-              Portal Presensi Guru & Kelas
+              Sistem Informasi Presensi & Manajemen Akademik
             </h2>
             <p style={{ fontSize: 12.5, color: '#cbd5e1', lineHeight: 1.5, margin: 0 }}>
-              Sistem presensi mandiri tenaga pengajar serta pencatatan absensi harian siswa per kelas secara real-time.
+              Platform pintar yang menghubungkan administrator, tenaga pendidik, dan presensi kelas dalam satu ekosistem terpadu.
             </p>
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function LoginView({ onLoginSuccess, showToast }) {
               E-SEKOLAH PRO
             </h1>
             <p style={{ color: '#94a3b8', fontSize: 12, marginTop: 4, fontWeight: 500 }}>
-              Portal Presensi Guru & Kelas
+              Sistem Presensi & Layanan Akademik
             </p>
           </div>
 
@@ -137,7 +137,7 @@ export default function LoginView({ onLoginSuccess, showToast }) {
                 Selamat Datang
               </h2>
               <p style={{ color: '#94a3b8', fontSize: 12.5, marginTop: 4, margin: 0 }}>
-                Silakan masuk dengan akun Guru atau Kelas
+                Silakan masuk untuk mengakses sistem
               </p>
             </div>
             <div style={{
@@ -159,7 +159,7 @@ export default function LoginView({ onLoginSuccess, showToast }) {
             {/* USERNAME INPUT FIELD */}
             <div>
               <label style={{ display: 'block', color: '#cbd5e1', fontSize: 11.5, fontWeight: 700, marginBottom: 6, letterSpacing: '0.3px' }}>
-                NIP GURU / USERNAME KELAS
+                USERNAME / NIP / EMAIL
               </label>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <User size={18} style={{ position: 'absolute', left: 14, color: '#38bdf8', pointerEvents: 'none' }} />
@@ -167,7 +167,7 @@ export default function LoginView({ onLoginSuccess, showToast }) {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Masukkan NIP Guru atau Akun Kelas"
+                  placeholder="Masukkan NIP, Email, atau Username"
                   required
                   style={{
                     width: '100%',

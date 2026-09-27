@@ -13,6 +13,7 @@ const dashboardRoutes = require('./dashboard.routes');
 const siswaRoutes = require('./siswa.routes');
 const izinRoutes = require('./izin.routes');
 const rekapRoutes = require('./rekap.routes');
+const userRoutes = require('./user.routes');
 
 // System Health Check
 router.get('/health', (req, res) => {
@@ -37,5 +38,6 @@ router.use('/dashboard', dashboardRoutes);
 router.use('/siswa', siswaRoutes);
 router.use('/izin', izinRoutes);
 router.use('/rekap', rekapRoutes);
+router.use('/users', userRoutes);
 
 module.exports = router;
