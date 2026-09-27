@@ -22,9 +22,18 @@ class KelasModel {
 
   static async findByUsername(username) {
     try {
+      const clean = String(username).trim();
       const rows = await query(
-        'SELECT * FROM kelas WHERE (username = ? OR nama_kelas = ?) LIMIT 1',
-        [username, username]
+        `SELECT * FROM kelas 
+         WHERE username = ? 
+            OR nama_kelas = ? 
+            OR CAST(kode_kelas AS CHAR) = ? 
+            OR LOWER(nama_kelas) = LOWER(?) 
+            OR LOWER(username) = LOWER(?) 
+            OR CONCAT('Kelas ', nama_kelas) = ? 
+            OR CONCAT('Kelas ', CAST(kode_kelas AS CHAR)) = ?
+         LIMIT 1`,
+        [clean, clean, clean, clean, clean, clean, clean]
       );
       return rows[0] || null;
     } catch (e) {

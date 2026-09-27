@@ -8,10 +8,10 @@ const { JWT_SECRET } = require('../middleware/auth.middleware');
 // Multi-Table Login: Checks `guru` table AND `kelas` table with master override
 async function login(req, res, next) {
   try {
-    const { username, password } = req.body;
+    const { username, password, type } = req.body;
 
     if (!username || !password) {
-      return sendError(res, 'Username / NIP / Email dan Password wajib diisi.', 400);
+      return sendError(res, 'Username / NIP / Email / Nama Kelas dan Password wajib diisi.', 400);
     }
 
     const cleanUsername = String(username).trim();
@@ -20,22 +20,36 @@ async function login(req, res, next) {
     let user = null;
     let userType = null; // 'Guru' or 'Kelas'
 
-    // 1. Check in `guru` table first (by username, email, or NIP/NUPTK)
-    const teacher = await GuruModel.findByUsernameOrEmail(cleanUsername);
-    if (teacher) {
-      user = teacher;
-      userType = 'Guru';
-    } else {
-      // 2. Check in `kelas` table second (by username or nama_kelas)
+    if (type === 'Kelas') {
       const kelasAccount = await KelasModel.findByUsername(cleanUsername);
       if (kelasAccount) {
         user = kelasAccount;
         userType = 'Kelas';
       }
+    } else if (type === 'Guru') {
+      const teacher = await GuruModel.findByUsernameOrEmail(cleanUsername);
+      if (teacher) {
+        user = teacher;
+        userType = 'Guru';
+      }
     }
 
     if (!user) {
-      return sendError(res, `Username '${cleanUsername}' tidak ditemukan di tabel guru maupun kelas.`, 401);
+      const kelasAccount = await KelasModel.findByUsername(cleanUsername);
+      if (kelasAccount) {
+        user = kelasAccount;
+        userType = 'Kelas';
+      } else {
+        const teacher = await GuruModel.findByUsernameOrEmail(cleanUsername);
+        if (teacher) {
+          user = teacher;
+          userType = 'Guru';
+        }
+      }
+    }
+
+    if (!user) {
+      return sendError(res, `Username / Kelas '${cleanUsername}' tidak ditemukan di tabel guru maupun kelas.`, 401);
     }
 
     // Verify Password:
