@@ -404,77 +404,97 @@ export default function AdminAbsensiMapelTab() {
                           </span>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                          <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
                             <button
                               type="button"
                               onClick={() => handleStatusChange(sKey, 'H')}
+                              title="Hadir (H)"
                               style={{
-                                padding: '6px 14px',
-                                borderRadius: 10,
-                                fontSize: 12,
-                                fontWeight: 700,
+                                width: 38,
+                                height: 32,
+                                borderRadius: 8,
+                                fontSize: 13,
+                                fontWeight: 800,
                                 cursor: 'pointer',
-                                border: currentStatus === 'H' ? '2px solid #059669' : '1px solid #e2e8f0',
+                                border: currentStatus === 'H' ? '2px solid #059669' : '1px solid #cbd5e1',
                                 background: currentStatus === 'H' ? '#ecfdf5' : '#ffffff',
                                 color: currentStatus === 'H' ? '#059669' : '#64748b',
-                                transition: 'all 0.15s ease'
+                                transition: 'all 0.15s ease',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                               }}
                             >
-                              Hadir (H)
+                              H
                             </button>
 
                             <button
                               type="button"
                               onClick={() => handleStatusChange(sKey, 'S')}
+                              title="Sakit (S)"
                               style={{
-                                padding: '6px 14px',
-                                borderRadius: 10,
-                                fontSize: 12,
-                                fontWeight: 700,
+                                width: 38,
+                                height: 32,
+                                borderRadius: 8,
+                                fontSize: 13,
+                                fontWeight: 800,
                                 cursor: 'pointer',
-                                border: currentStatus === 'S' ? '2px solid #d97706' : '1px solid #e2e8f0',
-                                background: currentStatus === 'S' ? '#fffbeb' : '#ffffff',
-                                color: currentStatus === 'S' ? '#d97706' : '#64748b',
-                                transition: 'all 0.15s ease'
+                                border: currentStatus === 'S' ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                                background: currentStatus === 'S' ? '#eff6ff' : '#ffffff',
+                                color: currentStatus === 'S' ? '#2563eb' : '#64748b',
+                                transition: 'all 0.15s ease',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                               }}
                             >
-                              Sakit (S)
+                              S
                             </button>
 
                             <button
                               type="button"
                               onClick={() => handleStatusChange(sKey, 'I')}
+                              title="Izin (I)"
                               style={{
-                                padding: '6px 14px',
-                                borderRadius: 10,
-                                fontSize: 12,
-                                fontWeight: 700,
+                                width: 38,
+                                height: 32,
+                                borderRadius: 8,
+                                fontSize: 13,
+                                fontWeight: 800,
                                 cursor: 'pointer',
-                                border: currentStatus === 'I' ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                                background: currentStatus === 'I' ? '#eff6ff' : '#ffffff',
-                                color: currentStatus === 'I' ? '#2563eb' : '#64748b',
-                                transition: 'all 0.15s ease'
+                                border: currentStatus === 'I' ? '2px solid #d97706' : '1px solid #cbd5e1',
+                                background: currentStatus === 'I' ? '#fffbeb' : '#ffffff',
+                                color: currentStatus === 'I' ? '#d97706' : '#64748b',
+                                transition: 'all 0.15s ease',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                               }}
                             >
-                              Izin (I)
+                              I
                             </button>
 
                             <button
                               type="button"
                               onClick={() => handleStatusChange(sKey, 'A')}
+                              title="Alpa (A)"
                               style={{
-                                padding: '6px 14px',
-                                borderRadius: 10,
-                                fontSize: 12,
-                                fontWeight: 700,
+                                width: 38,
+                                height: 32,
+                                borderRadius: 8,
+                                fontSize: 13,
+                                fontWeight: 800,
                                 cursor: 'pointer',
-                                border: currentStatus === 'A' ? '2px solid #dc2626' : '1px solid #e2e8f0',
+                                border: currentStatus === 'A' ? '2px solid #dc2626' : '1px solid #cbd5e1',
                                 background: currentStatus === 'A' ? '#fef2f2' : '#ffffff',
                                 color: currentStatus === 'A' ? '#dc2626' : '#64748b',
-                                transition: 'all 0.15s ease'
+                                transition: 'all 0.15s ease',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                               }}
                             >
-                              Alpa (A)
+                              A
                             </button>
                           </div>
                         </td>

@@ -125,6 +125,8 @@ export default function AdminPresensiGuruTab() {
   const totalBelumPulang = presensiList.filter(p => p.jam_in && !p.jam_out).length;
   const totalTerlambat = presensiList.filter(p => p.jam_in && p.jam_in > '07:15:00').length;
 
+  const [selectedDetail, setSelectedDetail] = useState(null);
+
   return (
     <div className="admin-presensi-wrapper">
       {/* STATS OVERVIEW CARDS */}
@@ -263,35 +265,33 @@ export default function AdminPresensiGuruTab() {
                 <th>Tanggal</th>
                 <th>Jam Masuk</th>
                 <th>Jam Pulang</th>
-                <th>Status Kehadiran</th>
                 <th>Lokasi Presensi</th>
-                <th style={{ width: 80, textAlign: 'center' }}>Foto</th>
+                <th style={{ width: 90, textAlign: 'center' }}>Detail</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                     Memuat data presensi dari database...
                   </td>
                 </tr>
               ) : filteredList.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                     Tidak ada catatan presensi pada periode yang dipilih.
                   </td>
                 </tr>
               ) : (
                 paginatedList.map((item, idx) => {
                   const isTerlambat = item.jam_in && item.jam_in > '07:15:00';
-                  const isComplete = item.jam_in && item.jam_out;
 
                   return (
                     <tr key={item.id || idx}>
                       <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
                       <td>
                         <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.nama_guru}</div>
-                        <div style={{ fontSize: 11, color: '#64748b' }}>NIP: {item.nip_nuptk}</div>
+                        <div style={{ fontSize: 11, color: '#64748b' }}>{item.nip_nuptk && item.nip_nuptk !== '-' ? `NIP: ${item.nip_nuptk}` : ''}</div>
                       </td>
                       <td style={{ fontWeight: 600, textAlign: 'center' }}>{item.tanggal}</td>
                       <td style={{ textAlign: 'center' }}>
@@ -307,7 +307,7 @@ export default function AdminPresensiGuruTab() {
                             )}
                           </div>
                         ) : (
-                          <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>-</span>
+                          <span style={{ color: '#94a3b8' }}>-</span>
                         )}
                       </td>
                       <td style={{ textAlign: 'center' }}>
@@ -319,36 +319,21 @@ export default function AdminPresensiGuruTab() {
                           </span>
                         )}
                       </td>
-                      <td style={{ textAlign: 'center' }}>
-                        {isComplete ? (
-                          <span className="badge-status-aktif">
-                            <span className="status-dot"></span> Lengkap
-                          </span>
-                        ) : (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#eff6ff', color: '#1d4ed8', padding: '3px 10px', borderRadius: 4, fontSize: 11.5, fontWeight: 700 }}>
-                            Hadir (Aktif)
-                          </span>
-                        )}
-                      </td>
                       <td>
                         <div style={{ fontSize: 11.5, color: '#475569', display: 'flex', alignItems: 'center', gap: 4 }}>
                           <MapPin size={13} color="#0066ff" />
-                          <span>{item.lokasi_in ? item.lokasi_in.substring(0, 25) + '...' : 'Di Area Sekolah'}</span>
+                          <span>{item.lokasi_in ? item.lokasi_in.substring(0, 30) + (item.lokasi_in.length > 30 ? '...' : '') : 'Di Area Sekolah'}</span>
                         </div>
                       </td>
                       <td style={{ textAlign: 'center' }}>
-                        {item.foto_in ? (
-                          <button
-                            className="btn-action-icon"
-                            style={{ background: '#0284c7', color: '#ffffff', border: '1px solid #0369a1' }}
-                            onClick={() => setPreviewPhoto(item.foto_in)}
-                            title="Lihat Foto Selfie Presensi"
-                          >
-                            <Eye size={13} />
-                          </button>
-                        ) : (
-                          <span style={{ color: '#cbd5e1', fontSize: 11 }}>-</span>
-                        )}
+                        <button
+                          className="btn-outline-admin"
+                          style={{ padding: '4px 10px', fontSize: 11.5 }}
+                          onClick={() => setSelectedDetail(item)}
+                          title="Lihat Detail Presensi"
+                        >
+                          <Eye size={13} /> Detail
+                        </button>
                       </td>
                     </tr>
                   );
@@ -367,28 +352,95 @@ export default function AdminPresensiGuruTab() {
         />
       </div>
 
-      {/* PHOTO PREVIEW MODAL */}
-      {previewPhoto && (
-        <div className="admin-modal-overlay" onClick={() => setPreviewPhoto(null)}>
-          <div className="admin-modal-card" style={{ maxWidth: 420, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <div style={{ fontWeight: 800, color: '#0f172a' }}>Foto Selfie Presensi</div>
-              <button className="btn-action-icon" onClick={() => setPreviewPhoto(null)}>
+      {/* DETAIL MODAL */}
+      {selectedDetail && (
+        <div className="admin-modal-overlay" onClick={() => setSelectedDetail(null)}>
+          <div className="admin-modal-box" style={{ maxWidth: 520, width: '92%' }} onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal-header" style={{ padding: '16px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'linear-gradient(135deg, #0284c7, #0369a1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                  <Fingerprint size={18} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', margin: 0 }}>Rincian Presensi Guru</h3>
+                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+                    {selectedDetail.nama_guru} {selectedDetail.nip_nuptk && selectedDetail.nip_nuptk !== '-' ? `(${selectedDetail.nip_nuptk})` : ''}
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedDetail(null)}
+                style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: 8, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748b' }}
+              >
                 <X size={16} />
               </button>
             </div>
-            <img
-              src={previewPhoto}
-              alt="Foto Presensi"
-              style={{ width: '100%', height: 'auto', borderRadius: 12, border: '1px solid #e2e8f0', objectFit: 'cover' }}
-            />
-            <button
-              className="btn-primary-admin"
-              style={{ width: '100%', marginTop: 14, justifyContent: 'center' }}
-              onClick={() => setPreviewPhoto(null)}
-            >
-              Tutup Preview
-            </button>
+
+            <div className="admin-modal-body" style={{ padding: '18px 20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Tanggal</div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', marginTop: 2 }}>{selectedDetail.tanggal}</div>
+                </div>
+                <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Status Sesi</div>
+                  <div style={{ marginTop: 2 }}>
+                    {selectedDetail.jam_in && selectedDetail.jam_out ? (
+                      <span style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>
+                        Lengkap (In & Out)
+                      </span>
+                    ) : (
+                      <span style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>
+                        Belum Scan Pulang
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Jam Masuk</div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: selectedDetail.jam_in > '07:15:00' ? '#dc2626' : '#059669', marginTop: 2 }}>
+                    {selectedDetail.jam_in || '-'}
+                  </div>
+                </div>
+                <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Jam Pulang</div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: '#0066ff', marginTop: 2 }}>
+                    {selectedDetail.jam_out || '-'}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 10, border: '1px solid #e2e8f0', marginBottom: 16 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 4 }}>Lokasi Presensi</div>
+                <div style={{ fontSize: 12.5, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <MapPin size={15} color="#0066ff" />
+                  <span>{selectedDetail.lokasi_in || 'Di Area Sekolah (SMK Artanita)'}</span>
+                </div>
+              </div>
+
+              {selectedDetail.foto_in && (
+                <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 10, border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 8, textAlign: 'left' }}>Foto Selfie Presensi</div>
+                  <img
+                    src={selectedDetail.foto_in}
+                    alt="Foto Selfie"
+                    style={{ width: '100%', maxHeight: 240, objectFit: 'contain', borderRadius: 8, border: '1px solid #e2e8f0' }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="admin-modal-footer" style={{ padding: '12px 20px', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+              <button
+                type="button"
+                className="btn-primary-admin"
+                onClick={() => setSelectedDetail(null)}
+                style={{ padding: '6px 20px' }}
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}

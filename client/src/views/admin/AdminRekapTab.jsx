@@ -380,10 +380,10 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                   <th>NIS / NISN</th>
                   <th>Nama Lengkap Siswa</th>
                   <th>Kelas</th>
-                  <th style={{ textAlign: 'center', color: '#16a34a' }}>Hadir (H)</th>
-                  <th style={{ textAlign: 'center', color: '#2563eb' }}>Sakit (S)</th>
-                  <th style={{ textAlign: 'center', color: '#d97706' }}>Izin (I)</th>
-                  <th style={{ textAlign: 'center', color: '#dc2626' }}>Alpha (A)</th>
+                  <th style={{ width: 60, textAlign: 'center', color: '#16a34a' }}>H</th>
+                  <th style={{ width: 60, textAlign: 'center', color: '#2563eb' }}>S</th>
+                  <th style={{ width: 60, textAlign: 'center', color: '#d97706' }}>I</th>
+                  <th style={{ width: 60, textAlign: 'center', color: '#dc2626' }}>A</th>
                   <th style={{ width: 90, textAlign: 'center' }}>Detail</th>
                 </tr>
               </thead>
@@ -441,10 +441,10 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                   <th>Nama Lengkap Siswa</th>
                   <th>Kelas</th>
                   <th>Mata Pelajaran</th>
-                  <th style={{ textAlign: 'center', color: '#16a34a' }}>Hadir (H)</th>
-                  <th style={{ textAlign: 'center', color: '#2563eb' }}>Sakit (S)</th>
-                  <th style={{ textAlign: 'center', color: '#d97706' }}>Izin (I)</th>
-                  <th style={{ textAlign: 'center', color: '#dc2626' }}>Alpha (A)</th>
+                  <th style={{ width: 60, textAlign: 'center', color: '#16a34a' }}>H</th>
+                  <th style={{ width: 60, textAlign: 'center', color: '#2563eb' }}>S</th>
+                  <th style={{ width: 60, textAlign: 'center', color: '#d97706' }}>I</th>
+                  <th style={{ width: 60, textAlign: 'center', color: '#dc2626' }}>A</th>
                   <th style={{ width: 90, textAlign: 'center' }}>Detail</th>
                 </tr>
               </thead>
@@ -590,19 +590,19 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                   borderBottom: '1px solid #e2e8f0'
                 }}>
                   <div style={{ padding: '8px 10px', background: '#ecfdf5', borderRadius: 8, border: '1px solid #a7f3d0', textAlign: 'center' }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase' }}>Hadir (H)</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#059669' }}>H</div>
                     <div style={{ fontSize: 16, fontWeight: 800, color: '#047857', marginTop: 1 }}>{hCount}</div>
                   </div>
                   <div style={{ padding: '8px 10px', background: '#eff6ff', borderRadius: 8, border: '1px solid #bfdbfe', textAlign: 'center' }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: '#2563eb', textTransform: 'uppercase' }}>Sakit (S)</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#2563eb' }}>S</div>
                     <div style={{ fontSize: 16, fontWeight: 800, color: '#1d4ed8', marginTop: 1 }}>{sCount}</div>
                   </div>
                   <div style={{ padding: '8px 10px', background: '#fffbeb', borderRadius: 8, border: '1px solid #fde68a', textAlign: 'center' }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: '#d97706', textTransform: 'uppercase' }}>Izin (I)</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#d97706' }}>I</div>
                     <div style={{ fontSize: 16, fontWeight: 800, color: '#b45309', marginTop: 1 }}>{iCount}</div>
                   </div>
                   <div style={{ padding: '8px 10px', background: '#fef2f2', borderRadius: 8, border: '1px solid #fecaca', textAlign: 'center' }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: '#dc2626', textTransform: 'uppercase' }}>Alpha (A)</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#dc2626' }}>A</div>
                     <div style={{ fontSize: 16, fontWeight: 800, color: '#b91c1c', marginTop: 1 }}>{aCount}</div>
                   </div>
                 </div>
@@ -631,6 +631,7 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                     const isS = d.status === 'S';
                     const isI = d.status === 'I';
                     const isA = d.status === 'A';
+                    const statusLetter = isH ? 'H' : isS ? 'S' : isI ? 'I' : 'A';
 
                     return (
                       <div
@@ -662,7 +663,7 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                             border: `1px solid ${isH ? '#a7f3d0' : isS ? '#bfdbfe' : isI ? '#fde68a' : '#fecaca'}`,
                             flexShrink: 0
                           }}>
-                            {isH ? 'H' : isS ? 'S' : isI ? 'I' : 'A'}
+                            {statusLetter}
                           </div>
 
                           <div>
@@ -690,23 +691,20 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                         </div>
 
                         <div style={{ flexShrink: 0 }}>
-                          {isH ? (
-                            <span style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>
-                              Hadir
-                            </span>
-                          ) : isS ? (
-                            <span style={{ background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>
-                              Sakit
-                            </span>
-                          ) : isI ? (
-                            <span style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>
-                              Izin
-                            </span>
-                          ) : (
-                            <span style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>
-                              Alpha
-                            </span>
-                          )}
+                          <span style={{
+                            background: isH ? '#ecfdf5' : isS ? '#eff6ff' : isI ? '#fffbeb' : '#fef2f2',
+                            color: isH ? '#059669' : isS ? '#2563eb' : isI ? '#d97706' : '#dc2626',
+                            border: `1px solid ${isH ? '#a7f3d0' : isS ? '#bfdbfe' : isI ? '#fde68a' : '#fecaca'}`,
+                            padding: '3px 12px',
+                            borderRadius: 6,
+                            fontSize: 12,
+                            fontWeight: 800,
+                            display: 'inline-block',
+                            minWidth: 28,
+                            textAlign: 'center'
+                          }}>
+                            {statusLetter}
+                          </span>
                         </div>
                       </div>
                     );
