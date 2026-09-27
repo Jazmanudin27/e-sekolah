@@ -189,12 +189,12 @@ export default function AdminAbsensiSiswaTab() {
           <div>
             <div className="stat-label">Total Siswa di Kelas</div>
             <div className="stat-value">{studentList.length}</div>
-            <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
-              {selectedKelasObj?.nama_kelas || 'Kelas Terpilih'}
+            <div className="stat-subtext">
+              <span style={{ color: '#0284c7' }}>●</span> {selectedKelasObj?.nama_kelas || 'Kelas Terpilih'}
             </div>
           </div>
           <div className="stat-icon-wrapper stat-icon-blue">
-            <Users size={24} />
+            <Users size={22} color="#ffffff" strokeWidth={2.2} />
           </div>
         </div>
 
@@ -202,12 +202,12 @@ export default function AdminAbsensiSiswaTab() {
           <div>
             <div className="stat-label">Hadir (H)</div>
             <div className="stat-value" style={{ color: '#059669' }}>{hadirCount}</div>
-            <div style={{ fontSize: 11, color: '#10b981', marginTop: 4 }}>
-              {studentList.length > 0 ? `${Math.round((hadirCount / studentList.length) * 100)}% kehadiran` : '0%'}
+            <div className="stat-subtext">
+              <span style={{ color: '#059669' }}>●</span> {studentList.length > 0 ? `${Math.round((hadirCount / studentList.length) * 100)}% kehadiran` : '0%'}
             </div>
           </div>
           <div className="stat-icon-wrapper stat-icon-emerald">
-            <CheckCircle2 size={24} />
+            <CheckCircle2 size={22} color="#ffffff" strokeWidth={2.2} />
           </div>
         </div>
 
@@ -215,25 +215,25 @@ export default function AdminAbsensiSiswaTab() {
           <div>
             <div className="stat-label">Sakit & Izin (S / I)</div>
             <div className="stat-value" style={{ color: '#d97706' }}>{sakitCount + izinCount}</div>
-            <div style={{ fontSize: 11, color: '#f59e0b', marginTop: 4 }}>
-              {sakitCount} Sakit, {izinCount} Izin
+            <div className="stat-subtext">
+              <span style={{ color: '#d97706' }}>●</span> {sakitCount} Sakit, {izinCount} Izin
             </div>
           </div>
           <div className="stat-icon-wrapper stat-icon-amber">
-            <HeartPulse size={24} />
+            <HeartPulse size={22} color="#ffffff" strokeWidth={2.2} />
           </div>
         </div>
 
         <div className="admin-stat-card">
           <div>
-            <div className="stat-label">Alpa / Tanpa Keterangan</div>
+            <div className="stat-label">Alpa (A)</div>
             <div className="stat-value" style={{ color: '#dc2626' }}>{alpaCount}</div>
-            <div style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>
-              Tidak ada keterangan
+            <div className="stat-subtext">
+              <span style={{ color: '#dc2626' }}>●</span> Tanpa keterangan
             </div>
           </div>
-          <div className="stat-icon-wrapper stat-icon-purple" style={{ background: 'linear-gradient(135deg, #ef4444, #f87171)' }}>
-            <AlertCircle size={24} />
+          <div className="stat-icon-wrapper stat-icon-red">
+            <AlertCircle size={22} color="#ffffff" strokeWidth={2.2} />
           </div>
         </div>
       </div>

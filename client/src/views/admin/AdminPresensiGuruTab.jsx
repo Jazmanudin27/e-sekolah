@@ -135,21 +135,25 @@ export default function AdminPresensiGuruTab() {
           <div>
             <div className="stat-label">Total Log Presensi</div>
             <div className="stat-value">{totalHadir}</div>
-            <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>Presensi tercatat</div>
+            <div className="stat-subtext">
+              <span style={{ color: '#0284c7' }}>●</span> Presensi tercatat
+            </div>
           </div>
           <div className="stat-icon-wrapper stat-icon-blue">
-            <Fingerprint size={24} />
+            <Fingerprint size={22} color="#ffffff" strokeWidth={2.2} />
           </div>
         </div>
 
         <div className="admin-stat-card">
           <div>
-            <div className="stat-label">Presensi Lengkap (In & Out)</div>
+            <div className="stat-label">Presensi Lengkap</div>
             <div className="stat-value" style={{ color: '#059669' }}>{totalLengkap}</div>
-            <div style={{ fontSize: 11, color: '#10b981', marginTop: 4 }}>Sudah scan pulang</div>
+            <div className="stat-subtext">
+              <span style={{ color: '#059669' }}>●</span> Sudah scan pulang
+            </div>
           </div>
           <div className="stat-icon-wrapper stat-icon-emerald">
-            <CheckCircle2 size={24} />
+            <CheckCircle2 size={22} color="#ffffff" strokeWidth={2.2} />
           </div>
         </div>
 
@@ -157,21 +161,25 @@ export default function AdminPresensiGuruTab() {
           <div>
             <div className="stat-label">Belum Scan Pulang</div>
             <div className="stat-value" style={{ color: '#d97706' }}>{totalBelumPulang}</div>
-            <div style={{ fontSize: 11, color: '#f59e0b', marginTop: 4 }}>Masih di sekolah / belum checkout</div>
+            <div className="stat-subtext">
+              <span style={{ color: '#d97706' }}>●</span> Masih di sekolah
+            </div>
           </div>
           <div className="stat-icon-wrapper stat-icon-amber">
-            <Clock size={24} />
+            <Clock size={22} color="#ffffff" strokeWidth={2.2} />
           </div>
         </div>
 
         <div className="admin-stat-card">
           <div>
-            <div className="stat-label">Terlambat (&gt; 07:15 WIB)</div>
+            <div className="stat-label">Terlambat (&gt; 07:15)</div>
             <div className="stat-value" style={{ color: '#dc2626' }}>{totalTerlambat}</div>
-            <div style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>Lewat batas jam masuk</div>
+            <div className="stat-subtext">
+              <span style={{ color: '#dc2626' }}>●</span> Lewat batas masuk
+            </div>
           </div>
-          <div className="stat-icon-wrapper stat-icon-purple" style={{ background: 'linear-gradient(135deg, #ef4444, #f87171)' }}>
-            <AlertCircle size={24} />
+          <div className="stat-icon-wrapper stat-icon-red">
+            <AlertCircle size={22} color="#ffffff" strokeWidth={2.2} />
           </div>
         </div>
       </div>
