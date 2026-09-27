@@ -904,7 +904,7 @@ export default function AdminDashboardTab({ onSwitchTab }) {
             </div>
 
             {/* MODAL FOOTER */}
-            <div className="portal-modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
+            <div className="portal-modal-footer" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', padding: '12px 20px', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
               <button
                 type="button"
                 onClick={() => handlePrintClassRecap(selectedDetailClass)}
@@ -923,13 +923,6 @@ export default function AdminDashboardTab({ onSwitchTab }) {
                 }}
               >
                 <Printer size={15} /> Cetak Rekap Kelas
-              </button>
-              <button
-                type="button"
-                className="admin-btn admin-btn-secondary"
-                onClick={() => setDetailModalOpen(false)}
-              >
-                Tutup
               </button>
             </div>
           </div>
