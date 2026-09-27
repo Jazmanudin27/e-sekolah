@@ -1,10 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import {
   Fingerprint, Search, Filter, Calendar, Clock, CheckCircle2,
-  AlertCircle, RefreshCw, Printer, User, MapPin, Eye, X, Download
+  AlertCircle, RefreshCw, Printer, User, MapPin, Eye, X, Download,
+  ExternalLink, Navigation
 } from 'lucide-react';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+
+const getCoordinates = (item) => {
+  if (!item) return null;
+  if (item.latitude && item.longitude) {
+    return { lat: parseFloat(item.latitude), lng: parseFloat(item.longitude) };
+  }
+  if (item.lat && item.lng) {
+    return { lat: parseFloat(item.lat), lng: parseFloat(item.lng) };
+  }
+  const loc = item.lokasi_in || item.lokasi || '';
+  const match = String(loc).match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+  if (match) {
+    return {
+      lat: parseFloat(match[1]),
+      lng: parseFloat(match[2])
+    };
+  }
+  return null;
+};
 
 export default function AdminPresensiGuruTab() {
   const now = new Date();
@@ -363,7 +383,7 @@ export default function AdminPresensiGuruTab() {
       {/* DETAIL MODAL */}
       {selectedDetail && (
         <div className="admin-modal-overlay" onClick={() => setSelectedDetail(null)}>
-          <div className="admin-modal-box" style={{ maxWidth: 520, width: '92%' }} onClick={(e) => e.stopPropagation()}>
+          <div className="admin-modal-box" style={{ maxWidth: 580, width: '94%' }} onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal-header" style={{ padding: '16px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 8, background: 'linear-gradient(135deg, #0284c7, #0369a1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
@@ -385,10 +405,10 @@ export default function AdminPresensiGuruTab() {
               </button>
             </div>
 
-            <div className="admin-modal-body" style={{ padding: '18px 20px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+            <div className="admin-modal-body" style={{ padding: '18px 20px', maxHeight: '75vh', overflowY: 'auto' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
                 <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Tanggal</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Tanggal Presensi</div>
                   <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', marginTop: 2 }}>{selectedDetail.tanggal}</div>
                 </div>
                 <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
@@ -419,17 +439,72 @@ export default function AdminPresensiGuruTab() {
                 </div>
               </div>
 
-              <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 10, border: '1px solid #e2e8f0', marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 4 }}>Lokasi Presensi</div>
-                <div style={{ fontSize: 12.5, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <MapPin size={15} color="#0066ff" />
-                  <span>{selectedDetail.lokasi_in || 'Di Area Sekolah (SMK Artanita)'}</span>
-                </div>
-              </div>
+              {/* LOKASI & INTERACTIVE MAPS SECTION */}
+              {(() => {
+                const coords = getCoordinates(selectedDetail);
+                return (
+                  <div style={{ background: '#ffffff', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', marginBottom: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <MapPin size={14} color="#0284c7" /> Titik Peta Lokasi Presensi
+                      </div>
+                      {coords && (
+                        <a
+                          href={`https://www.google.com/maps?q=${coords.lat},${coords.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-outline-admin"
+                          style={{ padding: '3px 8px', fontSize: 11, gap: 4, height: 26, textDecoration: 'none' }}
+                        >
+                          <ExternalLink size={12} /> Buka di Google Maps
+                        </a>
+                      )}
+                    </div>
 
+                    <div style={{ fontSize: 12, color: '#334155', marginBottom: coords ? 10 : 0 }}>
+                      <span style={{ fontWeight: 600 }}>Keterangan Lokasi: </span>
+                      <span style={{ color: '#0f172a', fontWeight: 700 }}>
+                        {selectedDetail.lokasi_in || (coords ? `${coords.lat}, ${coords.lng}` : 'Di Area Sekolah (SMK Artanita)')}
+                      </span>
+                    </div>
+
+                    {coords ? (
+                      <div style={{
+                        width: '100%',
+                        height: 200,
+                        borderRadius: 10,
+                        overflow: 'hidden',
+                        border: '1px solid #cbd5e1',
+                        background: '#f1f5f9',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                      }}>
+                        <iframe
+                          title="Peta Lokasi Presensi Guru"
+                          width="100%"
+                          height="100%"
+                          frameBorder="0"
+                          scrolling="no"
+                          marginHeight="0"
+                          marginWidth="0"
+                          src={`https://maps.google.com/maps?q=${coords.lat},${coords.lng}&hl=id&z=16&output=embed`}
+                          style={{ border: 0 }}
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ padding: '14px', background: '#f8fafc', borderRadius: 8, textAlign: 'center', color: '#64748b', fontSize: 12, border: '1px dashed #cbd5e1' }}>
+                        Tidak ada koordinat GPS terlampir pada log presensi ini.
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* FOTO SELFIE PRESENSI */}
               {selectedDetail.foto_in && (
-                <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: 10, border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 8, textAlign: 'left' }}>Foto Selfie Presensi</div>
+                <div style={{ background: '#ffffff', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 8, textAlign: 'left' }}>
+                    Foto Selfie Presensi
+                  </div>
                   <img
                     src={selectedDetail.foto_in}
                     alt="Foto Selfie"
