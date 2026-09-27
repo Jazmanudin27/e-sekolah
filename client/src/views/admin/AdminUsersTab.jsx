@@ -219,7 +219,7 @@ export default function AdminUsersTab() {
                         {u.username}
                       </code>
                     </td>
-                    <td style={{ color: '#475569' }}>{u.email || '-'}</td>
+                    <td style={{ color: '#475569' }}>{u.email && u.email !== '-' ? u.email : ''}</td>
                     <td style={{ textAlign: 'center' }}>
                       <span style={{
                         background: (u.role || '').toLowerCase().includes('super') ? '#fef3c7' : '#eff6ff',

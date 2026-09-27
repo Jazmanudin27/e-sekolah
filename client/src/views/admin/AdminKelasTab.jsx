@@ -225,10 +225,10 @@ export default function AdminKelasTab() {
                         {k.nama_kelas}
                       </span>
                     </td>
-                    <td style={{ fontWeight: 600, textAlign: 'center' }}>{k.jurusan || '-'}</td>
+                    <td style={{ fontWeight: 600, textAlign: 'center' }}>{k.jurusan && k.jurusan !== '-' ? k.jurusan : ''}</td>
                     <td>
                       <span style={{ color: '#0f172a', fontWeight: 600 }}>
-                        {k.wali_kelas || 'Belum diatur'}
+                        {k.wali_kelas && k.wali_kelas !== '-' && k.wali_kelas !== 'Belum diatur' ? k.wali_kelas : ''}
                       </span>
                     </td>
                     <td style={{ textAlign: 'center' }}>

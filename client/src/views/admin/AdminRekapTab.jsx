@@ -311,11 +311,13 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                       <td>
                         <div style={{ fontWeight: 800, color: '#0f172a' }}>{g.nama_guru}</div>
                       </td>
-                      <td style={{ fontWeight: 600, textAlign: 'center' }}>{g.nip_nuptk || '-'}</td>
+                      <td style={{ fontWeight: 600, textAlign: 'center' }}>{g.nip_nuptk && g.nip_nuptk !== '-' ? g.nip_nuptk : ''}</td>
                       <td style={{ textAlign: 'center' }}>
-                        <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
-                          {g.status_kepegawaian || 'Guru'}
-                        </span>
+                        {g.status_kepegawaian && g.status_kepegawaian !== '-' ? (
+                          <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
+                            {g.status_kepegawaian}
+                          </span>
+                        ) : ''}
                       </td>
                       <td style={{ textAlign: 'center', fontWeight: 800, color: '#16a34a' }}>
                         {g.total_hadir || 0}
@@ -373,7 +375,7 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                   paginatedList.map((s, idx) => (
                     <tr key={s.kode_siswa || idx}>
                       <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
-                      <td style={{ fontWeight: 700, color: '#0066ff', textAlign: 'center' }}>{s.nis_nisn || `NIS-${s.kode_siswa}`}</td>
+                      <td style={{ fontWeight: 700, color: '#0066ff', textAlign: 'center' }}>{s.nis_nisn && s.nis_nisn !== '-' ? s.nis_nisn : ''}</td>
                       <td>
                         <div style={{ fontWeight: 800, color: '#0f172a' }}>{s.nama_siswa}</div>
                       </td>
@@ -434,7 +436,7 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                   paginatedList.map((m, idx) => (
                     <tr key={m.kode_siswa || idx}>
                       <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
-                      <td style={{ fontWeight: 700, color: '#0066ff', textAlign: 'center' }}>{m.nis_nisn || `NIS-${m.kode_siswa}`}</td>
+                      <td style={{ fontWeight: 700, color: '#0066ff', textAlign: 'center' }}>{m.nis_nisn && m.nis_nisn !== '-' ? m.nis_nisn : ''}</td>
                       <td>
                         <div style={{ fontWeight: 800, color: '#0f172a' }}>{m.nama_siswa}</div>
                       </td>

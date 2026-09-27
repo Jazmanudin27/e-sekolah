@@ -232,7 +232,7 @@ export default function AdminSiswaTab() {
                 paginatedList.map((s, idx) => (
                   <tr key={s.kode_siswa || idx}>
                     <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
-                    <td style={{ fontWeight: 700, color: '#0066ff', textAlign: 'center' }}>{s.nis_nisn || `NIS-${s.kode_siswa}`}</td>
+                    <td style={{ fontWeight: 700, color: '#0066ff', textAlign: 'center' }}>{s.nis_nisn && s.nis_nisn !== '-' ? s.nis_nisn : ''}</td>
                     <td>
                       <div style={{ fontWeight: 800, color: '#0f172a' }}>{s.nama_siswa}</div>
                     </td>
@@ -246,7 +246,7 @@ export default function AdminSiswaTab() {
                         {s.nama_kelas || `Kelas ${s.kode_kelas}`}
                       </span>
                     </td>
-                    <td style={{ color: '#64748b', textAlign: 'center' }}>{s.jurusan || '-'}</td>
+                    <td style={{ color: '#64748b', textAlign: 'center' }}>{s.jurusan && s.jurusan !== '-' ? s.jurusan : ''}</td>
                     <td style={{ textAlign: 'center' }}>
                       <div style={{ display: 'inline-flex', gap: 4 }}>
                         <button className="btn-action-icon btn-edit" title="Edit Siswa" onClick={() => handleOpenEdit(s)}>
