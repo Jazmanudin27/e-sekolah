@@ -24,7 +24,39 @@ async function getGuruById(req, res, next) {
   }
 }
 
+async function createGuru(req, res, next) {
+  try {
+    const id = await GuruModel.create(req.body);
+    sendSuccess(res, 'Data guru berhasil ditambahkan.', { kode_guru: id }, 201);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function updateGuru(req, res, next) {
+  try {
+    const { id } = req.params;
+    await GuruModel.update(id, req.body);
+    sendSuccess(res, 'Data guru berhasil diperbarui.', { kode_guru: id });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function deleteGuru(req, res, next) {
+  try {
+    const { id } = req.params;
+    await GuruModel.delete(id);
+    sendSuccess(res, 'Data guru berhasil dihapus.');
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getAllGuru,
-  getGuruById
+  getGuruById,
+  createGuru,
+  updateGuru,
+  deleteGuru
 };

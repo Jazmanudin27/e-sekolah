@@ -1,11 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const UserModel = require('../models/user.model');
 const GuruModel = require('../models/guru.model');
 const KelasModel = require('../models/kelas.model');
 const { sendSuccess, sendError } = require('../utils/response.util');
 const { JWT_SECRET } = require('../middleware/auth.middleware');
 
-// Multi-Table Login: Checks `guru` table AND `kelas` table with master override
+// Multi-Table Login: Checks `users` table (Admin), `guru` table, and `kelas` table
 async function login(req, res, next) {
   try {
     const { username, password } = req.body;
@@ -18,24 +19,31 @@ async function login(req, res, next) {
     const cleanPassword = String(password).trim();
 
     let user = null;
-    let userType = null; // 'Guru' or 'Kelas'
+    let userType = null; // 'Admin', 'Guru', or 'Kelas'
 
-    // 1. Check in `guru` table first (by username, email, or NIP/NUPTK)
-    const teacher = await GuruModel.findByUsernameOrEmail(cleanUsername);
-    if (teacher) {
-      user = teacher;
-      userType = 'Guru';
+    // 1. Check in `users` table first (Admin / Operator accounts)
+    const adminUser = await UserModel.findByUsernameOrEmail(cleanUsername);
+    if (adminUser) {
+      user = adminUser;
+      userType = 'Admin';
     } else {
-      // 2. Check in `kelas` table second (by username or nama_kelas)
-      const kelasAccount = await KelasModel.findByUsername(cleanUsername);
-      if (kelasAccount) {
-        user = kelasAccount;
-        userType = 'Kelas';
+      // 2. Check in `guru` table second (by username, email, or NIP/NUPTK)
+      const teacher = await GuruModel.findByUsernameOrEmail(cleanUsername);
+      if (teacher) {
+        user = teacher;
+        userType = 'Guru';
+      } else {
+        // 3. Check in `kelas` table third (by username or nama_kelas)
+        const kelasAccount = await KelasModel.findByUsername(cleanUsername);
+        if (kelasAccount) {
+          user = kelasAccount;
+          userType = 'Kelas';
+        }
       }
     }
 
     if (!user) {
-      return sendError(res, `Username '${cleanUsername}' tidak ditemukan di tabel guru maupun kelas.`, 401);
+      return sendError(res, `Username '${cleanUsername}' tidak ditemukan di sistem.`, 401);
     }
 
     // Verify Password:
@@ -70,7 +78,28 @@ async function login(req, res, next) {
     let payload = {};
     let userData = {};
 
-    if (userType === 'Guru') {
+    if (userType === 'Admin') {
+      const userRole = user.role || 'Admin';
+      const displayName = user.name || user.nama || user.username || 'Administrator';
+      payload = {
+        type: 'Admin',
+        id: user.id,
+        name: displayName,
+        username: user.username,
+        email: user.email,
+        role: userRole
+      };
+      userData = {
+        type: 'Admin',
+        id: user.id,
+        name: displayName,
+        nama_guru: displayName,
+        username: user.username,
+        email: user.email,
+        role: userRole,
+        status: user.status || 'Active'
+      };
+    } else if (userType === 'Guru') {
       const userRole = user.role || 'Guru';
       payload = {
         type: 'Guru',
@@ -126,6 +155,20 @@ async function login(req, res, next) {
 // Get Profile
 async function getProfile(req, res, next) {
   try {
+    if (req.user.type === 'Admin') {
+      const adminData = await UserModel.findById(req.user.id);
+      return sendSuccess(res, 'Data profil admin berhasil diambil.', {
+        type: 'Admin',
+        id: req.user.id,
+        name: adminData?.name || adminData?.nama || req.user.name || 'Administrator',
+        nama_guru: adminData?.name || adminData?.nama || req.user.name || 'Administrator',
+        username: adminData?.username || req.user.username,
+        email: adminData?.email || req.user.email,
+        role: adminData?.role || req.user.role || 'Admin',
+        status: adminData?.status || 'Active'
+      });
+    }
+
     if (req.user.type === 'Kelas') {
       const kelasData = await KelasModel.findById(req.user.kode_kelas);
       return sendSuccess(res, 'Data profil kelas berhasil diambil.', {

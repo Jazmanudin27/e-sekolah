@@ -38,6 +38,34 @@ class GuruModel {
     const rows = await query('SELECT COUNT(*) AS total FROM guru WHERE status = "Aktif"');
     return rows[0].total || 0;
   }
+
+  static async create({ nip_nuptk, nama_guru, jk = 'L', no_hp, email, status_kepegawaian = 'PNS', status = 'Aktif', role = 'Guru', username, password }) {
+    const res = await query(
+      `INSERT INTO guru (nip_nuptk, nama_guru, jk, no_hp, email, status_kepegawaian, status, role, username, password)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [nip_nuptk || '-', nama_guru, jk, no_hp || '-', email || '-', status_kepegawaian, status, role, username || nip_nuptk || nama_guru.toLowerCase().replace(/\s+/g, ''), password || '123456']
+    );
+    return res.insertId;
+  }
+
+  static async update(id, data) {
+    const fields = [];
+    const params = [];
+    const allowed = ['nip_nuptk', 'nama_guru', 'jk', 'no_hp', 'email', 'status_kepegawaian', 'status', 'role', 'username', 'password'];
+    for (const key of allowed) {
+      if (data[key] !== undefined) {
+        fields.push(`${key} = ?`);
+        params.push(data[key]);
+      }
+    }
+    if (fields.length === 0) return;
+    params.push(id);
+    await query(`UPDATE guru SET ${fields.join(', ')} WHERE kode_guru = ?`, params);
+  }
+
+  static async delete(id) {
+    await query('DELETE FROM guru WHERE kode_guru = ?', [id]);
+  }
 }
 
 module.exports = GuruModel;

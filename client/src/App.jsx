@@ -16,6 +16,7 @@ import ProfilView from './views/ProfilView';
 import RekapSiswaView from './views/RekapSiswaView';
 import RekapMapelView from './views/RekapMapelView';
 import RekapGuruView from './views/RekapGuruView';
+import AdminDesktopView from './views/admin/AdminDesktopView';
 import api from './api/client';
 
 export default function App() {
@@ -64,11 +65,12 @@ export default function App() {
   const handleLoginSuccess = (user, token) => {
     localStorage.setItem('esekolah_token', token);
     setCurrentUser(user);
+    const isAdmin = user?.type === 'Admin' || (user?.role && ['admin', 'superadmin', 'operator', 'kepala_sekolah'].includes(String(user.role).toLowerCase()));
     const isKelas = user?.type === 'Kelas' || user?.role === 'Kelas';
-    setActiveTab(isKelas ? 'absensiSiswa' : 'beranda');
+    setActiveTab(isAdmin ? 'dashboard' : isKelas ? 'absensiSiswa' : 'beranda');
     Swal.fire({
       title: 'Login Berhasil!',
-      text: `Selamat datang kembali, ${user.nama_guru || user.nama_kelas || user.username || 'Pengguna'}!`,
+      text: `Selamat datang kembali, ${user.name || user.nama_guru || user.nama_kelas || user.username || 'Pengguna'}!`,
       icon: 'success',
       confirmButtonColor: '#0066ff',
       timer: 2200,
@@ -114,7 +116,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="app-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: '#0066ff', fontWeight: 600 }}>Memuat E-Sekolah Mobile...</p>
+        <p style={{ color: '#0066ff', fontWeight: 600 }}>Memuat E-Sekolah...</p>
       </div>
     );
   }
@@ -125,6 +127,11 @@ export default function App() {
         <LoginView onLoginSuccess={handleLoginSuccess} showToast={showToast} />
       </div>
     );
+  }
+
+  // DESKTOP ADMIN PANEL (Only accessible by accounts from `users` table)
+  if (currentUser?.type === 'Admin' || (currentUser?.role && ['admin', 'superadmin', 'operator', 'kepala_sekolah'].includes(String(currentUser.role).toLowerCase()))) {
+    return <AdminDesktopView user={currentUser} onLogout={handleLogout} />;
   }
 
   return (

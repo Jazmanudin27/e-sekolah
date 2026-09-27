@@ -24,7 +24,39 @@ async function getKelasById(req, res, next) {
   }
 }
 
+async function createKelas(req, res, next) {
+  try {
+    const id = await KelasModel.create(req.body);
+    sendSuccess(res, 'Data kelas berhasil ditambahkan.', { kode_kelas: id }, 201);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function updateKelas(req, res, next) {
+  try {
+    const { id } = req.params;
+    await KelasModel.update(id, req.body);
+    sendSuccess(res, 'Data kelas berhasil diperbarui.', { kode_kelas: id });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function deleteKelas(req, res, next) {
+  try {
+    const { id } = req.params;
+    await KelasModel.delete(id);
+    sendSuccess(res, 'Data kelas berhasil dihapus.');
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getAllKelas,
-  getKelasById
+  getKelasById,
+  createKelas,
+  updateKelas,
+  deleteKelas
 };
