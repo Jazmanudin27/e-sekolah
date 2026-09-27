@@ -6,6 +6,7 @@ import {
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function AdminIzinTab() {
   const [izinList, setIzinList] = useState([]);
@@ -193,30 +194,32 @@ export default function AdminIzinTab() {
             />
           </div>
 
-          <select
-            value={filterJenis}
-            onChange={(e) => setFilterJenis(e.target.value)}
-            className="form-control-admin"
-            style={{ width: 170 }}
-          >
-            <option value="ALL">Semua Jenis Izin</option>
-            <option value="Sakit">Sakit</option>
-            <option value="Izin">Izin Pribadi</option>
-            <option value="Cuti">Cuti</option>
-            <option value="Dinas">Tugas Dinas</option>
-          </select>
+          <div style={{ width: 170 }}>
+            <SearchableSelect
+              value={filterJenis}
+              onChange={(e) => setFilterJenis(e.target.value)}
+              options={[
+                { value: 'ALL', label: 'Semua Jenis Izin' },
+                { value: 'Sakit', label: 'Sakit' },
+                { value: 'Izin', label: 'Izin Pribadi' },
+                { value: 'Cuti', label: 'Cuti' },
+                { value: 'Dinas', label: 'Tugas Dinas' }
+              ]}
+            />
+          </div>
 
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="form-control-admin"
-            style={{ width: 170 }}
-          >
-            <option value="ALL">Semua Status</option>
-            <option value="Disetujui">Disetujui</option>
-            <option value="Menunggu">Menunggu</option>
-            <option value="Ditolak">Ditolak</option>
-          </select>
+          <div style={{ width: 170 }}>
+            <SearchableSelect
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              options={[
+                { value: 'ALL', label: 'Semua Status' },
+                { value: 'Disetujui', label: 'Disetujui' },
+                { value: 'Menunggu', label: 'Menunggu' },
+                { value: 'Ditolak', label: 'Ditolak' }
+              ]}
+            />
+          </div>
         </div>
 
         {/* TABLE */}

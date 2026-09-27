@@ -5,6 +5,7 @@ import {
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function AdminSiswaTab() {
   const [siswaList, setSiswaList] = useState([]);
@@ -314,29 +315,27 @@ export default function AdminSiswaTab() {
 
                   <div className="form-group-admin">
                     <label>Jenis Kelamin</label>
-                    <select
-                      className="form-control-admin"
+                    <SearchableSelect
                       value={formData.jk}
                       onChange={(e) => setFormData({ ...formData, jk: e.target.value })}
-                    >
-                      <option value="L">Laki-laki (L)</option>
-                      <option value="P">Perempuan (P)</option>
-                    </select>
+                      options={[
+                        { value: 'L', label: 'Laki-laki (L)' },
+                        { value: 'P', label: 'Perempuan (P)' }
+                      ]}
+                    />
                   </div>
 
                   <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>
                     <label>Pilih Kelas</label>
-                    <select
-                      className="form-control-admin"
+                    <SearchableSelect
+                      placeholder="-- Pilih Kelas --"
                       value={formData.kode_kelas}
                       onChange={(e) => setFormData({ ...formData, kode_kelas: e.target.value })}
-                    >
-                      {kelasList.map(k => (
-                        <option key={k.kode_kelas} value={k.kode_kelas}>
-                          {k.nama_kelas} {k.jurusan && k.jurusan !== '-' ? `(${k.jurusan})` : ''}
-                        </option>
-                      ))}
-                    </select>
+                      options={kelasList.map(k => ({
+                        value: k.kode_kelas,
+                        label: `${k.nama_kelas} ${k.jurusan && k.jurusan !== '-' ? `(${k.jurusan})` : ''}`
+                      }))}
+                    />
                   </div>
                 </div>
               </div>

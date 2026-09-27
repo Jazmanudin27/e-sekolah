@@ -6,6 +6,7 @@ import {
   UserX, Sparkles
 } from 'lucide-react';
 import api from '../../api/client';
+import SearchableSelect from '../../components/SearchableSelect';
 
 const BULAN_OPTIONS = [
   { value: '1', label: 'Januari' },
@@ -563,28 +564,20 @@ export default function AdminDashboardTab({ onSwitchTab }) {
 
         {/* 2 FILTER DROPDOWNS: BULAN & TAHUN */}
         <div className="portal-rekap-filter-bar">
-          <div className="portal-rekap-select-group">
-            <select
+          <div className="portal-rekap-select-group" style={{ minWidth: 150 }}>
+            <SearchableSelect
               value={rekapBulan}
               onChange={(e) => setRekapBulan(e.target.value)}
-              className="portal-filter-dropdown"
-            >
-              {BULAN_OPTIONS.map(b => (
-                <option key={b.value} value={b.value}>{b.label}</option>
-              ))}
-            </select>
+              options={BULAN_OPTIONS.map(b => ({ value: b.value, label: b.label }))}
+            />
           </div>
 
-          <div className="portal-rekap-select-group">
-            <select
+          <div className="portal-rekap-select-group" style={{ minWidth: 110 }}>
+            <SearchableSelect
               value={rekapTahun}
               onChange={(e) => setRekapTahun(e.target.value)}
-              className="portal-filter-dropdown"
-            >
-              {TAHUN_OPTIONS.map(yr => (
-                <option key={yr} value={yr}>{yr}</option>
-              ))}
-            </select>
+              options={TAHUN_OPTIONS.map(yr => ({ value: yr, label: yr }))}
+            />
           </div>
 
           <button
@@ -694,19 +687,19 @@ export default function AdminDashboardTab({ onSwitchTab }) {
         <h2 className="portal-jadwal-heading">JADWAL PELAJARAN</h2>
 
         {/* DAY SELECTOR DROPDOWN */}
-        <div className="portal-day-selector-wrapper">
-          <select
+        <div className="portal-day-selector-wrapper" style={{ minWidth: 140 }}>
+          <SearchableSelect
             value={selectedHari}
             onChange={(e) => setSelectedHari(e.target.value)}
-            className="portal-day-select"
-          >
-            <option value="Senin">Senin</option>
-            <option value="Selasa">Selasa</option>
-            <option value="Rabu">Rabu</option>
-            <option value="Kamis">Kamis</option>
-            <option value="Jumat">Jumat</option>
-            <option value="Sabtu">Sabtu</option>
-          </select>
+            options={[
+              { value: 'Senin', label: 'Senin' },
+              { value: 'Selasa', label: 'Selasa' },
+              { value: 'Rabu', label: 'Rabu' },
+              { value: 'Kamis', label: 'Kamis' },
+              { value: 'Jumat', label: 'Jumat' },
+              { value: 'Sabtu', label: 'Sabtu' }
+            ]}
+          />
         </div>
 
         {/* MATRIX GRID TABLE */}

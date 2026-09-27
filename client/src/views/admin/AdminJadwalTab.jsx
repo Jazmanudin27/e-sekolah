@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function AdminJadwalTab() {
   const [viewMode, setViewMode] = useState('matrix'); // 'matrix' or 'list'
@@ -243,32 +244,29 @@ export default function AdminJadwalTab() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 14, marginBottom: 20 }}>
               <div>
                 <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, display: 'block' }}>FILTER HARI</label>
-                <select
+                <SearchableSelect
                   value={selectedHari}
                   onChange={handleHariChange}
-                  className="form-control-admin"
-                >
-                  <option value="ALL">Semua Hari (Senin - Sabtu)</option>
-                  {daftarHari.map(h => (
-                    <option key={h} value={h}>{h}</option>
-                  ))}
-                </select>
+                  options={[
+                    { value: 'ALL', label: 'Semua Hari (Senin - Sabtu)' },
+                    ...daftarHari.map(h => ({ value: h, label: h }))
+                  ]}
+                />
               </div>
 
               <div>
                 <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, display: 'block' }}>FILTER KELAS</label>
-                <select
+                <SearchableSelect
                   value={selectedKelas}
                   onChange={handleKelasChange}
-                  className="form-control-admin"
-                >
-                  <option value="ALL">Semua Kelas</option>
-                  {kelasList.map(k => (
-                    <option key={k.kode_kelas} value={k.kode_kelas}>
-                      {k.nama_kelas} {k.jurusan && k.jurusan !== '-' ? `(${k.jurusan})` : ''}
-                    </option>
-                  ))}
-                </select>
+                  options={[
+                    { value: 'ALL', label: 'Semua Kelas' },
+                    ...kelasList.map(k => ({
+                      value: k.kode_kelas,
+                      label: `${k.nama_kelas} ${k.jurusan && k.jurusan !== '-' ? `(${k.jurusan})` : ''}`
+                    }))
+                  ]}
+                />
               </div>
 
               <div style={{ display: 'flex', alignItems: 'flex-end' }}>

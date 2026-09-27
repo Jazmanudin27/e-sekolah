@@ -5,6 +5,7 @@ import {
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function AdminKelasTab() {
   const [kelasList, setKelasList] = useState([]);
@@ -303,18 +304,19 @@ export default function AdminKelasTab() {
 
                   <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>
                     <label>Wali Kelas</label>
-                    <select
-                      className="form-control-admin"
+                    <SearchableSelect
+                      placeholder="-- Pilih Wali Kelas (Opsional) --"
                       value={formData.kode_guru}
                       onChange={(e) => setFormData({ ...formData, kode_guru: e.target.value })}
-                    >
-                      <option value="">-- Pilih Wali Kelas (Opsional) --</option>
-                      {guruList.map(g => (
-                        <option key={g.kode_guru} value={g.kode_guru}>
-                          {g.nama_guru} ({g.nip_nuptk || 'Guru'})
-                        </option>
-                      ))}
-                    </select>
+                      isClearable
+                      options={[
+                        { value: '', label: '-- Pilih Wali Kelas (Opsional) --' },
+                        ...guruList.map(g => ({
+                          value: g.kode_guru,
+                          label: `${g.nama_guru} (${g.nip_nuptk || 'Guru'})`
+                        }))
+                      ]}
+                    />
                   </div>
 
                   <div className="form-group-admin">

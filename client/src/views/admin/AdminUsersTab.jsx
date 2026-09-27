@@ -5,6 +5,7 @@ import {
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function AdminUsersTab() {
   const [userList, setUserList] = useState([]);
@@ -320,28 +321,28 @@ export default function AdminUsersTab() {
 
                   <div className="form-group-admin">
                     <label>Hak Akses / Role</label>
-                    <select
-                      className="form-control-admin"
+                    <SearchableSelect
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    >
-                      <option value="admin">Admin</option>
-                      <option value="superadmin">Super Admin</option>
-                      <option value="operator">Operator Sekolah</option>
-                      <option value="kepala_sekolah">Kepala Sekolah</option>
-                    </select>
+                      options={[
+                        { value: 'admin', label: 'Admin' },
+                        { value: 'superadmin', label: 'Super Admin' },
+                        { value: 'operator', label: 'Operator Sekolah' },
+                        { value: 'kepala_sekolah', label: 'Kepala Sekolah' }
+                      ]}
+                    />
                   </div>
 
                   <div className="form-group-admin">
                     <label>Status Akun</label>
-                    <select
-                      className="form-control-admin"
+                    <SearchableSelect
                       value={formData.status}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    >
-                      <option value="active">Active (Aktif)</option>
-                      <option value="inactive">Inactive (Nonaktif)</option>
-                    </select>
+                      options={[
+                        { value: 'active', label: 'Active (Aktif)' },
+                        { value: 'inactive', label: 'Inactive (Nonaktif)' }
+                      ]}
+                    />
                   </div>
 
                   <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>

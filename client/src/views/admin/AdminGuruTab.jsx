@@ -5,6 +5,7 @@ import {
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function AdminGuruTab() {
   const [guruList, setGuruList] = useState([]);
@@ -335,41 +336,41 @@ export default function AdminGuruTab() {
 
                   <div className="form-group-admin">
                     <label>Jenis Kelamin</label>
-                    <select
-                      className="form-control-admin"
+                    <SearchableSelect
                       value={formData.jk}
                       onChange={(e) => setFormData({ ...formData, jk: e.target.value })}
-                    >
-                      <option value="L">Laki-laki (L)</option>
-                      <option value="P">Perempuan (P)</option>
-                    </select>
+                      options={[
+                        { value: 'L', label: 'Laki-laki (L)' },
+                        { value: 'P', label: 'Perempuan (P)' }
+                      ]}
+                    />
                   </div>
 
                   <div className="form-group-admin">
                     <label>Status Kepegawaian</label>
-                    <select
-                      className="form-control-admin"
+                    <SearchableSelect
                       value={formData.status_kepegawaian}
                       onChange={(e) => setFormData({ ...formData, status_kepegawaian: e.target.value })}
-                    >
-                      <option value="PNS">PNS</option>
-                      <option value="PPPK">PPPK</option>
-                      <option value="GTT">Guru Tidak Tetap (GTT)</option>
-                      <option value="Honorer">Honorer</option>
-                      <option value="Yayasan">Guru Tetap Yayasan</option>
-                    </select>
+                      options={[
+                        { value: 'PNS', label: 'PNS' },
+                        { value: 'PPPK', label: 'PPPK' },
+                        { value: 'GTT', label: 'Guru Tidak Tetap (GTT)' },
+                        { value: 'Honorer', label: 'Honorer' },
+                        { value: 'Yayasan', label: 'Guru Tetap Yayasan' }
+                      ]}
+                    />
                   </div>
 
                   <div className="form-group-admin">
                     <label>Status Akun</label>
-                    <select
-                      className="form-control-admin"
+                    <SearchableSelect
                       value={formData.status}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    >
-                      <option value="Aktif">Aktif</option>
-                      <option value="Nonaktif">Nonaktif</option>
-                    </select>
+                      options={[
+                        { value: 'Aktif', label: 'Aktif' },
+                        { value: 'Nonaktif', label: 'Nonaktif' }
+                      ]}
+                    />
                   </div>
 
                   <div className="form-group-admin">
