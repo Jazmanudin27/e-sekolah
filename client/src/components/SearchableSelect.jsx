@@ -12,12 +12,14 @@ export default function SearchableSelect({
   className = '',
   style = {},
   isClearable = false,
-  zIndex = 9999
+  zIndex = 999999
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [dropdownStyle, setDropdownStyle] = useState({});
   const containerRef = useRef(null);
   const searchInputRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   // Normalize options to [{ value, label, sublabel }]
   const normalizedOptions = useMemo(() => {
@@ -51,10 +53,43 @@ export default function SearchableSelect({
     );
   }, [normalizedOptions, searchTerm]);
 
+  // Calculate fixed floating position to NEVER be clipped by modals or containers
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const updatePosition = () => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const dropdownHeight = 220;
+        const openUpwards = spaceBelow < dropdownHeight && rect.top > dropdownHeight;
+
+        setDropdownStyle({
+          position: 'fixed',
+          left: `${rect.left}px`,
+          width: `${rect.width}px`,
+          top: openUpwards ? `${rect.top - 6}px` : `${rect.bottom + 4}px`,
+          transform: openUpwards ? 'translateY(-100%)' : 'none',
+          zIndex
+        });
+      };
+
+      updatePosition();
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+      return () => {
+        window.removeEventListener('scroll', updatePosition, true);
+        window.removeEventListener('resize', updatePosition);
+      };
+    }
+  }, [isOpen, zIndex]);
+
   // Handle outside click & auto-focus search
   useEffect(() => {
     const handleOutsideClick = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+      if (
+        containerRef.current && !containerRef.current.contains(e.target) &&
+        dropdownRef.current && !dropdownRef.current.contains(e.target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -135,11 +170,12 @@ export default function SearchableSelect({
         </div>
       </div>
 
-      {/* FLOATING DROPDOWN MENU */}
+      {/* FLOATING DROPDOWN MENU (FIXED POSITIONED SO NEVER CLIPPED) */}
       {isOpen && (
         <div
+          ref={dropdownRef}
           className="searchable-select-dropdown"
-          style={{ zIndex }}
+          style={{ ...dropdownStyle }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* SEARCH INPUT BAR */}
