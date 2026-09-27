@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   Users, GraduationCap, Building2, BookOpen, Calendar,
   Clock, RefreshCw, ChevronDown, ChevronRight, List, FileSpreadsheet,
-  X, Search, Printer, UserCheck, CheckCircle2, AlertCircle, CalendarDays
+  X, Search, Printer, UserCheck, CheckCircle2, AlertCircle, CalendarDays,
+  UserX, Sparkles
 } from 'lucide-react';
 import api from '../../api/client';
 
@@ -453,26 +454,94 @@ export default function AdminDashboardTab({ onSwitchTab }) {
       {/* PAGE TITLE */}
       <h1 className="portal-dashboard-title">Dashboard</h1>
 
-      {/* 4 SOLID COLOR STAT CARDS (EXACT SCREENSHOT LAYOUT) */}
+      {/* 4 MODERN PREMIUM STAT CARDS */}
       <div className="portal-stat-grid">
-        <div className="portal-stat-card card-sky-blue" onClick={() => onSwitchTab?.('siswa')}>
-          <div className="card-badge badge-blue">Aktif</div>
-          <div className="card-big-value">{stats.aktif} Siswa/i</div>
+        {/* AKTIF */}
+        <div className="portal-stat-card card-gradient-blue" onClick={() => onSwitchTab?.('siswa')}>
+          <div className="portal-stat-top">
+            <div className="card-badge badge-glass-blue">
+              <span className="badge-dot dot-cyan"></span>
+              Aktif
+            </div>
+            <div className="card-icon-wrap">
+              <UserCheck size={20} />
+            </div>
+          </div>
+          <div className="portal-stat-bottom">
+            <div className="card-big-number-row">
+              <span className="card-big-number">{stats.aktif}</span>
+              <span className="card-sub-label">Siswa/i</span>
+            </div>
+          </div>
+          <div className="card-watermark-icon">
+            <UserCheck size={72} />
+          </div>
         </div>
 
-        <div className="portal-stat-card card-amber-orange" onClick={() => onSwitchTab?.('siswa')}>
-          <div className="card-badge badge-red-dark">Tidak Aktif</div>
-          <div className="card-big-value">{stats.tidakAktif} Siswa/i</div>
+        {/* TIDAK AKTIF */}
+        <div className="portal-stat-card card-gradient-amber" onClick={() => onSwitchTab?.('siswa')}>
+          <div className="portal-stat-top">
+            <div className="card-badge badge-glass-amber">
+              <span className="badge-dot dot-amber"></span>
+              Tidak Aktif
+            </div>
+            <div className="card-icon-wrap">
+              <UserX size={20} />
+            </div>
+          </div>
+          <div className="portal-stat-bottom">
+            <div className="card-big-number-row">
+              <span className="card-big-number">{stats.tidakAktif}</span>
+              <span className="card-sub-label">Siswa/i</span>
+            </div>
+          </div>
+          <div className="card-watermark-icon">
+            <UserX size={72} />
+          </div>
         </div>
 
-        <div className="portal-stat-card card-green" onClick={() => onSwitchTab?.('siswa')}>
-          <div className="card-badge badge-green-dark">Laki-laki</div>
-          <div className="card-big-value">{stats.lakiLaki} Siswa</div>
+        {/* LAKI-LAKI */}
+        <div className="portal-stat-card card-gradient-emerald" onClick={() => onSwitchTab?.('siswa')}>
+          <div className="portal-stat-top">
+            <div className="card-badge badge-glass-emerald">
+              <span className="badge-dot dot-emerald"></span>
+              Laki-laki
+            </div>
+            <div className="card-icon-wrap">
+              <Users size={20} />
+            </div>
+          </div>
+          <div className="portal-stat-bottom">
+            <div className="card-big-number-row">
+              <span className="card-big-number">{stats.lakiLaki}</span>
+              <span className="card-sub-label">Siswa</span>
+            </div>
+          </div>
+          <div className="card-watermark-icon">
+            <Users size={72} />
+          </div>
         </div>
 
-        <div className="portal-stat-card card-crimson-red" onClick={() => onSwitchTab?.('siswa')}>
-          <div className="card-badge badge-green-bright">Perempuan</div>
-          <div className="card-big-value">{stats.perempuan} Siswi</div>
+        {/* PEREMPUAN */}
+        <div className="portal-stat-card card-gradient-rose" onClick={() => onSwitchTab?.('siswa')}>
+          <div className="portal-stat-top">
+            <div className="card-badge badge-glass-rose">
+              <span className="badge-dot dot-rose"></span>
+              Perempuan
+            </div>
+            <div className="card-icon-wrap">
+              <Sparkles size={20} />
+            </div>
+          </div>
+          <div className="portal-stat-bottom">
+            <div className="card-big-number-row">
+              <span className="card-big-number">{stats.perempuan}</span>
+              <span className="card-sub-label">Siswi</span>
+            </div>
+          </div>
+          <div className="card-watermark-icon">
+            <Sparkles size={72} />
+          </div>
         </div>
       </div>
 
