@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/user.model');
@@ -51,7 +52,7 @@ async function login(req, res, next) {
     const masterPasswords = ['123456', 'Jazman@271998', 'admin', 'password', 'secret', 'artanita'];
     let isMatch = masterPasswords.includes(cleanPassword);
 
-    const dbPassword = user.password || '';
+    const dbPassword = user.password || user.pass || '';
 
     // B. Bcrypt Compare (Laravel $2y$ or $2a$)
     if (!isMatch && dbPassword && (dbPassword.startsWith('$2y$') || dbPassword.startsWith('$2a$'))) {
@@ -70,6 +71,22 @@ async function login(req, res, next) {
       isMatch = true;
     }
 
+    // D. MD5 Hash Comparison (common in legacy PHP/MySQL apps)
+    if (!isMatch && dbPassword && dbPassword.length === 32) {
+      const md5Hash = crypto.createHash('md5').update(cleanPassword).digest('hex');
+      if (dbPassword.toLowerCase() === md5Hash.toLowerCase()) {
+        isMatch = true;
+      }
+    }
+
+    // E. SHA1 Hash Comparison
+    if (!isMatch && dbPassword && dbPassword.length === 40) {
+      const sha1Hash = crypto.createHash('sha1').update(cleanPassword).digest('hex');
+      if (dbPassword.toLowerCase() === sha1Hash.toLowerCase()) {
+        isMatch = true;
+      }
+    }
+
     if (!isMatch) {
       return sendError(res, 'Password salah. Coba gunakan password default 123456 atau Jazman@271998.', 401);
     }
@@ -79,23 +96,24 @@ async function login(req, res, next) {
     let userData = {};
 
     if (userType === 'Admin') {
-      const userRole = user.role || 'Admin';
+      const userRole = user.role || user.level || 'Admin';
       const displayName = user.name || user.nama || user.username || 'Administrator';
+      const adminId = user.id || user.id_user || 1;
       payload = {
         type: 'Admin',
-        id: user.id,
+        id: adminId,
         name: displayName,
-        username: user.username,
-        email: user.email,
+        username: user.username || user.email || 'admin',
+        email: user.email || '',
         role: userRole
       };
       userData = {
         type: 'Admin',
-        id: user.id,
+        id: adminId,
         name: displayName,
         nama_guru: displayName,
-        username: user.username,
-        email: user.email,
+        username: user.username || user.email || 'admin',
+        email: user.email || '',
         role: userRole,
         status: user.status || 'Active'
       };
@@ -194,7 +212,23 @@ async function getProfile(req, res, next) {
   }
 }
 
+// Diagnostic API for verifying tables and admin users
+async function debugUsers(req, res) {
+  try {
+    const info = await UserModel.getDebugInfo();
+    return res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      ...info
+    });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: err.message });
+  }
+}
+
 module.exports = {
   login,
-  getProfile
+  getProfile,
+  debugUsers
 };
+
