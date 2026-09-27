@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import {
   GraduationCap, Lock, ArrowRight, ShieldCheck, User,
-  BookOpen, Sparkles, CheckCircle2, Users, Building2, Shield
+  BookOpen, Sparkles
 } from 'lucide-react';
 import api from '../api/client';
+import loginHeroImg from '../assets/login_hero.jpg';
 
 export default function LoginView({ onLoginSuccess, showToast }) {
-  const [username, setUsername] = useState('ali@artanita.com');
-  const [password, setPassword] = useState('123456');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!username || !password) {
+      showToast('Username/Email dan Password wajib diisi.', false);
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await api.post('/auth/login', { username, password });
@@ -32,110 +38,78 @@ export default function LoginView({ onLoginSuccess, showToast }) {
     <div className="login-responsive-container">
       <div className="login-card-wrapper">
         {/* ========================================================
-            LEFT COLUMN (DESKTOP HERO SHOWCASE - HIDDEN ON MOBILE)
+            LEFT COLUMN (DESKTOP HERO VISUAL - 3D ARTWORK BANNER)
             ======================================================== */}
-        <div className="login-hero-showcase">
-          <div className="login-hero-glow"></div>
-
-          <div>
-            {/* BRAND CREST */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
-              <div style={{
-                width: 48,
-                height: 48,
-                background: 'linear-gradient(135deg, #38bdf8, #0052cc)',
-                borderRadius: 14,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 16px rgba(56, 189, 248, 0.4)',
-                border: '1.5px solid rgba(255, 255, 255, 0.3)'
-              }}>
-                <GraduationCap size={28} color="#ffffff" />
-              </div>
-              <div>
-                <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0, letterSpacing: '0.3px', color: '#ffffff' }}>
-                  E-SEKOLAH PRO
-                </h1>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#38bdf8', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                  Sistem Informasi Terpadu
-                </span>
-              </div>
+        <div
+          className="login-hero-showcase"
+          style={{
+            backgroundImage: `linear-gradient(180deg, rgba(7, 22, 51, 0.45) 0%, rgba(7, 22, 51, 0.9) 100%), url(${loginHeroImg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            position: 'relative'
+          }}
+        >
+          {/* TOP BRAND BADGE */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 12,
+            background: 'rgba(15, 23, 42, 0.65)',
+            padding: '8px 16px',
+            borderRadius: 14,
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            width: 'fit-content'
+          }}>
+            <div style={{
+              width: 36,
+              height: 36,
+              background: 'linear-gradient(135deg, #0066ff, #00d2ff)',
+              borderRadius: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 10px rgba(0, 102, 255, 0.4)'
+            }}>
+              <GraduationCap size={20} color="#ffffff" />
             </div>
-
-            <h2 style={{ fontSize: 24, fontWeight: 800, lineHeight: 1.3, marginBottom: 12, color: '#ffffff' }}>
-              Pusat Layanan Presensi & Akademik Sekolah Modern
-            </h2>
-            <p style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.6, marginBottom: 28 }}>
-              Satu portal terintegrasi untuk seluruh ekosistem sekolah. Sistem otomatis mengarahkan peran dan modul kerja Anda.
-            </p>
-
-            {/* FEATURE BADGES LIST */}
-            <div className="login-hero-feature-item">
-              <div className="login-feature-icon">
-                <Shield size={18} color="#38bdf8" />
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#ffffff', letterSpacing: '0.3px', margin: 0 }}>
+                E-SEKOLAH PRO
               </div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#ffffff' }}>Panel Administrator Desktop</div>
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
-                  Akses khusus akun `users` untuk kelola master guru, siswa, kelas, mapel & rekap.
-                </div>
-              </div>
-            </div>
-
-            <div className="login-hero-feature-item">
-              <div className="login-feature-icon">
-                <Users size={18} color="#34d399" />
-              </div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#ffffff' }}>Portal Pengajar & Guru</div>
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
-                  Presensi mandiri, scan jam masuk/pulang, jadwal mengajar, dan absensi mapel.
-                </div>
-              </div>
-            </div>
-
-            <div className="login-hero-feature-item">
-              <div className="login-feature-icon">
-                <Building2 size={18} color="#fbbf24" />
-              </div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#ffffff' }}>Akun Absensi Kelas</div>
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
-                  Input kehadiran harian siswa khusus untuk masing-masing kelas.
-                </div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#38bdf8', letterSpacing: '0.5px' }}>
+                DIGITAL SMART CAMPUS
               </div>
             </div>
           </div>
 
-          {/* FOOTER BADGE */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: 16 }}>
-            <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>
-              Smart Role Detection • v2.6.0
-            </span>
-            <span style={{
-              background: 'rgba(56, 189, 248, 0.15)',
-              color: '#38bdf8',
-              fontSize: 10,
-              fontWeight: 800,
-              padding: '3px 8px',
-              borderRadius: 6,
-              border: '1px solid rgba(56, 189, 248, 0.3)'
-            }}>
-              SECURE SSO
-            </span>
+          {/* BOTTOM HERO CONTENT OVERLAY */}
+          <div style={{
+            background: 'rgba(7, 19, 43, 0.75)',
+            backdropFilter: 'blur(12px)',
+            padding: '24px 20px',
+            borderRadius: 20,
+            border: '1px solid rgba(56, 189, 248, 0.25)',
+            marginTop: 'auto'
+          }}>
+            <h2 style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.35, marginBottom: 8, color: '#ffffff' }}>
+              Sistem Informasi Presensi & Manajemen Akademik
+            </h2>
+            <p style={{ fontSize: 12.5, color: '#cbd5e1', lineHeight: 1.5, margin: 0 }}>
+              Platform pintar yang menghubungkan administrator, tenaga pendidik, dan presensi kelas dalam satu ekosistem terpadu.
+            </p>
           </div>
         </div>
 
         {/* ========================================================
-            RIGHT COLUMN (LOGIN FORM - RESPONSIVE FOR ALL DEVICES)
+            RIGHT COLUMN (CLEAN LOGIN FORM)
             ======================================================== */}
         <div className="login-form-side">
-          {/* MOBILE-ONLY HEADER LOGO (Shown when Left Column is hidden on small screens) */}
+          {/* MOBILE-ONLY BRAND HEADER (Visible on small screens) */}
           <div style={{ textAlign: 'center', marginBottom: 20 }} className="mobile-header-show">
             <div style={{
-              width: 58,
-              height: 58,
+              width: 56,
+              height: 56,
               background: 'linear-gradient(135deg, #0284c7, #6366f1)',
               borderRadius: 18,
               display: 'inline-flex',
@@ -146,29 +120,29 @@ export default function LoginView({ onLoginSuccess, showToast }) {
               boxShadow: '0 0 25px rgba(56, 189, 248, 0.45)',
               border: '2px solid rgba(255,255,255,0.25)'
             }}>
-              <GraduationCap size={32} />
+              <GraduationCap size={30} />
             </div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: '#ffffff', margin: 0 }}>
-              SMK ARTANITA
+            <h1 style={{ fontSize: 20, fontWeight: 800, color: '#ffffff', margin: 0 }}>
+              E-SEKOLAH PRO
             </h1>
             <p style={{ color: '#94a3b8', fontSize: 12, marginTop: 4, fontWeight: 500 }}>
-              Sistem Informasi & Presensi Terpadu
+              Sistem Presensi & Layanan Akademik
             </p>
           </div>
 
           {/* FORM HEADER */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
             <div>
-              <h2 style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', margin: 0 }}>
-                Masuk Portal Terpadu
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                Selamat Datang
               </h2>
-              <p style={{ color: '#94a3b8', fontSize: 12, marginTop: 4, margin: 0 }}>
-                Silakan masukkan kredensial akun Anda
+              <p style={{ color: '#94a3b8', fontSize: 12.5, marginTop: 4, margin: 0 }}>
+                Silakan masuk untuk mengakses sistem
               </p>
             </div>
             <div style={{
-              width: 38,
-              height: 38,
+              width: 40,
+              height: 40,
               borderRadius: 12,
               background: 'rgba(16, 185, 129, 0.15)',
               color: '#10b981',
@@ -177,35 +151,11 @@ export default function LoginView({ onLoginSuccess, showToast }) {
               justifyContent: 'center',
               border: '1px solid rgba(16, 185, 129, 0.3)'
             }}>
-              <ShieldCheck size={20} />
+              <ShieldCheck size={22} />
             </div>
           </div>
 
-          {/* ROLE IDENTIFIER TAGS */}
-          <div style={{
-            display: 'flex',
-            gap: 6,
-            marginBottom: 20,
-            background: 'rgba(30, 41, 59, 0.6)',
-            padding: '8px 10px',
-            borderRadius: 12,
-            border: '1px solid rgba(255, 255, 255, 0.08)'
-          }}>
-            <span style={{ fontSize: 10.5, fontWeight: 700, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '2px 8px', borderRadius: 6 }}>
-              🛡️ Admin
-            </span>
-            <span style={{ fontSize: 10.5, fontWeight: 700, color: '#34d399', background: 'rgba(52, 211, 153, 0.15)', padding: '2px 8px', borderRadius: 6 }}>
-              👨‍🏫 Guru
-            </span>
-            <span style={{ fontSize: 10.5, fontWeight: 700, color: '#fbbf24', background: 'rgba(251, 191, 36, 0.15)', padding: '2px 8px', borderRadius: 6 }}>
-              🏫 Kelas
-            </span>
-            <span style={{ fontSize: 10.5, color: '#94a3b8', marginLeft: 'auto', alignSelf: 'center', fontWeight: 600 }}>
-              Auto-detect
-            </span>
-          </div>
-
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             {/* USERNAME INPUT FIELD */}
             <div>
               <label style={{ display: 'block', color: '#cbd5e1', fontSize: 11.5, fontWeight: 700, marginBottom: 6, letterSpacing: '0.3px' }}>
@@ -250,7 +200,7 @@ export default function LoginView({ onLoginSuccess, showToast }) {
             {/* PASSWORD INPUT FIELD */}
             <div>
               <label style={{ display: 'block', color: '#cbd5e1', fontSize: 11.5, fontWeight: 700, marginBottom: 6, letterSpacing: '0.3px' }}>
-                PASSWORD AKSES
+                PASSWORD
               </label>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <Lock size={18} style={{ position: 'absolute', left: 14, color: '#38bdf8', pointerEvents: 'none' }} />
@@ -294,13 +244,13 @@ export default function LoginView({ onLoginSuccess, showToast }) {
               disabled={loading}
               style={{
                 width: '100%',
-                height: 48,
+                height: 50,
                 marginTop: 6,
                 background: 'linear-gradient(135deg, #0072ff, #0052cc)',
                 border: 'none',
                 borderRadius: 14,
                 color: '#ffffff',
-                fontSize: 14.5,
+                fontSize: 15,
                 fontWeight: 700,
                 cursor: loading ? 'not-allowed' : 'pointer',
                 display: 'flex',
@@ -312,15 +262,15 @@ export default function LoginView({ onLoginSuccess, showToast }) {
                 opacity: loading ? 0.7 : 1
               }}
             >
-              <span>{loading ? 'Memverifikasi Akun...' : 'Masuk Aplikasi'}</span>
+              <span>{loading ? 'Memverifikasi Data...' : 'Masuk Aplikasi'}</span>
               <ArrowRight size={18} />
             </button>
           </form>
 
           {/* FOOTER MOTTO */}
-          <div style={{ textAlign: 'center', marginTop: 20 }}>
-            <p style={{ fontSize: 11.5, color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: 0 }}>
-              <BookOpen size={13} /> E-Sekolah Digital • Aman & Transparan
+          <div style={{ textAlign: 'center', marginTop: 24 }}>
+            <p style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: 0 }}>
+              <BookOpen size={14} /> Presensi Digital Transparan & Akurat
             </p>
           </div>
         </div>
