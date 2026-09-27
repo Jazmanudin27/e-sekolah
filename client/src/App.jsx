@@ -236,6 +236,7 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={(t) => setActiveTab(t)}
         onOpenPresensi={(type) => setPresensiModalType(type || 'in')}
+        user={user}
       />
 
       {/* Presensi CheckIn/Out Modal */}

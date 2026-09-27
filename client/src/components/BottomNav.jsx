@@ -1,7 +1,77 @@
 import React from 'react';
-import { Home, FileText, Fingerprint, History, User } from 'lucide-react';
+import { Home, UserCheck, BookOpen, FileBarChart, User, FileText, Fingerprint, History } from 'lucide-react';
 
-export default function BottomNav({ activeTab, onTabChange, onOpenPresensi }) {
+export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user }) {
+  const isClassAccount = user?.type === 'Kelas' || Boolean(user?.kode_kelas && user?.role === 'Kelas');
+
+  if (isClassAccount) {
+    return (
+      <nav className="bottom-nav-white">
+        <div className="bottom-nav-inner" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: 2 }}>
+          {/* 1. BERANDA */}
+          <button
+            className={`nav-link-item ${activeTab === 'beranda' ? 'active' : ''}`}
+            onClick={() => onTabChange('beranda')}
+          >
+            <div className="nav-icon-wrapper">
+              <Home size={20} />
+            </div>
+            <span>Beranda</span>
+            {activeTab === 'beranda' && <span className="active-dot" />}
+          </button>
+
+          {/* 2. ABSEN SISWA */}
+          <button
+            className={`nav-link-item ${activeTab === 'absensiSiswa' ? 'active' : ''}`}
+            onClick={() => onTabChange('absensiSiswa')}
+          >
+            <div className="nav-icon-wrapper">
+              <UserCheck size={20} />
+            </div>
+            <span>Absen Siswa</span>
+            {activeTab === 'absensiSiswa' && <span className="active-dot" />}
+          </button>
+
+          {/* 3. ABSEN MAPEL */}
+          <button
+            className={`nav-link-item ${activeTab === 'absensiMapel' ? 'active' : ''}`}
+            onClick={() => onTabChange('absensiMapel')}
+          >
+            <div className="nav-icon-wrapper">
+              <BookOpen size={20} />
+            </div>
+            <span>Absen Mapel</span>
+            {activeTab === 'absensiMapel' && <span className="active-dot" />}
+          </button>
+
+          {/* 4. REKAP SISWA */}
+          <button
+            className={`nav-link-item ${activeTab === 'rekapSiswa' ? 'active' : ''}`}
+            onClick={() => onTabChange('rekapSiswa')}
+          >
+            <div className="nav-icon-wrapper">
+              <FileBarChart size={20} />
+            </div>
+            <span>Rekap</span>
+            {activeTab === 'rekapSiswa' && <span className="active-dot" />}
+          </button>
+
+          {/* 5. PROFIL */}
+          <button
+            className={`nav-link-item ${activeTab === 'profil' ? 'active' : ''}`}
+            onClick={() => onTabChange('profil')}
+          >
+            <div className="nav-icon-wrapper">
+              <User size={20} />
+            </div>
+            <span>Profil</span>
+            {activeTab === 'profil' && <span className="active-dot" />}
+          </button>
+        </div>
+      </nav>
+    );
+  }
+
   return (
     <nav className="bottom-nav-white">
       <div className="bottom-nav-inner">
