@@ -25,27 +25,58 @@ import AdminIzinTab from './AdminIzinTab';
 import AdminAbsensiSiswaTab from './AdminAbsensiSiswaTab';
 import AdminAbsensiMapelTab from './AdminAbsensiMapelTab';
 
+const VALID_ADMIN_TABS = [
+  'dashboard', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal',
+  'izin', 'presensiGuru', 'absensiSiswa', 'absensiMapel',
+  'rekapGuru', 'rekapSiswa', 'rekapMapel',
+  'users', 'settings'
+];
+
+const getInitialTab = () => {
+  try {
+    const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
+    if (hash && VALID_ADMIN_TABS.includes(hash)) return hash;
+    const stored = localStorage.getItem('admin_active_tab');
+    if (stored && VALID_ADMIN_TABS.includes(stored)) return stored;
+  } catch (e) {}
+  return 'dashboard';
+};
+
+const getInitialOpenMenus = (tab) => ({
+  dataMaster: ['kelas', 'siswa', 'guru', 'mapel', 'jadwal'].includes(tab),
+  suratMenyurat: ['izin'].includes(tab),
+  presensiAbsensi: ['presensiGuru', 'absensiSiswa', 'absensiMapel'].includes(tab),
+  laporanMaster: false,
+  laporanAbsensi: ['rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(tab),
+  laporanSurat: false,
+  perpustakaan: false,
+  pengaturan: ['settings', 'users'].includes(tab)
+});
+
 export default function AdminDesktopView({ user, onLogout }) {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
-  // Accordion open states matching screenshot
-  const [openMenus, setOpenMenus] = useState({
-    dataMaster: true,
-    suratMenyurat: false,
-    presensiAbsensi: true,
-    laporanMaster: false,
-    laporanAbsensi: true,
-    laporanSurat: false,
-    perpustakaan: false,
-    pengaturan: false
-  });
+  // Accordion open states (closed by default on dashboard, only opens if active tab belongs to the group)
+  const [openMenus, setOpenMenus] = useState(() => getInitialOpenMenus(getInitialTab()));
 
   const searchInputRef = useRef(null);
+
+  // Listen to hash change (e.g. browser back/forward buttons)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
+      if (hash && VALID_ADMIN_TABS.includes(hash) && hash !== activeTab) {
+        handleSelectTab(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [activeTab]);
 
   useEffect(() => {
     const updateClock = () => {
@@ -80,7 +111,35 @@ export default function AdminDesktopView({ user, onLogout }) {
 
   const handleSelectTab = (tabId) => {
     setActiveTab(tabId);
+    try {
+      localStorage.setItem('admin_active_tab', tabId);
+      window.location.hash = tabId;
+    } catch (e) {}
     setIsMobileSidebarOpen(false);
+
+    if (tabId === 'dashboard') {
+      // Close all submenus when returning to dashboard
+      setOpenMenus({
+        dataMaster: false,
+        suratMenyurat: false,
+        presensiAbsensi: false,
+        laporanMaster: false,
+        laporanAbsensi: false,
+        laporanSurat: false,
+        perpustakaan: false,
+        pengaturan: false
+      });
+    } else {
+      // Ensure parent menu of selected child is open
+      setOpenMenus(prev => ({
+        ...prev,
+        dataMaster: ['kelas', 'siswa', 'guru', 'mapel', 'jadwal'].includes(tabId) ? true : prev.dataMaster,
+        suratMenyurat: ['izin'].includes(tabId) ? true : prev.suratMenyurat,
+        presensiAbsensi: ['presensiGuru', 'absensiSiswa', 'absensiMapel'].includes(tabId) ? true : prev.presensiAbsensi,
+        laporanAbsensi: ['rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(tabId) ? true : prev.laporanAbsensi,
+        pengaturan: ['settings', 'users'].includes(tabId) ? true : prev.pengaturan,
+      }));
+    }
   };
 
   return (

@@ -494,20 +494,6 @@ export default function AdminAbsensiMapelTab() {
           itemsPerPage={itemsPerPage}
           onPageChange={setCurrentPage}
         />
-
-        {/* BOTTOM SAVE BAR */}
-        {studentList.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18, paddingTop: 14, borderTop: '1px solid #f1f5f9' }}>
-            <button
-              className="btn-primary-admin"
-              onClick={handleSave}
-              disabled={saving}
-              style={{ padding: '12px 28px', fontSize: 14 }}
-            >
-              <Save size={18} /> {saving ? 'Menyimpan Perubahan...' : 'Simpan Presensi Mata Pelajaran'}
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
