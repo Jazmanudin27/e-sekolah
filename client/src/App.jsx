@@ -122,11 +122,7 @@ export default function App() {
   }
 
   if (!currentUser) {
-    return (
-      <div className="app-shell" style={{ background: '#070a14', minHeight: '100vh' }}>
-        <LoginView onLoginSuccess={handleLoginSuccess} showToast={showToast} />
-      </div>
-    );
+    return <LoginView onLoginSuccess={handleLoginSuccess} showToast={showToast} />;
   }
 
   // DESKTOP ADMIN PANEL (Only accessible by accounts from `users` table)

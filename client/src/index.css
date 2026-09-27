@@ -1001,3 +1001,107 @@ body {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
+/* ===================================================
+   RESPONSIVE LOGIN PORTAL (DESKTOP & MOBILE SPLIT)
+   =================================================== */
+.login-responsive-container {
+  min-height: 100vh;
+  width: 100vw;
+  background-color: #070a14;
+  background-image: radial-gradient(circle at 50% 15%, rgba(14, 165, 233, 0.22), rgba(7, 10, 20, 0.98) 75%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.login-card-wrapper {
+  width: 100%;
+  max-width: 1060px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 35px rgba(56, 189, 248, 0.12);
+  display: flex;
+}
+
+/* DESKTOP HERO SHOWCASE LEFT COLUMN */
+.login-hero-showcase {
+  width: 48%;
+  background: linear-gradient(135deg, #071633 0%, #004ecc 50%, #0066ff 100%);
+  padding: 44px 38px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-hero-glow {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.35);
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+.login-hero-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.login-feature-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* RIGHT FORM SIDE */
+.login-form-side {
+  width: 52%;
+  padding: 44px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* MOBILE ADAPTIVE RESPONSIVENESS */
+@media (max-width: 900px) {
+  .login-card-wrapper {
+    max-width: 430px;
+    flex-direction: column;
+    border-radius: 24px;
+    padding: 24px 20px;
+  }
+
+  .login-hero-showcase {
+    display: none;
+  }
+
+  .login-form-side {
+    width: 100%;
+    padding: 0;
+  }
+}
+
+
