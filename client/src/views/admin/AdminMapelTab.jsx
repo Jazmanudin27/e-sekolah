@@ -212,12 +212,12 @@ export default function AdminMapelTab() {
                       </span>
                     </td>
                     <td style={{ textAlign: 'center' }}>
-                      <div style={{ display: 'inline-flex', gap: 6 }}>
+                      <div style={{ display: 'inline-flex', gap: 4 }}>
                         <button className="btn-action-icon btn-edit" title="Edit Mapel" onClick={() => handleOpenEdit(m)}>
-                          <Edit2 size={15} />
+                          <Edit2 size={13} />
                         </button>
                         <button className="btn-action-icon btn-delete" title="Hapus Mapel" onClick={() => handleDelete(m)}>
-                          <Trash2 size={15} />
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     </td>

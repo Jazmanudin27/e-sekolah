@@ -241,12 +241,12 @@ export default function AdminUsersTab() {
                       </span>
                     </td>
                     <td style={{ textAlign: 'center' }}>
-                      <div style={{ display: 'inline-flex', gap: 6 }}>
+                      <div style={{ display: 'inline-flex', gap: 4 }}>
                         <button className="btn-action-icon btn-edit" title="Edit Akun" onClick={() => handleOpenEdit(u)}>
-                          <Edit2 size={15} />
+                          <Edit2 size={13} />
                         </button>
                         <button className="btn-action-icon btn-delete" title="Hapus Akun" onClick={() => handleDelete(u)}>
-                          <Trash2 size={15} />
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     </td>

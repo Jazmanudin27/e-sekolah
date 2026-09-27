@@ -714,35 +714,37 @@ body {
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12.5px;
+  font-size: 12px;
   border: 1px solid #cbd5e1;
 }
 
 .admin-table thead {
-  background: #ffffff;
+  background: #f1f5f9;
 }
 
 .admin-table th {
-  background-color: #ffffff;
+  background-color: #f1f5f9;
   border: 1px solid #cbd5e1;
-  color: #1e293b;
+  color: #0f172a;
   font-weight: 700;
-  font-size: 11.5px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 8px 10px;
+  padding: 6px 8px;
   text-align: center;
   vertical-align: middle;
+  height: 30px;
 }
 
 .admin-table td {
   border: 1px solid #cbd5e1;
-  padding: 8px 10px;
+  padding: 4px 8px;
   color: #1e293b;
   font-weight: 500;
-  font-size: 12.5px;
+  font-size: 12px;
   vertical-align: middle;
   background: #ffffff;
+  height: 32px;
 }
 
 .admin-table tr:hover td {
@@ -750,68 +752,101 @@ body {
 }
 
 .btn-primary-admin {
-  background: #007bff;
+  background: #0284c7;
   color: #ffffff;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 5px 14px;
+  border-radius: 4px;
   font-weight: 600;
-  font-size: 13px;
-  border: none;
+  font-size: 12px;
+  border: 1px solid #0369a1;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background 0.15s ease;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(2, 132, 199, 0.25);
 }
 
 .btn-primary-admin:hover:not(:disabled) {
-  background: #0069d9;
+  background: #0369a1;
+  border-color: #075985;
 }
 
 .btn-outline-admin {
   background: #ffffff;
   color: #334155;
   border: 1px solid #cbd5e1;
-  padding: 7px 14px;
-  border-radius: 6px;
+  padding: 5px 12px;
+  border-radius: 4px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  transition: all 0.15s ease;
 }
 
 .btn-outline-admin:hover {
-  background: #f8fafc;
+  background: #f1f5f9;
   border-color: #94a3b8;
 }
 
 .btn-action-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.15s ease;
+  margin: 0 2px;
 }
 
-.btn-edit { background: #eff6ff; color: #2563eb; }
-.btn-edit:hover { background: #2563eb; color: #ffffff; }
+.btn-edit {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border: 1px solid #0369a1 !important;
+  box-shadow: 0 1px 2px rgba(2, 132, 199, 0.35);
+}
+.btn-edit:hover {
+  background: #0369a1 !important;
+  border-color: #075985 !important;
+  transform: translateY(-1px);
+}
 
-.btn-delete { background: #fef2f2; color: #ef4444; }
-.btn-delete:hover { background: #ef4444; color: #ffffff; }
+.btn-delete {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #b91c1c !important;
+  box-shadow: 0 1px 2px rgba(220, 38, 38, 0.35);
+}
+.btn-delete:hover {
+  background: #b91c1c !important;
+  border-color: #991b1b !important;
+  transform: translateY(-1px);
+}
+
+.btn-info-action {
+  background: #475569 !important;
+  color: #ffffff !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 1px 2px rgba(71, 85, 105, 0.35);
+}
+.btn-info-action:hover {
+  background: #334155 !important;
+  transform: translateY(-1px);
+}
 
 .form-control-admin {
   width: 100%;
-  height: 38px;
-  padding: 0 12px;
+  height: 32px;
+  padding: 0 10px;
   border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 13px;
+  border-radius: 4px;
+  font-size: 12px;
   color: #1e293b;
   background: #ffffff;
   outline: none;

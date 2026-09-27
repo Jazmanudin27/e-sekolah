@@ -342,11 +342,11 @@ export default function AdminPresensiGuruTab() {
                         {item.foto_in ? (
                           <button
                             className="btn-action-icon"
-                            style={{ background: '#f0fdf4', color: '#16a34a' }}
+                            style={{ background: '#0284c7', color: '#ffffff', border: '1px solid #0369a1' }}
                             onClick={() => setPreviewPhoto(item.foto_in)}
                             title="Lihat Foto Selfie Presensi"
                           >
-                            <Eye size={15} />
+                            <Eye size={13} />
                           </button>
                         ) : (
                           <span style={{ color: '#cbd5e1', fontSize: 11 }}>-</span>

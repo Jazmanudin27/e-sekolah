@@ -305,11 +305,11 @@ export default function AdminIzinTab() {
                           {status !== 'Disetujui' && (
                             <button
                               className="btn-action-icon"
-                              style={{ background: '#ecfdf5', color: '#059669' }}
+                              style={{ background: '#16a34a', color: '#ffffff', border: '1px solid #15803d' }}
                               onClick={() => handleUpdateStatus(item, 'Disetujui')}
                               title="Setujui Izin"
                             >
-                              <CheckCircle2 size={15} />
+                              <CheckCircle2 size={13} />
                             </button>
                           )}
                           <button
@@ -317,7 +317,7 @@ export default function AdminIzinTab() {
                             onClick={() => handleDelete(item)}
                             title="Hapus Surat Izin"
                           >
-                            <Trash2 size={15} />
+                            <Trash2 size={13} />
                           </button>
                         </div>
                       </td>
