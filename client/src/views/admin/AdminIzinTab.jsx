@@ -280,7 +280,7 @@ export default function AdminIzinTab() {
                       <td style={{ fontWeight: 600, textAlign: 'center' }}>{item.tanggal_selesai || item.tanggal_mulai}</td>
                       <td>
                         <div style={{ maxWidth: 260, fontSize: 12.5, color: '#334155', lineHeight: 1.4 }}>
-                          {item.keterangan || '-'}
+                          {item.keterangan && item.keterangan !== '-' ? item.keterangan : ''}
                         </div>
                       </td>
                       <td style={{ textAlign: 'center' }}>

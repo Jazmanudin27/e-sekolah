@@ -548,6 +548,96 @@ body {
 }
 
 /* =====================================================
+   ADMIN STATS OVERVIEW CARDS (Grid & Modern Widgets)
+   ===================================================== */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1024px) {
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-stat-card {
+  background: #ffffff;
+  border: 1px solid #d8e0ea;
+  border-radius: 6px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: capitalize;
+  letter-spacing: 0.01em;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+  margin-top: 4px;
+}
+
+.stat-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon-blue {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.stat-icon-emerald {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.stat-icon-amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.stat-icon-purple {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.stat-icon-red {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* =====================================================
    JADWAL PELAJARAN MATRIX TABLE (EXACT MATCH TO SCREENSHOT)
    ===================================================== */
 .portal-jadwal-container {
