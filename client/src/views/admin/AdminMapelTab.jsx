@@ -128,6 +128,8 @@ export default function AdminMapelTab() {
   return (
     <div>
       <div className="admin-panel">
+        <h2 className="portal-card-heading">DATA MASTER MATA PELAJARAN</h2>
+
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
@@ -195,17 +197,17 @@ export default function AdminMapelTab() {
               ) : (
                 paginatedList.map((m, idx) => (
                   <tr key={m.kode_mapel || idx}>
-                    <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
-                    <td>
-                      <code style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, fontSize: 12, color: '#475569', fontWeight: 700 }}>
+                    <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <code style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 4, fontSize: 12, color: '#475569', fontWeight: 700 }}>
                         MPL-{m.kode_mapel}
                       </code>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 14 }}>{m.nama_mapel}</div>
+                      <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 13 }}>{m.nama_mapel}</div>
                     </td>
-                    <td>
-                      <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '4px 10px', borderRadius: 8, fontSize: 12, fontWeight: 800 }}>
+                    <td style={{ textAlign: 'center' }}>
+                      <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '3px 10px', borderRadius: 4, fontSize: 12, fontWeight: 800 }}>
                         {m.kkm || 75}
                       </span>
                     </td>

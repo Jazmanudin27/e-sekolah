@@ -161,6 +161,8 @@ export default function AdminGuruTab() {
   return (
     <div>
       <div className="admin-panel">
+        <h2 className="portal-card-heading">DATA MASTER TENAGA PENDIDIK & GURU</h2>
+
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
@@ -242,24 +244,24 @@ export default function AdminGuruTab() {
               ) : (
                 paginatedList.map((g, idx) => (
                   <tr key={g.kode_guru || idx}>
-                    <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
+                    <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
                     <td>
                       <div style={{ fontWeight: 800, color: '#0f172a' }}>{g.nama_guru}</div>
                       <div style={{ fontSize: 11, color: '#64748b' }}>{g.email || '-'}</div>
                     </td>
-                    <td style={{ fontWeight: 600 }}>{g.nip_nuptk || '-'}</td>
-                    <td>
+                    <td style={{ fontWeight: 600, textAlign: 'center' }}>{g.nip_nuptk || '-'}</td>
+                    <td style={{ textAlign: 'center' }}>
                       <span style={{ fontWeight: 700, color: g.jk === 'L' ? '#0066ff' : '#be185d' }}>
-                        {g.jk === 'L' ? 'Laki-laki' : 'Perempuan'}
+                        {g.jk === 'L' ? 'L' : 'P'}
                       </span>
                     </td>
-                    <td>
-                      <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
+                    <td style={{ textAlign: 'center' }}>
+                      <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700 }}>
                         {g.status_kepegawaian || 'PNS'}
                       </span>
                     </td>
-                    <td>{g.no_hp || '-'}</td>
-                    <td>
+                    <td style={{ textAlign: 'center' }}>{g.no_hp || '-'}</td>
+                    <td style={{ textAlign: 'center' }}>
                       <span className={g.status === 'Aktif' ? 'status-badge-active' : 'status-badge-inactive'}>
                         {g.status || 'Aktif'}
                       </span>

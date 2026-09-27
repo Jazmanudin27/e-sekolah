@@ -151,6 +151,8 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
   return (
     <div>
       <div className="admin-panel">
+        <h2 className="portal-card-heading">PUSAT LAPORAN & REKAPITULASI PRESENSI</h2>
+
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
@@ -307,12 +309,12 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                 ) : (
                   paginatedList.map((g, idx) => (
                     <tr key={g.kode_guru || idx}>
-                      <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
+                      <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
                       <td>
                         <div style={{ fontWeight: 800, color: '#0f172a' }}>{g.nama_guru}</div>
                       </td>
-                      <td style={{ fontWeight: 600 }}>{g.nip_nuptk || '-'}</td>
-                      <td>
+                      <td style={{ fontWeight: 600, textAlign: 'center' }}>{g.nip_nuptk || '-'}</td>
+                      <td style={{ textAlign: 'center' }}>
                         <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
                           {g.status_kepegawaian || 'Guru'}
                         </span>
@@ -372,12 +374,12 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                 ) : (
                   paginatedList.map((s, idx) => (
                     <tr key={s.kode_siswa || idx}>
-                      <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
-                      <td style={{ fontWeight: 700, color: '#0066ff' }}>{s.nis_nisn || `NIS-${s.kode_siswa}`}</td>
+                      <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
+                      <td style={{ fontWeight: 700, color: '#0066ff', textAlign: 'center' }}>{s.nis_nisn || `NIS-${s.kode_siswa}`}</td>
                       <td>
                         <div style={{ fontWeight: 800, color: '#0f172a' }}>{s.nama_siswa}</div>
                       </td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
                           {s.nama_kelas || `Kelas ${s.kode_kelas}`}
                         </span>
@@ -433,17 +435,17 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                 ) : (
                   paginatedList.map((m, idx) => (
                     <tr key={m.kode_siswa || idx}>
-                      <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
-                      <td style={{ fontWeight: 700, color: '#0066ff' }}>{m.nis_nisn || `NIS-${m.kode_siswa}`}</td>
+                      <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
+                      <td style={{ fontWeight: 700, color: '#0066ff', textAlign: 'center' }}>{m.nis_nisn || `NIS-${m.kode_siswa}`}</td>
                       <td>
                         <div style={{ fontWeight: 800, color: '#0f172a' }}>{m.nama_siswa}</div>
                       </td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
                           {m.nama_kelas || `Kelas ${m.kode_kelas}`}
                         </span>
                       </td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         <span style={{ fontWeight: 700, color: '#7c3aed' }}>
                           {m.nama_mapel || 'Semua Mapel'}
                         </span>

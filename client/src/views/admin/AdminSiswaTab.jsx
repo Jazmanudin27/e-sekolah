@@ -148,6 +148,8 @@ export default function AdminSiswaTab() {
   return (
     <div>
       <div className="admin-panel">
+        <h2 className="portal-card-heading">DATA MASTER SISWA</h2>
+
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
@@ -231,22 +233,22 @@ export default function AdminSiswaTab() {
               ) : (
                 paginatedList.map((s, idx) => (
                   <tr key={s.kode_siswa || idx}>
-                    <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
-                    <td style={{ fontWeight: 700, color: '#0066ff' }}>{s.nis_nisn || `NIS-${s.kode_siswa}`}</td>
+                    <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
+                    <td style={{ fontWeight: 700, color: '#0066ff', textAlign: 'center' }}>{s.nis_nisn || `NIS-${s.kode_siswa}`}</td>
                     <td>
                       <div style={{ fontWeight: 800, color: '#0f172a' }}>{s.nama_siswa}</div>
                     </td>
-                    <td>
+                    <td style={{ textAlign: 'center' }}>
                       <span style={{ fontWeight: 700, color: s.jk === 'L' ? '#0066ff' : '#be185d' }}>
-                        {s.jk === 'L' ? 'Laki-laki' : 'Perempuan'}
+                        {s.jk === 'L' ? 'L' : 'P'}
                       </span>
                     </td>
-                    <td>
-                      <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
+                    <td style={{ textAlign: 'center' }}>
+                      <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700 }}>
                         {s.nama_kelas || `Kelas ${s.kode_kelas}`}
                       </span>
                     </td>
-                    <td style={{ color: '#64748b' }}>{s.jurusan || '-'}</td>
+                    <td style={{ color: '#64748b', textAlign: 'center' }}>{s.jurusan || '-'}</td>
                     <td style={{ textAlign: 'center' }}>
                       <div style={{ display: 'inline-flex', gap: 6 }}>
                         <button className="btn-action-icon btn-edit" title="Edit Siswa" onClick={() => handleOpenEdit(s)}>

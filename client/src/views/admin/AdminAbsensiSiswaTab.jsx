@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
+import Pagination from '../../components/Pagination';
 
 const getTodayIndonesianDate = () => {
   try {
@@ -28,12 +29,15 @@ export default function AdminAbsensiSiswaTab() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [isExistingData, setIsExistingData] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchKelas();
   }, []);
 
   useEffect(() => {
+    setCurrentPage(1);
     if (selectedKelas) {
       loadStudentsAndAttendance(selectedKelas, tanggal);
     }
@@ -213,6 +217,8 @@ export default function AdminAbsensiSiswaTab() {
 
       {/* MAIN DATA PANEL */}
       <div className="admin-panel">
+        <h2 className="portal-card-heading">PENCATATAN ABSENSI HARIAN SISWA</h2>
+
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
@@ -314,116 +320,128 @@ export default function AdminAbsensiSiswaTab() {
                   </td>
                 </tr>
               ) : (
-                studentList.map((siswa, idx) => {
-                  const currentStatus = studentStatus[siswa.nisn] || 'H';
-                  const isL = (siswa.jenis_kelamin || '').toUpperCase() === 'L';
+                (() => {
+                  const startIndex = (currentPage - 1) * itemsPerPage;
+                  const paginatedList = studentList.slice(startIndex, startIndex + itemsPerPage);
+                  return paginatedList.map((siswa, idx) => {
+                    const currentStatus = studentStatus[siswa.nisn] || 'H';
+                    const isL = (siswa.jenis_kelamin || '').toUpperCase() === 'L';
 
-                  return (
-                    <tr key={siswa.nisn || idx}>
-                      <td style={{ fontWeight: 700, color: '#64748b' }}>{idx + 1}</td>
-                      <td style={{ fontWeight: 600, color: '#0066ff' }}>{siswa.nisn}</td>
-                      <td>
-                        <div style={{ fontWeight: 700, color: '#0f172a' }}>{siswa.nama_siswa}</div>
-                        <div style={{ fontSize: 11, color: '#64748b' }}>{siswa.nis ? `NIS: ${siswa.nis}` : '-'}</div>
-                      </td>
-                      <td>
-                        <span style={{
-                          padding: '3px 8px',
-                          borderRadius: 8,
-                          fontSize: 11,
-                          fontWeight: 700,
-                          background: isL ? '#eff6ff' : '#fdf2f8',
-                          color: isL ? '#1d4ed8' : '#be185d'
-                        }}>
-                          {isL ? 'Laki-laki' : 'Perempuan'}
-                        </span>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                          {/* HADIR BUTTON */}
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(siswa.nisn, 'H')}
-                            style={{
-                              padding: '6px 14px',
-                              borderRadius: 10,
-                              fontSize: 12,
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              border: currentStatus === 'H' ? '2px solid #059669' : '1px solid #e2e8f0',
-                              background: currentStatus === 'H' ? '#ecfdf5' : '#ffffff',
-                              color: currentStatus === 'H' ? '#059669' : '#64748b',
-                              transition: 'all 0.15s ease'
-                            }}
-                          >
-                            Hadir (H)
-                          </button>
+                    return (
+                      <tr key={siswa.nisn || idx}>
+                        <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
+                        <td style={{ fontWeight: 700, color: '#0066ff', textAlign: 'center' }}>{siswa.nisn}</td>
+                        <td>
+                          <div style={{ fontWeight: 700, color: '#0f172a' }}>{siswa.nama_siswa}</div>
+                          <div style={{ fontSize: 11, color: '#64748b' }}>{siswa.nis ? `NIS: ${siswa.nis}` : '-'}</div>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <span style={{
+                            padding: '3px 8px',
+                            borderRadius: 8,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            background: isL ? '#eff6ff' : '#fdf2f8',
+                            color: isL ? '#1d4ed8' : '#be185d'
+                          }}>
+                            {isL ? 'L' : 'P'}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                            {/* HADIR BUTTON */}
+                            <button
+                              type="button"
+                              onClick={() => handleStatusChange(siswa.nisn, 'H')}
+                              style={{
+                                padding: '6px 14px',
+                                borderRadius: 10,
+                                fontSize: 12,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                border: currentStatus === 'H' ? '2px solid #059669' : '1px solid #e2e8f0',
+                                background: currentStatus === 'H' ? '#ecfdf5' : '#ffffff',
+                                color: currentStatus === 'H' ? '#059669' : '#64748b',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              Hadir (H)
+                            </button>
 
-                          {/* SAKIT BUTTON */}
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(siswa.nisn, 'S')}
-                            style={{
-                              padding: '6px 14px',
-                              borderRadius: 10,
-                              fontSize: 12,
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              border: currentStatus === 'S' ? '2px solid #d97706' : '1px solid #e2e8f0',
-                              background: currentStatus === 'S' ? '#fffbeb' : '#ffffff',
-                              color: currentStatus === 'S' ? '#d97706' : '#64748b',
-                              transition: 'all 0.15s ease'
-                            }}
-                          >
-                            Sakit (S)
-                          </button>
+                            {/* SAKIT BUTTON */}
+                            <button
+                              type="button"
+                              onClick={() => handleStatusChange(siswa.nisn, 'S')}
+                              style={{
+                                padding: '6px 14px',
+                                borderRadius: 10,
+                                fontSize: 12,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                border: currentStatus === 'S' ? '2px solid #d97706' : '1px solid #e2e8f0',
+                                background: currentStatus === 'S' ? '#fffbeb' : '#ffffff',
+                                color: currentStatus === 'S' ? '#d97706' : '#64748b',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              Sakit (S)
+                            </button>
 
-                          {/* IZIN BUTTON */}
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(siswa.nisn, 'I')}
-                            style={{
-                              padding: '6px 14px',
-                              borderRadius: 10,
-                              fontSize: 12,
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              border: currentStatus === 'I' ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                              background: currentStatus === 'I' ? '#eff6ff' : '#ffffff',
-                              color: currentStatus === 'I' ? '#2563eb' : '#64748b',
-                              transition: 'all 0.15s ease'
-                            }}
-                          >
-                            Izin (I)
-                          </button>
+                            {/* IZIN BUTTON */}
+                            <button
+                              type="button"
+                              onClick={() => handleStatusChange(siswa.nisn, 'I')}
+                              style={{
+                                padding: '6px 14px',
+                                borderRadius: 10,
+                                fontSize: 12,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                border: currentStatus === 'I' ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                                background: currentStatus === 'I' ? '#eff6ff' : '#ffffff',
+                                color: currentStatus === 'I' ? '#2563eb' : '#64748b',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              Izin (I)
+                            </button>
 
-                          {/* ALPA BUTTON */}
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(siswa.nisn, 'A')}
-                            style={{
-                              padding: '6px 14px',
-                              borderRadius: 10,
-                              fontSize: 12,
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              border: currentStatus === 'A' ? '2px solid #dc2626' : '1px solid #e2e8f0',
-                              background: currentStatus === 'A' ? '#fef2f2' : '#ffffff',
-                              color: currentStatus === 'A' ? '#dc2626' : '#64748b',
-                              transition: 'all 0.15s ease'
-                            }}
-                          >
-                            Alpa (A)
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
+                            {/* ALPA BUTTON */}
+                            <button
+                              type="button"
+                              onClick={() => handleStatusChange(siswa.nisn, 'A')}
+                              style={{
+                                padding: '6px 14px',
+                                borderRadius: 10,
+                                fontSize: 12,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                border: currentStatus === 'A' ? '2px solid #dc2626' : '1px solid #e2e8f0',
+                                background: currentStatus === 'A' ? '#fef2f2' : '#ffffff',
+                                color: currentStatus === 'A' ? '#dc2626' : '#64748b',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              Alpa (A)
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  });
+                })()
               )}
             </tbody>
           </table>
         </div>
+
+        {/* PAGINATION */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={studentList.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
 
         {/* BOTTOM SAVE BAR */}
         {studentList.length > 0 && (

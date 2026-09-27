@@ -144,6 +144,8 @@ export default function AdminUsersTab() {
   return (
     <div>
       <div className="admin-panel">
+        <h2 className="portal-card-heading">MANAJEMEN AKUN ADMINISTRATOR & USERS</h2>
+
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
@@ -210,22 +212,22 @@ export default function AdminUsersTab() {
               ) : (
                 paginatedList.map((u, idx) => (
                   <tr key={u.id || idx}>
-                    <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
+                    <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
                     <td>
                       <div style={{ fontWeight: 800, color: '#0f172a' }}>{u.name || u.nama || u.username}</div>
                     </td>
-                    <td>
-                      <code style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, fontSize: 12, color: '#0066ff', fontWeight: 700 }}>
+                    <td style={{ textAlign: 'center' }}>
+                      <code style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 4, fontSize: 12, color: '#0066ff', fontWeight: 700 }}>
                         {u.username}
                       </code>
                     </td>
                     <td style={{ color: '#475569' }}>{u.email || '-'}</td>
-                    <td>
+                    <td style={{ textAlign: 'center' }}>
                       <span style={{
                         background: (u.role || '').toLowerCase().includes('super') ? '#fef3c7' : '#eff6ff',
                         color: (u.role || '').toLowerCase().includes('super') ? '#b45309' : '#1d4ed8',
-                        padding: '4px 10px',
-                        borderRadius: 8,
+                        padding: '3px 10px',
+                        borderRadius: 4,
                         fontSize: 11,
                         fontWeight: 800,
                         textTransform: 'uppercase'
@@ -233,7 +235,7 @@ export default function AdminUsersTab() {
                         {u.role || 'Admin'}
                       </span>
                     </td>
-                    <td>
+                    <td style={{ textAlign: 'center' }}>
                       <span className={u.status === 'active' || u.status === 'Aktif' ? 'status-badge-active' : 'status-badge-inactive'}>
                         {u.status || 'Active'}
                       </span>

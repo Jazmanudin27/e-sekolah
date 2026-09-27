@@ -78,19 +78,19 @@ export default function AdminDashboardTab({ onSwitchTab }) {
     { jam: 11, range: '13.20 - 14.00' }
   ];
 
-  // Preset mock from screenshot to guarantee exact aesthetic match if DB empty
+  // Preset mock matching live screenshot exactly
   const defaultScheduleMatrix = {
-    1: { 'X AKL': '4', 'X PPLG': '7' },
-    2: { 'X AKL': '4', 'X MPLB': '17', 'X PM': '7', 'X PPLG': '8' },
-    3: { 'X AKL': '7', 'X MPLB': '17', 'X PM': '6', 'X PPLG': '7' },
+    1: { 'X AKL': '4', 'X MPLB': '22', 'X PPLG': '7' },
+    2: { 'X AKL': '5', 'X MPLB': '19', 'X PM': '7', 'X PPLG': '8' },
+    3: { 'X AKL': '7', 'X MPLB': '19', 'X PM': '6', 'X PPLG': '7' },
     4: { 'X AKL': '8', 'X MPLB': '3', 'X PM': '7', 'X PPLG': '6' },
     5: {}, // Istirahat
-    6: { 'X AKL': '4', 'X MPLB': '4', 'X PM': '7', 'X PPLG': '7' },
-    7: { 'X AKL': '4', 'X MPLB': '6', 'X PM': '4', 'X PPLG': '7' },
-    8: { 'X AKL': '4', 'X MPLB': '6', 'X PM': '4', 'X PPLG': '7' },
+    6: { 'X AKL': '5', 'X MPLB': '5', 'X PM': '7', 'X PPLG': '7' },
+    7: { 'X AKL': '4', 'X MPLB': '6', 'X PM': '5', 'X PPLG': '7' },
+    8: { 'X AKL': '5', 'X MPLB': '6', 'X PM': '5', 'X PPLG': '7' },
     9: {}, // Istirahat
-    10: { 'X AKL': '7', 'X MPLB': '13', 'X PPLG': '6', 'XI AKL': '8', 'XI MPLB': '17', 'XI PM': '11', 'XI PPLG': '7', 'XII AKL': '15', 'XII MPLB': '4' },
-    11: { 'X AKL': '7', 'X MPLB': '4', 'X PPLG': '6', 'XI AKL': '8', 'XI MPLB': '17', 'XII AKL': '15', 'XII MPLB': '7' }
+    10: { 'X AKL': '7', 'X MPLB': '14', 'X PPLG': '6', 'XI AKL': '8', 'XI MPLB': '19', 'XI PM': '12', 'XI PPLG': '7', 'XII AKL': '21', 'XII MPLB': '4' },
+    11: { 'X AKL': '7', 'X MPLB': '5', 'X PPLG': '6', 'XI AKL': '8', 'XI MPLB': '19', 'XI PPLG': '2', 'XII AKL': '21', 'XII MPLB': '7' }
   };
 
   // Helper to get cell value

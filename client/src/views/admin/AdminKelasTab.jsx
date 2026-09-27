@@ -151,6 +151,8 @@ export default function AdminKelasTab() {
   return (
     <div>
       <div className="admin-panel">
+        <h2 className="portal-card-heading">DATA MASTER KELAS & AKUN KELAS</h2>
+
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
@@ -219,20 +221,20 @@ export default function AdminKelasTab() {
               ) : (
                 paginatedList.map((k, idx) => (
                   <tr key={k.kode_kelas || idx}>
-                    <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
-                    <td>
-                      <span style={{ fontWeight: 800, color: '#0066ff', fontSize: 14 }}>
+                    <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <span style={{ fontWeight: 800, color: '#0066ff', fontSize: 13 }}>
                         {k.nama_kelas}
                       </span>
                     </td>
-                    <td style={{ fontWeight: 600 }}>{k.jurusan || '-'}</td>
+                    <td style={{ fontWeight: 600, textAlign: 'center' }}>{k.jurusan || '-'}</td>
                     <td>
                       <span style={{ color: '#0f172a', fontWeight: 600 }}>
                         {k.wali_kelas || 'Belum diatur'}
                       </span>
                     </td>
-                    <td>
-                      <code style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, fontSize: 12, color: '#0f172a', fontWeight: 700 }}>
+                    <td style={{ textAlign: 'center' }}>
+                      <code style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 4, fontSize: 12, color: '#0f172a', fontWeight: 700 }}>
                         {k.username || k.nama_kelas.toLowerCase().replace(/\s+/g, '')}
                       </code>
                     </td>

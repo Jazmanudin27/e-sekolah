@@ -162,6 +162,8 @@ export default function AdminIzinTab() {
 
       {/* MAIN DATA PANEL */}
       <div className="admin-panel">
+        <h2 className="portal-card-heading">DATA SURAT IZIN GURU & TENAGA PENDIDIK</h2>
+
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
@@ -258,15 +260,15 @@ export default function AdminIzinTab() {
 
                   return (
                     <tr key={item.id || idx}>
-                      <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
+                      <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
                       <td>
                         <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.nama_guru || 'Guru Pengajar'}</div>
                         <div style={{ fontSize: 11, color: '#64748b' }}>Kode: #{item.kode_guru || item.id}</div>
                       </td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         <span style={{
-                          padding: '4px 10px',
-                          borderRadius: 20,
+                          padding: '3px 10px',
+                          borderRadius: 4,
                           fontSize: 11.5,
                           fontWeight: 700,
                           background: isSakit ? '#ecfdf5' : isDinas ? '#f5f3ff' : '#eff6ff',
@@ -276,24 +278,24 @@ export default function AdminIzinTab() {
                           {item.jenis_izin || 'Izin'}
                         </span>
                       </td>
-                      <td style={{ fontWeight: 600 }}>{item.tanggal_mulai}</td>
-                      <td style={{ fontWeight: 600 }}>{item.tanggal_selesai || item.tanggal_mulai}</td>
+                      <td style={{ fontWeight: 600, textAlign: 'center' }}>{item.tanggal_mulai}</td>
+                      <td style={{ fontWeight: 600, textAlign: 'center' }}>{item.tanggal_selesai || item.tanggal_mulai}</td>
                       <td>
                         <div style={{ maxWidth: 260, fontSize: 12.5, color: '#334155', lineHeight: 1.4 }}>
                           {item.keterangan || '-'}
                         </div>
                       </td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         {status === 'Disetujui' ? (
                           <span className="badge-status-aktif">
                             <span className="status-dot"></span> Disetujui
                           </span>
                         ) : status === 'Ditolak' ? (
-                          <span style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', padding: '3px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 700 }}>
+                          <span style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', padding: '3px 10px', borderRadius: 4, fontSize: 11.5, fontWeight: 700 }}>
                             Ditolak
                           </span>
                         ) : (
-                          <span style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', padding: '3px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 700 }}>
+                          <span style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', padding: '3px 10px', borderRadius: 4, fontSize: 11.5, fontWeight: 700 }}>
                             Menunggu
                           </span>
                         )}

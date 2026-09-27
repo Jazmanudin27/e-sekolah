@@ -176,6 +176,8 @@ export default function AdminPresensiGuruTab() {
 
       {/* MAIN DATA PANEL */}
       <div className="admin-panel">
+        <h2 className="portal-card-heading">LOG PRESENSI HARIAN GURU & PEGAWAI</h2>
+
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
@@ -288,20 +290,20 @@ export default function AdminPresensiGuruTab() {
 
                   return (
                     <tr key={item.id || idx}>
-                      <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
+                      <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
                       <td>
                         <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.nama_guru}</div>
                         <div style={{ fontSize: 11, color: '#64748b' }}>NIP: {item.nip_nuptk}</div>
                       </td>
-                      <td style={{ fontWeight: 600 }}>{item.tanggal}</td>
-                      <td>
+                      <td style={{ fontWeight: 600, textAlign: 'center' }}>{item.tanggal}</td>
+                      <td style={{ textAlign: 'center' }}>
                         {item.jam_in ? (
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                             <span style={{ fontWeight: 700, color: isTerlambat ? '#dc2626' : '#059669' }}>
                               {item.jam_in}
                             </span>
                             {isTerlambat && (
-                              <span style={{ fontSize: 10, background: '#fee2e2', color: '#dc2626', padding: '2px 6px', borderRadius: 6, fontWeight: 700 }}>
+                              <span style={{ fontSize: 10, background: '#fee2e2', color: '#dc2626', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>
                                 Terlambat
                               </span>
                             )}
@@ -310,22 +312,22 @@ export default function AdminPresensiGuruTab() {
                           <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>-</span>
                         )}
                       </td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         {item.jam_out ? (
                           <span style={{ fontWeight: 700, color: '#0066ff' }}>{item.jam_out}</span>
                         ) : (
-                          <span style={{ fontSize: 11, background: '#fffbeb', color: '#b45309', padding: '3px 8px', borderRadius: 8, fontWeight: 700 }}>
+                          <span style={{ fontSize: 11, background: '#fffbeb', color: '#b45309', padding: '3px 8px', borderRadius: 4, fontWeight: 700 }}>
                             Belum Scan
                           </span>
                         )}
                       </td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         {isComplete ? (
                           <span className="badge-status-aktif">
                             <span className="status-dot"></span> Lengkap
                           </span>
                         ) : (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#eff6ff', color: '#1d4ed8', padding: '3px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 700 }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#eff6ff', color: '#1d4ed8', padding: '3px 10px', borderRadius: 4, fontSize: 11.5, fontWeight: 700 }}>
                             Hadir (Aktif)
                           </span>
                         )}
