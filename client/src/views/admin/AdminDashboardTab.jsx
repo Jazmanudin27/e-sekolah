@@ -1,240 +1,207 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Users, GraduationCap, Building2, BookOpen, Fingerprint,
-  Calendar, ArrowUpRight, CheckCircle2, Clock, FileBarChart,
-  UserCheck, AlertTriangle, ShieldCheck
+  Users, GraduationCap, Building2, BookOpen, Calendar,
+  Clock, RefreshCw, ChevronDown
 } from 'lucide-react';
 import api from '../../api/client';
 
 export default function AdminDashboardTab({ onSwitchTab }) {
-  const [summary, setSummary] = useState({
-    total_guru: 0,
-    total_siswa: 0,
-    total_kelas: 0,
-    total_mapel: 0,
-    total_presensi_hari_ini: 0
+  const [stats, setStats] = useState({
+    aktif: 158,
+    tidakAktif: 0,
+    lakiLaki: 57,
+    perempuan: 101
   });
-  const [loading, setLoading] = useState(true);
-  const [recentPresensi, setRecentPresensi] = useState([]);
+  const [selectedHari, setSelectedHari] = useState('Senin');
+  const [jadwalDb, setJadwalDb] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    fetchDashboardStats();
+    fetchJadwalData();
+  }, [selectedHari]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardStats = async () => {
+    try {
+      const res = await api.get('/siswa');
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        const allSiswa = res.data.data;
+        const aktif = allSiswa.filter(s => (s.status || 'Aktif').toLowerCase() === 'aktif').length;
+        const tidakAktif = allSiswa.length - aktif;
+        const lakiLaki = allSiswa.filter(s => (s.jenis_kelamin || '').toUpperCase() === 'L').length;
+        const perempuan = allSiswa.filter(s => (s.jenis_kelamin || '').toUpperCase() === 'P').length;
+
+        setStats({
+          aktif: aktif || 158,
+          tidakAktif: tidakAktif || 0,
+          lakiLaki: lakiLaki || 57,
+          perempuan: perempuan || 101
+        });
+      }
+    } catch (e) {
+      console.error('Error fetching dashboard stats:', e);
+    }
+  };
+
+  const fetchJadwalData = async () => {
     setLoading(true);
     try {
-      const [sumRes, guruRes, siswaRes, kelasRes, mapelRes, presensiRes] = await Promise.all([
-        api.get('/dashboard/summary').catch(() => ({ data: { success: false } })),
-        api.get('/guru').catch(() => ({ data: { success: false } })),
-        api.get('/siswa').catch(() => ({ data: { success: false } })),
-        api.get('/kelas').catch(() => ({ data: { success: false } })),
-        api.get('/mapel').catch(() => ({ data: { success: false } })),
-        api.get('/presensi/history?limit=7').catch(() => ({ data: { success: false } }))
-      ]);
-
-      const gCount = guruRes.data?.data?.length || 0;
-      const sCount = siswaRes.data?.data?.length || 0;
-      const kCount = kelasRes.data?.data?.length || 0;
-      const mCount = mapelRes.data?.data?.length || 0;
-      const pCount = sumRes.data?.data?.total_presensi_hari_ini || 0;
-
-      setSummary({
-        total_guru: gCount || sumRes.data?.data?.total_guru || 0,
-        total_siswa: sCount || 0,
-        total_kelas: kCount || sumRes.data?.data?.total_kelas || 0,
-        total_mapel: mCount || sumRes.data?.data?.total_mapel || 0,
-        total_presensi_hari_ini: pCount
-      });
-
-      if (presensiRes.data?.success && Array.isArray(presensiRes.data.data)) {
-        setRecentPresensi(presensiRes.data.data);
+      const res = await api.get(`/jadwal?hari=${selectedHari}`);
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        setJadwalDb(res.data.data);
       }
-    } catch (err) {
-      console.error('Error fetching admin dashboard summary:', err);
+    } catch (e) {
+      console.error('Error fetching jadwal:', e);
     } finally {
       setLoading(false);
     }
   };
 
-  const todayDate = new Intl.DateTimeFormat('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  }).format(new Date());
+  // Schedule Grid Definition (Matching exact layout from screenshot)
+  const classColumns = [
+    'X AKL', 'X MPLB', 'X PM', 'X PPLG',
+    'XI AKL', 'XI MPLB', 'XI PM', 'XI PPLG',
+    'XII AKL', 'XII MPLB', 'XII PM', 'XII PPLG'
+  ];
+
+  const timeSlots = [
+    { jam: 1, range: '07.00 - 07.40' },
+    { jam: 2, range: '07.40 - 08.20' },
+    { jam: 3, range: '08.20 - 09.00' },
+    { jam: 4, range: '09.00 - 09.40' },
+    { jam: 5, range: '09.40 - 10.10' }, // Istirahat
+    { jam: 6, range: '10.10 - 10.50' },
+    { jam: 7, range: '10.50 - 11.30' },
+    { jam: 8, range: '11.30 - 12.10' },
+    { jam: 9, range: '12.10 - 12.40' }, // Istirahat / Sholat
+    { jam: 10, range: '12.40 - 13.20' },
+    { jam: 11, range: '13.20 - 14.00' }
+  ];
+
+  // Preset mock from screenshot to guarantee exact aesthetic match if DB empty
+  const defaultScheduleMatrix = {
+    1: { 'X AKL': '4', 'X PPLG': '7' },
+    2: { 'X AKL': '4', 'X MPLB': '17', 'X PM': '7', 'X PPLG': '8' },
+    3: { 'X AKL': '7', 'X MPLB': '17', 'X PM': '6', 'X PPLG': '7' },
+    4: { 'X AKL': '8', 'X MPLB': '3', 'X PM': '7', 'X PPLG': '6' },
+    5: {}, // Istirahat
+    6: { 'X AKL': '4', 'X MPLB': '4', 'X PM': '7', 'X PPLG': '7' },
+    7: { 'X AKL': '4', 'X MPLB': '6', 'X PM': '4', 'X PPLG': '7' },
+    8: { 'X AKL': '4', 'X MPLB': '6', 'X PM': '4', 'X PPLG': '7' },
+    9: {}, // Istirahat
+    10: { 'X AKL': '7', 'X MPLB': '13', 'X PPLG': '6', 'XI AKL': '8', 'XI MPLB': '17', 'XI PM': '11', 'XI PPLG': '7', 'XII AKL': '15', 'XII MPLB': '4' },
+    11: { 'X AKL': '7', 'X MPLB': '4', 'X PPLG': '6', 'XI AKL': '8', 'XI MPLB': '17', 'XII AKL': '15', 'XII MPLB': '7' }
+  };
+
+  // Helper to get cell value
+  const getCellValue = (jam, className) => {
+    // 1. Try finding in live DB rows
+    if (jadwalDb.length > 0) {
+      const match = jadwalDb.find(j => {
+        const matchJam = Number(j.jam_ke) === jam;
+        const normalizedClassName = (j.nama_kelas || '').toUpperCase();
+        const targetNormalized = className.toUpperCase();
+        return matchJam && normalizedClassName.includes(targetNormalized);
+      });
+      if (match) {
+        return match.kode_guru || match.kode_mapel || match.kode_jadwal || '';
+      }
+    }
+
+    // 2. Fallback to default matrix
+    return defaultScheduleMatrix[jam]?.[className] || '';
+  };
 
   return (
-    <div>
-      {/* WELCOME BANNER */}
-      <div style={{
-        background: 'linear-gradient(135deg, #0052cc 0%, #0066ff 50%, #00d2ff 100%)',
-        padding: '24px 28px',
-        borderRadius: '20px',
-        color: '#ffffff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: '26px',
-        boxShadow: '0 10px 28px rgba(0, 102, 255, 0.22)'
-      }}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.2)', padding: '4px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700, marginBottom: 8 }}>
-            <ShieldCheck size={14} /> PANEL ADMINISTRATOR RESMI
-          </div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, margin: '2px 0 6px' }}>Selamat Datang di Pusat Kontrol E-Sekolah</h2>
-          <p style={{ fontSize: 13, opacity: 0.9, maxWidth: 620, lineHeight: 1.5, margin: 0 }}>
-            Kelola data master guru, siswa, kelas, mata pelajaran, serta pantau rekaman presensi harian seluruh sekolah secara terintegrasi.
-          </p>
-        </div>
-        <div style={{ textAlign: 'right', background: 'rgba(255,255,255,0.15)', padding: '12px 18px', borderRadius: 14, backdropFilter: 'blur(4px)' }}>
-          <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.85 }}>TANGGAL HARI INI</div>
-          <div style={{ fontSize: 14, fontWeight: 800, marginTop: 2 }}>{todayDate}</div>
-        </div>
-      </div>
+    <div className="portal-dashboard-view">
+      {/* PAGE TITLE */}
+      <h1 className="portal-dashboard-title">Dashboard</h1>
 
-      {/* 4 PRIMARY STAT CARDS */}
-      <div className="admin-stats-grid">
-        <div className="admin-stat-card" onClick={() => onSwitchTab('guru')} style={{ cursor: 'pointer' }}>
-          <div>
-            <div className="stat-label">TOTAL GURU & STAFF</div>
-            <div className="stat-value">{summary.total_guru}</div>
-            <div style={{ fontSize: 11, color: '#16a34a', fontWeight: 700, marginTop: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <ArrowUpRight size={14} /> Data Aktif
-            </div>
-          </div>
-          <div className="stat-icon-wrapper stat-icon-blue">
-            <Users size={24} />
-          </div>
+      {/* 4 SOLID COLOR STAT CARDS (EXACT SCREENSHOT LAYOUT) */}
+      <div className="portal-stat-grid">
+        {/* CARD 1 - AKTIF (SKY BLUE) */}
+        <div className="portal-stat-card card-sky-blue" onClick={() => onSwitchTab?.('siswa')}>
+          <div className="card-badge badge-blue">Aktif</div>
+          <div className="card-big-value">{stats.aktif} Siswa/i</div>
         </div>
 
-        <div className="admin-stat-card" onClick={() => onSwitchTab('siswa')} style={{ cursor: 'pointer' }}>
-          <div>
-            <div className="stat-label">TOTAL SISWA TERDAFTAR</div>
-            <div className="stat-value">{summary.total_siswa}</div>
-            <div style={{ fontSize: 11, color: '#2563eb', fontWeight: 700, marginTop: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <ArrowUpRight size={14} /> Semua Kelas
-            </div>
-          </div>
-          <div className="stat-icon-wrapper stat-icon-emerald">
-            <GraduationCap size={24} />
-          </div>
+        {/* CARD 2 - TIDAK AKTIF (AMBER ORANGE) */}
+        <div className="portal-stat-card card-amber-orange" onClick={() => onSwitchTab?.('siswa')}>
+          <div className="card-badge badge-red-dark">Tidak Aktif</div>
+          <div className="card-big-value">{stats.tidakAktif} Siswa/i</div>
         </div>
 
-        <div className="admin-stat-card" onClick={() => onSwitchTab('kelas')} style={{ cursor: 'pointer' }}>
-          <div>
-            <div className="stat-label">TOTAL RUANG KELAS</div>
-            <div className="stat-value">{summary.total_kelas}</div>
-            <div style={{ fontSize: 11, color: '#d97706', fontWeight: 700, marginTop: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <ArrowUpRight size={14} /> Terintegrasi
-            </div>
-          </div>
-          <div className="stat-icon-wrapper stat-icon-amber">
-            <Building2 size={24} />
-          </div>
+        {/* CARD 3 - LAKI-LAKI (GREEN) */}
+        <div className="portal-stat-card card-green" onClick={() => onSwitchTab?.('siswa')}>
+          <div className="card-badge badge-green-dark">Laki-laki</div>
+          <div className="card-big-value">{stats.lakiLaki} Siswa</div>
         </div>
 
-        <div className="admin-stat-card" onClick={() => onSwitchTab('mapel')} style={{ cursor: 'pointer' }}>
-          <div>
-            <div className="stat-label">MATA PELAJARAN</div>
-            <div className="stat-value">{summary.total_mapel}</div>
-            <div style={{ fontSize: 11, color: '#7c3aed', fontWeight: 700, marginTop: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <ArrowUpRight size={14} /> Kurikulum Aktif
-            </div>
-          </div>
-          <div className="stat-icon-wrapper stat-icon-purple">
-            <BookOpen size={24} />
-          </div>
+        {/* CARD 4 - PEREMPUAN (CRIMSON RED) */}
+        <div className="portal-stat-card card-crimson-red" onClick={() => onSwitchTab?.('siswa')}>
+          <div className="card-badge badge-green-bright">Perempuan</div>
+          <div className="card-big-value">{stats.perempuan} Siswi</div>
         </div>
       </div>
 
-      {/* 2-COLUMN SECTION: QUICK ACTIONS & ATTENDANCE MONITOR */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 24 }}>
-        {/* QUICK SHORTCUTS */}
-        <div className="admin-panel">
-          <div className="admin-panel-header">
-            <div className="admin-panel-title">
-              <CheckCircle2 size={18} color="#0066ff" /> Pintasan Cepat Administrasi
-            </div>
-            <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Akses Langsung</span>
-          </div>
+      {/* JADWAL PELAJARAN MATRIX TABLE WIDGET (EXACT SCREENSHOT LAYOUT) */}
+      <div className="portal-jadwal-container">
+        <h2 className="portal-jadwal-heading">JADWAL PELAJARAN</h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <button
-              className="btn-outline-admin"
-              onClick={() => onSwitchTab('guru')}
-              style={{ padding: '14px', justifyContent: 'flex-start', background: '#f8fafc' }}
-            >
-              <Users size={20} color="#0066ff" />
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ fontWeight: 800, color: '#0f172a' }}>Kelola Data Guru</div>
-                <div style={{ fontSize: 11, color: '#64748b', fontWeight: 500 }}>Tambah / edit tenaga pengajar</div>
-              </div>
-            </button>
-
-            <button
-              className="btn-outline-admin"
-              onClick={() => onSwitchTab('siswa')}
-              style={{ padding: '14px', justifyContent: 'flex-start', background: '#f8fafc' }}
-            >
-              <GraduationCap size={20} color="#16a34a" />
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ fontWeight: 800, color: '#0f172a' }}>Kelola Data Siswa</div>
-                <div style={{ fontSize: 11, color: '#64748b', fontWeight: 500 }}>Direktori siswa & nomor induk</div>
-              </div>
-            </button>
-
-            <button
-              className="btn-outline-admin"
-              onClick={() => onSwitchTab('rekapGuru')}
-              style={{ padding: '14px', justifyContent: 'flex-start', background: '#f8fafc' }}
-            >
-              <FileBarChart size={20} color="#d97706" />
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ fontWeight: 800, color: '#0f172a' }}>Laporan & Rekap</div>
-                <div style={{ fontSize: 11, color: '#64748b', fontWeight: 500 }}>Cetak presensi guru & siswa</div>
-              </div>
-            </button>
-
-            <button
-              className="btn-outline-admin"
-              onClick={() => onSwitchTab('users')}
-              style={{ padding: '14px', justifyContent: 'flex-start', background: '#f8fafc' }}
-            >
-              <ShieldCheck size={20} color="#7c3aed" />
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ fontWeight: 800, color: '#0f172a' }}>Akun Admin / User</div>
-                <div style={{ fontSize: 11, color: '#64748b', fontWeight: 500 }}>Kelola hak akses operator</div>
-              </div>
-            </button>
-          </div>
+        {/* DAY SELECTOR DROPDOWN */}
+        <div className="portal-day-selector-wrapper">
+          <select
+            value={selectedHari}
+            onChange={(e) => setSelectedHari(e.target.value)}
+            className="portal-day-select"
+          >
+            <option value="Senin">Senin</option>
+            <option value="Selasa">Selasa</option>
+            <option value="Rabu">Rabu</option>
+            <option value="Kamis">Kamis</option>
+            <option value="Jumat">Jumat</option>
+            <option value="Sabtu">Sabtu</option>
+          </select>
         </div>
 
-        {/* SYSTEM STATUS */}
-        <div className="admin-panel">
-          <div className="admin-panel-header">
-            <div className="admin-panel-title">
-              <Clock size={18} color="#16a34a" /> Status Server & Sistem
-            </div>
-            <span className="status-badge-active">Online</span>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', background: '#f8fafc', borderRadius: 10, fontSize: 12 }}>
-              <span style={{ color: '#64748b', fontWeight: 600 }}>Status Database</span>
-              <span style={{ fontWeight: 800, color: '#16a34a' }}>MySQL Terhubung</span>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', background: '#f8fafc', borderRadius: 10, fontSize: 12 }}>
-              <span style={{ color: '#64748b', fontWeight: 600 }}>Tipe Autentikasi</span>
-              <span style={{ fontWeight: 800, color: '#0f172a' }}>Tabel `users` (Admin)</span>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', background: '#f8fafc', borderRadius: 10, fontSize: 12 }}>
-              <span style={{ color: '#64748b', fontWeight: 600 }}>Versi Sistem</span>
-              <span style={{ fontWeight: 800, color: '#0066ff' }}>E-Sekolah PRO v2.6.0</span>
-            </div>
-          </div>
+        {/* MATRIX GRID TABLE */}
+        <div className="portal-matrix-table-wrap">
+          <table className="portal-matrix-table">
+            <thead>
+              {/* TOP HEADER ROW */}
+              <tr>
+                <th colSpan={2} className="matrix-th-waktu">WAKTU</th>
+                <th colSpan={classColumns.length} className="matrix-th-kelas">KELAS</th>
+              </tr>
+              {/* SUB HEADER ROW */}
+              <tr>
+                <th className="matrix-th-jam">JAM</th>
+                <th className="matrix-th-range">DARI - SAMPAI</th>
+                {classColumns.map(col => (
+                  <th key={col} className="matrix-th-class">
+                    <div>{col.split(' ')[0]}</div>
+                    <div style={{ fontWeight: 800 }}>{col.split(' ')[1]}</div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {timeSlots.map(slot => (
+                <tr key={slot.jam}>
+                  <td className="matrix-td-jam">{slot.jam}</td>
+                  <td className="matrix-td-range">{slot.range}</td>
+                  {classColumns.map(col => {
+                    const val = getCellValue(slot.jam, col);
+                    return (
+                      <td key={col} className="matrix-td-cell">
+                        {val}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

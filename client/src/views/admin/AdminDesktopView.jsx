@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  LayoutDashboard, Users, GraduationCap, Building2, BookOpen,
-  Calendar, FileBarChart, ShieldCheck, Settings, LogOut,
-  Bell, Clock, Shield, Sparkles, ChevronRight, ChevronDown, Menu, X,
-  Fingerprint, UserCheck, BookOpenCheck, FileText, Award,
-  FileSpreadsheet, BarChart3, Database, CalendarCheck
+  LayoutDashboard, Database, Mail, CheckSquare, FileText,
+  ClipboardList, Send, Calendar, BookOpen, Package, Settings,
+  ChevronDown, ChevronRight, Menu, X, Search, Bell, Clock, LogOut,
+  Building2, GraduationCap, Users, ShieldCheck, UserCheck, BookOpenCheck,
+  Fingerprint, Award, FileSpreadsheet, BarChart3, Shield
 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import ArtanitaLogo from '../../components/ArtanitaLogo';
 import '../../admin.css';
 
 // Tabs
@@ -29,34 +30,51 @@ export default function AdminDesktopView({ user, onLogout }) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
-  // Accordion open states
-  const [openGroups, setOpenGroups] = useState({
-    master: true,
-    presensi: true,
-    laporan: true,
-    sistem: false
+  // Accordion open states matching screenshot
+  const [openMenus, setOpenMenus] = useState({
+    dataMaster: true,
+    suratMenyurat: false,
+    presensiAbsensi: true,
+    laporanMaster: false,
+    laporanAbsensi: true,
+    laporanSurat: false,
+    perpustakaan: false,
+    pengaturan: false
   });
+
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     const updateClock = () => {
       const now = new Date();
-      const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
+      const options = { day: 'numeric', month: 'long', year: 'numeric' };
       setCurrentDate(now.toLocaleDateString('id-ID', options));
-      setCurrentTime(now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB');
+      setCurrentTime(now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':'));
     };
     updateClock();
     const interval = setInterval(updateClock, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const adminName = user?.name || user?.nama || user?.username || 'Administrator';
-  const adminRole = user?.role || 'Admin Utama';
+  // Keyboard shortcut Ctrl+/ to focus search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
-  const toggleGroup = (groupKey) => {
-    setOpenGroups(prev => ({
+  const toggleSubMenu = (menuKey) => {
+    setOpenMenus(prev => ({
       ...prev,
-      [groupKey]: !prev[groupKey]
+      [menuKey]: !prev[menuKey]
     }));
   };
 
@@ -65,346 +83,469 @@ export default function AdminDesktopView({ user, onLogout }) {
     setIsMobileSidebarOpen(false);
   };
 
-  // Structured Navigation Groups
-  const navigationStructure = [
-    {
-      type: 'single',
-      id: 'dashboard',
-      label: 'Dashboard Overview',
-      icon: LayoutDashboard,
-      badge: null
-    },
-    {
-      type: 'group',
-      key: 'master',
-      label: 'Data Master',
-      icon: Database,
-      items: [
-        { id: 'kelas', label: 'Data Kelas & Jurusan', icon: Building2 },
-        { id: 'siswa', label: 'Data Siswa & NISN', icon: GraduationCap },
-        { id: 'guru', label: 'Data Guru & Pegawai', icon: Users },
-        { id: 'mapel', label: 'Data Mata Pelajaran', icon: BookOpen },
-        { id: 'jadwal', label: 'Jadwal Pelajaran', icon: Calendar }
-      ]
-    },
-    {
-      type: 'group',
-      key: 'presensi',
-      label: 'Absensi & Presensi',
-      icon: CalendarCheck,
-      items: [
-        { id: 'presensiGuru', label: 'Presensi Guru', icon: Fingerprint, sub: 'Log masuk & pulang' },
-        { id: 'absensiSiswa', label: 'Absensi Siswa', icon: UserCheck, sub: 'Input harian per kelas' },
-        { id: 'absensiMapel', label: 'Absensi Mapel', icon: BookOpenCheck, sub: 'Per jam pelajaran' },
-        { id: 'izin', label: 'Surat Izin Guru', icon: FileText, sub: 'Pengajuan sakit/izin' }
-      ]
-    },
-    {
-      type: 'group',
-      key: 'laporan',
-      label: 'Laporan & Rekap',
-      icon: FileBarChart,
-      items: [
-        { id: 'rekapGuru', label: 'Rekap Presensi Guru', icon: Award },
-        { id: 'rekapSiswa', label: 'Rekap Absensi Siswa', icon: FileSpreadsheet },
-        { id: 'rekapMapel', label: 'Rekap Absensi Mapel', icon: BarChart3 }
-      ]
-    },
-    {
-      type: 'group',
-      key: 'sistem',
-      label: 'Pengaturan & Akun',
-      icon: ShieldCheck,
-      items: [
-        { id: 'users', label: 'Kelola Akun Users', icon: Shield },
-        { id: 'settings', label: 'Pengaturan Sekolah', icon: Settings }
-      ]
-    }
-  ];
-
-  const getTabTitle = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return {
-          category: 'Pusat Kendali',
-          title: 'Dashboard Administrasi',
-          subtitle: 'Ringkasan statistik & pusat pemantauan seluruh aktivitas sekolah'
-        };
-      case 'kelas':
-        return {
-          category: 'Data Master',
-          title: 'Manajemen Kelas & Jurusan',
-          subtitle: 'Kelola ruang kelas, wali kelas, serta kredensial akun kelas'
-        };
-      case 'siswa':
-        return {
-          category: 'Data Master',
-          title: 'Manajemen Data Siswa',
-          subtitle: 'Kelola direktori siswa, nomor induk siswa nasional (NISN), dan rombel'
-        };
-      case 'guru':
-        return {
-          category: 'Data Master',
-          title: 'Manajemen Data Guru & Pegawai',
-          subtitle: 'Kelola data tenaga pendidik, NIP, kepegawaian, dan akun pengajar'
-        };
-      case 'mapel':
-        return {
-          category: 'Data Master',
-          title: 'Manajemen Mata Pelajaran',
-          subtitle: 'Daftar mata pelajaran kurikulum dan standar KKM sekolah'
-        };
-      case 'jadwal':
-        return {
-          category: 'Data Master',
-          title: 'Jadwal Pelajaran Sekolah',
-          subtitle: 'Pengaturan alokasi jam mengajar guru dan kelas per hari'
-        };
-      case 'presensiGuru':
-        return {
-          category: 'Absensi & Presensi',
-          title: 'Monitoring Presensi Guru',
-          subtitle: 'Riwayat presensi mandiri, waktu scan masuk/pulang, dan foto selfie'
-        };
-      case 'absensiSiswa':
-        return {
-          category: 'Absensi & Presensi',
-          title: 'Absensi Harian Siswa',
-          subtitle: 'Pencatatan status kehadiran harian siswa per kelas (Hadir, Sakit, Izin, Alpa)'
-        };
-      case 'absensiMapel':
-        return {
-          category: 'Absensi & Presensi',
-          title: 'Absensi Mata Pelajaran',
-          subtitle: 'Pencatatan kehadiran siswa pada jam mengajar mata pelajaran tertentu'
-        };
-      case 'izin':
-        return {
-          category: 'Absensi & Presensi',
-          title: 'Verifikasi Surat Izin Guru',
-          subtitle: 'Daftar pengajuan izin sakit, dinas luar, dan keperluan keluarga'
-        };
-      case 'rekapGuru':
-        return {
-          category: 'Laporan & Rekap',
-          title: 'Laporan Rekap Presensi Guru',
-          subtitle: 'Rekapitulasi kehadiran bulanan seluruh tenaga pendidik & persentase'
-        };
-      case 'rekapSiswa':
-        return {
-          category: 'Laporan & Rekap',
-          title: 'Laporan Rekap Absensi Siswa',
-          subtitle: 'Rekapitulasi absensi harian per kelas dalam rentang bulan & semester'
-        };
-      case 'rekapMapel':
-        return {
-          category: 'Laporan & Rekap',
-          title: 'Laporan Rekap Absensi Mapel',
-          subtitle: 'Laporan kehadiran per mata pelajaran dan guru pengampu'
-        };
-      case 'users':
-        return {
-          category: 'Pengaturan & Akun',
-          title: 'Kelola Akun Administrator (Tabel Users)',
-          subtitle: 'Kelola hak akses administrator dan operator sistem'
-        };
-      case 'settings':
-        return {
-          category: 'Pengaturan & Akun',
-          title: 'Pengaturan Identitas & Sekolah',
-          subtitle: 'Konfigurasi profil sekolah, radius GPS, dan parameter jam presensi'
-        };
-      default:
-        return {
-          category: 'Admin Panel',
-          title: 'Pusat Kendali E-Sekolah',
-          subtitle: 'Sistem Informasi Akademik Terpadu'
-        };
-    }
-  };
-
-  const currentTabInfo = getTabTitle();
-
   return (
-    <div className="admin-desktop-container">
+    <div className="portal-admin-layout">
       {/* MOBILE BACKDROP OVERLAY */}
       <div
-        className={`admin-sidebar-backdrop ${isMobileSidebarOpen ? 'mobile-open' : ''}`}
+        className={`portal-sidebar-overlay ${isMobileSidebarOpen ? 'active' : ''}`}
         onClick={() => setIsMobileSidebarOpen(false)}
       />
 
       {/* ========================================================
-          SIDEBAR WITH ACCORDION HIERARCHY
+          SIDEBAR (MATCHING EXACT PORTAL ARTANITA SYSTEM SCREENSHOT)
           ======================================================== */}
-      <aside className={`admin-sidebar ${isMobileSidebarOpen ? 'mobile-open' : ''}`}>
-        {/* LOGO & BRAND HEADER */}
-        <div className="admin-sidebar-header">
-          <div className="admin-logo-badge">
-            <GraduationCap size={22} color="#ffffff" />
+      <aside className={`portal-sidebar ${isMobileSidebarOpen ? 'mobile-visible' : ''}`}>
+        {/* BRAND LOGO HEADER */}
+        <div className="portal-brand-header">
+          <div className="portal-logo-box">
+            <span>P</span>
           </div>
-          <div className="admin-brand-info">
-            <h2>E-SEKOLAH PRO</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-              <span className="online-beacon-dot"></span>
-              <span style={{ fontSize: 10.5, fontWeight: 700, color: '#38bdf8', letterSpacing: '0.5px' }}>
-                ADMIN DESKTOP
-              </span>
-            </div>
+          <div className="portal-brand-text">
+            <div className="brand-title">PORTAL</div>
+            <div className="brand-subtitle">ARTANITA SYSTEM</div>
           </div>
-          {/* MOBILE CLOSE TOGGLE */}
+          {/* Mobile close button */}
           <button
-            className="mobile-menu-toggle"
+            className="portal-mobile-close"
             onClick={() => setIsMobileSidebarOpen(false)}
-            style={{ marginLeft: 'auto', color: '#ffffff' }}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
-        {/* NAVIGATION LIST WITH ACCORDION SECTIONS */}
-        <div className="admin-sidebar-nav">
-          {navigationStructure.map((navItem, idx) => {
-            // 1. Single Direct Link (e.g. Dashboard)
-            if (navItem.type === 'single') {
-              const Icon = navItem.icon;
-              const isActive = activeTab === navItem.id;
-              return (
-                <button
-                  key={navItem.id}
-                  className={`sidebar-menu-btn ${isActive ? 'active' : ''}`}
-                  onClick={() => handleSelectTab(navItem.id)}
-                  style={{ marginBottom: 6 }}
-                >
-                  <div className="sidebar-icon-pod">
-                    <Icon size={18} />
-                  </div>
-                  <span>{navItem.label}</span>
-                </button>
-              );
-            }
-
-            // 2. Accordion Group
-            const isOpen = openGroups[navItem.key];
-            const hasActiveChild = navItem.items.some(child => child.id === activeTab);
-            const GroupIcon = navItem.icon;
-
-            return (
-              <div key={navItem.key} className="sidebar-group-block">
-                {/* GROUP ACCORDION HEADER */}
-                <button
-                  type="button"
-                  className={`sidebar-group-header ${hasActiveChild ? 'has-active' : ''}`}
-                  onClick={() => toggleGroup(navItem.key)}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div className="sidebar-group-icon-pod">
-                      <GroupIcon size={15} />
-                    </div>
-                    <span className="sidebar-group-label">{navItem.label}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span className="sidebar-group-count">{navItem.items.length}</span>
-                    <ChevronDown
-                      size={15}
-                      className={`group-chevron ${isOpen ? 'open' : ''}`}
-                    />
-                  </div>
-                </button>
-
-                {/* ACCORDION CHILDREN */}
-                {isOpen && (
-                  <div className="sidebar-sub-menu">
-                    {navItem.items.map((subItem) => {
-                      const SubIcon = subItem.icon;
-                      const isSubActive = activeTab === subItem.id;
-                      return (
-                        <button
-                          key={subItem.id}
-                          className={`sidebar-sub-item ${isSubActive ? 'active' : ''}`}
-                          onClick={() => handleSelectTab(subItem.id)}
-                        >
-                          <div className="sub-item-indicator"></div>
-                          <SubIcon size={16} />
-                          <span className="sub-item-text">{subItem.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        {/* SCHOOL PROFILE CARD IN SIDEBAR */}
+        <div className="portal-school-card">
+          <ArtanitaLogo size={36} />
+          <div className="school-info">
+            <div className="school-name">SMK ARTANITA</div>
+            <div className="school-badge-admin">ADMIN</div>
+          </div>
         </div>
 
-        {/* SIDEBAR FOOTER PROFILE CARD */}
-        <div className="admin-sidebar-footer">
-          <div className="admin-user-pill">
-            <div className="admin-avatar">
-              {adminName.charAt(0).toUpperCase()}
+        {/* SIDEBAR NAVIGATION ITEMS */}
+        <div className="portal-sidebar-menu">
+          {/* ----------------- MAIN MENU ----------------- */}
+          <div className="portal-menu-section-label">MAIN MENU</div>
+
+          {/* 1. Dashboard */}
+          <button
+            type="button"
+            className={`portal-menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => handleSelectTab('dashboard')}
+          >
+            <div className="menu-icon-wrap">
+              <LayoutDashboard size={17} />
             </div>
-            <div className="admin-user-details">
-              <div className="admin-user-name" title={adminName}>{adminName}</div>
-              <div className="admin-user-role">{adminRole}</div>
-            </div>
+            <span className="menu-label">Dashboard</span>
+          </button>
+
+          {/* 2. Data Master (Expandable) */}
+          <div className="portal-menu-group">
             <button
-              className="btn-action-icon"
-              style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', marginLeft: 'auto' }}
-              onClick={onLogout}
-              title="Logout"
+              type="button"
+              className={`portal-menu-item has-submenu ${['kelas', 'siswa', 'guru', 'mapel', 'jadwal'].includes(activeTab) ? 'has-active' : ''}`}
+              onClick={() => toggleSubMenu('dataMaster')}
             >
-              <LogOut size={16} />
+              <div className="menu-icon-wrap">
+                <Database size={17} />
+              </div>
+              <span className="menu-label">Data Master</span>
+              {openMenus.dataMaster ? <ChevronDown size={14} className="submenu-arrow" /> : <ChevronRight size={14} className="submenu-arrow" />}
             </button>
+            {openMenus.dataMaster && (
+              <div className="portal-submenu-list">
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'kelas' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('kelas')}
+                >
+                  <span>Data Kelas</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'siswa' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('siswa')}
+                >
+                  <span>Data Siswa</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'guru' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('guru')}
+                >
+                  <span>Data Guru</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'mapel' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('mapel')}
+                >
+                  <span>Data Mapel</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'jadwal' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('jadwal')}
+                >
+                  <span>Jadwal Pelajaran</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 3. Surat Menyurat (Expandable) */}
+          <div className="portal-menu-group">
+            <button
+              type="button"
+              className={`portal-menu-item has-submenu ${activeTab === 'izin' ? 'has-active' : ''}`}
+              onClick={() => toggleSubMenu('suratMenyurat')}
+            >
+              <div className="menu-icon-wrap">
+                <Mail size={17} />
+              </div>
+              <span className="menu-label">Surat Menyurat</span>
+              {openMenus.suratMenyurat ? <ChevronDown size={14} className="submenu-arrow" /> : <ChevronRight size={14} className="submenu-arrow" />}
+            </button>
+            {openMenus.suratMenyurat && (
+              <div className="portal-submenu-list">
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'izin' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('izin')}
+                >
+                  <span>Surat Izin Guru</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 4. Presensi & Absensi (Expandable) */}
+          <div className="portal-menu-group">
+            <button
+              type="button"
+              className={`portal-menu-item has-submenu ${['presensiGuru', 'absensiSiswa', 'absensiMapel'].includes(activeTab) ? 'has-active' : ''}`}
+              onClick={() => toggleSubMenu('presensiAbsensi')}
+            >
+              <div className="menu-icon-wrap">
+                <CheckSquare size={17} />
+              </div>
+              <span className="menu-label">Presensi & Absensi</span>
+              {openMenus.presensiAbsensi ? <ChevronDown size={14} className="submenu-arrow" /> : <ChevronRight size={14} className="submenu-arrow" />}
+            </button>
+            {openMenus.presensiAbsensi && (
+              <div className="portal-submenu-list">
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'presensiGuru' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('presensiGuru')}
+                >
+                  <span>Presensi Guru</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'absensiSiswa' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('absensiSiswa')}
+                >
+                  <span>Absensi Siswa</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'absensiMapel' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('absensiMapel')}
+                >
+                  <span>Absensi Mapel</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* ----------------- LAPORAN & REKAP ----------------- */}
+          <div className="portal-menu-section-label">LAPORAN & REKAP</div>
+
+          {/* 5. Laporan Master */}
+          <div className="portal-menu-group">
+            <button
+              type="button"
+              className="portal-menu-item has-submenu"
+              onClick={() => toggleSubMenu('laporanMaster')}
+            >
+              <div className="menu-icon-wrap">
+                <FileText size={17} />
+              </div>
+              <span className="menu-label">Laporan Master</span>
+              {openMenus.laporanMaster ? <ChevronDown size={14} className="submenu-arrow" /> : <ChevronRight size={14} className="submenu-arrow" />}
+            </button>
+            {openMenus.laporanMaster && (
+              <div className="portal-submenu-list">
+                <button
+                  type="button"
+                  className="portal-submenu-item"
+                  onClick={() => handleSelectTab('guru')}
+                >
+                  <span>Laporan Data Guru</span>
+                </button>
+                <button
+                  type="button"
+                  className="portal-submenu-item"
+                  onClick={() => handleSelectTab('siswa')}
+                >
+                  <span>Laporan Data Siswa</span>
+                </button>
+                <button
+                  type="button"
+                  className="portal-submenu-item"
+                  onClick={() => handleSelectTab('kelas')}
+                >
+                  <span>Laporan Data Kelas</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 6. Laporan Absensi */}
+          <div className="portal-menu-group">
+            <button
+              type="button"
+              className={`portal-menu-item has-submenu ${['rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(activeTab) ? 'has-active' : ''}`}
+              onClick={() => toggleSubMenu('laporanAbsensi')}
+            >
+              <div className="menu-icon-wrap">
+                <ClipboardList size={17} />
+              </div>
+              <span className="menu-label">Laporan Absensi</span>
+              {openMenus.laporanAbsensi ? <ChevronDown size={14} className="submenu-arrow" /> : <ChevronRight size={14} className="submenu-arrow" />}
+            </button>
+            {openMenus.laporanAbsensi && (
+              <div className="portal-submenu-list">
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'rekapGuru' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('rekapGuru')}
+                >
+                  <span>Rekap Presensi Guru</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'rekapSiswa' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('rekapSiswa')}
+                >
+                  <span>Rekap Absensi Siswa</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'rekapMapel' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('rekapMapel')}
+                >
+                  <span>Rekap Absensi Mapel</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 7. Laporan Surat */}
+          <div className="portal-menu-group">
+            <button
+              type="button"
+              className="portal-menu-item has-submenu"
+              onClick={() => toggleSubMenu('laporanSurat')}
+            >
+              <div className="menu-icon-wrap">
+                <Send size={17} />
+              </div>
+              <span className="menu-label">Laporan Surat</span>
+              {openMenus.laporanSurat ? <ChevronDown size={14} className="submenu-arrow" /> : <ChevronRight size={14} className="submenu-arrow" />}
+            </button>
+            {openMenus.laporanSurat && (
+              <div className="portal-submenu-list">
+                <button
+                  type="button"
+                  className="portal-submenu-item"
+                  onClick={() => handleSelectTab('izin')}
+                >
+                  <span>Rekap Surat Izin</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 8. Jadwal Pelajaran Link */}
+          <button
+            type="button"
+            className={`portal-menu-item ${activeTab === 'jadwal' ? 'active' : ''}`}
+            onClick={() => handleSelectTab('jadwal')}
+          >
+            <div className="menu-icon-wrap">
+              <Calendar size={17} />
+            </div>
+            <span className="menu-label">Jadwal Pelajaran</span>
+          </button>
+
+          {/* 9. Perpustakaan */}
+          <div className="portal-menu-group">
+            <button
+              type="button"
+              className="portal-menu-item has-submenu"
+              onClick={() => toggleSubMenu('perpustakaan')}
+            >
+              <div className="menu-icon-wrap">
+                <BookOpen size={17} />
+              </div>
+              <span className="menu-label">Perpustakaan</span>
+              {openMenus.perpustakaan ? <ChevronDown size={14} className="submenu-arrow" /> : <ChevronRight size={14} className="submenu-arrow" />}
+            </button>
+            {openMenus.perpustakaan && (
+              <div className="portal-submenu-list">
+                <button
+                  type="button"
+                  className="portal-submenu-item"
+                  onClick={() => Swal.fire('Info', 'Modul Perpustakaan E-Katalog sedang dalam sinkronisasi.', 'info')}
+                >
+                  <span>Katalog Buku</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 10. Sarana Prasarana */}
+          <button
+            type="button"
+            className="portal-menu-item"
+            onClick={() => Swal.fire('Info', 'Modul Sarana Prasarana sedang dalam proses integrasi inventaris.', 'info')}
+          >
+            <div className="menu-icon-wrap">
+              <Package size={17} />
+            </div>
+            <span className="menu-label">Sarana Prasarana</span>
+          </button>
+
+          {/* ----------------- SISTEM ----------------- */}
+          <div className="portal-menu-section-label">SISTEM</div>
+
+          {/* 11. Pengaturan */}
+          <div className="portal-menu-group">
+            <button
+              type="button"
+              className={`portal-menu-item has-submenu ${['settings', 'users'].includes(activeTab) ? 'has-active' : ''}`}
+              onClick={() => toggleSubMenu('pengaturan')}
+            >
+              <div className="menu-icon-wrap">
+                <Settings size={17} />
+              </div>
+              <span className="menu-label">Pengaturan</span>
+              {openMenus.pengaturan ? <ChevronDown size={14} className="submenu-arrow" /> : <ChevronRight size={14} className="submenu-arrow" />}
+            </button>
+            {openMenus.pengaturan && (
+              <div className="portal-submenu-list">
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'settings' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('settings')}
+                >
+                  <span>Pengaturan Sekolah</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'users' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('users')}
+                >
+                  <span>Kelola Akun Users</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </aside>
 
       {/* ========================================================
-          MAIN CONTENT WRAPPER
+          MAIN AREA & TOPBAR (MATCHING EXACT TOPBAR SCREENSHOT)
           ======================================================== */}
-      <div className="admin-main-wrap">
-        {/* TOPBAR HEADER */}
-        <header className="admin-top-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div className="portal-main-area">
+        {/* TOP NAVBAR */}
+        <header className="portal-navbar">
+          {/* LEFT: HAMBURGER & SEARCH INPUT */}
+          <div className="navbar-left">
             <button
-              className="mobile-menu-toggle"
+              type="button"
+              className="navbar-toggle-btn"
               onClick={() => setIsMobileSidebarOpen(true)}
-              title="Buka Menu"
+              title="Toggle Menu"
             >
-              <Menu size={22} />
+              <Menu size={20} />
             </button>
 
-            <div className="admin-header-title">
-              <div className="admin-breadcrumbs">
-                <span>E-Sekolah</span>
-                <ChevronRight size={12} />
-                <span>{currentTabInfo.category}</span>
-                <ChevronRight size={12} />
-                <span className="breadcrumb-current">{currentTabInfo.title}</span>
-              </div>
-              <h1>{currentTabInfo.title}</h1>
-              <span className="mobile-subtitle-hidden">{currentTabInfo.subtitle}</span>
+            <div className="navbar-search-box">
+              <Search size={16} className="search-icon" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari data, menu..."
+                className="search-input"
+              />
+              <span className="search-shortcut">Ctrl+/</span>
             </div>
           </div>
 
-          <div className="admin-header-actions">
-            {/* LIVE CLOCK */}
-            <div className="admin-live-clock">
-              <Clock size={15} color="#0066ff" />
+          {/* RIGHT: DATE PILL, NOTIF BELL, PROFILE DROPDOWN */}
+          <div className="navbar-right">
+            {/* DATE & TIME CAPSULE */}
+            <div className="navbar-datetime-capsule">
+              <Clock size={14} />
               <span>{currentDate} • {currentTime}</span>
             </div>
 
-            {/* LOGOUT BUTTON */}
-            <button className="admin-logout-btn" onClick={onLogout} title="Keluar dari Admin">
-              <LogOut size={16} />
-              <span>Keluar</span>
-            </button>
+            {/* NOTIFICATION BELL */}
+            <div className="navbar-bell-btn">
+              <Bell size={18} />
+              <span className="bell-badge">3</span>
+            </div>
+
+            {/* PROFILE DROPDOWN */}
+            <div className="navbar-profile-wrapper">
+              <button
+                type="button"
+                className="navbar-profile-btn"
+                onClick={() => setShowProfileMenu(prev => !prev)}
+              >
+                <ArtanitaLogo size={24} />
+                <span className="profile-school-title">SMK ARTANITA</span>
+                <ChevronDown size={14} color="#64748b" />
+              </button>
+
+              {/* DROPDOWN MENU */}
+              {showProfileMenu && (
+                <div className="navbar-profile-dropdown" onClick={() => setShowProfileMenu(false)}>
+                  <div className="dropdown-header">
+                    <div style={{ fontWeight: 700, color: '#0f172a' }}>{user?.name || user?.username || 'Admin Artanita'}</div>
+                    <div style={{ fontSize: 11, color: '#64748b' }}>{user?.email || 'admin@artanita.com'}</div>
+                  </div>
+                  <button
+                    type="button"
+                    className="dropdown-item"
+                    onClick={() => handleSelectTab('settings')}
+                  >
+                    <Settings size={14} /> Pengaturan Profil
+                  </button>
+                  <button
+                    type="button"
+                    className="dropdown-item dropdown-item-danger"
+                    onClick={onLogout}
+                  >
+                    <LogOut size={14} /> Keluar Aplikasi
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
-        {/* TAB BODY CONTENT */}
-        <main className="admin-content-inner">
+        {/* ========================================================
+            PAGE CONTENT INNER
+            ======================================================== */}
+        <main className="portal-page-body">
           {/* 1. DASHBOARD */}
-          {activeTab === 'dashboard' && <AdminDashboardTab onSwitchTab={(tab) => handleSelectTab(tab)} />}
+          {activeTab === 'dashboard' && <AdminDashboardTab onSwitchTab={handleSelectTab} />}
 
           {/* 2. DATA MASTER */}
           {activeTab === 'kelas' && <AdminKelasTab />}
@@ -413,11 +554,11 @@ export default function AdminDesktopView({ user, onLogout }) {
           {activeTab === 'mapel' && <AdminMapelTab />}
           {activeTab === 'jadwal' && <AdminJadwalTab />}
 
-          {/* 3. ABSENSI & PRESENSI */}
+          {/* 3. SURAT MENYURAT / PRESENSI */}
+          {activeTab === 'izin' && <AdminIzinTab />}
           {activeTab === 'presensiGuru' && <AdminPresensiGuruTab />}
           {activeTab === 'absensiSiswa' && <AdminAbsensiSiswaTab />}
           {activeTab === 'absensiMapel' && <AdminAbsensiMapelTab />}
-          {activeTab === 'izin' && <AdminIzinTab />}
 
           {/* 4. LAPORAN & REKAP */}
           {activeTab === 'rekapGuru' && <AdminRekapTab initialSubTab="guru" />}
