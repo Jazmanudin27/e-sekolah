@@ -176,14 +176,12 @@ export default function AdminPresensiGuruTab() {
 
       {/* MAIN DATA PANEL */}
       <div className="admin-panel">
-        <h2 className="portal-card-heading">LOG PRESENSI HARIAN GURU & PEGAWAI</h2>
-
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
-              <Fingerprint size={20} color="#0066ff" /> Log Presensi Harian Guru & Tenaga Kependidikan
+              <Fingerprint size={18} color="#0284c7" /> Log Presensi Harian Guru & Tenaga Kependidikan
             </div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            <div className="admin-panel-subtitle">
               Pemantauan waktu check-in, check-out, geolocation, dan foto selfie presensi
             </div>
           </div>

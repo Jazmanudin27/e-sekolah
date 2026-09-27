@@ -162,14 +162,12 @@ export default function AdminIzinTab() {
 
       {/* MAIN DATA PANEL */}
       <div className="admin-panel">
-        <h2 className="portal-card-heading">DATA SURAT IZIN GURU & TENAGA PENDIDIK</h2>
-
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
-              <FileText size={20} color="#0066ff" /> Data Pengajuan Surat Izin & Ketidakhadiran Guru
+              <FileText size={18} color="#0284c7" /> Data Pengajuan Surat Izin & Ketidakhadiran Guru
             </div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            <div className="admin-panel-subtitle">
               Daftar surat keterangan dokter, izin keperluan dinas, dan urusan keluarga
             </div>
           </div>

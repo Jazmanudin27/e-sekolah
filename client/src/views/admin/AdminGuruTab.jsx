@@ -161,14 +161,12 @@ export default function AdminGuruTab() {
   return (
     <div>
       <div className="admin-panel">
-        <h2 className="portal-card-heading">DATA MASTER TENAGA PENDIDIK & GURU</h2>
-
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
-              <Users size={20} color="#0066ff" /> Data Master Tenaga Pendidik & Guru
+              <Users size={18} color="#0284c7" /> Data Master Tenaga Pendidik & Guru
             </div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            <div className="admin-panel-subtitle">
               Total {filteredList.length} guru terdaftar dalam sistem
             </div>
           </div>

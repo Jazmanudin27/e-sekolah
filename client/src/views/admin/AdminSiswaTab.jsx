@@ -148,14 +148,12 @@ export default function AdminSiswaTab() {
   return (
     <div>
       <div className="admin-panel">
-        <h2 className="portal-card-heading">DATA MASTER SISWA</h2>
-
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
-              <GraduationCap size={20} color="#16a34a" /> Data Master Siswa
+              <GraduationCap size={18} color="#0284c7" /> Data Master Siswa
             </div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            <div className="admin-panel-subtitle">
               Total {filteredList.length} siswa terdaftar dalam sistem
             </div>
           </div>

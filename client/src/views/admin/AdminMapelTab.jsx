@@ -128,14 +128,12 @@ export default function AdminMapelTab() {
   return (
     <div>
       <div className="admin-panel">
-        <h2 className="portal-card-heading">DATA MASTER MATA PELAJARAN</h2>
-
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
-              <BookOpen size={20} color="#7c3aed" /> Data Master Mata Pelajaran
+              <BookOpen size={18} color="#0284c7" /> Data Master Mata Pelajaran
             </div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            <div className="admin-panel-subtitle">
               Total {filteredList.length} mata pelajaran dalam kurikulum sekolah
             </div>
           </div>

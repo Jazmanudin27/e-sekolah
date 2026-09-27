@@ -144,14 +144,12 @@ export default function AdminUsersTab() {
   return (
     <div>
       <div className="admin-panel">
-        <h2 className="portal-card-heading">MANAJEMEN AKUN ADMINISTRATOR & USERS</h2>
-
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
-              <ShieldCheck size={20} color="#7c3aed" /> Manajemen Akun Administrator & Pengguna (Tabel Users)
+              <ShieldCheck size={18} color="#0284c7" /> Manajemen Akun Administrator & Pengguna (Tabel Users)
             </div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            <div className="admin-panel-subtitle">
               Hanya akun yang terdaftar di tabel ini yang memiliki hak akses penuh ke Halaman Admin Desktop
             </div>
           </div>

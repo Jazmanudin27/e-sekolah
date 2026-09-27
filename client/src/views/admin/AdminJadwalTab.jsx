@@ -134,20 +134,26 @@ export default function AdminJadwalTab() {
   return (
     <div>
       <div className="admin-panel">
-        <h2 className="portal-card-heading">JADWAL PELAJARAN</h2>
+        <div className="admin-panel-header">
+          <div>
+            <div className="admin-panel-title">
+              <Calendar size={18} color="#0284c7" /> Jadwal Pelajaran & Matriks Jam Mengajar
+            </div>
+            <div className="admin-panel-subtitle">
+              Struktur jadwal mingguan seluruh tingkat kelas dan alokasi jam mengajar
+            </div>
+          </div>
 
-        {/* VIEW MODE TOGGLE & PRINT */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             <button
               type="button"
               className={`btn-outline-admin ${viewMode === 'matrix' ? 'active' : ''}`}
               onClick={() => setViewMode('matrix')}
               style={{
-                background: viewMode === 'matrix' ? '#0066ff' : '#ffffff',
+                background: viewMode === 'matrix' ? '#0284c7' : '#ffffff',
                 color: viewMode === 'matrix' ? '#ffffff' : '#334155',
-                borderColor: viewMode === 'matrix' ? '#0066ff' : '#cbd5e1',
-                fontWeight: 700
+                borderColor: viewMode === 'matrix' ? '#0284c7' : '#cbd5e1',
+                fontWeight: 600
               }}
             >
               Matriks Grid Jadwal
@@ -157,17 +163,14 @@ export default function AdminJadwalTab() {
               className={`btn-outline-admin ${viewMode === 'list' ? 'active' : ''}`}
               onClick={() => setViewMode('list')}
               style={{
-                background: viewMode === 'list' ? '#0066ff' : '#ffffff',
+                background: viewMode === 'list' ? '#0284c7' : '#ffffff',
                 color: viewMode === 'list' ? '#ffffff' : '#334155',
-                borderColor: viewMode === 'list' ? '#0066ff' : '#cbd5e1',
-                fontWeight: 700
+                borderColor: viewMode === 'list' ? '#0284c7' : '#cbd5e1',
+                fontWeight: 600
               }}
             >
               Daftar Baris Data
             </button>
-          </div>
-
-          <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn-outline-admin" onClick={() => window.print()}>
               <Printer size={16} /> Cetak / Print
             </button>

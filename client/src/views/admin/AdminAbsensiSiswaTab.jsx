@@ -217,14 +217,12 @@ export default function AdminAbsensiSiswaTab() {
 
       {/* MAIN DATA PANEL */}
       <div className="admin-panel">
-        <h2 className="portal-card-heading">PENCATATAN ABSENSI HARIAN SISWA</h2>
-
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
-              <UserCheck size={20} color="#0066ff" /> Pencatatan Absensi Harian Siswa
+              <UserCheck size={18} color="#0284c7" /> Pencatatan Absensi Harian Siswa
             </div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            <div className="admin-panel-subtitle">
               Status: {isExistingData ? (
                 <span style={{ color: '#059669', fontWeight: 700 }}>● Sudah Tersimpan di Database</span>
               ) : (

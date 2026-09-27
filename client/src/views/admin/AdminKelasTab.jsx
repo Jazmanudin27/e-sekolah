@@ -151,14 +151,12 @@ export default function AdminKelasTab() {
   return (
     <div>
       <div className="admin-panel">
-        <h2 className="portal-card-heading">DATA MASTER KELAS & AKUN KELAS</h2>
-
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
-              <Building2 size={20} color="#d97706" /> Data Master Kelas & Akun Kelas
+              <Building2 size={18} color="#0284c7" /> Data Master Kelas & Akun Kelas
             </div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            <div className="admin-panel-subtitle">
               Kelola daftar ruang kelas dan kredensial login akun kelas
             </div>
           </div>
