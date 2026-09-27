@@ -1550,6 +1550,38 @@ body {
   padding: 4px !important;
 }
 
+.portal-rekap-table tfoot .rekap-total-row {
+  background-color: #f1f5f9;
+  border-top: 2px solid #94a3b8;
+}
+
+.portal-rekap-table tfoot td {
+  border: 1px solid #cbd5e1;
+  padding: 8px 8px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #0f172a;
+  height: 38px;
+  vertical-align: middle;
+}
+
+.td-total-label {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #0f172a;
+  background-color: #e2e8f0;
+}
+
+.td-total-bold {
+  font-weight: 800;
+}
+
+.td-grand-total {
+  font-weight: 800;
+  color: #0f172a;
+  background-color: #e2e8f0;
+}
+
 .btn-action-rekap {
   display: inline-flex;
   align-items: center;

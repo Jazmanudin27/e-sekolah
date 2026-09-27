@@ -449,6 +449,16 @@ export default function AdminDashboardTab({ onSwitchTab }) {
     );
   });
 
+  // Calculate total summary row for table
+  const rekapTotals = rekapKelasRows.reduce((acc, row) => ({
+    lakiLaki: acc.lakiLaki + (Number(row.lakiLaki) || 0),
+    perempuan: acc.perempuan + (Number(row.perempuan) || 0),
+    totalSiswa: acc.totalSiswa + (Number(row.totalSiswa) || 0),
+    izin: acc.izin + (Number(row.izin) || 0),
+    sakit: acc.sakit + (Number(row.sakit) || 0),
+    alfa: acc.alfa + (Number(row.alfa) || 0),
+  }), { lakiLaki: 0, perempuan: 0, totalSiswa: 0, izin: 0, sakit: 0, alfa: 0 });
+
   return (
     <div className="portal-dashboard-view">
       {/* PAGE TITLE */}
@@ -659,6 +669,22 @@ export default function AdminDashboardTab({ onSwitchTab }) {
                 ))
               )}
             </tbody>
+            {rekapKelasRows.length > 0 && !rekapLoading && (
+              <tfoot>
+                <tr className="rekap-total-row">
+                  <td colSpan={3} className="td-center td-total-label">
+                    TOTAL
+                  </td>
+                  <td className="td-center td-count td-total-bold">{renderNumberOrDash(rekapTotals.lakiLaki)}</td>
+                  <td className="td-center td-count td-total-bold">{renderNumberOrDash(rekapTotals.perempuan)}</td>
+                  <td className="td-center td-total td-grand-total">{renderNumberOrDash(rekapTotals.totalSiswa)}</td>
+                  <td className="td-center td-absen td-total-bold">{renderNumberOrDash(rekapTotals.izin)}</td>
+                  <td className="td-center td-absen td-total-bold">{renderNumberOrDash(rekapTotals.sakit)}</td>
+                  <td className="td-center td-absen td-alfa td-total-bold">{renderNumberOrDash(rekapTotals.alfa)}</td>
+                  <td className="td-center">-</td>
+                </tr>
+              </tfoot>
+            )}
           </table>
         </div>
       </div>
