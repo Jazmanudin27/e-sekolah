@@ -47,7 +47,8 @@ export default function RekapGuruView() {
     try {
       const res = await api.get(`/rekap/guru?bulan=${bul || ''}&tahun=${thn || ''}`);
       if (res.data?.success && Array.isArray(res.data.data)) {
-        setRekapList(res.data.data);
+        const sorted = res.data.data.slice().sort((a, b) => (a.nama_guru || '').localeCompare(b.nama_guru || '', 'id', { sensitivity: 'base' }));
+        setRekapList(sorted);
       } else {
         setRekapList([]);
       }

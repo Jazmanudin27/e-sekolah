@@ -64,7 +64,8 @@ export default function RekapSiswaView({ user }) {
     try {
       const res = await api.get(`/rekap/siswa?kode_kelas=${kId || ''}&bulan=${bul}&tahun=${thn}`);
       if (res.data?.success && Array.isArray(res.data.data)) {
-        setRekapList(res.data.data);
+        const sorted = res.data.data.slice().sort((a, b) => (a.nama_siswa || '').localeCompare(b.nama_siswa || '', 'id', { sensitivity: 'base' }));
+        setRekapList(sorted);
       } else {
         setRekapList([]);
       }

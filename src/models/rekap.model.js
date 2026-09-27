@@ -83,7 +83,7 @@ class RekapModel {
         fbParams.push(kode_kelas);
       }
 
-      fallbackSql += ' GROUP BY a.kode_siswa, s.nama_siswa, k.nama_kelas ORDER BY a.kode_siswa ASC';
+      fallbackSql += ' GROUP BY a.kode_siswa, s.nama_siswa, k.nama_kelas ORDER BY s.nama_siswa ASC, a.kode_siswa ASC';
       return await query(fallbackSql, fbParams);
 
     } catch (e) {
@@ -186,7 +186,7 @@ class RekapModel {
         fbParams.push(kode_kelas);
       }
 
-      fallbackSql += ' GROUP BY a.kode_siswa, s.nama_siswa, k.nama_kelas, m.nama_mapel ORDER BY a.kode_siswa ASC';
+      fallbackSql += ' GROUP BY a.kode_siswa, s.nama_siswa, k.nama_kelas, m.nama_mapel ORDER BY s.nama_siswa ASC, a.kode_siswa ASC';
       return await query(fallbackSql, fbParams);
 
     } catch (e) {

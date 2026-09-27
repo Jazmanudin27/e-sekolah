@@ -50,12 +50,14 @@ export default function SiswaView({ showToast }) {
   };
 
   // Filter List Logic
-  const filteredSiswa = siswaList.filter(s => {
-    const matchSearch = (s.nama_siswa || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        (s.nis_nisn || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchKelas = selectedKelas === 'ALL' || String(s.kode_kelas) === String(selectedKelas) || s.nama_kelas === selectedKelas;
-    return matchSearch && matchKelas;
-  });
+  const filteredSiswa = siswaList
+    .filter(s => {
+      const matchSearch = (s.nama_siswa || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (s.nis_nisn || '').toLowerCase().includes(searchQuery.toLowerCase());
+      const matchKelas = selectedKelas === 'ALL' || String(s.kode_kelas) === String(selectedKelas) || s.nama_kelas === selectedKelas;
+      return matchSearch && matchKelas;
+    })
+    .sort((a, b) => (a.nama_siswa || '').localeCompare(b.nama_siswa || '', 'id', { sensitivity: 'base' }));
 
   const totalLaki = filteredSiswa.filter(s => (s.jk || '').toUpperCase() === 'L').length;
   const totalPerempuan = filteredSiswa.filter(s => (s.jk || '').toUpperCase() === 'P').length;

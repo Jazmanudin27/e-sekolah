@@ -71,7 +71,8 @@ export default function RekapMapelView() {
     try {
       const res = await api.get(`/rekap/mapel?kode_mapel=${mId || ''}&kode_kelas=${kId || ''}&bulan=${bul}&tahun=${thn}`);
       if (res.data?.success && Array.isArray(res.data.data)) {
-        setRekapList(res.data.data);
+        const sorted = res.data.data.slice().sort((a, b) => (a.nama_siswa || '').localeCompare(b.nama_siswa || '', 'id', { sensitivity: 'base' }));
+        setRekapList(sorted);
       } else {
         setRekapList([]);
       }

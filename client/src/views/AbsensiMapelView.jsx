@@ -87,6 +87,7 @@ export default function AbsensiMapelView({ user, showToast }) {
           nis: s.nis_nisn || s.nis || `NIS-${s.kode_siswa}`,
           nama: s.nama_siswa || `Siswa ID #${s.kode_siswa}`
         }));
+        students.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
       }
 
       setStudentList(students);
