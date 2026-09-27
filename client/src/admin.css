@@ -1256,3 +1256,323 @@ body {
   background: #ffffff;
 }
 
+/* ==========================================================
+   REKAP ABSENSI SISWA/I, MAPEL, & SURAT TEGURAN WIDGET STYLES
+   ========================================================== */
+.portal-rekap-widget-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.portal-rekap-heading {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #1e293b;
+  margin: 0 0 18px 0;
+  text-transform: uppercase;
+}
+
+.portal-rekap-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.portal-rekap-select-group {
+  position: relative;
+}
+
+.portal-filter-dropdown {
+  padding: 7px 14px;
+  border-radius: 5px;
+  border: 1px solid #cbd5e1;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  background: #ffffff;
+  outline: none;
+  min-width: 150px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.portal-filter-dropdown:focus {
+  border-color: #3b82f6;
+}
+
+.portal-filter-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 5px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.portal-filter-refresh-btn:hover {
+  background: #f8fafc;
+  color: #1e293b;
+  border-color: #94a3b8;
+}
+
+.portal-rekap-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #cbd5e1;
+}
+
+.portal-rekap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  text-align: center;
+  background: #ffffff;
+}
+
+.portal-rekap-table thead th {
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 7px 6px;
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.th-section-header {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.th-teguran-header {
+  width: 70px;
+  vertical-align: middle !important;
+}
+
+.th-sub {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.col-no { width: 45px; }
+.col-kelas { width: 95px; }
+.col-jurusan { width: 85px; }
+.col-l { width: 80px; }
+.col-p { width: 85px; }
+.col-total { width: 85px; }
+.col-izin { width: 60px; }
+.col-sakit { width: 60px; }
+.col-alfa { width: 60px; }
+.col-btn-siswa { width: 55px; }
+.col-btn-mapel { width: 55px; }
+
+.portal-rekap-table tbody td {
+  border: 1px solid #cbd5e1;
+  padding: 6px 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e293b;
+  height: 36px;
+  vertical-align: middle;
+}
+
+.rekap-data-row:hover {
+  background-color: #f8fafc;
+}
+
+.td-center {
+  text-align: center;
+}
+
+.td-no {
+  font-weight: 600;
+  color: #475569;
+}
+
+.td-kelas {
+  text-align: left;
+  padding-left: 14px !important;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.td-jurusan {
+  color: #64748b;
+}
+
+.td-count {
+  font-weight: 600;
+}
+
+.td-total {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.td-absen {
+  font-weight: 600;
+}
+
+.td-alfa {
+  font-weight: 700;
+}
+
+.td-action {
+  padding: 4px !important;
+}
+
+.btn-action-rekap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-action-rekap:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-action-rekap:active {
+  transform: translateY(0);
+}
+
+.btn-rekap-siswa {
+  background-color: #2563eb;
+}
+
+.btn-rekap-mapel {
+  background-color: #16a34a;
+}
+
+.btn-rekap-teguran {
+  background-color: #eab308;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ==========================================================
+   PORTAL MODAL POPUP (SURAT TEGURAN)
+   ========================================================== */
+.portal-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: adminModalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.portal-modal-content {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.3), 0 0 0 1px rgba(226, 232, 240, 0.9);
+  width: 100%;
+  max-width: 620px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: adminModalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.portal-modal-lg {
+  max-width: 820px;
+}
+
+.portal-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+}
+
+.portal-modal-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.portal-modal-subtitle {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.portal-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.portal-modal-close:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+.portal-modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  max-height: calc(88vh - 130px);
+  background: #ffffff;
+}
+
+.modal-icon-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-icon-badge.amber-badge {
+  background: #fef3c7;
+}
+
+
