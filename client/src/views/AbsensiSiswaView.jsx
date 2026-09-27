@@ -198,36 +198,24 @@ export default function AbsensiSiswaView({ user, showToast }) {
         </div>
 
         {isClassAccount ? (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <div style={{ background: 'linear-gradient(135deg, #0052cc, #0072ff)', padding: '10px 14px', borderRadius: 12, color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(0,82,204,0.15)' }}>
-              <div>
-                <div style={{ fontSize: 9, fontWeight: 700, opacity: 0.85 }}>KELAS SAYA</div>
-                <div style={{ fontSize: 14, fontWeight: 900, marginTop: 1 }}>{userClassName}</div>
-              </div>
-              <span style={{ background: 'rgba(255,255,255,0.2)', padding: '2px 7px', borderRadius: 6, fontSize: 10, fontWeight: 700 }}>
-                Terunci
-              </span>
-            </div>
-
-            <div>
-              <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>TANGGAL ABSENSI</label>
-              <input
-                type="date"
-                value={tanggal}
-                onChange={handleTanggalChange}
-                style={{
-                  width: '100%',
-                  padding: '9px 12px',
-                  borderRadius: 10,
-                  border: '1px solid #cbd5e1',
-                  fontSize: 12,
-                  fontWeight: 700,
-                  background: '#f8fafc',
-                  color: '#0f172a',
-                  outline: 'none'
-                }}
-              />
-            </div>
+          <div>
+            <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>TANGGAL ABSENSI</label>
+            <input
+              type="date"
+              value={tanggal}
+              onChange={handleTanggalChange}
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                borderRadius: 12,
+                border: '1px solid #cbd5e1',
+                fontSize: 13,
+                fontWeight: 700,
+                background: '#f8fafc',
+                color: '#0f172a',
+                outline: 'none'
+              }}
+            />
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>

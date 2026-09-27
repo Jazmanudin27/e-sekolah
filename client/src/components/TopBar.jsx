@@ -31,7 +31,7 @@ export default function TopBar({ user, onLogout }) {
     return () => clearInterval(interval);
   }, []);
 
-  const displayName = user?.nama_guru || user?.username || 'Pengajar';
+  const displayName = user?.nama_guru || user?.nama_kelas || user?.username || 'Pengguna';
   const initials = displayName.split(' ').filter(Boolean).slice(0, 2).map(n => n[0]).join('').toUpperCase();
 
   return (

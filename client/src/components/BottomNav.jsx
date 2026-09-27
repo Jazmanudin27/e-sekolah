@@ -43,18 +43,6 @@ export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user
             <span>Rekap</span>
             {activeTab === 'rekapSiswa' && <span className="active-dot" />}
           </button>
-
-          {/* 4. PROFILE */}
-          <button
-            className={`nav-link-item ${activeTab === 'profil' ? 'active' : ''}`}
-            onClick={() => onTabChange('profil')}
-          >
-            <div className="nav-icon-wrapper">
-              <User size={21} />
-            </div>
-            <span>Profile</span>
-            {activeTab === 'profil' && <span className="active-dot" />}
-          </button>
         </div>
       </nav>
     );
