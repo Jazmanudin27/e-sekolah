@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   Users, GraduationCap, Building2, BookOpen, Calendar,
-  Clock, RefreshCw, ChevronDown, List, FileSpreadsheet
+  Clock, RefreshCw, ChevronDown, List, FileSpreadsheet,
+  X, Search, Printer, UserCheck, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import api from '../../api/client';
 
@@ -36,6 +37,11 @@ export default function AdminDashboardTab({ onSwitchTab }) {
   const [rekapTahun, setRekapTahun] = useState(String(currentDateObj.getFullYear()));
   const [rekapKelasRows, setRekapKelasRows] = useState([]);
   const [rekapLoading, setRekapLoading] = useState(false);
+
+  // Detail Modal State
+  const [selectedDetailClass, setSelectedDetailClass] = useState(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [searchStudentInModal, setSearchStudentInModal] = useState('');
 
   // Jadwal State
   const [selectedHari, setSelectedHari] = useState('Senin');
@@ -155,9 +161,37 @@ export default function AdminDashboardTab({ onSwitchTab }) {
           return rKelasId === kId || (kName && rKelasName === kName) || (kName && rKelasName.includes(kName)) || (kName && kName.includes(rKelasName));
         });
 
+        const hadir = rekapInClass.reduce((acc, curr) => acc + (Number(curr.total_hadir) || 0), 0);
         const izin = rekapInClass.reduce((acc, curr) => acc + (Number(curr.total_izin) || 0), 0);
         const sakit = rekapInClass.reduce((acc, curr) => acc + (Number(curr.total_sakit) || 0), 0);
         const alfa = rekapInClass.reduce((acc, curr) => acc + (Number(curr.total_alpha) || 0), 0);
+
+        // Individual student records for Modal
+        const studentsWithRekap = (studentsInClass.length > 0 ? studentsInClass : rekapInClass).map(st => {
+          const matchedRekap = rekapInClass.find(r => 
+            String(r.kode_siswa) === String(st.kode_siswa) || 
+            (r.nis_nisn && st.nis && r.nis_nisn.includes(st.nis)) ||
+            (st.nama_siswa && r.nama_siswa && st.nama_siswa.toLowerCase() === r.nama_siswa.toLowerCase())
+          );
+          const h = Number(matchedRekap?.total_hadir || 0);
+          const i = Number(matchedRekap?.total_izin || 0);
+          const s = Number(matchedRekap?.total_sakit || 0);
+          const a = Number(matchedRekap?.total_alpha || 0);
+          const totalDays = h + i + s + a;
+          const persentase = totalDays > 0 ? Math.round((h / totalDays) * 100) : (h > 0 ? 100 : 0);
+
+          return {
+            kode_siswa: st.kode_siswa,
+            nama_siswa: st.nama_siswa || matchedRekap?.nama_siswa || 'Siswa',
+            nis: st.nis || st.nisn || st.nis_nisn || matchedRekap?.nis_nisn || '-',
+            jk: getGenderStr(st) === 'L' || isLaki(st) ? 'L' : 'P',
+            total_hadir: h,
+            total_izin: i,
+            total_sakit: s,
+            total_alpha: a,
+            persentase
+          };
+        });
 
         return {
           no: index + 1,
@@ -167,9 +201,11 @@ export default function AdminDashboardTab({ onSwitchTab }) {
           lakiLaki: lakiLaki,
           perempuan: perempuan,
           totalSiswa: totalSiswa || (lakiLaki + perempuan),
+          hadir,
           izin,
           sakit,
-          alfa
+          alfa,
+          students: studentsWithRekap
         };
       });
 
@@ -193,6 +229,119 @@ export default function AdminDashboardTab({ onSwitchTab }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePrintClassRecap = (kelasRow) => {
+    const bulanName = BULAN_OPTIONS.find(b => b.value === rekapBulan)?.label || 'Bulan Berjalan';
+    const printWindow = window.open('', '_blank');
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Rekap Absensi - ${kelasRow.nama_kelas} (${bulanName} ${rekapTahun})</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 30px; color: #1e293b; line-height: 1.5; font-size: 13px; }
+          .kop { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+          .kop h2 { margin: 0; font-size: 18px; font-weight: bold; }
+          .kop h1 { margin: 3px 0; font-size: 22px; font-weight: bold; }
+          .kop p { margin: 0; font-size: 12px; color: #475569; }
+          .info-box { margin-bottom: 18px; }
+          .info-box table { width: 100%; border-collapse: collapse; font-size: 13px; }
+          .info-box td { padding: 3px 6px; }
+          .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          .data-table th, .data-table td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: center; }
+          .data-table th { background: #f1f5f9; font-weight: bold; font-size: 12px; }
+          .data-table td.name { text-align: left; font-weight: 600; }
+          .signatures { margin-top: 40px; display: flex; justify-content: space-between; page-break-inside: avoid; }
+          .sig-box { text-align: center; width: 200px; }
+          .sig-space { height: 65px; }
+          @media print {
+            body { padding: 15px; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="kop">
+          <h2>SMK ARTANITA NUSANTARA</h2>
+          <h1>REKAPITULASI ABSENSI SISWA</h1>
+          <p>Periode: ${bulanName} ${rekapTahun} • Kelas: ${kelasRow.nama_kelas} (${kelasRow.jurusan})</p>
+        </div>
+
+        <div class="info-box">
+          <table>
+            <tr>
+              <td style="width: 120px;"><strong>Kelas / Jurusan</strong></td>
+              <td style="width: 10px;">:</td>
+              <td>${kelasRow.nama_kelas} / ${kelasRow.jurusan}</td>
+              <td style="text-align: right;"><strong>Total Siswa</strong>: ${kelasRow.totalSiswa} (L: ${kelasRow.lakiLaki}, P: ${kelasRow.perempuan})</td>
+            </tr>
+            <tr>
+              <td><strong>Periode Rekap</strong></td>
+              <td>:</td>
+              <td>${bulanName} ${rekapTahun}</td>
+              <td style="text-align: right;"><strong>Total Absen</strong>: Izin: ${kelasRow.izin}, Sakit: ${kelasRow.sakit}, Alfa: ${kelasRow.alfa}</td>
+            </tr>
+          </table>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 35px;">No</th>
+              <th style="width: 110px;">NIS / NISN</th>
+              <th style="text-align: left;">Nama Siswa</th>
+              <th style="width: 45px;">L/P</th>
+              <th style="width: 65px;">Hadir (H)</th>
+              <th style="width: 60px;">Izin (I)</th>
+              <th style="width: 60px;">Sakit (S)</th>
+              <th style="width: 60px;">Alfa (A)</th>
+              <th style="width: 75px;">Kehadiran</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${kelasRow.students.map((st, i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${st.nis || '-'}</td>
+                <td class="name">${st.nama_siswa}</td>
+                <td>${st.jk}</td>
+                <td><strong>${st.total_hadir}</strong></td>
+                <td>${st.total_izin}</td>
+                <td>${st.total_sakit}</td>
+                <td style="color: ${st.total_alpha > 0 ? '#b91c1c' : '#334155'}; font-weight: ${st.total_alpha > 0 ? 'bold' : 'normal'}">${st.total_alpha}</td>
+                <td>${st.persentase}%</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div class="signatures">
+          <div class="sig-box">
+            Mengetahui,<br/>
+            <strong>Kepala Sekolah</strong>
+            <div class="sig-space"></div>
+            <strong><u>Drs. H. M. Artanita, M.Pd</u></strong><br/>
+            NIP. 19740512 200003 1 002
+          </div>
+          <div class="sig-box">
+            Wali Kelas ${kelasRow.nama_kelas},<br/>
+            <strong>Guru Wali Kelas</strong>
+            <div class="sig-space"></div>
+            <strong><u>( .................................................. )</u></strong><br/>
+            NIP/NUPTK. -
+          </div>
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+          };
+        </script>
+      </body>
+      </html>
+    `;
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   };
 
   // Schedule Grid Definition (Matching exact layout from screenshot)
@@ -252,6 +401,16 @@ export default function AdminDashboardTab({ onSwitchTab }) {
     }
     return val;
   };
+
+  // Filter students in modal based on search query
+  const modalStudentsFiltered = (selectedDetailClass?.students || []).filter(st => {
+    if (!searchStudentInModal) return true;
+    const q = searchStudentInModal.toLowerCase();
+    return (
+      (st.nama_siswa || '').toLowerCase().includes(q) ||
+      (st.nis || '').toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="portal-dashboard-view">
@@ -375,13 +534,17 @@ export default function AdminDashboardTab({ onSwitchTab }) {
                     <td className="td-center td-absen">{renderNumberOrDash(row.sakit)}</td>
                     <td className="td-center td-absen td-alfa">{renderNumberOrDash(row.alfa)}</td>
                     
-                    {/* BUTTON SISWA (BLUE ICON) */}
+                    {/* BUTTON SISWA (OPENS DETAIL MODAL) */}
                     <td className="td-center td-action">
                       <button
                         type="button"
-                        onClick={() => onSwitchTab?.('absensiSiswa')}
+                        onClick={() => {
+                          setSelectedDetailClass(row);
+                          setSearchStudentInModal('');
+                          setDetailModalOpen(true);
+                        }}
                         className="btn-action-rekap btn-rekap-siswa"
-                        title="Buka Absensi Siswa"
+                        title="Lihat Rincian Absensi Kelas"
                       >
                         <List size={16} />
                       </button>
@@ -454,8 +617,206 @@ export default function AdminDashboardTab({ onSwitchTab }) {
           </table>
         </div>
       </div>
+
+      {/* ========================================================
+          MODAL DETAIL RINCIAN ABSENSI SISWA KELAS
+          ======================================================== */}
+      {detailModalOpen && selectedDetailClass && (
+        <div className="portal-modal-backdrop" onClick={() => setDetailModalOpen(false)}>
+          <div className="portal-modal-content portal-modal-lg" onClick={(e) => e.stopPropagation()}>
+            {/* MODAL HEADER */}
+            <div className="portal-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '8px',
+                  background: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#2563eb'
+                }}>
+                  <UserCheck size={20} />
+                </div>
+                <div>
+                  <h3 className="portal-modal-title">
+                    Detail Absensi Siswa - {selectedDetailClass.nama_kelas}
+                  </h3>
+                  <p className="portal-modal-subtitle">
+                    Periode: <strong>{BULAN_OPTIONS.find(b => b.value === rekapBulan)?.label} {rekapTahun}</strong> • Jurusan: <strong>{selectedDetailClass.jurusan}</strong>
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="portal-modal-close"
+                onClick={() => setDetailModalOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* MODAL BODY */}
+            <div className="portal-modal-body">
+              {/* TOP KPI CARDS */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px' }}>
+                <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Total Siswa</div>
+                  <div style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>{selectedDetailClass.totalSiswa}</div>
+                </div>
+                <div style={{ background: '#f0fdf4', padding: '10px 12px', borderRadius: '8px', border: '1px solid #bbf7d0', textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', color: '#166534', fontWeight: 600 }}>Hadir (H)</div>
+                  <div style={{ fontSize: '17px', fontWeight: 800, color: '#15803d' }}>{selectedDetailClass.hadir || 0}</div>
+                </div>
+                <div style={{ background: '#fffbeb', padding: '10px 12px', borderRadius: '8px', border: '1px solid #fde68a', textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', color: '#92400e', fontWeight: 600 }}>Izin (I)</div>
+                  <div style={{ fontSize: '17px', fontWeight: 800, color: '#b45309' }}>{selectedDetailClass.izin}</div>
+                </div>
+                <div style={{ background: '#faf5ff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e9d5ff', textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', color: '#6b21a8', fontWeight: 600 }}>Sakit (S)</div>
+                  <div style={{ fontSize: '17px', fontWeight: 800, color: '#7e22ce' }}>{selectedDetailClass.sakit}</div>
+                </div>
+                <div style={{ background: '#fef2f2', padding: '10px 12px', borderRadius: '8px', border: '1px solid #fecaca', textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', color: '#991b1b', fontWeight: 600 }}>Alfa (A)</div>
+                  <div style={{ fontSize: '17px', fontWeight: 800, color: '#dc2626' }}>{selectedDetailClass.alfa}</div>
+                </div>
+              </div>
+
+              {/* SEARCH BOX */}
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '14px', position: 'relative' }}>
+                <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '12px' }} />
+                <input
+                  type="text"
+                  placeholder="Cari nama siswa atau NIS..."
+                  value={searchStudentInModal}
+                  onChange={(e) => setSearchStudentInModal(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px 8px 36px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '13px',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
+              {/* STUDENT RECAP TABLE */}
+              <div style={{ maxHeight: '340px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                <table className="admin-table" style={{ width: '100%', fontSize: '12.5px', margin: 0 }}>
+                  <thead>
+                    <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 1 }}>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '40px' }}>No</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '100px' }}>NIS</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'left' }}>Nama Siswa</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '50px' }}>L/P</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '60px' }}>Hadir</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '60px' }}>Izin</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '60px' }}>Sakit</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '60px' }}>Alfa</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '85px' }}>Kehadiran</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {modalStudentsFiltered.length > 0 ? (
+                      modalStudentsFiltered.map((st, idx) => (
+                        <tr key={st.kode_siswa || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '8px 10px', textAlign: 'center', color: '#64748b' }}>{idx + 1}</td>
+                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: '#0284c7' }}>
+                            {st.nis || '-'}
+                          </td>
+                          <td style={{ padding: '8px 10px', fontWeight: 700, color: '#0f172a' }}>
+                            {st.nama_siswa}
+                          </td>
+                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: st.jk === 'L' ? '#0284c7' : '#db2777' }}>
+                            {st.jk}
+                          </td>
+                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: '#16a34a' }}>
+                            {st.total_hadir}
+                          </td>
+                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: '#d97706' }}>
+                            {st.total_izin}
+                          </td>
+                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: '#9333ea' }}>
+                            {st.total_sakit}
+                          </td>
+                          <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '2px 8px',
+                              borderRadius: '10px',
+                              fontSize: '11.5px',
+                              fontWeight: 700,
+                              background: st.total_alpha > 0 ? '#fee2e2' : '#f1f5f9',
+                              color: st.total_alpha > 0 ? '#b91c1c' : '#64748b'
+                            }}>
+                              {st.total_alpha}
+                            </span>
+                          </td>
+                          <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '2px 8px',
+                              borderRadius: '10px',
+                              fontSize: '11.5px',
+                              fontWeight: 700,
+                              background: st.persentase >= 90 ? '#dcfce7' : st.persentase >= 75 ? '#fef3c7' : '#fee2e2',
+                              color: st.persentase >= 90 ? '#15803d' : st.persentase >= 75 ? '#b45309' : '#b91c1c'
+                            }}>
+                              {st.persentase}%
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={9} style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+                          Tidak ada siswa yang cocok dengan pencarian.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* MODAL FOOTER */}
+            <div className="portal-modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
+              <button
+                type="button"
+                onClick={() => handlePrintClassRecap(selectedDetailClass)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 14px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#334155',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <Printer size={15} /> Cetak Rekap Kelas
+              </button>
+              <button
+                type="button"
+                className="admin-btn admin-btn-secondary"
+                onClick={() => setDetailModalOpen(false)}
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 
 
