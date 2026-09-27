@@ -64,10 +64,11 @@ export default function App() {
   const handleLoginSuccess = (user, token) => {
     localStorage.setItem('esekolah_token', token);
     setCurrentUser(user);
-    setActiveTab('beranda');
+    const isKelas = user?.type === 'Kelas' || user?.role === 'Kelas';
+    setActiveTab(isKelas ? 'absensiSiswa' : 'beranda');
     Swal.fire({
       title: 'Login Berhasil!',
-      text: `Selamat datang kembali, ${user.nama_guru || user.username || 'Pengajar'}!`,
+      text: `Selamat datang kembali, ${user.nama_guru || user.nama_kelas || user.username || 'Pengguna'}!`,
       icon: 'success',
       confirmButtonColor: '#0066ff',
       timer: 2200,
@@ -236,7 +237,7 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={(t) => setActiveTab(t)}
         onOpenPresensi={(type) => setPresensiModalType(type || 'in')}
-        user={user}
+        user={currentUser}
       />
 
       {/* Presensi CheckIn/Out Modal */}

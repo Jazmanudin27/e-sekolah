@@ -3,29 +3,17 @@ import { GraduationCap, Lock, ArrowRight, ShieldCheck, User, BookOpen } from 'lu
 import api from '../api/client';
 
 export default function LoginView({ onLoginSuccess, showToast }) {
-  const [accountType, setAccountType] = useState('Guru'); // 'Guru' or 'Kelas'
   const [username, setUsername] = useState('ali@artanita.com');
   const [password, setPassword] = useState('123456');
   const [loading, setLoading] = useState(false);
-
-  const handleTypeChange = (type) => {
-    setAccountType(type);
-    if (type === 'Kelas') {
-      setUsername('X RPL 1');
-      setPassword('123456');
-    } else {
-      setUsername('ali@artanita.com');
-      setPassword('123456');
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.post('/auth/login', { username, password, type: accountType });
+      const res = await api.post('/auth/login', { username, password });
       if (res.data.success) {
-        showToast(`Login ${accountType === 'Kelas' ? 'Akun Kelas' : 'Guru'} Berhasil!`);
+        showToast('Login Berhasil! Selamat Datang di E-Sekolah.');
         onLoginSuccess(res.data.data.user, res.data.data.token);
       } else {
         showToast(res.data.message || 'Username atau Password salah.', false);
@@ -97,117 +85,50 @@ export default function LoginView({ onLoginSuccess, showToast }) {
           padding: '28px 24px',
           boxShadow: '0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(56, 189, 248, 0.1)'
         }}>
-          {/* ACCOUNT TYPE SWITCHER TABS */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 6,
-            background: 'rgba(30, 41, 59, 0.8)',
-            padding: 4,
-            borderRadius: 14,
-            marginBottom: 20,
-            border: '1px solid rgba(255,255,255,0.1)'
-          }}>
-            <button
-              type="button"
-              onClick={() => handleTypeChange('Guru')}
-              style={{
-                padding: '9px 12px',
-                borderRadius: 10,
-                border: 'none',
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: 'pointer',
-                background: accountType === 'Guru' ? 'linear-gradient(135deg, #0284c7, #0052cc)' : 'transparent',
-                color: accountType === 'Guru' ? '#ffffff' : '#94a3b8',
-                boxShadow: accountType === 'Guru' ? '0 4px 12px rgba(2, 132, 199, 0.4)' : 'none',
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6
-              }}
-            >
-              <User size={14} />
-              <span>Guru / Staf</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleTypeChange('Kelas')}
-              style={{
-                padding: '9px 12px',
-                borderRadius: 10,
-                border: 'none',
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: 'pointer',
-                background: accountType === 'Kelas' ? 'linear-gradient(135deg, #059669, #10b981)' : 'transparent',
-                color: accountType === 'Kelas' ? '#ffffff' : '#94a3b8',
-                boxShadow: accountType === 'Kelas' ? '0 4px 12px rgba(16, 185, 129, 0.4)' : 'none',
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6
-              }}
-            >
-              <BookOpen size={14} />
-              <span>Akun Kelas</span>
-            </button>
-          </div>
-
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
             <div>
-              <h2 style={{ fontSize: 17, fontWeight: 700, color: '#ffffff', margin: 0 }}>
-                {accountType === 'Kelas' ? 'Masuk Portal Kelas' : 'Masuk Akun Pengajar'}
-              </h2>
-              <p style={{ color: '#94a3b8', fontSize: 12, marginTop: 4, margin: 0 }}>
-                {accountType === 'Kelas' ? 'Masukkan Nama atau Kode Kelas' : 'Masukkan NIP atau Email Guru'}
-              </p>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#ffffff', margin: 0 }}>Masuk Akun Pengajar</h2>
+              <p style={{ color: '#94a3b8', fontSize: 12, marginTop: 4, margin: 0 }}>Silakan masukkan NIP / Email Guru</p>
             </div>
             <div style={{
               width: 40,
               height: 40,
               borderRadius: 14,
-              background: accountType === 'Kelas' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(56, 189, 248, 0.15)',
-              color: accountType === 'Kelas' ? '#10b981' : '#38bdf8',
+              background: 'rgba(16, 185, 129, 0.15)',
+              color: '#10b981',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: `1px solid ${accountType === 'Kelas' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(56, 189, 248, 0.3)'}`
+              border: '1px solid rgba(16, 185, 129, 0.3)'
             }}>
               <ShieldCheck size={22} />
             </div>
           </div>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            {/* USERNAME / KELAS INPUT FIELD */}
+            {/* USERNAME INPUT FIELD */}
             <div>
-              <label style={{ display: 'block', color: '#cbd5e1', fontSize: 11, fontWeight: 700, marginBottom: 8, letterSpacing: '0.3px' }}>
-                {accountType === 'Kelas' ? 'NAMA KELAS / KODE KELAS' : 'NIP / EMAIL / USERNAME'}
+              <label style={{ display: 'block', color: '#cbd5e1', fontSize: 12, fontWeight: 600, marginBottom: 8, letterSpacing: '0.3px' }}>
+                NIP / EMAIL / USERNAME
               </label>
               <div style={{
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center'
               }}>
-                {accountType === 'Kelas' ? (
-                  <BookOpen size={18} style={{ position: 'absolute', left: 14, color: '#10b981', pointerEvents: 'none' }} />
-                ) : (
-                  <User size={18} style={{ position: 'absolute', left: 14, color: '#38bdf8', pointerEvents: 'none' }} />
-                )}
+                <User size={18} style={{ position: 'absolute', left: 14, color: '#38bdf8', pointerEvents: 'none' }} />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder={accountType === 'Kelas' ? 'Contoh: X RPL 1 atau 1' : 'Masukkan NIP atau Email'}
+                  placeholder="Masukkan NIP atau Email"
                   required
                   style={{
                     width: '100%',
                     height: 48,
                     padding: '0 14px 0 42px',
                     background: 'rgba(30, 41, 59, 0.7)',
-                    border: `1.5px solid ${accountType === 'Kelas' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(56, 189, 248, 0.25)'}`,
+                    border: '1.5px solid rgba(56, 189, 248, 0.25)',
                     borderRadius: 14,
                     color: '#ffffff',
                     fontSize: 14,
@@ -215,6 +136,16 @@ export default function LoginView({ onLoginSuccess, showToast }) {
                     outline: 'none',
                     boxSizing: 'border-box',
                     transition: 'all 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#38bdf8';
+                    e.target.style.boxShadow = '0 0 14px rgba(56, 189, 248, 0.3)';
+                    e.target.style.background = 'rgba(30, 41, 59, 0.9)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(56, 189, 248, 0.25)';
+                    e.target.style.boxShadow = 'none';
+                    e.target.style.background = 'rgba(30, 41, 59, 0.7)';
                   }}
                 />
               </div>
