@@ -4,11 +4,14 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
+import Pagination from '../../components/Pagination';
 
 export default function AdminMapelTab() {
   const [mapelList, setMapelList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Modal State
   const [showModal, setShowModal] = useState(false);
@@ -111,9 +114,16 @@ export default function AdminMapelTab() {
     }
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
   const filteredList = mapelList
     .filter(m => (m.nama_mapel || '').toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => (a.nama_mapel || '').localeCompare(b.nama_mapel || '', 'id', { sensitivity: 'base' }));
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div>
@@ -183,9 +193,9 @@ export default function AdminMapelTab() {
                   </td>
                 </tr>
               ) : (
-                filteredList.map((m, idx) => (
+                paginatedList.map((m, idx) => (
                   <tr key={m.kode_mapel || idx}>
-                    <td style={{ fontWeight: 700, color: '#64748b' }}>{idx + 1}</td>
+                    <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
                     <td>
                       <code style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, fontSize: 12, color: '#475569', fontWeight: 700 }}>
                         MPL-{m.kode_mapel}
@@ -215,6 +225,14 @@ export default function AdminMapelTab() {
             </tbody>
           </table>
         </div>
+
+        {/* PAGINATION */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredList.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* ADD / EDIT MODAL */}

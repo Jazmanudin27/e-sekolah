@@ -4,9 +4,12 @@ import {
   Calendar, CheckCircle2, HeartPulse, FileText, AlertCircle, X, ChevronRight
 } from 'lucide-react';
 import api from '../../api/client';
+import Pagination from '../../components/Pagination';
 
 export default function AdminRekapTab({ initialSubTab = 'guru' }) {
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     if (initialSubTab) {
@@ -136,6 +139,14 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
   const printReport = () => {
     window.print();
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeSubTab, selectedBulan, selectedTahun, selectedKelas, selectedMapel]);
+
+  const currentList = activeSubTab === 'guru' ? rekapGuru : activeSubTab === 'siswa' ? rekapSiswa : rekapMapel;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedList = currentList.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div>
@@ -294,9 +305,9 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                     </td>
                   </tr>
                 ) : (
-                  rekapGuru.map((g, idx) => (
+                  paginatedList.map((g, idx) => (
                     <tr key={g.kode_guru || idx}>
-                      <td style={{ fontWeight: 700, color: '#64748b' }}>{idx + 1}</td>
+                      <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
                       <td>
                         <div style={{ fontWeight: 800, color: '#0f172a' }}>{g.nama_guru}</div>
                       </td>
@@ -359,9 +370,9 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                     </td>
                   </tr>
                 ) : (
-                  rekapSiswa.map((s, idx) => (
+                  paginatedList.map((s, idx) => (
                     <tr key={s.kode_siswa || idx}>
-                      <td style={{ fontWeight: 700, color: '#64748b' }}>{idx + 1}</td>
+                      <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
                       <td style={{ fontWeight: 700, color: '#0066ff' }}>{s.nis_nisn || `NIS-${s.kode_siswa}`}</td>
                       <td>
                         <div style={{ fontWeight: 800, color: '#0f172a' }}>{s.nama_siswa}</div>
@@ -420,9 +431,9 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                     </td>
                   </tr>
                 ) : (
-                  rekapMapel.map((m, idx) => (
+                  paginatedList.map((m, idx) => (
                     <tr key={m.kode_siswa || idx}>
-                      <td style={{ fontWeight: 700, color: '#64748b' }}>{idx + 1}</td>
+                      <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
                       <td style={{ fontWeight: 700, color: '#0066ff' }}>{m.nis_nisn || `NIS-${m.kode_siswa}`}</td>
                       <td>
                         <div style={{ fontWeight: 800, color: '#0f172a' }}>{m.nama_siswa}</div>
@@ -453,6 +464,14 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
             </table>
           </div>
         )}
+
+        {/* PAGINATION */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={currentList.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* DETAIL MODAL */}

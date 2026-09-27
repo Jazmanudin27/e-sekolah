@@ -4,11 +4,14 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
+import Pagination from '../../components/Pagination';
 
 export default function AdminUsersTab() {
   const [userList, setUserList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Modal State
   const [showModal, setShowModal] = useState(false);
@@ -125,11 +128,18 @@ export default function AdminUsersTab() {
     }
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
   const filteredList = userList.filter(u => {
     return (u.name || '').toLowerCase().includes(search.toLowerCase()) ||
            (u.username || '').toLowerCase().includes(search.toLowerCase()) ||
            (u.email || '').toLowerCase().includes(search.toLowerCase());
   });
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div>
@@ -198,9 +208,9 @@ export default function AdminUsersTab() {
                   </td>
                 </tr>
               ) : (
-                filteredList.map((u, idx) => (
+                paginatedList.map((u, idx) => (
                   <tr key={u.id || idx}>
-                    <td style={{ fontWeight: 700, color: '#64748b' }}>{idx + 1}</td>
+                    <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
                     <td>
                       <div style={{ fontWeight: 800, color: '#0f172a' }}>{u.name || u.nama || u.username}</div>
                     </td>
@@ -244,6 +254,14 @@ export default function AdminUsersTab() {
             </tbody>
           </table>
         </div>
+
+        {/* PAGINATION */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredList.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* ADD / EDIT MODAL */}

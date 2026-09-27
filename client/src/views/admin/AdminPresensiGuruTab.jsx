@@ -4,6 +4,7 @@ import {
   AlertCircle, RefreshCw, Printer, User, MapPin, Eye, X, Download
 } from 'lucide-react';
 import api from '../../api/client';
+import Pagination from '../../components/Pagination';
 
 export default function AdminPresensiGuruTab() {
   const now = new Date();
@@ -12,6 +13,8 @@ export default function AdminPresensiGuruTab() {
   const [selectedGuru, setSelectedGuru] = useState('');
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL'); // 'ALL', 'LENGKAP', 'BELUM_PULANG', 'TERLAMBAT'
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const [guruList, setGuruList] = useState([]);
   const [presensiList, setPresensiList] = useState([]);
@@ -108,6 +111,13 @@ export default function AdminPresensiGuruTab() {
     if (filterStatus === 'TERLAMBAT') return matchSearch && isTerlambat;
     return matchSearch;
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterStatus, selectedGuru, selectedBulan, selectedTahun]);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
 
   // Summary counts
   const totalHadir = presensiList.length;
@@ -272,13 +282,13 @@ export default function AdminPresensiGuruTab() {
                   </td>
                 </tr>
               ) : (
-                filteredList.map((item, idx) => {
+                paginatedList.map((item, idx) => {
                   const isTerlambat = item.jam_in && item.jam_in > '07:15:00';
                   const isComplete = item.jam_in && item.jam_out;
 
                   return (
                     <tr key={item.id || idx}>
-                      <td style={{ fontWeight: 700, color: '#64748b' }}>{idx + 1}</td>
+                      <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
                       <td>
                         <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.nama_guru}</div>
                         <div style={{ fontSize: 11, color: '#64748b' }}>NIP: {item.nip_nuptk}</div>
@@ -348,15 +358,13 @@ export default function AdminPresensiGuruTab() {
           </table>
         </div>
 
-        {/* FOOTER */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, paddingTop: 14, borderTop: '1px solid #f1f5f9', fontSize: 12, color: '#64748b' }}>
-          <div>
-            Menampilkan <strong>{filteredList.length}</strong> catatan presensi
-          </div>
-          <div>
-            Sistem Presensi Real-Time E-Sekolah
-          </div>
-        </div>
+        {/* PAGINATION */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredList.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* PHOTO PREVIEW MODAL */}

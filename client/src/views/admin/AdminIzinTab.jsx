@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
+import Pagination from '../../components/Pagination';
 
 export default function AdminIzinTab() {
   const [izinList, setIzinList] = useState([]);
@@ -12,6 +13,8 @@ export default function AdminIzinTab() {
   const [search, setSearch] = useState('');
   const [filterJenis, setFilterJenis] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchIzin();
@@ -96,6 +99,13 @@ export default function AdminIzinTab() {
 
     return matchSearch && matchJenis && matchStatus;
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterJenis, filterStatus]);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
 
   const totalSakit = izinList.filter(i => (i.jenis_izin || '').toLowerCase() === 'sakit').length;
   const totalIzin = izinList.filter(i => (i.jenis_izin || '').toLowerCase() === 'izin').length;
@@ -241,14 +251,14 @@ export default function AdminIzinTab() {
                   </td>
                 </tr>
               ) : (
-                filteredList.map((item, idx) => {
+                paginatedList.map((item, idx) => {
                   const status = item.status || 'Disetujui';
                   const isSakit = (item.jenis_izin || '').toLowerCase() === 'sakit';
                   const isDinas = (item.jenis_izin || '').toLowerCase() === 'dinas';
 
                   return (
                     <tr key={item.id || idx}>
-                      <td style={{ fontWeight: 700, color: '#64748b' }}>{idx + 1}</td>
+                      <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
                       <td>
                         <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.nama_guru || 'Guru Pengajar'}</div>
                         <div style={{ fontSize: 11, color: '#64748b' }}>Kode: #{item.kode_guru || item.id}</div>
@@ -317,15 +327,13 @@ export default function AdminIzinTab() {
           </table>
         </div>
 
-        {/* FOOTER */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, paddingTop: 14, borderTop: '1px solid #f1f5f9', fontSize: 12, color: '#64748b' }}>
-          <div>
-            Menampilkan <strong>{filteredList.length}</strong> permohonan surat izin
-          </div>
-          <div>
-            Verifikasi Izin & Ketidakhadiran Guru
-          </div>
-        </div>
+        {/* PAGINATION */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredList.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

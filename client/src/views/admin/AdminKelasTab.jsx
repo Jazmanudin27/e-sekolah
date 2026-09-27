@@ -4,12 +4,15 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
+import Pagination from '../../components/Pagination';
 
 export default function AdminKelasTab() {
   const [kelasList, setKelasList] = useState([]);
   const [guruList, setGuruList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Modal State
   const [showModal, setShowModal] = useState(false);
@@ -130,6 +133,10 @@ export default function AdminKelasTab() {
     }
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
   const filteredList = kelasList
     .filter(k => {
       return (k.nama_kelas || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -137,6 +144,9 @@ export default function AdminKelasTab() {
              (k.wali_kelas || '').toLowerCase().includes(search.toLowerCase());
     })
     .sort((a, b) => (a.nama_kelas || '').localeCompare(b.nama_kelas || '', 'id', { numeric: true }));
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div>
@@ -207,9 +217,9 @@ export default function AdminKelasTab() {
                   </td>
                 </tr>
               ) : (
-                filteredList.map((k, idx) => (
+                paginatedList.map((k, idx) => (
                   <tr key={k.kode_kelas || idx}>
-                    <td style={{ fontWeight: 700, color: '#64748b' }}>{idx + 1}</td>
+                    <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
                     <td>
                       <span style={{ fontWeight: 800, color: '#0066ff', fontSize: 14 }}>
                         {k.nama_kelas}
@@ -242,6 +252,14 @@ export default function AdminKelasTab() {
             </tbody>
           </table>
         </div>
+
+        {/* PAGINATION */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredList.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* ADD / EDIT MODAL */}

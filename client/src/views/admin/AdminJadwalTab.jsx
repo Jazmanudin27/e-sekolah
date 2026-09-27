@@ -3,6 +3,7 @@ import {
   Calendar, Search, Printer, RefreshCw, Clock, Building2, User, BookOpen
 } from 'lucide-react';
 import api from '../../api/client';
+import Pagination from '../../components/Pagination';
 
 export default function AdminJadwalTab() {
   const [jadwalList, setJadwalList] = useState([]);
@@ -10,6 +11,8 @@ export default function AdminJadwalTab() {
   const [selectedHari, setSelectedHari] = useState('ALL');
   const [selectedKelas, setSelectedKelas] = useState('ALL');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const daftarHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
@@ -73,6 +76,13 @@ export default function AdminJadwalTab() {
     setSelectedKelas(k);
     fetchFilteredJadwal(selectedHari, k);
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedHari, selectedKelas]);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedList = jadwalList.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div>
@@ -161,9 +171,9 @@ export default function AdminJadwalTab() {
                   </td>
                 </tr>
               ) : (
-                jadwalList.map((j, idx) => (
+                paginatedList.map((j, idx) => (
                   <tr key={j.kode_jadwal || idx}>
-                    <td style={{ fontWeight: 700, color: '#64748b' }}>{idx + 1}</td>
+                    <td style={{ fontWeight: 700, color: '#64748b' }}>{startIndex + idx + 1}</td>
                     <td>
                       <span style={{
                         background: j.hari === 'Senin' ? '#eff6ff' : j.hari === 'Jumat' ? '#f0fdf4' : '#f8fafc',
@@ -208,6 +218,14 @@ export default function AdminJadwalTab() {
             </tbody>
           </table>
         </div>
+
+        {/* PAGINATION */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={jadwalList.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );
