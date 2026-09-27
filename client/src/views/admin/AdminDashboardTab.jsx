@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   Users, GraduationCap, Building2, BookOpen, Calendar,
-  Clock, RefreshCw, ChevronDown, List, FileSpreadsheet,
-  X, Search, Printer, UserCheck, CheckCircle2, AlertCircle
+  Clock, RefreshCw, ChevronDown, ChevronRight, List, FileSpreadsheet,
+  X, Search, Printer, UserCheck, CheckCircle2, AlertCircle, CalendarDays
 } from 'lucide-react';
 import api from '../../api/client';
 
@@ -42,6 +42,9 @@ export default function AdminDashboardTab({ onSwitchTab }) {
   const [selectedDetailClass, setSelectedDetailClass] = useState(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [searchStudentInModal, setSearchStudentInModal] = useState('');
+  const [expandedStudentId, setExpandedStudentId] = useState(null);
+  const [studentDetailCache, setStudentDetailCache] = useState({});
+  const [studentDetailLoading, setStudentDetailLoading] = useState(false);
 
   // Jadwal State
   const [selectedHari, setSelectedHari] = useState('Senin');
@@ -228,6 +231,43 @@ export default function AdminDashboardTab({ onSwitchTab }) {
       console.error('Error fetching jadwal:', e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleExpandStudent = async (student) => {
+    const sId = String(student.kode_siswa || student.nis);
+    if (expandedStudentId === sId) {
+      setExpandedStudentId(null);
+      return;
+    }
+
+    setExpandedStudentId(sId);
+
+    // If not cached, fetch detail from API
+    if (!studentDetailCache[sId]) {
+      setStudentDetailLoading(true);
+      try {
+        const res = await api.get(`/rekap/siswa-detail?kode_siswa=${student.kode_siswa}&bulan=${rekapBulan}&tahun=${rekapTahun}`);
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setStudentDetailCache(prev => ({
+            ...prev,
+            [sId]: res.data.data
+          }));
+        } else {
+          setStudentDetailCache(prev => ({
+            ...prev,
+            [sId]: []
+          }));
+        }
+      } catch (err) {
+        console.error('Error fetching student detail logs:', err);
+        setStudentDetailCache(prev => ({
+          ...prev,
+          [sId]: []
+        }));
+      } finally {
+        setStudentDetailLoading(false);
+      }
     }
   };
 
@@ -537,6 +577,7 @@ export default function AdminDashboardTab({ onSwitchTab }) {
                         onClick={() => {
                           setSelectedDetailClass(row);
                           setSearchStudentInModal('');
+                          setExpandedStudentId(null);
                           setDetailModalOpen(true);
                         }}
                         className="btn-action-rekap btn-rekap-siswa"
@@ -676,30 +717,35 @@ export default function AdminDashboardTab({ onSwitchTab }) {
                 </div>
               </div>
 
-              {/* SEARCH BOX */}
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '14px', position: 'relative' }}>
-                <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '12px' }} />
-                <input
-                  type="text"
-                  placeholder="Cari nama siswa atau NIS..."
-                  value={searchStudentInModal}
-                  onChange={(e) => setSearchStudentInModal(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px 8px 36px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '13px',
-                    outline: 'none'
-                  }}
-                />
+              {/* SEARCH BOX & INSTRUCTION NOTE */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', flex: 1, position: 'relative' }}>
+                  <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '12px' }} />
+                  <input
+                    type="text"
+                    placeholder="Cari nama siswa atau NIS..."
+                    value={searchStudentInModal}
+                    onChange={(e) => setSearchStudentInModal(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px 8px 36px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '13px',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+                <span style={{ fontSize: '11.5px', color: '#64748b', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
+                  *Klik baris siswa untuk melihat tanggal ketidakhadiran
+                </span>
               </div>
 
               {/* STUDENT RECAP TABLE (NO, NIS, NAMA SISWA, L/P, IZIN, SAKIT, ALFA) */}
-              <div style={{ maxHeight: '340px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+              <div style={{ maxHeight: '360px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
                 <table className="admin-table" style={{ width: '100%', fontSize: '12.5px', margin: 0 }}>
                   <thead>
-                    <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 1 }}>
+                    <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 2 }}>
                       <th style={{ padding: '8px 10px', textAlign: 'center', width: '45px' }}>No</th>
                       <th style={{ padding: '8px 10px', textAlign: 'center', width: '110px' }}>NIS</th>
                       <th style={{ padding: '8px 10px', textAlign: 'left' }}>Nama Siswa</th>
@@ -711,39 +757,140 @@ export default function AdminDashboardTab({ onSwitchTab }) {
                   </thead>
                   <tbody>
                     {modalStudentsFiltered.length > 0 ? (
-                      modalStudentsFiltered.map((st, idx) => (
-                        <tr key={st.kode_siswa || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                          <td style={{ padding: '8px 10px', textAlign: 'center', color: '#64748b' }}>{idx + 1}</td>
-                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: '#0284c7' }}>
-                            {st.nis || '-'}
-                          </td>
-                          <td style={{ padding: '8px 10px', fontWeight: 700, color: '#0f172a' }}>
-                            {st.nama_siswa}
-                          </td>
-                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: st.jk === 'L' ? '#0284c7' : '#db2777' }}>
-                            {st.jk}
-                          </td>
-                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: st.total_izin > 0 ? '#d97706' : '#64748b' }}>
-                            {renderNumberOrDash(st.total_izin)}
-                          </td>
-                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: st.total_sakit > 0 ? '#9333ea' : '#64748b' }}>
-                            {renderNumberOrDash(st.total_sakit)}
-                          </td>
-                          <td style={{ padding: '8px 10px', textAlign: 'center' }}>
-                            <span style={{
-                              display: 'inline-block',
-                              padding: '2px 8px',
-                              borderRadius: '10px',
-                              fontSize: '11.5px',
-                              fontWeight: 700,
-                              background: st.total_alpha > 0 ? '#fee2e2' : '#f1f5f9',
-                              color: st.total_alpha > 0 ? '#b91c1c' : '#64748b'
-                            }}>
-                              {renderNumberOrDash(st.total_alpha)}
-                            </span>
-                          </td>
-                        </tr>
-                      ))
+                      modalStudentsFiltered.map((st, idx) => {
+                        const sId = String(st.kode_siswa || st.nis);
+                        const isExpanded = expandedStudentId === sId;
+                        const logs = (studentDetailCache[sId] || []).filter(l => l.status !== 'H');
+
+                        return (
+                          <React.Fragment key={st.kode_siswa || idx}>
+                            <tr
+                              onClick={() => handleToggleExpandStudent(st)}
+                              style={{
+                                borderBottom: '1px solid #f1f5f9',
+                                cursor: 'pointer',
+                                background: isExpanded ? '#eff6ff' : 'transparent',
+                                transition: 'background-color 0.15s'
+                              }}
+                              title="Klik untuk melihat tanggal ketidakhadiran"
+                            >
+                              <td style={{ padding: '9px 10px', textAlign: 'center', color: '#64748b' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                  {isExpanded ? <ChevronDown size={14} color="#2563eb" /> : <ChevronRight size={14} color="#94a3b8" />}
+                                  <span>{idx + 1}</span>
+                                </div>
+                              </td>
+                              <td style={{ padding: '9px 10px', textAlign: 'center', fontWeight: 600, color: '#0284c7' }}>
+                                {st.nis || '-'}
+                              </td>
+                              <td style={{ padding: '9px 10px', fontWeight: 700, color: '#0f172a' }}>
+                                {st.nama_siswa}
+                              </td>
+                              <td style={{ padding: '9px 10px', textAlign: 'center', fontWeight: 600, color: st.jk === 'L' ? '#0284c7' : '#db2777' }}>
+                                {st.jk}
+                              </td>
+                              <td style={{ padding: '9px 10px', textAlign: 'center', fontWeight: 600, color: st.total_izin > 0 ? '#d97706' : '#64748b' }}>
+                                {renderNumberOrDash(st.total_izin)}
+                              </td>
+                              <td style={{ padding: '9px 10px', textAlign: 'center', fontWeight: 600, color: st.total_sakit > 0 ? '#9333ea' : '#64748b' }}>
+                                {renderNumberOrDash(st.total_sakit)}
+                              </td>
+                              <td style={{ padding: '9px 10px', textAlign: 'center' }}>
+                                <span style={{
+                                  display: 'inline-block',
+                                  padding: '2px 8px',
+                                  borderRadius: '10px',
+                                  fontSize: '11.5px',
+                                  fontWeight: 700,
+                                  background: st.total_alpha > 0 ? '#fee2e2' : '#f1f5f9',
+                                  color: st.total_alpha > 0 ? '#b91c1c' : '#64748b'
+                                }}>
+                                  {renderNumberOrDash(st.total_alpha)}
+                                </span>
+                              </td>
+                            </tr>
+
+                            {/* EXPANDED ACCORDION ROW FOR DATE-BY-DATE ABSENCE */}
+                            {isExpanded && (
+                              <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1' }}>
+                                <td colSpan={7} style={{ padding: '12px 18px' }}>
+                                  <div style={{
+                                    background: '#ffffff',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: '8px',
+                                    padding: '14px 16px',
+                                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)'
+                                  }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '13px', color: '#1e293b' }}>
+                                        <CalendarDays size={16} color="#0284c7" />
+                                        <span>Rincian Tanggal Ketidakhadiran - {st.nama_siswa}</span>
+                                      </div>
+                                      <div style={{ fontSize: '11.5px', color: '#64748b' }}>
+                                        Izin: <strong>{st.total_izin}</strong> • Sakit: <strong>{st.total_sakit}</strong> • Alfa: <strong>{st.total_alpha}</strong>
+                                      </div>
+                                    </div>
+
+                                    {studentDetailLoading && !studentDetailCache[sId] ? (
+                                      <div style={{ padding: '14px', textAlign: 'center', color: '#64748b', fontSize: '12px' }}>
+                                        <RefreshCw size={14} className="spin-icon" style={{ display: 'inline-block', marginRight: '6px' }} />
+                                        Memuat riwayat tanggal absensi...
+                                      </div>
+                                    ) : logs.length > 0 ? (
+                                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '6px' }}>
+                                        {logs.map((logItem, logIdx) => {
+                                          const isAlfa = logItem.status === 'A';
+                                          const isSakit = logItem.status === 'S';
+                                          const isIzin = logItem.status === 'I';
+                                          const badgeBg = isAlfa ? '#fee2e2' : isSakit ? '#f3e8ff' : isIzin ? '#fef3c7' : '#f1f5f9';
+                                          const badgeColor = isAlfa ? '#991b1b' : isSakit ? '#6b21a8' : isIzin ? '#92400e' : '#334155';
+                                          const borderCol = isAlfa ? '#fecaca' : isSakit ? '#e9d5ff' : isIzin ? '#fde68a' : '#cbd5e1';
+                                          const statusLabel = isAlfa ? 'Alfa (Tanpa Keterangan)' : isSakit ? 'Sakit' : isIzin ? 'Izin' : logItem.status;
+
+                                          return (
+                                            <div
+                                              key={logItem.id || logIdx}
+                                              style={{
+                                                background: badgeBg,
+                                                color: badgeColor,
+                                                border: `1px solid ${borderCol}`,
+                                                padding: '6px 12px',
+                                                borderRadius: '6px',
+                                                fontSize: '12px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px'
+                                              }}
+                                            >
+                                              <span style={{ fontWeight: 700 }}>
+                                                📅 {logItem.tanggal_format || logItem.tanggal}
+                                              </span>
+                                              <span style={{
+                                                fontSize: '11px',
+                                                fontWeight: 800,
+                                                padding: '2px 6px',
+                                                borderRadius: '4px',
+                                                background: '#ffffff',
+                                                color: badgeColor
+                                              }}>
+                                                {statusLabel}
+                                              </span>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    ) : (
+                                      <div style={{ padding: '10px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', color: '#166534', fontSize: '12px' }}>
+                                        ✅ Tidak ada catatan tanggal izin, sakit, maupun alfa untuk siswa ini pada periode {BULAN_OPTIONS.find(b => b.value === rekapBulan)?.label} {rekapTahun}. (Kehadiran 100%)
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        );
+                      })
                     ) : (
                       <tr>
                         <td colSpan={7} style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
