@@ -13,17 +13,19 @@ async function getAbsensiMapel(req, res, next) {
 
 async function saveAbsensiMapel(req, res, next) {
   try {
-    const { tanggal, kode_kelas, kode_guru, kode_mapel, list_absensi } = req.body;
+    const { tanggal, kode_kelas, kode_guru, kode_mapel, list_absensi, records } = req.body;
+    const items = Array.isArray(list_absensi) ? list_absensi : Array.isArray(records) ? records : [];
 
-    if (!tanggal || !kode_kelas || !kode_mapel || !Array.isArray(list_absensi)) {
+    if (!tanggal || !kode_kelas || !kode_mapel || items.length === 0) {
       return sendError(res, 'Data tanggal, kode_kelas, kode_mapel, dan list_absensi wajib diisi.', 400);
     }
 
     const savedRecords = [];
 
-    for (const item of list_absensi) {
-      const { kode_siswa, status } = item;
-      if (!kode_siswa || !status) continue;
+    for (const item of items) {
+      const kode_siswa = item.kode_siswa || item.nisn || item.nis_nisn || item.id;
+      const status = item.status || 'H';
+      if (!kode_siswa) continue;
 
       const existing = await AbsensiMapelModel.findExisting({
         tanggal,

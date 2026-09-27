@@ -67,6 +67,8 @@ export default function AdminAbsensiMapelTab() {
     }
   };
 
+  const getSiswaKey = (s) => String(s.kode_siswa || s.nis_nisn || s.nis || s.nisn || s.id || s.nama_siswa);
+
   const loadStudentsAndAttendance = async (mapelId, kelasId, tgl) => {
     setLoading(true);
     try {
@@ -88,14 +90,26 @@ export default function AdminAbsensiMapelTab() {
 
       if (resAbsen.data?.success && Array.isArray(resAbsen.data.data) && resAbsen.data.data.length > 0) {
         hasData = true;
-        resAbsen.data.data.forEach(item => {
-          statusMap[item.nisn] = item.status;
-          noteMap[item.nisn] = item.catatan || '';
+        const dbRecords = resAbsen.data.data;
+        list.forEach(s => {
+          const key = getSiswaKey(s);
+          const match = dbRecords.find(r => 
+            (r.kode_siswa !== undefined && String(r.kode_siswa) === String(s.kode_siswa)) ||
+            (r.kode_siswa !== undefined && String(r.kode_siswa) === String(s.nis_nisn)) ||
+            (r.kode_siswa !== undefined && String(r.kode_siswa) === String(s.nis)) ||
+            (r.kode_siswa !== undefined && String(r.kode_siswa) === String(s.nisn)) ||
+            (r.nisn !== undefined && String(r.nisn) === String(s.nisn)) ||
+            (r.nisn !== undefined && String(r.nisn) === String(s.nis_nisn)) ||
+            (r.nisn !== undefined && String(r.nisn) === String(s.nis))
+          );
+          statusMap[key] = match && match.status ? match.status : 'H';
+          noteMap[key] = match && match.catatan ? match.catatan : '';
         });
       } else {
         list.forEach(s => {
-          statusMap[s.nisn] = 'H';
-          noteMap[s.nisn] = '';
+          const key = getSiswaKey(s);
+          statusMap[key] = 'H';
+          noteMap[key] = '';
         });
       }
 
@@ -109,17 +123,18 @@ export default function AdminAbsensiMapelTab() {
     }
   };
 
-  const handleStatusChange = (nisn, status) => {
+  const handleStatusChange = (sKey, status) => {
     setMapelStatus(prev => ({
       ...prev,
-      [nisn]: status
+      [sKey]: status
     }));
   };
 
   const handleMarkAll = (status) => {
     const updated = {};
     studentList.forEach(s => {
-      updated[s.nisn] = status;
+      const key = getSiswaKey(s);
+      updated[key] = status;
     });
     setMapelStatus(updated);
   };
@@ -129,17 +144,22 @@ export default function AdminAbsensiMapelTab() {
 
     setSaving(true);
     try {
-      const records = studentList.map(s => ({
-        nisn: s.nisn,
-        nama_siswa: s.nama_siswa,
-        status: mapelStatus[s.nisn] || 'H',
-        catatan: catatanMap[s.nisn] || ''
-      }));
+      const records = studentList.map(s => {
+        const key = getSiswaKey(s);
+        return {
+          kode_siswa: s.kode_siswa || s.nis_nisn || s.nis || s.nisn,
+          nisn: s.nis_nisn || s.nisn || s.nis || s.kode_siswa,
+          nama_siswa: s.nama_siswa,
+          status: mapelStatus[key] || 'H',
+          catatan: catatanMap[key] || ''
+        };
+      });
 
       const res = await api.post('/absensi-mapel/batch', {
         kode_mapel: selectedMapel,
         kode_kelas: selectedKelas,
         tanggal,
+        list_absensi: records,
         records
       });
 
@@ -166,7 +186,8 @@ export default function AdminAbsensiMapelTab() {
   let alpaCount = 0;
 
   studentList.forEach(s => {
-    const st = mapelStatus[s.nisn];
+    const key = getSiswaKey(s);
+    const st = mapelStatus[key] || 'H';
     if (st === 'H') hadirCount++;
     else if (st === 'S') sakitCount++;
     else if (st === 'I') izinCount++;
@@ -185,7 +206,7 @@ export default function AdminAbsensiMapelTab() {
             <div className="stat-label">Siswa Terdaftar di Mapel</div>
             <div className="stat-value">{studentList.length}</div>
             <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
-              {selectedKelasObj?.nama_kelas || '-'} • {selectedMapelObj?.nama_mapel || '-'}
+              {selectedKelasObj?.nama_kelas || ''} • {selectedMapelObj?.nama_mapel || ''}
             </div>
           </div>
           <div className="stat-icon-wrapper stat-icon-blue">
@@ -357,16 +378,18 @@ export default function AdminAbsensiMapelTab() {
                   const startIndex = (currentPage - 1) * itemsPerPage;
                   const paginatedList = studentList.slice(startIndex, startIndex + itemsPerPage);
                   return paginatedList.map((siswa, idx) => {
-                    const currentStatus = mapelStatus[siswa.nisn] || 'H';
+                    const sKey = getSiswaKey(siswa);
+                    const currentStatus = mapelStatus[sKey] || 'H';
                     const isL = (siswa.jenis_kelamin || '').toUpperCase() === 'L';
+                    const nisnDisplay = siswa.nis_nisn || siswa.nisn || siswa.nis || siswa.kode_siswa || '-';
 
                     return (
-                      <tr key={siswa.nisn || idx}>
+                      <tr key={sKey || idx}>
                         <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
-                        <td style={{ fontWeight: 700, color: '#0066ff', textAlign: 'center' }}>{siswa.nisn}</td>
+                        <td style={{ fontWeight: 700, color: '#0066ff', textAlign: 'center' }}>{nisnDisplay}</td>
                         <td>
                           <div style={{ fontWeight: 700, color: '#0f172a' }}>{siswa.nama_siswa}</div>
-                          <div style={{ fontSize: 11, color: '#64748b' }}>{siswa.nis ? `NIS: ${siswa.nis}` : '-'}</div>
+                          <div style={{ fontSize: 11, color: '#64748b' }}>{siswa.nis ? `NIS: ${siswa.nis}` : ''}</div>
                         </td>
                         <td style={{ textAlign: 'center' }}>
                           <span style={{
@@ -384,7 +407,7 @@ export default function AdminAbsensiMapelTab() {
                           <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
                             <button
                               type="button"
-                              onClick={() => handleStatusChange(siswa.nisn, 'H')}
+                              onClick={() => handleStatusChange(sKey, 'H')}
                               style={{
                                 padding: '6px 14px',
                                 borderRadius: 10,
@@ -402,7 +425,7 @@ export default function AdminAbsensiMapelTab() {
 
                             <button
                               type="button"
-                              onClick={() => handleStatusChange(siswa.nisn, 'S')}
+                              onClick={() => handleStatusChange(sKey, 'S')}
                               style={{
                                 padding: '6px 14px',
                                 borderRadius: 10,
@@ -420,7 +443,7 @@ export default function AdminAbsensiMapelTab() {
 
                             <button
                               type="button"
-                              onClick={() => handleStatusChange(siswa.nisn, 'I')}
+                              onClick={() => handleStatusChange(sKey, 'I')}
                               style={{
                                 padding: '6px 14px',
                                 borderRadius: 10,
@@ -438,7 +461,7 @@ export default function AdminAbsensiMapelTab() {
 
                             <button
                               type="button"
-                              onClick={() => handleStatusChange(siswa.nisn, 'A')}
+                              onClick={() => handleStatusChange(sKey, 'A')}
                               style={{
                                 padding: '6px 14px',
                                 borderRadius: 10,

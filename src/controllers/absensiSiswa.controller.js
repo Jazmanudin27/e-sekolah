@@ -17,20 +17,23 @@ async function getAbsensiSiswa(req, res, next) {
 
 async function saveAbsensiSiswa(req, res, next) {
   try {
-    const { tanggal, kode_kelas, list_absensi } = req.body;
+    const { tanggal, kode_kelas, list_absensi, records } = req.body;
     const effectiveKodeKelas = (req.user && req.user.type === 'Kelas' && req.user.kode_kelas) 
       ? req.user.kode_kelas 
       : kode_kelas;
 
-    if (!tanggal || !effectiveKodeKelas || !Array.isArray(list_absensi) || list_absensi.length === 0) {
+    const items = Array.isArray(list_absensi) ? list_absensi : Array.isArray(records) ? records : [];
+
+    if (!tanggal || !effectiveKodeKelas || items.length === 0) {
       return sendError(res, 'Data tanggal, kode_kelas, dan list_absensi (array) wajib diisi.', 400);
     }
 
     const savedRecords = [];
 
-    for (const item of list_absensi) {
-      const { kode_siswa, status } = item;
-      if (!kode_siswa || !status) continue;
+    for (const item of items) {
+      const kode_siswa = item.kode_siswa || item.nisn || item.nis_nisn || item.id;
+      const status = item.status || 'H';
+      if (!kode_siswa) continue;
 
       const existing = await AbsensiSiswaModel.findExisting(tanggal, effectiveKodeKelas, kode_siswa);
 

@@ -6,8 +6,8 @@ class AbsensiMapelModel {
     const params = [];
 
     if (tanggal) {
-      sql += ' AND tanggal = ?';
-      params.push(tanggal);
+      sql += ' AND (DATE(tanggal) = DATE(?) OR tanggal = ?)';
+      params.push(tanggal, tanggal);
     }
     if (kode_kelas) {
       sql += ' AND kode_kelas = ?';
@@ -22,17 +22,17 @@ class AbsensiMapelModel {
       params.push(kode_guru);
     }
 
-    sql += ' ORDER BY id DESC';
+    sql += ' ORDER BY id ASC';
     return await query(sql, params);
   }
 
   static async findExisting({ tanggal, kode_kelas, kode_mapel, kode_siswa }) {
     const rows = await query(
       `SELECT id FROM absensi_mapel 
-       WHERE tanggal = ? AND kode_kelas = ? AND kode_mapel = ? 
+       WHERE (DATE(tanggal) = DATE(?) OR tanggal = ?) AND kode_kelas = ? AND kode_mapel = ? 
          AND (CONVERT(kode_siswa USING utf8mb4) = CONVERT(? USING utf8mb4))
        LIMIT 1`,
-      [tanggal, kode_kelas, kode_mapel, kode_siswa]
+      [tanggal, tanggal, kode_kelas, kode_mapel, kode_siswa]
     );
     return rows[0] || null;
   }
