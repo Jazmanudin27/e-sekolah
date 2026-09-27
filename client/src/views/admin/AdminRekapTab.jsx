@@ -55,6 +55,35 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
 
   const daftarTahun = [2024, 2025, 2026, 2027];
 
+  const formatDateIndo = (dateStr) => {
+    if (!dateStr) return '-';
+    try {
+      const cleanStr = String(dateStr).split('T')[0];
+      const parts = cleanStr.split('-');
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        const d = new Date(year, month, day);
+        return new Intl.DateTimeFormat('id-ID', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        }).format(d);
+      }
+      const d = new Date(dateStr);
+      return new Intl.DateTimeFormat('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      }).format(d);
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
   useEffect(() => {
     fetchDropdowns();
   }, []);
@@ -478,92 +507,225 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
 
       {/* DETAIL MODAL */}
       {detailModal && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal-box" style={{ maxWidth: 640 }}>
-            <div className="admin-modal-header">
-              <div>
-                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  Rincian Riwayat Presensi
-                </h3>
-                <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
-                  {detailModal.data.nama_guru || detailModal.data.nama_siswa} ({detailModal.data.nip_nuptk || detailModal.data.nis_nisn || '-'})
+        <div className="admin-modal-overlay" onClick={() => setDetailModal(null)}>
+          <div
+            className="admin-modal-box"
+            style={{ maxWidth: 680, width: '94%' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* MODAL HEADER */}
+            <div className="admin-modal-header" style={{ padding: '16px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff',
+                  boxShadow: '0 3px 8px rgba(2, 132, 199, 0.25)',
+                  flexShrink: 0
+                }}>
+                  <Calendar size={18} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                    Rincian Riwayat Presensi
+                  </h3>
+                  <div style={{ fontSize: 12, color: '#475569', marginTop: 3, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 700, color: '#0284c7' }}>
+                      {detailModal.data.nama_guru || detailModal.data.nama_siswa}
+                    </span>
+                    {(detailModal.data.nip_nuptk || detailModal.data.nis_nisn) && (
+                      <span style={{ background: '#e2e8f0', padding: '1px 6px', borderRadius: 4, fontSize: 11, fontWeight: 600, color: '#334155' }}>
+                        {detailModal.data.nip_nuptk || detailModal.data.nis_nisn}
+                      </span>
+                    )}
+                    {detailModal.data.nama_kelas && (
+                      <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '1px 6px', borderRadius: 4, fontSize: 11, fontWeight: 700 }}>
+                        {detailModal.data.nama_kelas}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setDetailModal(null)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: 8,
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#64748b',
+                  transition: 'all 0.15s ease'
+                }}
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
-            <div className="admin-modal-body">
+            {/* QUICK STATS SUMMARY BANNER */}
+            {(() => {
+              const details = detailModal.details || [];
+              const hCount = details.filter(d => d.status === 'H' || (!d.status && d.jam_in)).length;
+              const sCount = details.filter(d => d.status === 'S').length;
+              const iCount = details.filter(d => d.status === 'I').length;
+              const aCount = details.filter(d => d.status === 'A').length;
+
+              return (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: 10,
+                  padding: '12px 20px',
+                  background: '#ffffff',
+                  borderBottom: '1px solid #e2e8f0'
+                }}>
+                  <div style={{ padding: '8px 10px', background: '#ecfdf5', borderRadius: 8, border: '1px solid #a7f3d0', textAlign: 'center' }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', textTransform: 'uppercase' }}>Hadir (H)</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: '#047857', marginTop: 1 }}>{hCount}</div>
+                  </div>
+                  <div style={{ padding: '8px 10px', background: '#eff6ff', borderRadius: 8, border: '1px solid #bfdbfe', textAlign: 'center' }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#2563eb', textTransform: 'uppercase' }}>Sakit (S)</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: '#1d4ed8', marginTop: 1 }}>{sCount}</div>
+                  </div>
+                  <div style={{ padding: '8px 10px', background: '#fffbeb', borderRadius: 8, border: '1px solid #fde68a', textAlign: 'center' }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#d97706', textTransform: 'uppercase' }}>Izin (I)</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: '#b45309', marginTop: 1 }}>{iCount}</div>
+                  </div>
+                  <div style={{ padding: '8px 10px', background: '#fef2f2', borderRadius: 8, border: '1px solid #fecaca', textAlign: 'center' }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#dc2626', textTransform: 'uppercase' }}>Alpha (A)</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: '#b91c1c', marginTop: 1 }}>{aCount}</div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* MODAL BODY */}
+            <div className="admin-modal-body" style={{ padding: '16px 20px', maxHeight: '50vh' }}>
               {loadingDetail ? (
-                <div style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
-                  Memuat rincian data...
+                <div style={{ textAlign: 'center', padding: '36px 0', color: '#64748b' }}>
+                  <RefreshCw size={24} style={{ margin: '0 auto 8px', display: 'block', color: '#0284c7', animation: 'spin 1s linear infinite' }} />
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>Memuat rincian data...</div>
                 </div>
               ) : detailModal.details.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
-                  Belum ada catatan detail kehadiran.
+                <div style={{ textAlign: 'center', padding: '36px 20px', background: '#ffffff', borderRadius: 12, border: '1px dashed #cbd5e1' }}>
+                  <AlertCircle size={32} style={{ margin: '0 auto 8px', color: '#94a3b8', display: 'block' }} />
+                  <div style={{ fontWeight: 700, color: '#334155', fontSize: 14 }}>Belum Ada Catatan Kehadiran</div>
+                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+                    Tidak ditemukan catatan presensi/absensi untuk periode yang dipilih.
+                  </div>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {detailModal.details.map((d, i) => (
-                    <div
-                      key={d.id || i}
-                      style={{
-                        padding: '12px 14px',
-                        background: '#f8fafc',
-                        borderRadius: 12,
-                        border: '1px solid #e2e8f0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: 13, color: '#0f172a' }}>
-                          {d.tanggal_format || d.tanggal}
-                        </div>
-                        {d.jam_in && (
-                          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
-                            Masuk: {d.jam_in} • Pulang: {d.jam_out || '-'}
-                          </div>
-                        )}
-                        {d.nama_mapel && (
-                          <div style={{ fontSize: 11, color: '#7c3aed', fontWeight: 600, marginTop: 2 }}>
-                            Mapel: {d.nama_mapel}
-                          </div>
-                        )}
-                      </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {detailModal.details.map((d, i) => {
+                    const isH = d.status === 'H' || (!d.status && d.jam_in);
+                    const isS = d.status === 'S';
+                    const isI = d.status === 'I';
+                    const isA = d.status === 'A';
 
-                      <div>
-                        {d.status === 'H' || (!d.status && d.jam_in) ? (
-                          <span style={{ background: '#dcfce7', color: '#15803d', padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 800 }}>
-                            Hadir
-                          </span>
-                        ) : d.status === 'S' ? (
-                          <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 800 }}>
-                            Sakit
-                          </span>
-                        ) : d.status === 'I' ? (
-                          <span style={{ background: '#fef3c7', color: '#b45309', padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 800 }}>
-                            Izin
-                          </span>
-                        ) : (
-                          <span style={{ background: '#fee2e2', color: '#dc2626', padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 800 }}>
-                            Alpha
-                          </span>
-                        )}
+                    return (
+                      <div
+                        key={d.id || i}
+                        style={{
+                          padding: '10px 14px',
+                          background: '#ffffff',
+                          borderRadius: 10,
+                          border: '1px solid #e2e8f0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 12,
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+                          <div style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 8,
+                            background: isH ? '#ecfdf5' : isS ? '#eff6ff' : isI ? '#fffbeb' : '#fef2f2',
+                            color: isH ? '#059669' : isS ? '#2563eb' : isI ? '#d97706' : '#dc2626',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 800,
+                            fontSize: 12,
+                            border: `1px solid ${isH ? '#a7f3d0' : isS ? '#bfdbfe' : isI ? '#fde68a' : '#fecaca'}`,
+                            flexShrink: 0
+                          }}>
+                            {isH ? 'H' : isS ? 'S' : isI ? 'I' : 'A'}
+                          </div>
+
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: 13, color: '#0f172a' }}>
+                              {formatDateIndo(d.tanggal || d.tanggal_format)}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2, flexWrap: 'wrap' }}>
+                              {d.nama_mapel && (
+                                <span style={{ fontSize: 11, color: '#7c3aed', fontWeight: 600, background: '#f5f3ff', padding: '1px 6px', borderRadius: 4 }}>
+                                  Mapel: {d.nama_mapel}
+                                </span>
+                              )}
+                              {d.jam_in && (
+                                <span style={{ fontSize: 11, color: '#64748b' }}>
+                                  Masuk: {d.jam_in} • Pulang: {d.jam_out || '-'}
+                                </span>
+                              )}
+                              {d.catatan && (
+                                <span style={{ fontSize: 11, color: '#475569', fontStyle: 'italic' }}>
+                                  ({d.catatan})
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ flexShrink: 0 }}>
+                          {isH ? (
+                            <span style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>
+                              Hadir
+                            </span>
+                          ) : isS ? (
+                            <span style={{ background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>
+                              Sakit
+                            </span>
+                          ) : isI ? (
+                            <span style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>
+                              Izin
+                            </span>
+                          ) : (
+                            <span style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 800 }}>
+                              Alpha
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
 
-            <div className="admin-modal-footer">
-              <button type="button" className="btn-primary-admin" onClick={() => setDetailModal(null)}>
+            {/* MODAL FOOTER */}
+            <div className="admin-modal-footer" style={{ padding: '12px 20px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+                Total {detailModal.details?.length || 0} catatan
+              </div>
+              <button
+                type="button"
+                className="btn-primary-admin"
+                onClick={() => setDetailModal(null)}
+                style={{ padding: '6px 18px' }}
+              >
                 Tutup
               </button>
             </div>
