@@ -288,14 +288,12 @@ export default function AdminDashboardTab({ onSwitchTab }) {
           <thead>
             <tr>
               <th style="width: 35px;">No</th>
-              <th style="width: 110px;">NIS / NISN</th>
+              <th style="width: 120px;">NIS / NISN</th>
               <th style="text-align: left;">Nama Siswa</th>
-              <th style="width: 45px;">L/P</th>
-              <th style="width: 65px;">Hadir (H)</th>
-              <th style="width: 60px;">Izin (I)</th>
-              <th style="width: 60px;">Sakit (S)</th>
-              <th style="width: 60px;">Alfa (A)</th>
-              <th style="width: 75px;">Kehadiran</th>
+              <th style="width: 50px;">L/P</th>
+              <th style="width: 70px;">Izin (I)</th>
+              <th style="width: 70px;">Sakit (S)</th>
+              <th style="width: 70px;">Alfa (A)</th>
             </tr>
           </thead>
           <tbody>
@@ -305,11 +303,9 @@ export default function AdminDashboardTab({ onSwitchTab }) {
                 <td>${st.nis || '-'}</td>
                 <td class="name">${st.nama_siswa}</td>
                 <td>${st.jk}</td>
-                <td><strong>${st.total_hadir}</strong></td>
                 <td>${st.total_izin}</td>
                 <td>${st.total_sakit}</td>
                 <td style="color: ${st.total_alpha > 0 ? '#b91c1c' : '#334155'}; font-weight: ${st.total_alpha > 0 ? 'bold' : 'normal'}">${st.total_alpha}</td>
-                <td>${st.persentase}%</td>
               </tr>
             `).join('')}
           </tbody>
@@ -660,27 +656,23 @@ export default function AdminDashboardTab({ onSwitchTab }) {
 
             {/* MODAL BODY */}
             <div className="portal-modal-body">
-              {/* TOP KPI CARDS */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px' }}>
-                <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+              {/* TOP KPI CARDS (4 CARDS: TOTAL SISWA, IZIN, SAKIT, ALFA) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>
+                <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
                   <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Total Siswa</div>
-                  <div style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>{selectedDetailClass.totalSiswa}</div>
+                  <div style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>{selectedDetailClass.totalSiswa}</div>
                 </div>
-                <div style={{ background: '#f0fdf4', padding: '10px 12px', borderRadius: '8px', border: '1px solid #bbf7d0', textAlign: 'center' }}>
-                  <div style={{ fontSize: '11px', color: '#166534', fontWeight: 600 }}>Hadir (H)</div>
-                  <div style={{ fontSize: '17px', fontWeight: 800, color: '#15803d' }}>{selectedDetailClass.hadir || 0}</div>
-                </div>
-                <div style={{ background: '#fffbeb', padding: '10px 12px', borderRadius: '8px', border: '1px solid #fde68a', textAlign: 'center' }}>
+                <div style={{ background: '#fffbeb', padding: '10px 14px', borderRadius: '8px', border: '1px solid #fde68a', textAlign: 'center' }}>
                   <div style={{ fontSize: '11px', color: '#92400e', fontWeight: 600 }}>Izin (I)</div>
-                  <div style={{ fontSize: '17px', fontWeight: 800, color: '#b45309' }}>{selectedDetailClass.izin}</div>
+                  <div style={{ fontSize: '18px', fontWeight: 800, color: '#b45309' }}>{selectedDetailClass.izin}</div>
                 </div>
-                <div style={{ background: '#faf5ff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e9d5ff', textAlign: 'center' }}>
+                <div style={{ background: '#faf5ff', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e9d5ff', textAlign: 'center' }}>
                   <div style={{ fontSize: '11px', color: '#6b21a8', fontWeight: 600 }}>Sakit (S)</div>
-                  <div style={{ fontSize: '17px', fontWeight: 800, color: '#7e22ce' }}>{selectedDetailClass.sakit}</div>
+                  <div style={{ fontSize: '18px', fontWeight: 800, color: '#7e22ce' }}>{selectedDetailClass.sakit}</div>
                 </div>
-                <div style={{ background: '#fef2f2', padding: '10px 12px', borderRadius: '8px', border: '1px solid #fecaca', textAlign: 'center' }}>
+                <div style={{ background: '#fef2f2', padding: '10px 14px', borderRadius: '8px', border: '1px solid #fecaca', textAlign: 'center' }}>
                   <div style={{ fontSize: '11px', color: '#991b1b', fontWeight: 600 }}>Alfa (A)</div>
-                  <div style={{ fontSize: '17px', fontWeight: 800, color: '#dc2626' }}>{selectedDetailClass.alfa}</div>
+                  <div style={{ fontSize: '18px', fontWeight: 800, color: '#dc2626' }}>{selectedDetailClass.alfa}</div>
                 </div>
               </div>
 
@@ -703,20 +695,18 @@ export default function AdminDashboardTab({ onSwitchTab }) {
                 />
               </div>
 
-              {/* STUDENT RECAP TABLE */}
+              {/* STUDENT RECAP TABLE (NO, NIS, NAMA SISWA, L/P, IZIN, SAKIT, ALFA) */}
               <div style={{ maxHeight: '340px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
                 <table className="admin-table" style={{ width: '100%', fontSize: '12.5px', margin: 0 }}>
                   <thead>
                     <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 1 }}>
-                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '40px' }}>No</th>
-                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '100px' }}>NIS</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '45px' }}>No</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '110px' }}>NIS</th>
                       <th style={{ padding: '8px 10px', textAlign: 'left' }}>Nama Siswa</th>
-                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '50px' }}>L/P</th>
-                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '60px' }}>Hadir</th>
-                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '60px' }}>Izin</th>
-                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '60px' }}>Sakit</th>
-                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '60px' }}>Alfa</th>
-                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '85px' }}>Kehadiran</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '55px' }}>L/P</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '70px' }}>Izin</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '70px' }}>Sakit</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: '70px' }}>Alfa</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -733,14 +723,11 @@ export default function AdminDashboardTab({ onSwitchTab }) {
                           <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: st.jk === 'L' ? '#0284c7' : '#db2777' }}>
                             {st.jk}
                           </td>
-                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: '#16a34a' }}>
-                            {st.total_hadir}
+                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: st.total_izin > 0 ? '#d97706' : '#64748b' }}>
+                            {renderNumberOrDash(st.total_izin)}
                           </td>
-                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: '#d97706' }}>
-                            {st.total_izin}
-                          </td>
-                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: '#9333ea' }}>
-                            {st.total_sakit}
+                          <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 600, color: st.total_sakit > 0 ? '#9333ea' : '#64748b' }}>
+                            {renderNumberOrDash(st.total_sakit)}
                           </td>
                           <td style={{ padding: '8px 10px', textAlign: 'center' }}>
                             <span style={{
@@ -752,27 +739,14 @@ export default function AdminDashboardTab({ onSwitchTab }) {
                               background: st.total_alpha > 0 ? '#fee2e2' : '#f1f5f9',
                               color: st.total_alpha > 0 ? '#b91c1c' : '#64748b'
                             }}>
-                              {st.total_alpha}
-                            </span>
-                          </td>
-                          <td style={{ padding: '8px 10px', textAlign: 'center' }}>
-                            <span style={{
-                              display: 'inline-block',
-                              padding: '2px 8px',
-                              borderRadius: '10px',
-                              fontSize: '11.5px',
-                              fontWeight: 700,
-                              background: st.persentase >= 90 ? '#dcfce7' : st.persentase >= 75 ? '#fef3c7' : '#fee2e2',
-                              color: st.persentase >= 90 ? '#15803d' : st.persentase >= 75 ? '#b45309' : '#b91c1c'
-                            }}>
-                              {st.persentase}%
+                              {renderNumberOrDash(st.total_alpha)}
                             </span>
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={9} style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+                        <td colSpan={7} style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
                           Tidak ada siswa yang cocok dengan pencarian.
                         </td>
                       </tr>
@@ -817,6 +791,7 @@ export default function AdminDashboardTab({ onSwitchTab }) {
     </div>
   );
 }
+
 
 
 
