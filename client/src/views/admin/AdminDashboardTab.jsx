@@ -51,14 +51,32 @@ export default function AdminDashboardTab({ onSwitchTab }) {
     fetchRekapTableData();
   }, [rekapBulan, rekapTahun]);
 
-  const isLaki = (jk) => {
-    const s = String(jk || '').trim().toUpperCase();
-    return s.startsWith('L') || s === 'PRIA' || s === '1';
+  const getGenderStr = (item) => {
+    if (!item) return '';
+    if (typeof item === 'string') return item.trim().toUpperCase();
+    const raw = item.jk || item.jenis_kelamin || item.jk_siswa || item.gender || '';
+    return String(raw).trim().toUpperCase();
   };
 
-  const isPerempuan = (jk) => {
-    const s = String(jk || '').trim().toUpperCase();
-    return s.startsWith('P') || s === 'WANITA' || s === '2';
+  const isLaki = (item) => {
+    const s = getGenderStr(item);
+    return s.startsWith('L') || s === 'PRIA' || s === '1' || s === 'MALE' || s === 'M';
+  };
+
+  const isPerempuan = (item) => {
+    const s = getGenderStr(item);
+    return s.startsWith('P') || s === 'WANITA' || s === '2' || s === 'FEMALE' || s === 'F';
+  };
+
+  const getJurusanStr = (k) => {
+    if (k.jurusan && String(k.jurusan).trim() !== '' && String(k.jurusan).trim() !== '-') {
+      return String(k.jurusan).trim();
+    }
+    const parts = String(k.nama_kelas || '').trim().split(/\s+/);
+    if (parts.length > 1) {
+      return parts.slice(1).join(' ');
+    }
+    return '-';
   };
 
   const fetchDashboardStats = async () => {
@@ -68,8 +86,8 @@ export default function AdminDashboardTab({ onSwitchTab }) {
         const allSiswa = res.data.data;
         const aktif = allSiswa.filter(s => (s.status || 'Aktif').toLowerCase() === 'aktif').length;
         const tidakAktif = allSiswa.length - aktif;
-        const lakiLaki = allSiswa.filter(s => isLaki(s.jenis_kelamin)).length;
-        const perempuan = allSiswa.filter(s => isPerempuan(s.jenis_kelamin)).length;
+        const lakiLaki = allSiswa.filter(isLaki).length;
+        const perempuan = allSiswa.filter(isPerempuan).length;
 
         setStats({
           aktif: aktif || 158,
@@ -108,7 +126,8 @@ export default function AdminDashboardTab({ onSwitchTab }) {
         { kode_kelas: '8', nama_kelas: 'XI PPLG', jurusan: 'PPLG' },
         { kode_kelas: '9', nama_kelas: 'XII AKL', jurusan: 'AKL' },
         { kode_kelas: '10', nama_kelas: 'XII MPLG', jurusan: 'MPLG' },
-        { kode_kelas: '11', nama_kelas: 'XII PM', jurusan: 'PM' }
+        { kode_kelas: '11', nama_kelas: 'XII PM', jurusan: 'PM' },
+        { kode_kelas: '12', nama_kelas: 'XII PPLG', jurusan: 'PPLG' }
       ];
 
       const classesToProcess = kelasList.length > 0 ? kelasList : defaultClassNames;
@@ -122,18 +141,18 @@ export default function AdminDashboardTab({ onSwitchTab }) {
         const studentsInClass = siswaList.filter(s => {
           const sKelasId = String(s.kode_kelas || '');
           const sKelasName = (s.nama_kelas || '').toUpperCase();
-          return sKelasId === kId || (kName && sKelasName.includes(kName)) || (kName && kName.includes(sKelasName));
+          return sKelasId === kId || (kName && sKelasName === kName) || (kName && sKelasName.includes(kName)) || (kName && kName.includes(sKelasName));
         });
 
-        const lakiLaki = studentsInClass.filter(s => isLaki(s.jenis_kelamin)).length;
-        const perempuan = studentsInClass.filter(s => isPerempuan(s.jenis_kelamin)).length;
+        const lakiLaki = studentsInClass.filter(isLaki).length;
+        const perempuan = studentsInClass.filter(isPerempuan).length;
         const totalSiswa = studentsInClass.length;
 
         // Attendance stats from rekap
         const rekapInClass = rekapList.filter(r => {
           const rKelasId = String(r.kode_kelas || '');
           const rKelasName = (r.nama_kelas || '').toUpperCase();
-          return rKelasId === kId || (kName && rKelasName.includes(kName)) || (kName && kName.includes(rKelasName));
+          return rKelasId === kId || (kName && rKelasName === kName) || (kName && rKelasName.includes(kName)) || (kName && kName.includes(rKelasName));
         });
 
         const izin = rekapInClass.reduce((acc, curr) => acc + (Number(curr.total_izin) || 0), 0);
@@ -144,8 +163,8 @@ export default function AdminDashboardTab({ onSwitchTab }) {
           no: index + 1,
           kode_kelas: k.kode_kelas,
           nama_kelas: k.nama_kelas || `Kelas ${index + 1}`,
-          jurusan: k.jurusan || (k.nama_kelas ? k.nama_kelas.split(' ')[1] : '-'),
-          lakiLaki: lakiLaki || (totalSiswa > 0 ? (totalSiswa - perempuan) : 0),
+          jurusan: getJurusanStr(k),
+          lakiLaki: lakiLaki,
           perempuan: perempuan,
           totalSiswa: totalSiswa || (lakiLaki + perempuan),
           izin,
