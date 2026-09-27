@@ -8,13 +8,16 @@ import api from '../api/client';
 import TopBar from '../components/TopBar';
 
 export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwitchTab }) {
+  const isClassAccount = user?.type === 'Kelas' || user?.role === 'Kelas';
   const [todayStatus, setTodayStatus] = useState(null);
   const [historyItems, setHistoryItems] = useState([]);
 
   useEffect(() => {
-    fetchTodayStatus();
-    fetchHistory();
-  }, []);
+    if (!isClassAccount) {
+      fetchTodayStatus();
+      fetchHistory();
+    }
+  }, [isClassAccount]);
 
   const fetchTodayStatus = async () => {
     try {
@@ -83,6 +86,81 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
     );
   };
 
+  // ========================
+  // BERANDA KHUSUS AKUN KELAS
+  // ========================
+  if (isClassAccount) {
+    const className = user?.nama_kelas || 'Kelas';
+    return (
+      <div className="beranda-view-container">
+        {/* HERO BLUE HEADER */}
+        <TopBar user={user} onLogout={onLogout} />
+
+        {/* WELCOME CARD KELAS */}
+        <div className="summary-overlap-card">
+          <div style={{ textAlign: 'center', padding: '6px 0 2px 0' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
+              🏫 Dashboard Kelas
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a' }}>
+              {className}
+            </div>
+            {user?.jurusan && user.jurusan !== '-' && (
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#475569', marginTop: 2 }}>
+                {user.jurusan}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* MENU GRID KHUSUS KELAS (3 menu: Absen Siswa, Rekap Siswa, Profile) */}
+        <div className="grid-8-menu-wrapper">
+          <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+            <button className="menu-blue-card" onClick={() => onSwitchTab('absensiSiswa')}>
+              <div className="menu-icon-circle">
+                <UserCheck size={22} />
+              </div>
+              <span>Absen Siswa</span>
+            </button>
+
+            <button className="menu-blue-card" onClick={() => onSwitchTab('rekapSiswa')}>
+              <div className="menu-icon-circle">
+                <FileBarChart size={22} />
+              </div>
+              <span>Rekap Siswa</span>
+            </button>
+
+            <button className="menu-blue-card" onClick={() => onSwitchTab('profil')}>
+              <div className="menu-icon-circle">
+                <Users size={22} />
+              </div>
+              <span>Profile</span>
+            </button>
+          </div>
+        </div>
+
+        {/* INFO BOX */}
+        <div style={{
+          margin: '0 16px 20px',
+          padding: '14px 16px',
+          borderRadius: 14,
+          background: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          color: '#1e40af',
+          fontSize: 13,
+          fontWeight: 600,
+          lineHeight: 1.6
+        }}>
+          <div style={{ fontWeight: 800, marginBottom: 4 }}>ℹ️ Informasi Akun Kelas</div>
+          Anda login sebagai <strong>{className}</strong>. Akses terbatas pada menu absensi dan rekap siswa untuk kelas ini saja.
+        </div>
+      </div>
+    );
+  }
+
+  // ========================
+  // BERANDA GURU / ADMIN (ORIGINAL)
+  // ========================
   return (
     <div className="beranda-view-container">
 

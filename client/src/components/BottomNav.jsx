@@ -8,7 +8,19 @@ export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user
     return (
       <nav className="bottom-nav-white">
         <div className="bottom-nav-inner">
-          {/* 1. ABSENSI SISWA */}
+          {/* 1. BERANDA KELAS */}
+          <button
+            className={`nav-link-item ${activeTab === 'beranda' ? 'active' : ''}`}
+            onClick={() => onTabChange('beranda')}
+          >
+            <div className="nav-icon-wrapper">
+              <Home size={21} />
+            </div>
+            <span>Beranda</span>
+            {activeTab === 'beranda' && <span className="active-dot" />}
+          </button>
+
+          {/* 2. ABSENSI SISWA */}
           <button
             className={`nav-link-item ${activeTab === 'absensiSiswa' ? 'active' : ''}`}
             onClick={() => onTabChange('absensiSiswa')}
@@ -18,18 +30,6 @@ export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user
             </div>
             <span>Absen Siswa</span>
             {activeTab === 'absensiSiswa' && <span className="active-dot" />}
-          </button>
-
-          {/* 2. ABSENSI MAPEL */}
-          <button
-            className={`nav-link-item ${activeTab === 'absensiMapel' ? 'active' : ''}`}
-            onClick={() => onTabChange('absensiMapel')}
-          >
-            <div className="nav-icon-wrapper">
-              <BookOpen size={21} />
-            </div>
-            <span>Absen Mapel</span>
-            {activeTab === 'absensiMapel' && <span className="active-dot" />}
           </button>
 
           {/* 3. REKAP SISWA */}
