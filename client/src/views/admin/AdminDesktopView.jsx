@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard, Users, GraduationCap, Building2, BookOpen,
   Calendar, FileBarChart, ShieldCheck, Settings, LogOut,
-  Bell, Clock, Shield, Sparkles, ChevronRight
+  Bell, Clock, Shield, Sparkles, ChevronRight, Menu, X
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import '../../admin.css';
@@ -20,6 +20,7 @@ import AdminSettingsTab from './AdminSettingsTab';
 
 export default function AdminDesktopView({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
 
@@ -57,6 +58,11 @@ export default function AdminDesktopView({ user, onLogout }) {
     { id: 'settings', label: 'Pengaturan Sekolah', icon: Settings }
   ];
 
+  const handleSelectTab = (tabId) => {
+    setActiveTab(tabId);
+    setIsMobileSidebarOpen(false);
+  };
+
   const getTabTitle = () => {
     switch (activeTab) {
       case 'dashboard': return { title: 'Dashboard Administrasi', subtitle: 'Ringkasan statistik & pusat pemantauan seluruh data sekolah' };
@@ -76,8 +82,14 @@ export default function AdminDesktopView({ user, onLogout }) {
 
   return (
     <div className="admin-desktop-container">
+      {/* MOBILE BACKDROP OVERLAY */}
+      <div
+        className={`admin-sidebar-backdrop ${isMobileSidebarOpen ? 'mobile-open' : ''}`}
+        onClick={() => setIsMobileSidebarOpen(false)}
+      />
+
       {/* SIDEBAR */}
-      <aside className="admin-sidebar">
+      <aside className={`admin-sidebar ${isMobileSidebarOpen ? 'mobile-open' : ''}`}>
         {/* LOGO & TITLE */}
         <div className="admin-sidebar-header">
           <div className="admin-logo-badge">
@@ -87,6 +99,14 @@ export default function AdminDesktopView({ user, onLogout }) {
             <h2>E-Sekolah PRO</h2>
             <span>Admin Desktop</span>
           </div>
+          {/* MOBILE CLOSE BUTTON */}
+          <button
+            className="mobile-menu-toggle"
+            onClick={() => setIsMobileSidebarOpen(false)}
+            style={{ marginLeft: 'auto', color: '#ffffff' }}
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {/* NAVIGATION LIST */}
@@ -105,7 +125,7 @@ export default function AdminDesktopView({ user, onLogout }) {
               <button
                 key={item.id}
                 className={`sidebar-menu-btn ${isActive ? 'active' : ''}`}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => handleSelectTab(item.id)}
               >
                 <Icon size={18} />
                 <span>{item.label}</span>
@@ -132,9 +152,19 @@ export default function AdminDesktopView({ user, onLogout }) {
       <div className="admin-main-wrap">
         {/* TOP HEADER */}
         <header className="admin-top-header">
-          <div className="admin-header-title">
-            <h1>{currentTabInfo.title}</h1>
-            <span>{currentTabInfo.subtitle}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button
+              className="mobile-menu-toggle"
+              onClick={() => setIsMobileSidebarOpen(true)}
+              title="Buka Menu"
+            >
+              <Menu size={22} />
+            </button>
+
+            <div className="admin-header-title">
+              <h1>{currentTabInfo.title}</h1>
+              <span className="mobile-subtitle-hidden">{currentTabInfo.subtitle}</span>
+            </div>
           </div>
 
           <div className="admin-header-actions">
@@ -152,7 +182,7 @@ export default function AdminDesktopView({ user, onLogout }) {
 
         {/* BODY CONTENT */}
         <main className="admin-content-inner">
-          {activeTab === 'dashboard' && <AdminDashboardTab onSwitchTab={(tab) => setActiveTab(tab)} />}
+          {activeTab === 'dashboard' && <AdminDashboardTab onSwitchTab={(tab) => handleSelectTab(tab)} />}
           {activeTab === 'guru' && <AdminGuruTab />}
           {activeTab === 'siswa' && <AdminSiswaTab />}
           {activeTab === 'kelas' && <AdminKelasTab />}
