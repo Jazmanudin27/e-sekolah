@@ -7,23 +7,6 @@ import {
 import api from '../../api/client';
 import SearchableSelect from '../../components/SearchableSelect';
 
-const BULAN_OPTIONS = [
-  { value: '1', label: 'Januari' },
-  { value: '2', label: 'Februari' },
-  { value: '3', label: 'Maret' },
-  { value: '4', label: 'April' },
-  { value: '5', label: 'Mei' },
-  { value: '6', label: 'Juni' },
-  { value: '7', label: 'Juli' },
-  { value: '8', label: 'Agustus' },
-  { value: '9', label: 'September' },
-  { value: '10', label: 'Oktober' },
-  { value: '11', label: 'November' },
-  { value: '12', label: 'Desember' }
-];
-
-const TAHUN_OPTIONS = ['2024', '2025', '2026', '2027'];
-
 export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }) {
   const currentDateObj = new Date();
   const [loading, setLoading] = useState(false);
@@ -33,13 +16,20 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
   const [mapelList, setMapelList] = useState([]);
   const [guruList, setGuruList] = useState([]);
 
+  // Date Range Defaults: First day of current month to today
+  const yearStr = currentDateObj.getFullYear();
+  const monthStr = String(currentDateObj.getMonth() + 1).padStart(2, '0');
+  const lastDayOfMonth = new Date(yearStr, currentDateObj.getMonth() + 1, 0).getDate();
+  const defaultDari = `${yearStr}-${monthStr}-01`;
+  const defaultSampai = `${yearStr}-${monthStr}-${String(lastDayOfMonth).padStart(2, '0')}`;
+
   // Filter Form States
   const [selectedKelas, setSelectedKelas] = useState('ALL');
   const [selectedStatus, setSelectedStatus] = useState('Aktif');
   const [selectedKepegawaian, setSelectedKepegawaian] = useState('ALL');
   const [selectedMapel, setSelectedMapel] = useState('ALL');
-  const [selectedBulan, setSelectedBulan] = useState(String(currentDateObj.getMonth() + 1));
-  const [selectedTahun, setSelectedTahun] = useState(String(currentDateObj.getFullYear()));
+  const [dariTanggal, setDariTanggal] = useState(defaultDari);
+  const [sampaiTanggal, setSampaiTanggal] = useState(defaultSampai);
   const [jenisLaporan, setJenisLaporan] = useState('Detail'); // 'Standar', 'Detail', 'Rekap'
   const [selectedJenisIzin, setSelectedJenisIzin] = useState('ALL');
   const [selectedStatusIzin, setSelectedStatusIzin] = useState('ALL');
@@ -68,11 +58,6 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
     loadMasterData();
   }, [reportType]);
 
-  // Helper function to get days in month
-  const getDaysInMonth = (month, year) => {
-    return new Date(Number(year), Number(month), 0).getDate();
-  };
-
   // Titles and Subtitles based on reportType
   const getReportMeta = () => {
     switch (reportType) {
@@ -84,7 +69,7 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
         };
       case 'laporanGuru':
         return {
-          title: 'Laporan Data Guru & Tenaga Kependidikan',
+          title: 'Laporan Data Guru',
           subtitle: 'Cetak dan ekspor data tenaga pendidik, NIP/NUPTK & status kepegawaian',
           icon: <Users size={20} color="#0284c7" />
         };
@@ -103,25 +88,25 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
       case 'laporanAbsensiSiswa':
         return {
           title: 'Laporan Absensi Siswa',
-          subtitle: 'Laporan presensi siswa per kelas dalam format Detail (1-31 hari) atau Rekap (1-12 bulan)',
+          subtitle: 'Laporan presensi siswa per kelas dalam format Standar, Detail, atau Rekap',
           icon: <FileText size={20} color="#0284c7" />
         };
       case 'laporanAbsensiMapel':
         return {
-          title: 'Laporan Absensi Mata Pelajaran',
+          title: 'Laporan Absensi Mapel',
           subtitle: 'Rekapitulasi absensi siswa pada jam mata pelajaran per kelas',
           icon: <BookOpen size={20} color="#0284c7" />
         };
       case 'laporanSurat':
       case 'laporanIzin':
         return {
-          title: 'Laporan Surat Izin & Ketidakhadiran',
+          title: 'Laporan Surat Izin',
           subtitle: 'Rekapitulasi pengajuan surat izin sakit, dinas, cuti, dan keperluan keluarga',
           icon: <Send size={20} color="#0284c7" />
         };
       default:
         return {
-          title: 'Pusat Cetak & Laporan',
+          title: 'Laporan',
           subtitle: 'Pilih parameter dan cetak dokumen laporan resmi',
           icon: <FileText size={20} color="#0284c7" />
         };
@@ -136,6 +121,10 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
   const fetchReportData = async () => {
     setLoading(true);
     try {
+      const dStart = new Date(dariTanggal);
+      const startBulan = dStart.getMonth() + 1;
+      const startTahun = dStart.getFullYear();
+
       if (reportType === 'laporanSiswa') {
         const res = await api.get('/siswa');
         let list = res.data?.data || [];
@@ -166,18 +155,17 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
       }
 
       if (reportType === 'laporanAbsensiSiswa') {
-        // Fetch rekap students
         const kParam = selectedKelas !== 'ALL' ? selectedKelas : (kelasList[0]?.kode_kelas || '');
-        const res = await api.get(`/rekap/siswa?bulan=${selectedBulan}&tahun=${selectedTahun}${kParam ? `&kode_kelas=${kParam}` : ''}`);
+        const res = await api.get(`/rekap/siswa?bulan=${startBulan}&tahun=${startTahun}${kParam ? `&kode_kelas=${kParam}` : ''}`);
         const list = res.data?.data || [];
 
-        // For Detail / Rekap matrix, fetch per-student detail logs
+        // Fetch logs for detail matrix
         const studentDetails = {};
         for (const st of list) {
           const sId = st.kode_siswa || st.nis;
           if (sId) {
             try {
-              const dRes = await api.get(`/rekap/siswa-detail?kode_siswa=${sId}&bulan=${selectedBulan}&tahun=${selectedTahun}`);
+              const dRes = await api.get(`/rekap/siswa-detail?kode_siswa=${sId}&bulan=${startBulan}&tahun=${startTahun}`);
               studentDetails[sId] = dRes.data?.data || [];
             } catch (e) {
               studentDetails[sId] = [];
@@ -191,19 +179,23 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
           data: list,
           studentDetails,
           kelasObj,
-          bulan: selectedBulan,
-          tahun: selectedTahun,
+          dariTanggal,
+          sampaiTanggal,
+          bulan: startBulan,
+          tahun: startTahun,
           jenisLaporan
         };
       }
 
       if (reportType === 'laporanPresensiGuru') {
-        const res = await api.get(`/rekap/guru?bulan=${selectedBulan}&tahun=${selectedTahun}`);
+        const res = await api.get(`/rekap/guru?bulan=${startBulan}&tahun=${startTahun}`);
         return {
           type: 'presensiGuru',
           data: res.data?.data || [],
-          bulan: selectedBulan,
-          tahun: selectedTahun,
+          dariTanggal,
+          sampaiTanggal,
+          bulan: startBulan,
+          tahun: startTahun,
           jenisLaporan
         };
       }
@@ -211,12 +203,14 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
       if (reportType === 'laporanAbsensiMapel') {
         const kParam = selectedKelas !== 'ALL' ? selectedKelas : '';
         const mParam = selectedMapel !== 'ALL' ? selectedMapel : '';
-        const res = await api.get(`/rekap/mapel?bulan=${selectedBulan}&tahun=${selectedTahun}${kParam ? `&kode_kelas=${kParam}` : ''}${mParam ? `&kode_mapel=${mParam}` : ''}`);
+        const res = await api.get(`/rekap/mapel?bulan=${startBulan}&tahun=${startTahun}${kParam ? `&kode_kelas=${kParam}` : ''}${mParam ? `&kode_mapel=${mParam}` : ''}`);
         return {
           type: 'absensiMapel',
           data: res.data?.data || [],
-          bulan: selectedBulan,
-          tahun: selectedTahun,
+          dariTanggal,
+          sampaiTanggal,
+          bulan: startBulan,
+          tahun: startTahun,
           jenisLaporan
         };
       }
@@ -230,7 +224,13 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
         if (selectedStatusIzin !== 'ALL') {
           list = list.filter(i => (i.status || 'Disetujui').toLowerCase() === selectedStatusIzin.toLowerCase());
         }
-        return { type: 'izin', data: list, bulan: selectedBulan, tahun: selectedTahun };
+        if (dariTanggal && sampaiTanggal) {
+          list = list.filter(i => {
+            const tgl = i.tanggal_mulai || i.created_at || '';
+            return (!dariTanggal || tgl >= dariTanggal) && (!sampaiTanggal || tgl <= sampaiTanggal);
+          });
+        }
+        return { type: 'izin', data: list, dariTanggal, sampaiTanggal };
       }
 
       return { type: 'empty', data: [] };
@@ -258,18 +258,20 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
       return;
     }
 
-    const namaBulanStr = BULAN_OPTIONS.find(b => b.value === selectedBulan)?.label || 'Bulan';
-    const bulan2Digit = String(selectedBulan).padStart(2, '0');
-    const daysInMonth = getDaysInMonth(selectedBulan, selectedTahun);
+    const dStart = new Date(dariTanggal);
+    const startBulan = dStart.getMonth() + 1;
+    const startTahun = dStart.getFullYear();
+    const bulan2Digit = String(startBulan).padStart(2, '0');
+    const daysInMonth = new Date(startTahun, startBulan, 0).getDate();
 
     let reportTitle = meta.title.toUpperCase();
-    let reportSub = `BULAN ${bulan2Digit} TAHUN ${selectedTahun}`;
+    let reportSub = `PERIODE: ${dariTanggal} s.d ${sampaiTanggal}`;
     let tableHtml = '';
 
     // 1. ABSENSI SISWA DETAIL (SCREENSHOT 3: 1-31 DATES)
     if (reportObj.type === 'absensiSiswa' && reportObj.jenisLaporan === 'Detail') {
       reportTitle = 'LAPORAN ABSENSI SISWA';
-      reportSub = `BULAN ${bulan2Digit} TAHUN ${selectedTahun}<br/>KELAS ${reportObj.kelasObj?.nama_kelas || ''}`;
+      reportSub = `BULAN ${bulan2Digit} TAHUN ${startTahun}<br/>KELAS ${reportObj.kelasObj?.nama_kelas || ''}`;
 
       let daysTh = '';
       for (let d = 1; d <= daysInMonth; d++) {
@@ -284,7 +286,7 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
         let daysTd = '';
         for (let d = 1; d <= daysInMonth; d++) {
           const dStr = String(d).padStart(2, '0');
-          const fullDatePrefix = `${selectedTahun}-${bulan2Digit}-${dStr}`;
+          const fullDatePrefix = `${startTahun}-${bulan2Digit}-${dStr}`;
           const matchLog = logs.find(l => (l.tanggal || '').startsWith(fullDatePrefix));
 
           let code = '';
@@ -333,7 +335,7 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
     // 2. ABSENSI SISWA REKAP (SCREENSHOT 4: 01-12 MONTHS)
     else if (reportObj.type === 'absensiSiswa' && reportObj.jenisLaporan === 'Rekap') {
       reportTitle = 'LAPORAN REKAP ABSENSI SISWA';
-      reportSub = `KELAS ${reportObj.kelasObj?.nama_kelas || ''}<br/>TAHUN ${selectedTahun}`;
+      reportSub = `KELAS ${reportObj.kelasObj?.nama_kelas || ''}<br/>TAHUN ${startTahun}`;
 
       let monthHeaders = '';
       let subHeaders = '';
@@ -347,7 +349,7 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
       reportObj.data.forEach((st, idx) => {
         let monthsTd = '';
         for (let m = 1; m <= 12; m++) {
-          const isSelectedM = String(m) === String(selectedBulan);
+          const isSelectedM = String(m) === String(startBulan);
           const iVal = isSelectedM ? (st.total_izin || st.izin || '') : '';
           const sVal = isSelectedM ? (st.total_sakit || st.sakit || '') : '';
           const aVal = isSelectedM ? (st.total_alpha || st.alfa || '') : '';
@@ -372,7 +374,7 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
             <tr>
               <th rowspan="2" style="width: 35px; text-align: center;">No</th>
               <th rowspan="2" style="text-align: center;">Nama Siswa</th>
-              <th colspan="36" style="text-align: center;">TAHUN ${selectedTahun}</th>
+              <th colspan="36" style="text-align: center;">TAHUN ${startTahun}</th>
               <th colspan="3" style="text-align: center;">Total</th>
             </tr>
             <tr>
@@ -427,7 +429,7 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
     // 4. LAPORAN GURU MASTER / PRESENSI GURU
     else if (reportObj.type === 'guru' || reportObj.type === 'presensiGuru') {
       reportTitle = reportObj.type === 'guru' ? 'LAPORAN DATA GURU' : 'LAPORAN PRESENSI GURU';
-      reportSub = `SMK ARTANITA • PERIODE: ${namaBulanStr.toUpperCase()} ${selectedTahun}`;
+      reportSub = `SMK ARTANITA • PERIODE: ${dariTanggal} s.d ${sampaiTanggal}`;
 
       let rowsHtml = reportObj.data.map((g, idx) => `
         <tr>
@@ -615,7 +617,7 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
     }
 
     let csvContent = '';
-    const fileName = `${reportType}_${selectedBulan}_${selectedTahun}.xls`;
+    const fileName = `${reportType}_${dariTanggal}_sd_${sampaiTanggal}.xls`;
 
     if (reportObj.type === 'siswa') {
       csvContent += 'No\tNIS\tNama Siswa\tL/P\tKelas\tJurusan\tStatus\n';
@@ -742,23 +744,25 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
             </div>
           )}
 
-          {/* 5. FILTER BULAN & TAHUN (For Presensi Guru, Absensi Siswa, Absensi Mapel, Surat Izin) */}
+          {/* 5. FILTER DARI TANGGAL & SAMPAI TANGGAL (For Presensi Guru, Absensi Siswa, Absensi Mapel, Surat Izin) */}
           {['laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat', 'laporanIzin'].includes(reportType) && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div className="form-group-admin">
-                <label>Bulan</label>
-                <SearchableSelect
-                  value={selectedBulan}
-                  onChange={(e) => setSelectedBulan(e.target.value)}
-                  options={BULAN_OPTIONS.map(b => ({ value: b.value, label: b.label }))}
+                <label>Dari Tanggal</label>
+                <input
+                  type="date"
+                  className="form-control-admin"
+                  value={dariTanggal}
+                  onChange={(e) => setDariTanggal(e.target.value)}
                 />
               </div>
               <div className="form-group-admin">
-                <label>Tahun</label>
-                <SearchableSelect
-                  value={selectedTahun}
-                  onChange={(e) => setSelectedTahun(e.target.value)}
-                  options={TAHUN_OPTIONS.map(yr => ({ value: yr, label: yr }))}
+                <label>Sampai Tanggal</label>
+                <input
+                  type="date"
+                  className="form-control-admin"
+                  value={sampaiTanggal}
+                  onChange={(e) => setSampaiTanggal(e.target.value)}
                 />
               </div>
             </div>
@@ -772,9 +776,9 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
                 value={jenisLaporan}
                 onChange={(e) => setJenisLaporan(e.target.value)}
                 options={[
-                  { value: 'Detail', label: 'Detail (Format 1-31 Hari Per Tanggal)' },
-                  { value: 'Rekap', label: 'Rekap (Format 1-12 Bulan Per Tahun)' },
-                  { value: 'Standar', label: 'Standar (Ringkasan Kehadiran)' }
+                  { value: 'Standar', label: 'Standar' },
+                  { value: 'Detail', label: 'Detail' },
+                  { value: 'Rekap', label: 'Rekap' }
                 ]}
               />
             </div>
