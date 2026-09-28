@@ -193,16 +193,18 @@ export default function AdminGuruTab() {
             />
           </div>
 
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="form-control-admin"
-            style={{ width: 180 }}
-          >
-            <option value="ALL">Semua Status</option>
-            <option value="Aktif">Status: Aktif</option>
-            <option value="Nonaktif">Status: Nonaktif</option>
-          </select>
+          <div style={{ width: 180 }}>
+            <SearchableSelect
+              options={[
+                { value: 'ALL', label: 'Semua Status' },
+                { value: 'Aktif', label: 'Status: Aktif' },
+                { value: 'Nonaktif', label: 'Status: Nonaktif' }
+              ]}
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              placeholder="Semua Status"
+            />
+          </div>
 
           <button className="btn-outline-admin" onClick={fetchGuru} title="Refresh Data">
             <RefreshCw size={16} />

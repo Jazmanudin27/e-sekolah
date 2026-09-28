@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, BookOpen, UserCheck, Calendar, Loader2, CheckCircle2, AlertCircle, RefreshCw, Filter } from 'lucide-react';
 import api from '../api/client';
+import SearchableSelect from '../components/SearchableSelect';
 
 const getTodayIndonesianDate = () => {
   try {
@@ -248,55 +249,33 @@ export default function AbsensiMapelView({ user, showToast }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div>
             <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>MATA PELAJARAN</label>
-            <select
+            <SearchableSelect
+              options={[
+                { value: '', label: '-- Pilih Mata Pelajaran --' },
+                ...mapelList.map(m => ({ value: m.kode_mapel, label: m.nama_mapel }))
+              ]}
               value={selectedMapel}
               onChange={handleMapelChange}
-              style={{
-                width: '100%',
-                padding: '9px 12px',
-                borderRadius: 10,
-                border: '1px solid #cbd5e1',
-                fontSize: 12,
-                fontWeight: 700,
-                background: '#f8fafc',
-                color: '#0f172a',
-                outline: 'none'
-              }}
-            >
-              <option value="">-- Pilih Mata Pelajaran --</option>
-              {mapelList.map(m => (
-                <option key={m.kode_mapel} value={m.kode_mapel}>{m.nama_mapel}</option>
-              ))}
-            </select>
+              placeholder="-- Pilih Mata Pelajaran --"
+            />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
               <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>KELAS</label>
-              <select
+              <SearchableSelect
+                options={[
+                  ...(!isClassAccount ? [{ value: '', label: '-- Pilih Kelas --' }] : []),
+                  ...kelasList.map(k => ({
+                    value: k.kode_kelas,
+                    label: `${k.nama_kelas}${k.jurusan && k.jurusan.trim() !== '-' ? ` (${k.jurusan.trim()})` : ''}`
+                  }))
+                ]}
                 value={selectedKelas}
                 onChange={handleKelasChange}
                 disabled={isClassAccount}
-                style={{
-                  width: '100%',
-                  padding: '9px 12px',
-                  borderRadius: 10,
-                  border: '1px solid #cbd5e1',
-                  fontSize: 12,
-                  fontWeight: 700,
-                  background: isClassAccount ? '#e2e8f0' : '#f8fafc',
-                  color: isClassAccount ? '#64748b' : '#0f172a',
-                  cursor: isClassAccount ? 'not-allowed' : 'pointer',
-                  outline: 'none'
-                }}
-              >
-                {!isClassAccount && <option value="">-- Pilih Kelas --</option>}
-                {kelasList.map(k => (
-                  <option key={k.kode_kelas} value={k.kode_kelas}>
-                    {k.nama_kelas}{k.jurusan && k.jurusan.trim() !== '-' ? ` (${k.jurusan.trim()})` : ''}
-                  </option>
-                ))}
-              </select>
+                placeholder="-- Pilih Kelas --"
+              />
             </div>
 
             <div>

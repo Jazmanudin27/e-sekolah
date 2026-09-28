@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Search, RefreshCw } from 'lucide-react';
 import api from '../api/client';
+import SearchableSelect from '../components/SearchableSelect';
 
 export default function SiswaView({ showToast }) {
   const [siswaList, setSiswaList] = useState([]);
@@ -111,28 +112,15 @@ export default function SiswaView({ showToast }) {
             <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 6, display: 'block', letterSpacing: '0.3px' }}>
               FILTER BERDASARKAN KELAS
             </label>
-            <select
+            <SearchableSelect
+              options={[
+                { value: 'ALL', label: 'Semua Kelas' },
+                ...kelasList.map(k => ({ value: k.kode_kelas, label: k.nama_kelas }))
+              ]}
               value={selectedKelas}
               onChange={(e) => setSelectedKelas(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '11px 14px',
-                borderRadius: 12,
-                border: '1px solid #cbd5e1',
-                fontSize: 13,
-                background: '#ffffff',
-                fontWeight: 600,
-                color: '#0f172a',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="ALL">Semua Kelas</option>
-              {kelasList.map(k => (
-                <option key={k.kode_kelas} value={k.kode_kelas}>
-                  {k.nama_kelas}
-                </option>
-              ))}
-            </select>
+              placeholder="Semua Kelas"
+            />
           </div>
         </div>
       </div>

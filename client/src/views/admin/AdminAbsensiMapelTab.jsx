@@ -6,6 +6,7 @@ import {
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 const getTodayIndonesianDate = () => {
   try {
@@ -294,34 +295,30 @@ export default function AdminAbsensiMapelTab() {
             <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
               MATA PELAJARAN
             </label>
-            <select
+            <SearchableSelect
+              options={mapelList.map(m => ({
+                value: m.kode_mapel,
+                label: `${m.nama_mapel} (${m.kode_mapel})`
+              }))}
               value={selectedMapel}
               onChange={(e) => setSelectedMapel(e.target.value)}
-              className="form-control-admin"
-            >
-              {mapelList.map(m => (
-                <option key={m.kode_mapel} value={m.kode_mapel}>
-                  {m.nama_mapel} ({m.kode_mapel})
-                </option>
-              ))}
-            </select>
+              placeholder="-- Pilih Mata Pelajaran --"
+            />
           </div>
 
           <div>
             <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
               KELAS
             </label>
-            <select
+            <SearchableSelect
+              options={kelasList.map(k => ({
+                value: k.kode_kelas,
+                label: k.nama_kelas
+              }))}
               value={selectedKelas}
               onChange={(e) => setSelectedKelas(e.target.value)}
-              className="form-control-admin"
-            >
-              {kelasList.map(k => (
-                <option key={k.kode_kelas} value={k.kode_kelas}>
-                  {k.nama_kelas}
-                </option>
-              ))}
-            </select>
+              placeholder="-- Pilih Kelas --"
+            />
           </div>
 
           <div>

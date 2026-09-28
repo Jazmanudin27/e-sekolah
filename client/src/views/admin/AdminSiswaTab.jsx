@@ -180,19 +180,20 @@ export default function AdminSiswaTab() {
             />
           </div>
 
-          <select
-            value={filterKelas}
-            onChange={(e) => setFilterKelas(e.target.value)}
-            className="form-control-admin"
-            style={{ width: 220 }}
-          >
-            <option value="ALL">Semua Kelas</option>
-            {kelasList.map(k => (
-              <option key={k.kode_kelas} value={k.kode_kelas}>
-                {k.nama_kelas} {k.jurusan && k.jurusan !== '-' ? `(${k.jurusan})` : ''}
-              </option>
-            ))}
-          </select>
+          <div style={{ width: 220 }}>
+            <SearchableSelect
+              options={[
+                { value: 'ALL', label: 'Semua Kelas' },
+                ...kelasList.map(k => ({
+                  value: k.kode_kelas,
+                  label: `${k.nama_kelas} ${k.jurusan && k.jurusan !== '-' ? `(${k.jurusan})` : ''}`
+                }))
+              ]}
+              value={filterKelas}
+              onChange={(e) => setFilterKelas(e.target.value)}
+              placeholder="Semua Kelas"
+            />
+          </div>
 
           <button className="btn-outline-admin" onClick={fetchInitial} title="Refresh Data">
             <RefreshCw size={16} />

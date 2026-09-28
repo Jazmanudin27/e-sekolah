@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Users, User, CalendarX, BookOpen, Filter } from 'lucide-react';
 import api from '../api/client';
+import SearchableSelect from '../components/SearchableSelect';
 
 export default function JadwalView() {
   const getTodayIndonesianDay = () => {
@@ -116,51 +117,26 @@ export default function JadwalView() {
           {/* FILTER HARI */}
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, display: 'block' }}>HARI</label>
-            <select
+            <SearchableSelect
+              options={days.map(d => ({ value: d.value, label: d.label }))}
               value={activeHari}
               onChange={(e) => setActiveHari(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: 12,
-                border: '1px solid #cbd5e1',
-                fontSize: 13,
-                fontWeight: 700,
-                background: '#f8fafc',
-                color: '#0f172a',
-                outline: 'none'
-              }}
-            >
-              {days.map(d => (
-                <option key={d.value} value={d.value}>{d.label}</option>
-              ))}
-            </select>
+              placeholder="Pilih Hari"
+            />
           </div>
 
           {/* FILTER KELAS */}
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, display: 'block' }}>KELAS</label>
-            <select
+            <SearchableSelect
+              options={kelasList.map(k => ({
+                value: String(k.kode_kelas || k.id),
+                label: k.nama_kelas
+              }))}
               value={selectedKelas}
               onChange={(e) => setSelectedKelas(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: 12,
-                border: '1px solid #cbd5e1',
-                fontSize: 13,
-                fontWeight: 700,
-                background: '#f8fafc',
-                color: '#0f172a',
-                outline: 'none'
-              }}
-            >
-              {kelasList.map(k => (
-                <option key={k.kode_kelas || k.id} value={k.kode_kelas || k.id}>
-                  {k.nama_kelas}
-                </option>
-              ))}
-            </select>
+              placeholder="Semua Kelas"
+            />
           </div>
         </div>
       </div>

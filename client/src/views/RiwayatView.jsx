@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Fingerprint, Filter } from 'lucide-react';
 import api from '../api/client';
+import SearchableSelect from '../components/SearchableSelect';
 
 export default function RiwayatView() {
   const [historyList, setHistoryList] = useState([]);
@@ -103,48 +104,22 @@ export default function RiwayatView() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <div>
             <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>BULAN</label>
-            <select
+            <SearchableSelect
+              options={daftarBulan.map(b => ({ value: b.value, label: b.label }))}
               value={selectedBulan}
               onChange={(e) => setSelectedBulan(parseInt(e.target.value, 10))}
-              style={{
-                width: '100%',
-                padding: '9px 12px',
-                borderRadius: 10,
-                border: '1px solid #cbd5e1',
-                fontSize: 12,
-                fontWeight: 700,
-                background: '#f8fafc',
-                color: '#0f172a',
-                outline: 'none'
-              }}
-            >
-              {daftarBulan.map(b => (
-                <option key={b.value} value={b.value}>{b.label}</option>
-              ))}
-            </select>
+              placeholder="Pilih Bulan"
+            />
           </div>
 
           <div>
             <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>TAHUN</label>
-            <select
+            <SearchableSelect
+              options={daftarTahun.map(t => ({ value: t, label: String(t) }))}
               value={selectedTahun}
               onChange={(e) => setSelectedTahun(parseInt(e.target.value, 10))}
-              style={{
-                width: '100%',
-                padding: '9px 12px',
-                borderRadius: 10,
-                border: '1px solid #cbd5e1',
-                fontSize: 12,
-                fontWeight: 700,
-                background: '#f8fafc',
-                color: '#0f172a',
-                outline: 'none'
-              }}
-            >
-              {daftarTahun.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+              placeholder="Pilih Tahun"
+            />
           </div>
         </div>
       </div>

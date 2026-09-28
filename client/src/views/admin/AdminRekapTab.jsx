@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function AdminRekapTab({ initialSubTab = 'guru' }) {
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
@@ -241,63 +242,54 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
           {activeSubTab !== 'guru' && (
             <div>
               <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, display: 'block' }}>PILIH KELAS</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'Semua Kelas' },
+                  ...kelasList.map(k => ({
+                    value: k.kode_kelas,
+                    label: `${k.nama_kelas} ${k.jurusan && k.jurusan !== '-' ? `(${k.jurusan})` : ''}`
+                  }))
+                ]}
                 value={selectedKelas}
                 onChange={(e) => setSelectedKelas(e.target.value)}
-                className="form-control-admin"
-              >
-                <option value="">Semua Kelas</option>
-                {kelasList.map(k => (
-                  <option key={k.kode_kelas} value={k.kode_kelas}>
-                    {k.nama_kelas} {k.jurusan && k.jurusan !== '-' ? `(${k.jurusan})` : ''}
-                  </option>
-                ))}
-              </select>
+                placeholder="Semua Kelas"
+              />
             </div>
           )}
 
           {activeSubTab === 'mapel' && (
             <div>
               <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, display: 'block' }}>MATA PELAJARAN</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'Semua Mapel' },
+                  ...mapelList.map(m => ({ value: m.kode_mapel, label: m.nama_mapel }))
+                ]}
                 value={selectedMapel}
                 onChange={(e) => setSelectedMapel(e.target.value)}
-                className="form-control-admin"
-              >
-                <option value="">Semua Mapel</option>
-                {mapelList.map(m => (
-                  <option key={m.kode_mapel} value={m.kode_mapel}>
-                    {m.nama_mapel}
-                  </option>
-                ))}
-              </select>
+                placeholder="Semua Mapel"
+              />
             </div>
           )}
 
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, display: 'block' }}>BULAN</label>
-            <select
+            <SearchableSelect
+              options={daftarBulan.map(b => ({ value: b.value, label: b.label }))}
               value={selectedBulan}
               onChange={(e) => setSelectedBulan(parseInt(e.target.value, 10))}
-              className="form-control-admin"
-            >
-              {daftarBulan.map(b => (
-                <option key={b.value} value={b.value}>{b.label}</option>
-              ))}
-            </select>
+              placeholder="Pilih Bulan"
+            />
           </div>
 
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, display: 'block' }}>TAHUN</label>
-            <select
+            <SearchableSelect
+              options={daftarTahun.map(t => ({ value: t, label: String(t) }))}
               value={selectedTahun}
               onChange={(e) => setSelectedTahun(parseInt(e.target.value, 10))}
-              className="form-control-admin"
-            >
-              {daftarTahun.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+              placeholder="Pilih Tahun"
+            />
           </div>
         </div>
 

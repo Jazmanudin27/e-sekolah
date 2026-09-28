@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FileText, Plus, CheckCircle, Clock, Calendar, AlertCircle, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../api/client';
+import SearchableSelect from '../components/SearchableSelect';
 
 export default function IzinView({ showToast }) {
   const [showForm, setShowForm] = useState(false);
@@ -149,15 +150,16 @@ export default function IzinView({ showToast }) {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div>
               <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 6, display: 'block' }}>JENIS PERMOHONAN</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: 'Sakit', label: 'Sakit' },
+                  { value: 'Izin', label: 'Izin Keperluan Keluarga' },
+                  { value: 'Dinas', label: 'Dinas / Tugas Sekolah' }
+                ]}
                 value={jenisIzin}
                 onChange={(e) => setJenisIzin(e.target.value)}
-                style={{ width: '100%', padding: '11px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }}
-              >
-                <option value="Sakit">Sakit</option>
-                <option value="Izin">Izin Keperluan Keluarga</option>
-                <option value="Dinas">Dinas / Tugas Sekolah</option>
-              </select>
+                placeholder="Pilih Jenis Permohonan"
+              />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>

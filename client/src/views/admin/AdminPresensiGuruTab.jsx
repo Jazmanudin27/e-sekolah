@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 const getCoordinates = (item) => {
   if (!item) return null;
@@ -237,47 +238,41 @@ export default function AdminPresensiGuruTab() {
             />
           </div>
 
-          <select
+          <SearchableSelect
+            options={[
+              { value: '', label: 'Semua Guru' },
+              ...guruList.map(g => ({ value: g.kode_guru, label: g.nama_guru }))
+            ]}
             value={selectedGuru}
             onChange={(e) => setSelectedGuru(e.target.value)}
-            className="form-control-admin"
-          >
-            <option value="">Semua Guru</option>
-            {guruList.map(g => (
-              <option key={g.kode_guru} value={g.kode_guru}>{g.nama_guru}</option>
-            ))}
-          </select>
+            placeholder="Semua Guru"
+          />
 
-          <select
+          <SearchableSelect
+            options={daftarBulan.map(b => ({ value: b.value, label: b.label }))}
             value={selectedBulan}
             onChange={(e) => setSelectedBulan(e.target.value)}
-            className="form-control-admin"
-          >
-            {daftarBulan.map(b => (
-              <option key={b.value} value={b.value}>{b.label}</option>
-            ))}
-          </select>
+            placeholder="Pilih Bulan"
+          />
 
-          <select
+          <SearchableSelect
+            options={daftarTahun.map(t => ({ value: t, label: `Tahun ${t}` }))}
             value={selectedTahun}
             onChange={(e) => setSelectedTahun(e.target.value)}
-            className="form-control-admin"
-          >
-            {daftarTahun.map(t => (
-              <option key={t} value={t}>Tahun {t}</option>
-            ))}
-          </select>
+            placeholder="Pilih Tahun"
+          />
 
-          <select
+          <SearchableSelect
+            options={[
+              { value: 'ALL', label: 'Semua Status' },
+              { value: 'LENGKAP', label: 'Lengkap (In & Out)' },
+              { value: 'BELUM_PULANG', label: 'Belum Scan Pulang' },
+              { value: 'TERLAMBAT', label: 'Terlambat' }
+            ]}
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="form-control-admin"
-          >
-            <option value="ALL">Semua Status</option>
-            <option value="LENGKAP">Lengkap (In & Out)</option>
-            <option value="BELUM_PULANG">Belum Scan Pulang</option>
-            <option value="TERLAMBAT">Terlambat</option>
-          </select>
+            placeholder="Semua Status"
+          />
         </div>
 
         {/* DATA TABLE */}

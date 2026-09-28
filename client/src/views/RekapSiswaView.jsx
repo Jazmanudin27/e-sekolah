@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileBarChart, Filter, Loader2, X, Calendar, ChevronRight, Users, CheckCircle2, HeartPulse, FileText, AlertCircle } from 'lucide-react';
 import api from '../api/client';
+import SearchableSelect from '../components/SearchableSelect';
 
 export default function RekapSiswaView({ user }) {
   const isClassAccount = user?.type === 'Kelas' || Boolean(user?.kode_kelas && user?.role === 'Kelas');
@@ -148,43 +149,36 @@ export default function RekapSiswaView({ user }) {
           {!isClassAccount && (
             <div>
               <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>KELAS</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'Semua Kelas' },
+                  ...kelasList.map(k => ({ value: k.kode_kelas, label: k.nama_kelas }))
+                ]}
                 value={selectedKelas}
                 onChange={handleKelasChange}
-                style={{ width: '100%', padding: '9px 10px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, fontWeight: 700, background: '#f8fafc', color: '#0f172a', outline: 'none' }}
-              >
-                <option value="">Semua Kelas</option>
-                {kelasList.map(k => (
-                  <option key={k.kode_kelas} value={k.kode_kelas}>{k.nama_kelas}</option>
-                ))}
-              </select>
+                placeholder="Semua Kelas"
+              />
             </div>
           )}
 
           <div>
             <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>BULAN</label>
-            <select
+            <SearchableSelect
+              options={daftarBulan.map(b => ({ value: b.value, label: b.label }))}
               value={selectedBulan}
               onChange={handleBulanChange}
-              style={{ width: '100%', padding: '9px 10px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, fontWeight: 700, background: '#f8fafc', color: '#0f172a', outline: 'none' }}
-            >
-              {daftarBulan.map(b => (
-                <option key={b.value} value={b.value}>{b.label}</option>
-              ))}
-            </select>
+              placeholder="Pilih Bulan"
+            />
           </div>
 
           <div>
             <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>TAHUN</label>
-            <select
+            <SearchableSelect
+              options={daftarTahun.map(t => ({ value: t, label: String(t) }))}
               value={selectedTahun}
               onChange={handleTahunChange}
-              style={{ width: '100%', padding: '9px 10px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, fontWeight: 700, background: '#f8fafc', color: '#0f172a', outline: 'none' }}
-            >
-              {daftarTahun.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+              placeholder="Pilih Tahun"
+            />
           </div>
         </div>
       </div>

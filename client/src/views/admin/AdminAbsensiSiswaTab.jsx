@@ -6,6 +6,7 @@ import {
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 const getTodayIndonesianDate = () => {
   try {
@@ -277,17 +278,15 @@ export default function AdminAbsensiSiswaTab() {
             <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
               PILIH KELAS
             </label>
-            <select
+            <SearchableSelect
+              options={kelasList.map(k => ({
+                value: k.kode_kelas,
+                label: `${k.nama_kelas} (${k.jurusan || 'Umum'})`
+              }))}
               value={selectedKelas}
               onChange={(e) => setSelectedKelas(e.target.value)}
-              className="form-control-admin"
-            >
-              {kelasList.map(k => (
-                <option key={k.kode_kelas} value={k.kode_kelas}>
-                  {k.nama_kelas} ({k.jurusan || 'Umum'})
-                </option>
-              ))}
-            </select>
+              placeholder="-- Pilih Kelas --"
+            />
           </div>
 
           <div>
