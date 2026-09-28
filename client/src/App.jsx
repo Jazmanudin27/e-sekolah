@@ -19,11 +19,43 @@ import RekapGuruView from './views/RekapGuruView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
 import api from './api/client';
 
+const getInitialTab = () => {
+  try {
+    const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
+    if (hash) return hash;
+    const stored = localStorage.getItem('esekolah_active_tab');
+    if (stored) return stored;
+  } catch (e) {}
+  return 'beranda';
+};
+
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('beranda');
+  const [activeTab, setActiveTabState] = useState(getInitialTab);
   const [presensiModalType, setPresensiModalType] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const setActiveTab = (tab) => {
+    setActiveTabState(tab);
+    try {
+      localStorage.setItem('esekolah_active_tab', tab);
+      window.location.hash = tab;
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
+      if (hash && hash !== activeTab) {
+        setActiveTabState(hash);
+        try {
+          localStorage.setItem('esekolah_active_tab', hash);
+        } catch (e) {}
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [activeTab]);
 
   useEffect(() => {
     const token = localStorage.getItem('esekolah_token');
@@ -65,9 +97,15 @@ export default function App() {
   const handleLoginSuccess = (user, token) => {
     localStorage.setItem('esekolah_token', token);
     setCurrentUser(user);
-    const isAdmin = user?.type === 'Admin' || (user?.role && ['admin', 'superadmin', 'operator', 'kepala_sekolah'].includes(String(user.role).toLowerCase()));
-    const isKelas = user?.type === 'Kelas' || user?.role === 'Kelas';
-    setActiveTab(isAdmin ? 'dashboard' : isKelas ? 'absensiSiswa' : 'beranda');
+    const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
+    const stored = localStorage.getItem('esekolah_active_tab');
+    if (!hash && !stored) {
+      const isAdmin = user?.type === 'Admin' || (user?.role && ['admin', 'superadmin', 'operator', 'kepala_sekolah'].includes(String(user.role).toLowerCase()));
+      const isKelas = user?.type === 'Kelas' || user?.role === 'Kelas';
+      setActiveTab(isAdmin ? 'dashboard' : isKelas ? 'absensiSiswa' : 'beranda');
+    } else {
+      setActiveTab(hash || stored);
+    }
     Swal.fire({
       title: 'Login Berhasil!',
       text: `Selamat datang kembali, ${user.name || user.nama_guru || user.nama_kelas || user.username || 'Pengguna'}!`,
@@ -98,6 +136,9 @@ export default function App() {
     }).then((result) => {
       if (result.isConfirmed) {
         localStorage.removeItem('esekolah_token');
+        localStorage.removeItem('esekolah_active_tab');
+        localStorage.removeItem('admin_active_tab');
+        window.location.hash = '';
         setCurrentUser(null);
         Swal.fire({
           title: 'Berhasil Keluar',
