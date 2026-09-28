@@ -33,6 +33,7 @@ class IzinModel {
           COALESCE(NULLIF(TRIM(g.nama_guru), ''), NULLIF(TRIM(p.nama_pengaju), ''), 'Guru Pengajar') AS nama_guru,
           p.nama_pengaju, 
           p.jenis, 
+          p.jenis AS jenis_izin,
           DATE_FORMAT(p.tanggal_mulai, '%Y-%m-%d') AS tanggal_mulai,
           DATE_FORMAT(p.tanggal_selesai, '%Y-%m-%d') AS tanggal_selesai,
           p.durasi, 

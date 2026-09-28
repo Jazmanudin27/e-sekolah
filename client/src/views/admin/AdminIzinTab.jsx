@@ -178,14 +178,17 @@ export default function AdminIzinTab() {
   };
 
   const filteredList = izinList.filter(item => {
+    const teacherName = item.nama_guru || item.nama_pengaju || '';
+    const jenisVal = item.jenis || item.jenis_izin || '';
+    const statusVal = item.status || 'Menunggu';
+
     const matchSearch =
-      (item.nama_guru || '').toLowerCase().includes(search.toLowerCase()) ||
+      teacherName.toLowerCase().includes(search.toLowerCase()) ||
       (item.keterangan || '').toLowerCase().includes(search.toLowerCase()) ||
       (item.tanggal_mulai || '').includes(search);
 
-    const matchJenis = filterJenis === 'ALL' || item.jenis_izin === filterJenis;
-    const itemStatus = item.status || 'Disetujui';
-    const matchStatus = filterStatus === 'ALL' || itemStatus === filterStatus;
+    const matchJenis = filterJenis === 'ALL' || jenisVal.toLowerCase() === filterJenis.toLowerCase();
+    const matchStatus = filterStatus === 'ALL' || statusVal.toLowerCase() === filterStatus.toLowerCase();
 
     return matchSearch && matchJenis && matchStatus;
   });
@@ -197,9 +200,9 @@ export default function AdminIzinTab() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
 
-  const totalSakit = izinList.filter(i => (i.jenis_izin || '').toLowerCase() === 'sakit').length;
-  const totalIzin = izinList.filter(i => (i.jenis_izin || '').toLowerCase() === 'izin').length;
-  const totalDinas = izinList.filter(i => (i.jenis_izin || '').toLowerCase() === 'dinas').length;
+  const totalSakit = izinList.filter(i => (i.jenis || i.jenis_izin || '').toLowerCase() === 'sakit').length;
+  const totalIzin = izinList.filter(i => (i.jenis || i.jenis_izin || '').toLowerCase() === 'izin').length;
+  const totalDinas = izinList.filter(i => (i.jenis || i.jenis_izin || '').toLowerCase() === 'dinas').length;
 
   return (
     <div className="admin-izin-wrapper">
@@ -360,16 +363,18 @@ export default function AdminIzinTab() {
                 </tr>
               ) : (
                 paginatedList.map((item, idx) => {
-                  const status = item.status || 'Disetujui';
-                  const isSakit = (item.jenis_izin || '').toLowerCase() === 'sakit';
-                  const isDinas = (item.jenis_izin || '').toLowerCase() === 'dinas';
+                  const status = item.status || 'Menunggu';
+                  const jenisText = item.jenis || item.jenis_izin || 'Izin';
+                  const isSakit = jenisText.toLowerCase() === 'sakit';
+                  const isDinas = jenisText.toLowerCase() === 'dinas';
+                  const teacherName = item.nama_guru || item.nama_pengaju || 'Guru Pengajar';
 
                   return (
                     <tr key={item.id || idx}>
                       <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
                       <td>
-                        <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.nama_guru || 'Guru Pengajar'}</div>
-                        <div style={{ fontSize: 11, color: '#64748b' }}>Kode: #{item.kode_guru || item.id}</div>
+                        <div style={{ fontWeight: 700, color: '#0f172a' }}>{teacherName}</div>
+                        <div style={{ fontSize: 11, color: '#64748b' }}>Kode: #{item.user_id || item.kode_guru || item.id}</div>
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         <span style={{
@@ -381,7 +386,7 @@ export default function AdminIzinTab() {
                           color: isSakit ? '#059669' : isDinas ? '#7c3aed' : '#2563eb',
                           border: `1px solid ${isSakit ? '#a7f3d0' : isDinas ? '#ddd6fe' : '#bfdbfe'}`
                         }}>
-                          {item.jenis_izin || 'Izin'}
+                          {jenisText}
                         </span>
                       </td>
                       <td style={{ fontWeight: 600, textAlign: 'center' }}>{item.tanggal_mulai}</td>
