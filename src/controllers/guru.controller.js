@@ -4,7 +4,8 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 async function getAllGuru(req, res, next) {
   try {
     const { search, status } = req.query;
-    const teachers = await GuruModel.findAll({ status, search });
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const teachers = await GuruModel.findAll({ status, search, kode_member });
     sendSuccess(res, 'Data guru berhasil diambil.', teachers, 200, { count: teachers.length });
   } catch (error) {
     next(error);
@@ -26,7 +27,8 @@ async function getGuruById(req, res, next) {
 
 async function createGuru(req, res, next) {
   try {
-    const id = await GuruModel.create(req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member;
+    const id = await GuruModel.create({ ...req.body, kode_member });
     sendSuccess(res, 'Data guru berhasil ditambahkan.', { kode_guru: id }, 201);
   } catch (error) {
     next(error);

@@ -17,10 +17,14 @@ class GuruModel {
     return rows[0] || null;
   }
 
-  static async findAll({ status, search }) {
-    let sql = 'SELECT kode_guru, nip_nuptk, nama_guru, jk, no_hp, email, status_kepegawaian, status, role FROM guru WHERE 1=1';
+  static async findAll({ status, search, kode_member }) {
+    let sql = 'SELECT kode_guru, nip_nuptk, nama_guru, jk, no_hp, email, status_kepegawaian, status, role, kode_member FROM guru WHERE 1=1';
     const params = [];
 
+    if (kode_member) {
+      sql += ' AND kode_member = ?';
+      params.push(kode_member);
+    }
     if (status) {
       sql += ' AND status = ?';
       params.push(status);
@@ -34,16 +38,22 @@ class GuruModel {
     return await query(sql, params);
   }
 
-  static async countActive() {
-    const rows = await query('SELECT COUNT(*) AS total FROM guru WHERE status = "Aktif"');
+  static async countActive(kode_member) {
+    let sql = 'SELECT COUNT(*) AS total FROM guru WHERE status = "Aktif"';
+    const params = [];
+    if (kode_member) {
+      sql += ' AND kode_member = ?';
+      params.push(kode_member);
+    }
+    const rows = await query(sql, params);
     return rows[0].total || 0;
   }
 
-  static async create({ nip_nuptk, nama_guru, jk = 'L', no_hp, email, status_kepegawaian = 'PNS', status = 'Aktif', role = 'Guru', username, password }) {
+  static async create({ nip_nuptk, nama_guru, jk = 'L', no_hp, email, status_kepegawaian = 'PNS', status = 'Aktif', role = 'Guru', username, password, kode_member }) {
     const res = await query(
-      `INSERT INTO guru (nip_nuptk, nama_guru, jk, no_hp, email, status_kepegawaian, status, role, username, password)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [nip_nuptk || '-', nama_guru, jk, no_hp || '-', email || '-', status_kepegawaian, status, role, username || nip_nuptk || nama_guru.toLowerCase().replace(/\s+/g, ''), password || '123456']
+      `INSERT INTO guru (nip_nuptk, nama_guru, jk, no_hp, email, status_kepegawaian, status, role, username, password, kode_member)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [nip_nuptk || '-', nama_guru, jk, no_hp || '-', email || '-', status_kepegawaian, status, role, username || nip_nuptk || nama_guru.toLowerCase().replace(/\s+/g, ''), password || '123456', kode_member || null]
     );
     return res.insertId;
   }
