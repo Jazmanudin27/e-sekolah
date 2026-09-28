@@ -75,7 +75,7 @@ export default function LoginView({ onLoginSuccess, showToast }) {
             </div>
             <div>
               <div style={{ fontSize: 14, fontWeight: 800, color: '#ffffff', letterSpacing: '0.3px', margin: 0 }}>
-                E-SEKOLAH
+                E-SEKOLAH PRO
               </div>
               <div style={{ fontSize: 10, fontWeight: 700, color: '#38bdf8', letterSpacing: '0.5px' }}>
                 DIGITAL SMART CAMPUS
@@ -107,8 +107,23 @@ export default function LoginView({ onLoginSuccess, showToast }) {
         <div className="login-form-side">
           {/* MOBILE-ONLY BRAND HEADER (Visible on small screens) */}
           <div style={{ textAlign: 'center', marginBottom: 20 }} className="mobile-header-show">
+            <div style={{
+              width: 56,
+              height: 56,
+              background: 'linear-gradient(135deg, #0284c7, #6366f1)',
+              borderRadius: 18,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              marginBottom: 10,
+              boxShadow: '0 0 25px rgba(56, 189, 248, 0.45)',
+              border: '2px solid rgba(255,255,255,0.25)'
+            }}>
+              <GraduationCap size={30} />
+            </div>
             <h1 style={{ fontSize: 20, fontWeight: 800, color: '#ffffff', margin: 0 }}>
-              E-SEKOLAH
+              E-SEKOLAH PRO
             </h1>
             <p style={{ color: '#94a3b8', fontSize: 12, marginTop: 4, fontWeight: 500 }}>
               Sistem Presensi & Layanan Akademik

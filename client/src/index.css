@@ -82,9 +82,9 @@ body {
 
 .header-top-row {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 2px;
+  margin-bottom: 8px;
 }
 
 .brand-title {
