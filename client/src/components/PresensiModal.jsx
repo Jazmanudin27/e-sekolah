@@ -100,9 +100,29 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
     }
   }, [coords]);
 
+  const calculateDistanceMeter = (lat1, lon1, lat2, lon2) => {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
+    const R = 6371e3;
+    const rad = Math.PI / 180;
+    const dLat = (lat2 - lat1) * rad;
+    const dLon = (lon2 - lon1) * rad;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * rad) * Math.cos(lat2 * rad) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Math.round(R * c);
+  };
+
+  const distanceMeter = calculateDistanceMeter(coords.lat, coords.lng, SCHOOL_LOCATION.lat, SCHOOL_LOCATION.lng);
+  const isOutOfRadius = distanceMeter > SCHOOL_LOCATION.radiusMeter;
+
   const handleSubmit = async () => {
     if (isFakeGpsDetected) {
       showToast('Presensi ditolak! Terdeteksi aplikasi pemalsu lokasi (Fake GPS).', false);
+      return;
+    }
+    if (isOutOfRadius) {
+      showToast(`Presensi ditolak! Anda berada di luar radius aman lokasi sekolah (${distanceMeter}m dari sekolah).`, false);
       return;
     }
     setLoading(true);
@@ -174,28 +194,34 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
           </button>
         </div>
 
-        {/* GPS VERIFICATION STATUS CARD */}
+        {/* GPS & RADIUS VERIFICATION STATUS CARD */}
         <div style={{
-          background: isFakeGpsDetected ? '#fef2f2' : '#f0fdf4',
-          border: `1px solid ${isFakeGpsDetected ? '#fecaca' : '#bbf7d0'}`,
+          background: isFakeGpsDetected || isOutOfRadius ? '#fef2f2' : '#f0fdf4',
+          border: `1px solid ${isFakeGpsDetected || isOutOfRadius ? '#fecaca' : '#bbf7d0'}`,
           borderRadius: 14,
           padding: '12px 14px',
           marginBottom: 14
         }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            {isFakeGpsDetected ? (
+            {isFakeGpsDetected || isOutOfRadius ? (
               <AlertTriangle size={22} color="#dc2626" style={{ marginTop: 2, flexShrink: 0 }} />
             ) : (
               <CheckCircle2 size={22} color="#16a34a" style={{ marginTop: 2, flexShrink: 0 }} />
             )}
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: isFakeGpsDetected ? '#991b1b' : '#166534' }}>
-                {isFakeGpsDetected ? 'Fake GPS Terdeteksi!' : 'Lokasi GPS Terverifikasi Real-Time'}
+              <div style={{ fontSize: 13, fontWeight: 800, color: isFakeGpsDetected || isOutOfRadius ? '#991b1b' : '#166534' }}>
+                {isFakeGpsDetected
+                  ? 'Fake GPS Terdeteksi!'
+                  : isOutOfRadius
+                  ? `Di Luar Radius Safe Zone (${distanceMeter}m)`
+                  : 'Lokasi Terverifikasi (Dalam Safe Zone)'}
               </div>
-              <div style={{ fontSize: 11.5, color: isFakeGpsDetected ? '#b91c1c' : '#15803d', marginTop: 3, lineHeight: 1.4 }}>
+              <div style={{ fontSize: 11.5, color: isFakeGpsDetected || isOutOfRadius ? '#b91c1c' : '#15803d', marginTop: 3, lineHeight: 1.4 }}>
                 {isFakeGpsDetected
                   ? 'Aplikasi pemalsu lokasi terdeteksi. Harap nonaktifkan Fake GPS untuk melakukan absen.'
-                  : 'Sistem menggunakan lokasi GPS presisi tinggi. Proteksi Anti-Fake GPS Aktif.'}
+                  : isOutOfRadius
+                  ? `Presensi ditolak karena Anda berada ${distanceMeter}m dari sekolah. Maksimal radius: ${SCHOOL_LOCATION.radiusMeter}m.`
+                  : `Jarak Anda ke sekolah: ${distanceMeter}m. Lokasi aman & memenuhi syarat presensi.`}
               </div>
             </div>
           </div>
@@ -207,8 +233,8 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
             <span style={{ fontSize: 11, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 4 }}>
               <Navigation size={14} color="#0066ff" /> Peta Lokasi Saya & Sekolah
             </span>
-            <span style={{ fontSize: 10, color: '#16a34a', fontWeight: 700, background: '#dcfce7', padding: '2px 8px', borderRadius: 10 }}>
-              Radius Safe Zone: {SCHOOL_LOCATION.radiusMeter}m
+            <span style={{ fontSize: 10, color: isOutOfRadius ? '#dc2626' : '#16a34a', fontWeight: 700, background: isOutOfRadius ? '#fee2e2' : '#dcfce7', padding: '2px 8px', borderRadius: 10 }}>
+              {isOutOfRadius ? `Di Luar (${distanceMeter}m)` : `Dalam Radius (${distanceMeter}m)`}
             </span>
           </div>
 
@@ -224,17 +250,23 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
               <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>{gpsReady ? coordsString : 'Mencari Satelit GPS...'}</div>
             </div>
           </div>
-          <span style={{ fontSize: 10, fontWeight: 800, color: '#059669', background: '#ecfdf5', padding: '3px 8px', borderRadius: 6, border: '1px solid #a7f3d0' }}>
-            GPS Aktif
+          <span style={{
+            fontSize: 10, fontWeight: 800,
+            color: isOutOfRadius ? '#dc2626' : '#059669',
+            background: isOutOfRadius ? '#fef2f2' : '#ecfdf5',
+            padding: '3px 8px', borderRadius: 6,
+            border: `1px solid ${isOutOfRadius ? '#fecaca' : '#a7f3d0'}`
+          }}>
+            {isOutOfRadius ? 'Di Luar Radius' : 'GPS Valid'}
           </span>
         </div>
 
         {/* SUBMIT BUTTON */}
         <button
           onClick={handleSubmit}
-          disabled={loading || isFakeGpsDetected}
+          disabled={loading || isFakeGpsDetected || isOutOfRadius}
           className={`presensi-submit-btn ${scanType === 'in' ? 'btn-scan-masuk' : 'btn-scan-pulang'}`}
-          style={{ opacity: isFakeGpsDetected ? 0.6 : 1, cursor: isFakeGpsDetected ? 'not-allowed' : 'pointer' }}
+          style={{ opacity: (isFakeGpsDetected || isOutOfRadius) ? 0.6 : 1, cursor: (isFakeGpsDetected || isOutOfRadius) ? 'not-allowed' : 'pointer' }}
         >
           <Send size={18} />
           <span>{loading ? 'Mengirim Data Presensi...' : `Kirim Presensi ${scanType === 'in' ? 'Masuk' : 'Pulang'}`}</span>

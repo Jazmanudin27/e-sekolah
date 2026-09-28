@@ -33,6 +33,36 @@ async function getTodayStatus(req, res, next) {
   }
 }
 
+const SCHOOL_LAT = -7.325205;
+const SCHOOL_LNG = 108.208354;
+const MAX_RADIUS_METER = 100;
+
+function calculateDistanceMeter(lat1, lon1, lat2, lon2) {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
+  const R = 6371e3;
+  const rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad;
+  const dLon = (lon2 - lon1) * rad;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * rad) * Math.cos(lat2 * rad) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c);
+}
+
+function checkRadiusValidation(lokasiStr) {
+  if (!lokasiStr) return { valid: true, distance: 0 };
+  const parts = String(lokasiStr).split(',').map(s => parseFloat(s.trim()));
+  if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+    const distance = calculateDistanceMeter(parts[0], parts[1], SCHOOL_LAT, SCHOOL_LNG);
+    if (distance > MAX_RADIUS_METER) {
+      return { valid: false, distance };
+    }
+    return { valid: true, distance };
+  }
+  return { valid: true, distance: 0 };
+}
+
 // Teacher Check-In (Absen Masuk)
 async function checkIn(req, res, next) {
   try {
@@ -49,6 +79,11 @@ async function checkIn(req, res, next) {
 
     if (is_fake_gps) {
       return sendError(res, 'Penggunaan Fake GPS dilarang oleh sistem presensi sekolah.', 403);
+    }
+
+    const radiusCheck = checkRadiusValidation(lokasi);
+    if (!radiusCheck.valid) {
+      return sendError(res, `Presensi ditolak! Anda berada di luar radius aman sekolah (${radiusCheck.distance}m dari sekolah). Maksimal radius: ${MAX_RADIUS_METER}m.`, 400);
     }
 
     const finalLokasi = lokasi;
@@ -93,6 +128,11 @@ async function checkOut(req, res, next) {
 
     if (is_fake_gps) {
       return sendError(res, 'Penggunaan Fake GPS dilarang oleh sistem presensi sekolah.', 403);
+    }
+
+    const radiusCheck = checkRadiusValidation(lokasi);
+    if (!radiusCheck.valid) {
+      return sendError(res, `Presensi ditolak! Anda berada di luar radius aman sekolah (${radiusCheck.distance}m dari sekolah). Maksimal radius: ${MAX_RADIUS_METER}m.`, 400);
     }
 
     const finalLokasi = lokasi;
