@@ -96,6 +96,8 @@ export default function RekapGuruView() {
   const totalHadirCount = rekapList.reduce((acc, curr) => acc + parseInt(curr.total_hadir || 0, 10), 0);
   const totalSakitCount = rekapList.reduce((acc, curr) => acc + parseInt(curr.total_sakit || 0, 10), 0);
   const totalIzinCount = rekapList.reduce((acc, curr) => acc + parseInt(curr.total_izin || 0, 10), 0);
+  const totalDinasCount = rekapList.reduce((acc, curr) => acc + parseInt(curr.total_dinas || 0, 10), 0);
+  const totalCutiCount = rekapList.reduce((acc, curr) => acc + parseInt(curr.total_cuti || 0, 10), 0);
 
   return (
     <div className="inner-page-wrapper" style={{ paddingTop: 4, paddingBottom: 36 }}>
@@ -130,38 +132,36 @@ export default function RekapGuruView() {
         </div>
       </div>
 
-      {/* SUMMARY STATS CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
-        {/* Total Guru Card */}
-        <div style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', borderRadius: 14, padding: '10px 8px', color: '#ffffff', boxShadow: '0 4px 12px rgba(37,99,235,0.15)', textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
-            <Users size={12} /> GURU
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>{totalGuruCount}</div>
-        </div>
-
+      {/* SUMMARY STATS CARDS (5 COLUMNS: HADIR, SAKIT, IZIN, DINAS, CUTI) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6, marginBottom: 16 }}>
         {/* Total Hadir Card */}
-        <div style={{ background: 'linear-gradient(135deg, #10b981, #047857)', borderRadius: 14, padding: '10px 8px', color: '#ffffff', boxShadow: '0 4px 12px rgba(16,185,129,0.15)', textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
-            <CheckCircle2 size={12} /> HADIR
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>{totalHadirCount}</div>
+        <div style={{ background: 'linear-gradient(135deg, #10b981, #047857)', borderRadius: 12, padding: '8px 4px', color: '#ffffff', boxShadow: '0 4px 10px rgba(16,185,129,0.15)', textAlign: 'center' }}>
+          <div style={{ fontSize: 9, fontWeight: 800, opacity: 0.9, marginBottom: 2 }}>HADIR (H)</div>
+          <div style={{ fontSize: 16, fontWeight: 900, lineHeight: 1.1 }}>{totalHadirCount}</div>
         </div>
 
         {/* Total Sakit Card */}
-        <div style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', borderRadius: 14, padding: '10px 8px', color: '#ffffff', boxShadow: '0 4px 12px rgba(2,132,199,0.15)', textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
-            <HeartPulse size={12} /> SAKIT
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>{totalSakitCount}</div>
+        <div style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', borderRadius: 12, padding: '8px 4px', color: '#ffffff', boxShadow: '0 4px 10px rgba(2,132,199,0.15)', textAlign: 'center' }}>
+          <div style={{ fontSize: 9, fontWeight: 800, opacity: 0.9, marginBottom: 2 }}>SAKIT (S)</div>
+          <div style={{ fontSize: 16, fontWeight: 900, lineHeight: 1.1 }}>{totalSakitCount}</div>
         </div>
 
         {/* Total Izin Card */}
-        <div style={{ background: 'linear-gradient(135deg, #f59e0b, #b45309)', borderRadius: 14, padding: '10px 8px', color: '#ffffff', boxShadow: '0 4px 12px rgba(245,158,11,0.15)', textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
-            <FileText size={12} /> IZIN
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>{totalIzinCount}</div>
+        <div style={{ background: 'linear-gradient(135deg, #f59e0b, #b45309)', borderRadius: 12, padding: '8px 4px', color: '#ffffff', boxShadow: '0 4px 10px rgba(245,158,11,0.15)', textAlign: 'center' }}>
+          <div style={{ fontSize: 9, fontWeight: 800, opacity: 0.9, marginBottom: 2 }}>IZIN (I)</div>
+          <div style={{ fontSize: 16, fontWeight: 900, lineHeight: 1.1 }}>{totalIzinCount}</div>
+        </div>
+
+        {/* Total Dinas Card */}
+        <div style={{ background: 'linear-gradient(135deg, #06b6d4, #0e7490)', borderRadius: 12, padding: '8px 4px', color: '#ffffff', boxShadow: '0 4px 10px rgba(6,182,212,0.15)', textAlign: 'center' }}>
+          <div style={{ fontSize: 9, fontWeight: 800, opacity: 0.9, marginBottom: 2 }}>DINAS (D)</div>
+          <div style={{ fontSize: 16, fontWeight: 900, lineHeight: 1.1 }}>{totalDinasCount}</div>
+        </div>
+
+        {/* Total Cuti Card */}
+        <div style={{ background: 'linear-gradient(135deg, #a855f7, #7e22ce)', borderRadius: 12, padding: '8px 4px', color: '#ffffff', boxShadow: '0 4px 10px rgba(168,85,247,0.15)', textAlign: 'center' }}>
+          <div style={{ fontSize: 9, fontWeight: 800, opacity: 0.9, marginBottom: 2 }}>CUTI (C)</div>
+          <div style={{ fontSize: 16, fontWeight: 900, lineHeight: 1.1 }}>{totalCutiCount}</div>
         </div>
       </div>
 
@@ -181,6 +181,8 @@ export default function RekapGuruView() {
             const totalH = parseInt(item.total_hadir || 0, 10);
             const totalS = parseInt(item.total_sakit || 0, 10);
             const totalI = parseInt(item.total_izin || 0, 10);
+            const totalD = parseInt(item.total_dinas || 0, 10);
+            const totalC = parseInt(item.total_cuti || 0, 10);
 
             return (
               <div
@@ -228,12 +230,12 @@ export default function RekapGuruView() {
                   <ChevronRight size={18} color="#94a3b8" />
                 </div>
 
-                {/* BOTTOM ROW: STATS SUMMARY BADGES (HADIR, SAKIT, IZIN) */}
+                {/* BOTTOM ROW: STATS SUMMARY BADGES (HADIR, SAKIT, IZIN, DINAS, CUTI) */}
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: 8,
+                    gridTemplateColumns: 'repeat(5, 1fr)',
+                    gap: 4,
                     paddingTop: 10,
                     borderTop: '1px dashed #e2e8f0'
                   }}
@@ -243,17 +245,15 @@ export default function RekapGuruView() {
                     style={{
                       background: '#f0fdf4',
                       border: '1px solid #bbf7d0',
-                      borderRadius: 10,
-                      padding: '6px 8px',
+                      borderRadius: 8,
+                      padding: '4px 2px',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 5
+                      justifyContent: 'center'
                     }}
                   >
-                    <CheckCircle2 size={13} color="#16a34a" />
-                    <span style={{ fontSize: 11, fontWeight: 800, color: '#15803d' }}>
-                      Hadir: {totalH}
+                    <span style={{ fontSize: 10, fontWeight: 800, color: '#15803d' }}>
+                      H: {totalH}
                     </span>
                   </div>
 
@@ -262,17 +262,15 @@ export default function RekapGuruView() {
                     style={{
                       background: '#eff6ff',
                       border: '1px solid #bfdbfe',
-                      borderRadius: 10,
-                      padding: '6px 8px',
+                      borderRadius: 8,
+                      padding: '4px 2px',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 5
+                      justifyContent: 'center'
                     }}
                   >
-                    <HeartPulse size={13} color="#2563eb" />
-                    <span style={{ fontSize: 11, fontWeight: 800, color: '#1d4ed8' }}>
-                      Sakit: {totalS}
+                    <span style={{ fontSize: 10, fontWeight: 800, color: '#1d4ed8' }}>
+                      S: {totalS}
                     </span>
                   </div>
 
@@ -281,17 +279,49 @@ export default function RekapGuruView() {
                     style={{
                       background: '#fffbe6',
                       border: '1px solid #fde68a',
-                      borderRadius: 10,
-                      padding: '6px 8px',
+                      borderRadius: 8,
+                      padding: '4px 2px',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 5
+                      justifyContent: 'center'
                     }}
                   >
-                    <FileText size={13} color="#d97706" />
-                    <span style={{ fontSize: 11, fontWeight: 800, color: '#b45309' }}>
-                      Izin: {totalI}
+                    <span style={{ fontSize: 10, fontWeight: 800, color: '#b45309' }}>
+                      I: {totalI}
+                    </span>
+                  </div>
+
+                  {/* Dinas Pill */}
+                  <div
+                    style={{
+                      background: '#e0f2fe',
+                      border: '1px solid #bae6fd',
+                      borderRadius: 8,
+                      padding: '4px 2px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <span style={{ fontSize: 10, fontWeight: 800, color: '#0369a1' }}>
+                      D: {totalD}
+                    </span>
+                  </div>
+
+                  {/* Cuti Pill */}
+                  <div
+                    style={{
+                      background: '#faf5ff',
+                      border: '1px solid #e9d5ff',
+                      borderRadius: 8,
+                      padding: '4px 2px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <span style={{ fontSize: 10, fontWeight: 800, color: '#7e22ce' }}>
+                      C: {totalC}
                     </span>
                   </div>
                 </div>
@@ -365,19 +395,27 @@ export default function RekapGuruView() {
 
             {/* MODAL BODY */}
             <div style={{ padding: 16, overflowY: 'auto', flex: 1 }}>
-              {/* SUMMARY STATS ROW IN MODAL */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
-                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '8px 6px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#15803d' }}>HADIR</div>
-                  <div style={{ fontSize: 15, fontWeight: 900, color: '#16a34a', marginTop: 2 }}>{selectedGuru.total_hadir || 0}</div>
+              {/* SUMMARY STATS ROW IN MODAL (5 COLUMNS) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6, marginBottom: 14 }}>
+                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '6px 4px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: '#15803d' }}>HADIR (H)</div>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: '#16a34a', marginTop: 2 }}>{selectedGuru.total_hadir || 0}</div>
                 </div>
-                <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '8px 6px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#1d4ed8' }}>SAKIT</div>
-                  <div style={{ fontSize: 15, fontWeight: 900, color: '#2563eb', marginTop: 2 }}>{selectedGuru.total_sakit || 0}</div>
+                <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '6px 4px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: '#1d4ed8' }}>SAKIT (S)</div>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: '#2563eb', marginTop: 2 }}>{selectedGuru.total_sakit || 0}</div>
                 </div>
-                <div style={{ background: '#fffbe6', border: '1px solid #fde68a', borderRadius: 10, padding: '8px 6px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#b45309' }}>IZIN</div>
-                  <div style={{ fontSize: 15, fontWeight: 900, color: '#d97706', marginTop: 2 }}>{selectedGuru.total_izin || 0}</div>
+                <div style={{ background: '#fffbe6', border: '1px solid #fde68a', borderRadius: 8, padding: '6px 4px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: '#b45309' }}>IZIN (I)</div>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: '#d97706', marginTop: 2 }}>{selectedGuru.total_izin || 0}</div>
+                </div>
+                <div style={{ background: '#e0f2fe', border: '1px solid #bae6fd', borderRadius: 8, padding: '6px 4px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: '#0369a1' }}>DINAS (D)</div>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: '#0284c7', marginTop: 2 }}>{selectedGuru.total_dinas || 0}</div>
+                </div>
+                <div style={{ background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: 8, padding: '6px 4px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: '#7e22ce' }}>CUTI (C)</div>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: '#9333ea', marginTop: 2 }}>{selectedGuru.total_cuti || 0}</div>
                 </div>
               </div>
 

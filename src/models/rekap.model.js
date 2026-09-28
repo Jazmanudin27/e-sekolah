@@ -239,8 +239,10 @@ class RekapModel {
           COALESCE(g.nip_nuptk, '-') AS nip_nuptk,
           COALESCE(g.status_kepegawaian, 'Guru') AS status_kepegawaian,
           COUNT(DISTINCT p.id) AS total_hadir,
-          COUNT(DISTINCT CASE WHEN i.jenis = 'Sakit' THEN i.id END) AS total_sakit,
-          COUNT(DISTINCT CASE WHEN i.jenis IS NOT NULL AND i.jenis != 'Sakit' THEN i.id END) AS total_izin
+          COUNT(DISTINCT CASE WHEN LOWER(i.jenis) = 'sakit' THEN i.id END) AS total_sakit,
+          COUNT(DISTINCT CASE WHEN LOWER(i.jenis) = 'izin' THEN i.id END) AS total_izin,
+          COUNT(DISTINCT CASE WHEN LOWER(i.jenis) = 'cuti' THEN i.id END) AS total_cuti,
+          COUNT(DISTINCT CASE WHEN LOWER(i.jenis) = 'dinas' THEN i.id END) AS total_dinas
         FROM guru g
         LEFT JOIN presensi p 
           ON (CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.kode_guru USING utf8mb4) 
@@ -269,7 +271,9 @@ class RekapModel {
           COALESCE(g.status_kepegawaian, 'Guru') AS status_kepegawaian,
           COUNT(DISTINCT p.id) AS total_hadir,
           0 AS total_sakit,
-          0 AS total_izin
+          0 AS total_izin,
+          0 AS total_cuti,
+          0 AS total_dinas
         FROM presensi p
         LEFT JOIN guru g ON (
           CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.kode_guru USING utf8mb4)

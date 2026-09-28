@@ -306,19 +306,21 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                   <th style={{ textAlign: 'center', color: '#16a34a' }}>Hadir</th>
                   <th style={{ textAlign: 'center', color: '#2563eb' }}>Sakit</th>
                   <th style={{ textAlign: 'center', color: '#d97706' }}>Izin</th>
+                  <th style={{ textAlign: 'center', color: '#0284c7' }}>Dinas</th>
+                  <th style={{ textAlign: 'center', color: '#9333ea' }}>Cuti</th>
                   <th style={{ width: 90, textAlign: 'center' }}>Detail</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={8} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                    <td colSpan={10} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                       Memuat rekap guru...
                     </td>
                   </tr>
                 ) : rekapGuru.length === 0 ? (
                   <tr>
-                    <td colSpan={8} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                    <td colSpan={10} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                       Tidak ada data presensi guru untuk periode ini.
                     </td>
                   </tr>
@@ -345,6 +347,12 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                       </td>
                       <td style={{ textAlign: 'center', fontWeight: 800, color: '#d97706' }}>
                         {g.total_izin || 0}
+                      </td>
+                      <td style={{ textAlign: 'center', fontWeight: 800, color: '#0284c7' }}>
+                        {g.total_dinas || 0}
+                      </td>
+                      <td style={{ textAlign: 'center', fontWeight: 800, color: '#9333ea' }}>
+                        {g.total_cuti || 0}
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         <button className="btn-outline-detail" onClick={() => openDetail('guru', g)}>
