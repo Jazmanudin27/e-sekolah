@@ -66,19 +66,38 @@ export default function AdminJadwalTab() {
     'XII AKL', 'XII MPLB', 'XII PM', 'XII PPLG'
   ];
 
-  const timeSlots = [
-    { jam: 1, range: '07.00 - 07.40', isBreak: false },
-    { jam: 2, range: '07.40 - 08.20', isBreak: false },
-    { jam: 3, range: '08.20 - 09.00', isBreak: false },
-    { jam: 4, range: '09.00 - 09.40', isBreak: false },
-    { jam: 5, range: '09.40 - 10.10', isBreak: true, label: 'ISTIRAHAT 1' },
-    { jam: 6, range: '10.10 - 10.50', isBreak: false },
-    { jam: 7, range: '10.50 - 11.30', isBreak: false },
-    { jam: 8, range: '11.30 - 12.10', isBreak: false },
-    { jam: 9, range: '12.10 - 12.40', isBreak: true, label: 'ISTIRAHAT / SHOLAT DZUHUR' },
-    { jam: 10, range: '12.40 - 13.20', isBreak: false },
-    { jam: 11, range: '13.20 - 14.00', isBreak: false }
-  ];
+  const getTimeSlots = (hari) => {
+    if (hari === 'Jumat') {
+      return [
+        { jam: 1, range: '07.00 - 07.35', isBreak: false },
+        { jam: 2, range: '07.35 - 08.10', isBreak: false },
+        { jam: 3, range: '08.10 - 08.45', isBreak: false },
+        { jam: 4, range: '08.45 - 09.20', isBreak: false },
+        { jam: 5, range: '09.20 - 09.45', isBreak: true, label: 'ISTIRAHAT 1' },
+        { jam: 6, range: '09.45 - 10.20', isBreak: false },
+        { jam: 7, range: '10.20 - 10.55', isBreak: false },
+        { jam: 8, range: '10.55 - 13.00', isBreak: true, label: 'ISTIRAHAT & SHOLAT JUM\'AT' },
+        { jam: 9, range: '13.00 - 13.35', isBreak: false },
+        { jam: 10, range: '13.35 - 14.10', isBreak: false }
+      ];
+    }
+    // Senin - Kamis & Sabtu
+    return [
+      { jam: 1, range: '07.00 - 07.40', isBreak: false },
+      { jam: 2, range: '07.40 - 08.20', isBreak: false },
+      { jam: 3, range: '08.20 - 09.00', isBreak: false },
+      { jam: 4, range: '09.00 - 09.40', isBreak: false },
+      { jam: 5, range: '09.40 - 10.10', isBreak: true, label: 'ISTIRAHAT 1' },
+      { jam: 6, range: '10.10 - 10.50', isBreak: false },
+      { jam: 7, range: '10.50 - 11.30', isBreak: false },
+      { jam: 8, range: '11.30 - 12.10', isBreak: false },
+      { jam: 9, range: '12.10 - 12.40', isBreak: true, label: 'ISTIRAHAT / SHOLAT DZUHUR' },
+      { jam: 10, range: '12.40 - 13.20', isBreak: false },
+      { jam: 11, range: '13.20 - 14.00', isBreak: false }
+    ];
+  };
+
+  const timeSlots = useMemo(() => getTimeSlots(selectedHari), [selectedHari]);
 
   // Full Weekly Schedule Matrix State: { [hari]: { [jam]: { [className]: optionObj } } }
   const [scheduleState, setScheduleState] = useState(() => {
