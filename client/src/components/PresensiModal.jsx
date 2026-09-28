@@ -4,11 +4,12 @@ import api from '../api/client';
 
 export default function PresensiModal({ type: initialType = 'in', onClose, onSuccess, showToast }) {
   const [scanType, setScanType] = useState(initialType);
-  const [coords, setCoords] = useState({ lat: -7.325205, lng: 108.208354 });
-  const [coordsString, setCoordsString] = useState('-7.325205, 108.208354');
+  const [coords, setCoords] = useState(null);
+  const [coordsString, setCoordsString] = useState('Mencari lokasi GPS...');
   const [loading, setLoading] = useState(false);
   const [isFakeGpsDetected, setIsFakeGpsDetected] = useState(false);
   const [gpsReady, setGpsReady] = useState(false);
+  const [gpsError, setGpsError] = useState(null);
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -24,39 +25,47 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
   // Real GPS Geolocation & Fake GPS Detection Effect
   useEffect(() => {
     if (navigator.geolocation) {
-      const watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          setCoords({ lat, lng });
-          setCoordsString(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-          setGpsReady(true);
+      const handleSuccess = (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setCoords({ lat, lng });
+        setCoordsString(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        setGpsReady(true);
+        setGpsError(null);
 
-          // Detect Fake GPS / Mock Location
-          const isMocked = pos.coords.isMocked || (pos.coords.accuracy !== undefined && pos.coords.accuracy < 0.1);
-          if (isMocked) {
-            setIsFakeGpsDetected(true);
-          } else {
-            setIsFakeGpsDetected(false);
-          }
-        },
-        (err) => {
-          console.warn("GPS error:", err);
-          setCoords({ lat: SCHOOL_LOCATION.lat, lng: SCHOOL_LOCATION.lng });
-          setCoordsString(`${SCHOOL_LOCATION.lat}, ${SCHOOL_LOCATION.lng}`);
-          setGpsReady(true);
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        // Detect Fake GPS / Mock Location
+        const isMocked = Boolean(pos.coords.isMocked || (pos.coords.accuracy !== undefined && pos.coords.accuracy < 0.1));
+        setIsFakeGpsDetected(isMocked);
+      };
+
+      const handleError = (err) => {
+        console.warn("GPS error:", err);
+        setGpsReady(true);
+        setGpsError("Gagal mendeteksi lokasi GPS. Harap aktifkan & berikan izin GPS lokasi di browser/HP Anda.");
+      };
+
+      navigator.geolocation.getCurrentPosition(
+        handleSuccess,
+        handleError,
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
       );
+
+      const watchId = navigator.geolocation.watchPosition(
+        handleSuccess,
+        handleError,
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+
       return () => navigator.geolocation.clearWatch(watchId);
     } else {
       setGpsReady(true);
+      setGpsError("Browser tidak mendukung fitur lokasi GPS.");
     }
   }, []);
 
   // Leaflet Map Initialization & Update Effect
   useEffect(() => {
-    if (!mapContainerRef.current) return;
+    if (!mapContainerRef.current || !coords?.lat || !coords?.lng) return;
 
     const L = window.L;
     if (!L) return;
@@ -64,7 +73,7 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
     if (!mapInstanceRef.current) {
       const map = L.map(mapContainerRef.current, {
         center: [coords.lat, coords.lng],
-        zoom: 16,
+        zoom: 17,
         zoomControl: true
       });
 
@@ -85,17 +94,17 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
       const schoolMarker = L.marker([SCHOOL_LOCATION.lat, SCHOOL_LOCATION.lng]).addTo(map);
       schoolMarker.bindPopup(`<b>${SCHOOL_LOCATION.name}</b><br>Kantor Pusat Presensi`);
 
-      // Custom User Marker
+      // Custom User Marker (Actual Location)
       const userMarker = L.marker([coords.lat, coords.lng]).addTo(map);
-      userMarker.bindPopup(`<b>Lokasi Presensi Guru</b><br>Status: Terverifikasi`).openPopup();
+      userMarker.bindPopup(`<b>Titik Lokasi Perangkat Anda</b><br>Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`).openPopup();
 
       markerRef.current = userMarker;
       mapInstanceRef.current = map;
     } else {
-      mapInstanceRef.current.setView([coords.lat, coords.lng], 16);
+      mapInstanceRef.current.setView([coords.lat, coords.lng], 17);
       if (markerRef.current) {
         markerRef.current.setLatLng([coords.lat, coords.lng]);
-        markerRef.current.setPopupContent(`<b>Lokasi Presensi Guru</b><br>Status: Terverifikasi`);
+        markerRef.current.setPopupContent(`<b>Titik Lokasi Perangkat Anda</b><br>Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`);
       }
     }
   }, [coords]);
@@ -113,10 +122,16 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
     return Math.round(R * c);
   };
 
-  const distanceMeter = calculateDistanceMeter(coords.lat, coords.lng, SCHOOL_LOCATION.lat, SCHOOL_LOCATION.lng);
+  const distanceMeter = (coords?.lat && coords?.lng)
+    ? calculateDistanceMeter(coords.lat, coords.lng, SCHOOL_LOCATION.lat, SCHOOL_LOCATION.lng)
+    : 9999;
   const isOutOfRadius = distanceMeter > SCHOOL_LOCATION.radiusMeter;
 
   const handleSubmit = async () => {
+    if (!coords?.lat || !coords?.lng) {
+      showToast('Menunggu lokasi GPS perangkat terdeteksi...', false);
+      return;
+    }
     if (isFakeGpsDetected) {
       showToast('Presensi ditolak! Terdeteksi aplikasi pemalsu lokasi (Fake GPS).', false);
       return;
@@ -196,28 +211,34 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
 
         {/* GPS & RADIUS VERIFICATION STATUS CARD */}
         <div style={{
-          background: isFakeGpsDetected || isOutOfRadius ? '#fef2f2' : '#f0fdf4',
-          border: `1px solid ${isFakeGpsDetected || isOutOfRadius ? '#fecaca' : '#bbf7d0'}`,
+          background: !coords ? '#eff6ff' : (isFakeGpsDetected || isOutOfRadius) ? '#fef2f2' : '#f0fdf4',
+          border: `1px solid ${!coords ? '#bfdbfe' : (isFakeGpsDetected || isOutOfRadius) ? '#fecaca' : '#bbf7d0'}`,
           borderRadius: 14,
           padding: '12px 14px',
           marginBottom: 14
         }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            {isFakeGpsDetected || isOutOfRadius ? (
+            {!coords ? (
+              <Navigation size={22} color="#0066ff" className="spin" style={{ marginTop: 2, flexShrink: 0 }} />
+            ) : isFakeGpsDetected || isOutOfRadius ? (
               <AlertTriangle size={22} color="#dc2626" style={{ marginTop: 2, flexShrink: 0 }} />
             ) : (
               <CheckCircle2 size={22} color="#16a34a" style={{ marginTop: 2, flexShrink: 0 }} />
             )}
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: isFakeGpsDetected || isOutOfRadius ? '#991b1b' : '#166534' }}>
-                {isFakeGpsDetected
+              <div style={{ fontSize: 13, fontWeight: 800, color: !coords ? '#1e40af' : (isFakeGpsDetected || isOutOfRadius) ? '#991b1b' : '#166534' }}>
+                {!coords
+                  ? 'Mencari Satelit GPS Perangkat...'
+                  : isFakeGpsDetected
                   ? 'Fake GPS Terdeteksi!'
                   : isOutOfRadius
                   ? `Di Luar Radius Safe Zone (${distanceMeter}m)`
                   : 'Lokasi Terverifikasi (Dalam Safe Zone)'}
               </div>
-              <div style={{ fontSize: 11.5, color: isFakeGpsDetected || isOutOfRadius ? '#b91c1c' : '#15803d', marginTop: 3, lineHeight: 1.4 }}>
-                {isFakeGpsDetected
+              <div style={{ fontSize: 11.5, color: !coords ? '#1d4ed8' : (isFakeGpsDetected || isOutOfRadius) ? '#b91c1c' : '#15803d', marginTop: 3, lineHeight: 1.4 }}>
+                {!coords
+                  ? (gpsError || 'Sedang mengambil titik koordinat GPS fisik perangkat Anda...')
+                  : isFakeGpsDetected
                   ? 'Aplikasi pemalsu lokasi terdeteksi. Harap nonaktifkan Fake GPS untuk melakukan absen.'
                   : isOutOfRadius
                   ? `Presensi ditolak karena Anda berada ${distanceMeter}m dari sekolah. Maksimal radius: ${SCHOOL_LOCATION.radiusMeter}m.`
@@ -228,13 +249,13 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
         </div>
 
         {/* LEAFLET INTERACTIVE MAP DISPLAY */}
-        <div style={{ borderRadius: 16, overflow: 'hidden', marginBottom: 14, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+        <div style={{ borderRadius: 16, overflow: 'hidden', marginBottom: 14, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', minHeight: 180, position: 'relative' }}>
           <div style={{ background: '#f8fafc', padding: '8px 12px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 11, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 4 }}>
               <Navigation size={14} color="#0066ff" /> Peta Lokasi Saya & Sekolah
             </span>
-            <span style={{ fontSize: 10, color: isOutOfRadius ? '#dc2626' : '#16a34a', fontWeight: 700, background: isOutOfRadius ? '#fee2e2' : '#dcfce7', padding: '2px 8px', borderRadius: 10 }}>
-              {isOutOfRadius ? `Di Luar (${distanceMeter}m)` : `Dalam Radius (${distanceMeter}m)`}
+            <span style={{ fontSize: 10, color: !coords ? '#0066ff' : isOutOfRadius ? '#dc2626' : '#16a34a', fontWeight: 700, background: !coords ? '#eff6ff' : isOutOfRadius ? '#fee2e2' : '#dcfce7', padding: '2px 8px', borderRadius: 10 }}>
+              {!coords ? 'Mencari GPS...' : isOutOfRadius ? `Di Luar (${distanceMeter}m)` : `Dalam Radius (${distanceMeter}m)`}
             </span>
           </div>
 
@@ -247,17 +268,17 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
             <MapPin size={18} color="#0066ff" />
             <div>
               <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b' }}>Koordinat GPS Saat Ini</div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>{gpsReady ? coordsString : 'Mencari Satelit GPS...'}</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>{coordsString}</div>
             </div>
           </div>
           <span style={{
             fontSize: 10, fontWeight: 800,
-            color: isOutOfRadius ? '#dc2626' : '#059669',
-            background: isOutOfRadius ? '#fef2f2' : '#ecfdf5',
+            color: !coords ? '#0066ff' : isOutOfRadius ? '#dc2626' : '#059669',
+            background: !coords ? '#eff6ff' : isOutOfRadius ? '#fef2f2' : '#ecfdf5',
             padding: '3px 8px', borderRadius: 6,
-            border: `1px solid ${isOutOfRadius ? '#fecaca' : '#a7f3d0'}`
+            border: `1px solid ${!coords ? '#bfdbfe' : isOutOfRadius ? '#fecaca' : '#a7f3d0'}`
           }}>
-            {isOutOfRadius ? 'Di Luar Radius' : 'GPS Valid'}
+            {!coords ? 'Mencari...' : isOutOfRadius ? 'Di Luar Radius' : 'GPS Valid'}
           </span>
         </div>
 
