@@ -1,14 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard, Database, Mail, CheckSquare, FileText,
   ClipboardList, Send, Calendar, BookOpen, Package, Settings,
-  ChevronDown, ChevronRight, Menu, X, Search, Bell, Clock, LogOut,
+  ChevronDown, ChevronRight, Menu, X, Bell, Clock, LogOut,
   Building2, GraduationCap, Users, ShieldCheck, UserCheck, BookOpenCheck,
   Fingerprint, Award, FileSpreadsheet, BarChart3, Shield
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import ArtanitaLogo from '../../components/ArtanitaLogo';
 import '../../admin.css';
+import api from '../../api/client';
 
 // Tabs
 import AdminDashboardTab from './AdminDashboardTab';
@@ -62,13 +63,10 @@ export default function AdminDesktopView({ user, onLogout }) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   // Accordion open states (closed by default on dashboard, only opens if active tab belongs to the group)
   const [openMenus, setOpenMenus] = useState(() => getInitialOpenMenus(getInitialTab()));
-
-  const searchInputRef = useRef(null);
 
   // Listen to hash change (e.g. browser back/forward buttons)
   useEffect(() => {
@@ -82,6 +80,20 @@ export default function AdminDesktopView({ user, onLogout }) {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [activeTab]);
 
+  const [sekolahInfo, setSekolahInfo] = useState(null);
+
+  useEffect(() => {
+    const fetchSekolah = async () => {
+      try {
+        const res = await api.get('/sekolah');
+        if (res.data?.success && res.data?.data) {
+          setSekolahInfo(res.data.data);
+        }
+      } catch (e) {}
+    };
+    fetchSekolah();
+  }, []);
+
   useEffect(() => {
     const updateClock = () => {
       const now = new Date();
@@ -92,18 +104,6 @@ export default function AdminDesktopView({ user, onLogout }) {
     updateClock();
     const interval = setInterval(updateClock, 1000);
     return () => clearInterval(interval);
-  }, []);
-
-  // Keyboard shortcut Ctrl+/ to focus search
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const toggleSubMenu = (menuKey) => {
@@ -180,7 +180,7 @@ export default function AdminDesktopView({ user, onLogout }) {
         <div className="portal-school-card">
           <ArtanitaLogo size={36} />
           <div className="school-info">
-            <div className="school-name">SMK ARTANITA</div>
+            <div className="school-name">{sekolahInfo?.nama_sekolah || 'SMK ARTANITA'}</div>
             <div className="school-badge-admin">ADMIN</div>
           </div>
         </div>
@@ -525,7 +525,7 @@ export default function AdminDesktopView({ user, onLogout }) {
       <div className="portal-main-area">
         {/* TOP NAVBAR */}
         <header className="portal-navbar">
-          {/* LEFT: HAMBURGER & SEARCH INPUT */}
+          {/* LEFT: HAMBURGER */}
           <div className="navbar-left">
             <button
               type="button"
@@ -535,19 +535,6 @@ export default function AdminDesktopView({ user, onLogout }) {
             >
               <Menu size={20} />
             </button>
-
-            <div className="navbar-search-box">
-              <Search size={16} className="search-icon" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari data, menu..."
-                className="search-input"
-              />
-              <span className="search-shortcut">Ctrl+/</span>
-            </div>
           </div>
 
           {/* RIGHT: DATE PILL, NOTIF BELL, PROFILE DROPDOWN */}
@@ -572,7 +559,7 @@ export default function AdminDesktopView({ user, onLogout }) {
                 onClick={() => setShowProfileMenu(prev => !prev)}
               >
                 <ArtanitaLogo size={24} />
-                <span className="profile-school-title">SMK ARTANITA</span>
+                <span className="profile-school-title">{sekolahInfo?.nama_sekolah || 'SMK ARTANITA'}</span>
                 <ChevronDown size={14} color="#64748b" />
               </button>
 

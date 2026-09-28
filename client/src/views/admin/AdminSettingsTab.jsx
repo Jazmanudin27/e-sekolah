@@ -1,33 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Settings, Building, Clock, Save, ShieldCheck, Database, Check
+  Settings, Building, Clock, Save, ShieldCheck, Database, Check, RefreshCw
 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import api from '../../api/client';
 
 export default function AdminSettingsTab() {
   const [settings, setSettings] = useState({
-    nama_sekolah: 'SMK E-SEKOLAH INDONESIA',
-    npsn: '10293847',
-    alamat: 'Jl. Pendidikan No. 27, Kota Digital',
-    kepala_sekolah: 'Drs. H. Ahmad Dahlan, M.Pd',
+    nama_sekolah: '',
+    npsn: '',
+    alamat: '',
+    kepala_sekolah: '',
     jam_masuk: '07:00',
     toleransi_telat: '15',
     jam_pulang: '15:30'
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    setSaved(true);
-    Swal.fire({
-      title: 'Pengaturan Disimpan!',
-      text: 'Informasi sekolah dan aturan presensi berhasil diperbarui.',
-      icon: 'success',
-      timer: 1800,
-      confirmButtonColor: '#0066ff'
-    });
-    setTimeout(() => setSaved(false), 2500);
+  const fetchSekolahSettings = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/sekolah');
+      if (response.data && response.data.success && response.data.data) {
+        const d = response.data.data;
+        setSettings({
+          nama_sekolah: d.nama_sekolah || 'SMK ARTANITA TASIKMALAYA',
+          npsn: d.npsn || '20279876',
+          alamat: d.alamat || 'Jl. Cienteung No. 112 A, Kota Tasikmalaya',
+          kepala_sekolah: d.kepala_sekolah || 'Ali Irsan Shafar, SH.M.Pd',
+          jam_masuk: d.jam_masuk || '07:00',
+          toleransi_telat: d.toleransi_telat ? String(d.toleransi_telat) : '15',
+          jam_pulang: d.jam_pulang || '15:30'
+        });
+      }
+    } catch (err) {
+      console.warn('Gagal memuat data sekolah dari API:', err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchSekolahSettings();
+  }, []);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const response = await api.put('/sekolah', settings);
+      if (response.data && response.data.success) {
+        setSaved(true);
+        Swal.fire({
+          title: 'Pengaturan Disimpan!',
+          text: 'Informasi sekolah dan aturan presensi berhasil diperbarui di database.',
+          icon: 'success',
+          timer: 1800,
+          confirmButtonColor: '#0066ff'
+        });
+        setTimeout(() => setSaved(false), 2500);
+      } else {
+        throw new Error(response.data?.message || 'Gagal menyimpan data');
+      }
+    } catch (err) {
+      Swal.fire({
+        title: 'Gagal Menyimpan',
+        text: err.message || 'Terjadi kesalahan saat menyimpan pengaturan.',
+        icon: 'error',
+        confirmButtonColor: '#0066ff'
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="admin-panel" style={{ textAlign: 'center', padding: '40px 20px' }}>
+        <RefreshCw size={24} className="spin" color="#0066ff" style={{ animation: 'spin 1s linear infinite' }} />
+        <p style={{ marginTop: 10, color: '#64748b', fontSize: 13, fontWeight: 600 }}>Memuat data sekolah dari database...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -38,9 +94,17 @@ export default function AdminSettingsTab() {
               <Settings size={20} color="#0066ff" /> Pengaturan Identitas Sekolah & Sistem Presensi
             </div>
             <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
-              Konfigurasi data profil instansi dan parameter jam kerja presensi
+              Konfigurasi data profil instansi dan parameter jam kerja presensi dari database
             </div>
           </div>
+          <button
+            type="button"
+            className="btn-outline-admin"
+            onClick={fetchSekolahSettings}
+            title="Refresh Data Sekolah"
+          >
+            <RefreshCw size={14} /> Refresh Data
+          </button>
         </div>
 
         <form onSubmit={handleSave}>
@@ -59,6 +123,7 @@ export default function AdminSettingsTab() {
                     className="form-control-admin"
                     value={settings.nama_sekolah}
                     onChange={(e) => setSettings({ ...settings, nama_sekolah: e.target.value })}
+                    required
                   />
                 </div>
 
@@ -140,10 +205,11 @@ export default function AdminSettingsTab() {
               <button
                 type="submit"
                 className="btn-primary-admin"
+                disabled={saving}
                 style={{ width: '100%', padding: '14px', justifyContent: 'center', fontSize: 14 }}
               >
                 {saved ? <Check size={18} /> : <Save size={18} />}
-                {saved ? 'Tersimpan!' : 'Simpan Semua Pengaturan'}
+                {saving ? 'Menyimpan...' : saved ? 'Tersimpan!' : 'Simpan Semua Pengaturan'}
               </button>
             </div>
           </div>

@@ -14,6 +14,7 @@ const siswaRoutes = require('./siswa.routes');
 const izinRoutes = require('./izin.routes');
 const rekapRoutes = require('./rekap.routes');
 const userRoutes = require('./user.routes');
+const sekolahRoutes = require('./sekolah.routes');
 
 // System Health Check
 router.get('/health', (req, res) => {
@@ -39,5 +40,6 @@ router.use('/siswa', siswaRoutes);
 router.use('/izin', izinRoutes);
 router.use('/rekap', rekapRoutes);
 router.use('/users', userRoutes);
+router.use('/sekolah', sekolahRoutes);
 
 module.exports = router;

@@ -198,6 +198,30 @@ export default function AdminJadwalTab() {
           setMapelGuruOptions(combined);
         }
       }
+
+      // Build live matrix from DB schedules
+      if (jData.length > 0) {
+        const matrix = {};
+        daftarHari.forEach(h => { matrix[h] = {}; });
+        jData.forEach(item => {
+          const h = item.hari;
+          const jam = item.jam_ke || item.kode_jam;
+          const cls = item.nama_kelas || (kData.find(k => String(k.kode_kelas) === String(item.kode_kelas))?.nama_kelas);
+          if (h && jam && cls) {
+            if (!matrix[h]) matrix[h] = {};
+            if (!matrix[h][jam]) matrix[h][jam] = {};
+            matrix[h][jam][cls] = {
+              kode_jadwal: item.kode_jadwal,
+              kode_guru: String(item.kode_guru || '-'),
+              nama_guru: item.nama_guru || '',
+              nama_mapel: item.nama_mapel || '',
+              kode_mapel: item.kode_mapel || '',
+              kode_guru_mapel: item.kode_guru_mapel
+            };
+          }
+        });
+        setScheduleState(matrix);
+      }
     } catch (err) {
       console.error('Error loading initial jadwal data:', err);
     } finally {
@@ -424,22 +448,42 @@ export default function AdminJadwalTab() {
   const handleSaveSchedule = async () => {
     setSaving(true);
     try {
-      // In local state, everything is preserved; save feedback:
-      setTimeout(() => {
-        setSaving(false);
+      const payload = [];
+      daftarHari.forEach(h => {
+        const dayMatrix = scheduleState[h] || {};
+        Object.entries(dayMatrix).forEach(([jam, classObj]) => {
+          Object.entries(classObj).forEach(([clsName, cell]) => {
+            const kObj = kelasList.find(k => k.nama_kelas === clsName);
+            if (cell && cell.kode_guru && cell.kode_guru !== '-') {
+              payload.push({
+                hari: h,
+                kode_jam: parseInt(jam, 10),
+                kode_kelas: kObj ? kObj.kode_kelas : clsName,
+                kode_guru: cell.kode_guru,
+                kode_mapel: cell.kode_mapel
+              });
+            }
+          });
+        });
+      });
+
+      const res = await api.post('/jadwal', { schedules: payload });
+      if (res.data && res.data.success) {
         Swal.fire({
           title: 'Berhasil!',
-          text: `Seluruh pengaturan jadwal pelajaran untuk hari ${selectedHari} berhasil disimpan ke sistem.`,
+          text: 'Seluruh pengaturan jadwal pelajaran berhasil disimpan ke database.',
           icon: 'success',
           confirmButtonColor: '#0284c7',
           customClass: {
             popup: 'swal2-custom-popup'
           }
         });
-      }, 500);
+      }
     } catch (err) {
+      console.error('Save error:', err);
+      Swal.fire('Error', 'Gagal menyimpan perubahan jadwal pelajaran ke database.', 'error');
+    } finally {
       setSaving(false);
-      Swal.fire('Error', 'Gagal menyimpan perubahan jadwal pelajaran.', 'error');
     }
   };
 
