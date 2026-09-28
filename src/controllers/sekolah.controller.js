@@ -2,7 +2,8 @@ const SekolahModel = require('../models/sekolah.model');
 
 exports.getSekolah = async (req, res) => {
   try {
-    const data = await SekolahModel.get();
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const data = await SekolahModel.get(kode_member);
     res.json({
       success: true,
       data
@@ -10,7 +11,7 @@ exports.getSekolah = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Gagal mengambil data sekolah',
+      message: 'Gagal mengambil data sekolah/member',
       error: error.message
     });
   }
@@ -18,16 +19,17 @@ exports.getSekolah = async (req, res) => {
 
 exports.updateSekolah = async (req, res) => {
   try {
-    const updated = await SekolahModel.update(req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member;
+    const updated = await SekolahModel.update(req.body, kode_member);
     res.json({
       success: true,
-      message: 'Data sekolah berhasil diperbarui',
+      message: 'Data sekolah/member berhasil diperbarui',
       data: updated
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Gagal memperbarui data sekolah',
+      message: 'Gagal memperbarui data sekolah/member',
       error: error.message
     });
   }
