@@ -12,14 +12,15 @@ async function getIzin(req, res, next) {
 
 async function createIzin(req, res, next) {
   try {
-    const { jenis, tanggal_mulai, tanggal_selesai, keterangan } = req.body;
+    const { jenis, jenis_izin, kode_guru, nama_guru, nama_pengaju, tanggal_mulai, tanggal_selesai, keterangan, status } = req.body;
 
-    if (!tanggal_mulai || !keterangan) {
-      return sendError(res, 'Tanggal mulai dan keterangan wajib diisi.', 400);
+    if (!tanggal_mulai) {
+      return sendError(res, 'Tanggal mulai wajib diisi.', 400);
     }
 
-    const nama_pengaju = req.user?.nama_guru || req.user?.username || 'Citra Dewi, S.Pd.';
-    const user_id = req.user?.id || null;
+    const pengaju = nama_guru || nama_pengaju || req.user?.nama_guru || req.user?.name || req.user?.username || 'Guru / Pegawai';
+    const user_id = kode_guru || req.user?.id || null;
+    const finalJenis = jenis || jenis_izin || 'Sakit';
 
     let durasi = '1 Hari';
     if (tanggal_selesai && tanggal_selesai !== tanggal_mulai) {
@@ -28,15 +29,16 @@ async function createIzin(req, res, next) {
 
     const insertId = await IzinModel.create({
       user_id,
-      nama_pengaju,
-      jenis,
+      nama_pengaju: pengaju,
+      jenis: finalJenis,
       tanggal_mulai,
-      tanggal_selesai,
+      tanggal_selesai: tanggal_selesai || tanggal_mulai,
       durasi,
-      keterangan
+      keterangan: keterangan || 'Pengajuan Izin',
+      status: status || 'Disetujui'
     });
 
-    sendSuccess(res, 'Pengajuan izin berhasil disimpan ke database.', { id: insertId }, 201);
+    sendSuccess(res, 'Surat izin berhasil ditambahkan ke database.', { id: insertId }, 201);
   } catch (error) {
     next(error);
   }

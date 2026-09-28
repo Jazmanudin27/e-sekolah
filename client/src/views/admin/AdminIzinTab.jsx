@@ -10,16 +10,41 @@ import SearchableSelect from '../../components/SearchableSelect';
 
 export default function AdminIzinTab() {
   const [izinList, setIzinList] = useState([]);
+  const [guruList, setGuruList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState('');
   const [filterJenis, setFilterJenis] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const [formData, setFormData] = useState({
+    kode_guru: '',
+    nama_guru: '',
+    jenis: 'Sakit',
+    tanggal_mulai: new Date().toISOString().split('T')[0],
+    tanggal_selesai: new Date().toISOString().split('T')[0],
+    status: 'Disetujui',
+    keterangan: ''
+  });
+
   useEffect(() => {
     fetchIzin();
+    fetchGuruList();
   }, []);
+
+  const fetchGuruList = async () => {
+    try {
+      const res = await api.get('/guru');
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        setGuruList(res.data.data);
+      }
+    } catch (e) {
+      console.warn('Error fetching guru list:', e);
+    }
+  };
 
   const fetchIzin = async () => {
     setLoading(true);
@@ -35,6 +60,47 @@ export default function AdminIzinTab() {
       setIzinList([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.nama_guru && !formData.kode_guru) {
+      Swal.fire('Peringatan', 'Pilih atau isi nama guru pengaju izin.', 'warning');
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = {
+        kode_guru: formData.kode_guru,
+        nama_guru: formData.nama_guru || 'Guru Pengajar',
+        jenis: formData.jenis,
+        tanggal_mulai: formData.tanggal_mulai,
+        tanggal_selesai: formData.tanggal_selesai || formData.tanggal_mulai,
+        status: formData.status,
+        keterangan: formData.keterangan
+      };
+      const res = await api.post('/izin', payload);
+      if (res.data?.success) {
+        Swal.fire('Berhasil!', 'Surat izin baru berhasil ditambahkan.', 'success');
+        setShowModal(false);
+        setFormData({
+          kode_guru: '',
+          nama_guru: '',
+          jenis: 'Sakit',
+          tanggal_mulai: new Date().toISOString().split('T')[0],
+          tanggal_selesai: new Date().toISOString().split('T')[0],
+          status: 'Disetujui',
+          keterangan: ''
+        });
+        fetchIzin();
+      } else {
+        throw new Error(res.data?.message || 'Gagal menyimpan surat izin');
+      }
+    } catch (err) {
+      Swal.fire('Gagal!', err.response?.data?.message || err.message, 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -174,6 +240,13 @@ export default function AdminIzinTab() {
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              className="btn-primary-admin"
+              onClick={() => setShowModal(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13 }}
+            >
+              <Plus size={16} /> Tambah Surat Izin
+            </button>
             <button className="btn-outline-admin" onClick={fetchIzin} title="Segarkan Data">
               <RefreshCw size={16} /> Refresh
             </button>
@@ -335,6 +408,156 @@ export default function AdminIzinTab() {
           onPageChange={setCurrentPage}
         />
       </div>
+
+      {/* MODAL TAMBAH SURAT IZIN */}
+      {showModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 999999, padding: 16
+        }}>
+          <div style={{
+            background: '#ffffff', borderRadius: 16, width: '100%', maxWidth: 520,
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden',
+            border: '1px solid #e2e8f0'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              padding: '16px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 800, fontSize: 15, color: '#0f172a' }}>
+                <Plus size={18} color="#0066ff" /> Tambah Data Surat Izin Guru
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+              >
+                <XCircle size={20} />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleCreateSubmit} style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
+                  NAMA GURU / PEGAWAI <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <SearchableSelect
+                  options={guruList.map(g => ({
+                    value: String(g.kode_guru || g.id),
+                    label: `${g.nama_guru} (${g.nip_nuptk || g.kode_guru || 'Guru'})`
+                  }))}
+                  value={formData.kode_guru}
+                  onChange={(e) => {
+                    const selected = guruList.find(g => String(g.kode_guru || g.id) === String(e.target.value));
+                    setFormData({
+                      ...formData,
+                      kode_guru: e.target.value,
+                      nama_guru: selected ? selected.nama_guru : e.target.value
+                    });
+                  }}
+                  placeholder="-- Pilih Guru / Ketik Nama Guru --"
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
+                    JENIS IZIN <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <SearchableSelect
+                    options={[
+                      { value: 'Sakit', label: 'Sakit (Kondisi Medis)' },
+                      { value: 'Izin', label: 'Izin Keperluan Pribadi' },
+                      { value: 'Cuti', label: 'Cuti Tahunan / Melahirkan' },
+                      { value: 'Dinas', label: 'Tugas Luar / Dinas' }
+                    ]}
+                    value={formData.jenis}
+                    onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
+                    STATUS VERIFIKASI
+                  </label>
+                  <SearchableSelect
+                    options={[
+                      { value: 'Disetujui', label: 'Disetujui' },
+                      { value: 'Menunggu', label: 'Menunggu Verifikasi' },
+                      { value: 'Ditolak', label: 'Ditolak' }
+                    ]}
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
+                    TANGGAL MULAI <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    className="form-control-admin"
+                    value={formData.tanggal_mulai}
+                    onChange={(e) => setFormData({ ...formData, tanggal_mulai: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
+                    TANGGAL SELESAI
+                  </label>
+                  <input
+                    type="date"
+                    className="form-control-admin"
+                    value={formData.tanggal_selesai}
+                    onChange={(e) => setFormData({ ...formData, tanggal_selesai: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
+                  KETERANGAN / ALASAN IZIN
+                </label>
+                <textarea
+                  rows={3}
+                  className="form-control-admin"
+                  placeholder="Tuliskan keterangan detail pengajuan surat izin..."
+                  value={formData.keterangan}
+                  onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
+                />
+              </div>
+
+              {/* Modal Footer */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
+                <button
+                  type="button"
+                  className="btn-outline-admin"
+                  onClick={() => setShowModal(false)}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary-admin"
+                  disabled={saving}
+                  style={{ padding: '10px 20px', fontSize: 13 }}
+                >
+                  {saving ? 'Menyimpan...' : 'Simpan Surat Izin'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

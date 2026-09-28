@@ -55,12 +55,12 @@ class IzinModel {
     return rows[0] || null;
   }
 
-  static async create({ user_id, nama_pengaju, jenis, tanggal_mulai, tanggal_selesai, durasi, keterangan }) {
+  static async create({ user_id, nama_pengaju, jenis, tanggal_mulai, tanggal_selesai, durasi, keterangan, status, disetujui_oleh }) {
     await this.initTable();
     const res = await query(
       `INSERT INTO pengajuan_izin 
        (user_id, nama_pengaju, jenis, tanggal_mulai, tanggal_selesai, durasi, keterangan, status, disetujui_oleh) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'Menunggu', 'Proses Verifikasi Guru/Admin')`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         user_id || null,
         nama_pengaju || 'Pengguna E-Sekolah',
@@ -68,7 +68,9 @@ class IzinModel {
         tanggal_mulai,
         tanggal_selesai || null,
         durasi || '1 Hari',
-        keterangan || ''
+        keterangan || '',
+        status || 'Disetujui',
+        disetujui_oleh || 'Administrator'
       ]
     );
     return res.insertId;
