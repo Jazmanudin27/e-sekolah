@@ -78,7 +78,6 @@ export default function AdminAbsensiSiswaTab() {
       if (resAbsen.data?.success && Array.isArray(resAbsen.data.data) && resAbsen.data.data.length > 0) {
         hasData = true;
         const dbRecords = resAbsen.data.data;
-
         list.forEach(s => {
           const key = getSiswaKey(s);
           // Match record from DB
