@@ -41,7 +41,7 @@ body {
 /* HEADER HERO BANNER (VIBRANT BLUE MODERN GRADIENT WITH MESH GLOW) */
 .header-blue-hero {
   background: linear-gradient(135deg, #071633 0%, #004ecc 50%, #0066ff 100%);
-  padding: 8px 18px 22px 18px;
+  padding: 16px 18px 28px 18px;
   color: #ffffff;
   position: relative;
   width: 100%;
@@ -84,7 +84,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .brand-title {
