@@ -37,10 +37,19 @@ app.get('*', (req, res, next) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
+const SekolahModel = require('./models/sekolah.model');
+
 // Start Application Server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`=================================================`);
   console.log(`🚀 E-Sekolah REST API Server running on port ${PORT}`);
   console.log(`📱 Mobile Presensi App running at http://localhost:${PORT}`);
   console.log(`=================================================`);
+  
+  try {
+    await SekolahModel.ensureColumns();
+    console.log('[SekolahModel] Verified & updated member table columns successfully.');
+  } catch (err) {
+    console.warn('[SekolahModel] Column verification warning:', err.message);
+  }
 });
