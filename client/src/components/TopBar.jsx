@@ -41,14 +41,8 @@ export default function TopBar({ user, onLogout }) {
       <div className="hero-glow-circle hero-glow-2"></div>
 
       <div className="header-inner">
-        {/* TOP BRAND & CONTROLS */}
+        {/* TOP CONTROLS */}
         <div className="header-top-row">
-          <div className="brand-title">
-            <div className="brand-text">
-              <span className="brand-name">E-Sekolah</span>
-            </div>
-          </div>
-
           <div className="header-icons">
             <button className="header-icon-btn notif-btn-hero" title="Notifikasi">
               <Bell size={18} />

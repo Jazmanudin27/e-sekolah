@@ -36,8 +36,25 @@ export default function ProfilView({ user, onLogout }) {
   const pendidikan = profile?.pendidikan_terakhir || '-';
   const alamat = profile?.alamat || '-';
   const tempatLahir = profile?.tempat_lahir || '';
-  const tglLahir = profile?.tgl_lahir || '';
-  const ttl = (tempatLahir || tglLahir) ? `${tempatLahir}${tempatLahir && tglLahir ? ', ' : ''}${tglLahir}` : '-';
+  const rawTglLahir = profile?.tgl_lahir || '';
+
+  const formatTglLahir = (val) => {
+    if (!val) return '';
+    const cleanStr = String(val).split('T')[0].split(' ')[0];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(cleanStr)) {
+      const [y, m, d] = cleanStr.split('-');
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const mIdx = parseInt(m, 10) - 1;
+      if (mIdx >= 0 && mIdx < 12) {
+        return `${parseInt(d, 10)} ${months[mIdx]} ${y}`;
+      }
+      return `${d}/${m}/${y}`;
+    }
+    return cleanStr;
+  };
+
+  const formattedTglLahir = formatTglLahir(rawTglLahir);
+  const ttl = (tempatLahir || formattedTglLahir) ? `${tempatLahir}${tempatLahir && formattedTglLahir ? ', ' : ''}${formattedTglLahir}` : '-';
   const jkText = profile?.jk === 'L' ? 'Laki-laki' : profile?.jk === 'P' ? 'Perempuan' : '-';
 
   const initials = name
