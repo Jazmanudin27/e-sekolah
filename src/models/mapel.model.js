@@ -2,7 +2,15 @@ const { query } = require('../config/database');
 
 class MapelModel {
   static async findAll() {
-    return await query('SELECT kode_mapel, nama_mapel, singkatan, kkm FROM mapel ORDER BY nama_mapel ASC');
+    try {
+      return await query('SELECT kode_mapel, nama_mapel, singkatan, kkm FROM mapel ORDER BY nama_mapel ASC');
+    } catch (err) {
+      if (err.code === 'ER_BAD_FIELD_ERROR' || (err.message && err.message.includes('singkatan'))) {
+        await query('ALTER TABLE mapel ADD COLUMN singkatan VARCHAR(50) DEFAULT NULL');
+        return await query('SELECT kode_mapel, nama_mapel, singkatan, kkm FROM mapel ORDER BY nama_mapel ASC');
+      }
+      throw err;
+    }
   }
 
   static async countAll() {
@@ -11,11 +19,23 @@ class MapelModel {
   }
 
   static async create({ nama_mapel, singkatan = '', kkm = 75 }) {
-    const res = await query(
-      'INSERT INTO mapel (nama_mapel, singkatan, kkm) VALUES (?, ?, ?)',
-      [nama_mapel, singkatan, kkm]
-    );
-    return res.insertId;
+    try {
+      const res = await query(
+        'INSERT INTO mapel (nama_mapel, singkatan, kkm) VALUES (?, ?, ?)',
+        [nama_mapel, singkatan, kkm]
+      );
+      return res.insertId;
+    } catch (err) {
+      if (err.code === 'ER_BAD_FIELD_ERROR' || (err.message && err.message.includes('singkatan'))) {
+        await query('ALTER TABLE mapel ADD COLUMN singkatan VARCHAR(50) DEFAULT NULL');
+        const res = await query(
+          'INSERT INTO mapel (nama_mapel, singkatan, kkm) VALUES (?, ?, ?)',
+          [nama_mapel, singkatan, kkm]
+        );
+        return res.insertId;
+      }
+      throw err;
+    }
   }
 
   static async update(id, data) {
@@ -35,7 +55,17 @@ class MapelModel {
     }
     if (fields.length === 0) return;
     params.push(id);
-    await query(`UPDATE mapel SET ${fields.join(', ')} WHERE kode_mapel = ?`, params);
+    
+    try {
+      await query(`UPDATE mapel SET ${fields.join(', ')} WHERE kode_mapel = ?`, params);
+    } catch (err) {
+      if (err.code === 'ER_BAD_FIELD_ERROR' || (err.message && err.message.includes('singkatan'))) {
+        await query('ALTER TABLE mapel ADD COLUMN singkatan VARCHAR(50) DEFAULT NULL');
+        await query(`UPDATE mapel SET ${fields.join(', ')} WHERE kode_mapel = ?`, params);
+      } else {
+        throw err;
+      }
+    }
   }
 
   static async delete(id) {

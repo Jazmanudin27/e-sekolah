@@ -32,7 +32,15 @@ class JadwalModel {
 
     sql += ' ORDER BY FIELD(j.hari, "Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"), jj.jam_ke ASC';
 
-    return await query(sql, params);
+    try {
+      return await query(sql, params);
+    } catch (err) {
+      if (err.code === 'ER_BAD_FIELD_ERROR' || (err.message && err.message.includes('singkatan'))) {
+        await query('ALTER TABLE mapel ADD COLUMN singkatan VARCHAR(50) DEFAULT NULL');
+        return await query(sql, params);
+      }
+      throw err;
+    }
   }
 
   static async saveSchedule({ hari, kode_jam, kode_kelas, kode_guru, kode_mapel }) {

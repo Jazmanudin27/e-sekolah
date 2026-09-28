@@ -12,7 +12,12 @@ async function getAllMapel(req, res, next) {
 
 async function createMapel(req, res, next) {
   try {
-    const id = await MapelModel.create(req.body);
+    const { nama_mapel, singkatan, kkm } = req.body;
+    const id = await MapelModel.create({
+      nama_mapel: nama_mapel ? String(nama_mapel).trim() : '',
+      singkatan: singkatan ? String(singkatan).trim() : '',
+      kkm: kkm !== undefined ? parseInt(kkm, 10) : 75
+    });
     sendSuccess(res, 'Data mapel berhasil ditambahkan.', { kode_mapel: id }, 201);
   } catch (error) {
     next(error);
@@ -22,7 +27,13 @@ async function createMapel(req, res, next) {
 async function updateMapel(req, res, next) {
   try {
     const { id } = req.params;
-    await MapelModel.update(id, req.body);
+    const { nama_mapel, singkatan, kkm } = req.body;
+    const updateData = {};
+    if (nama_mapel !== undefined) updateData.nama_mapel = String(nama_mapel).trim();
+    if (singkatan !== undefined) updateData.singkatan = String(singkatan).trim();
+    if (kkm !== undefined) updateData.kkm = parseInt(kkm, 10);
+
+    await MapelModel.update(id, updateData);
     sendSuccess(res, 'Data mapel berhasil diperbarui.', { kode_mapel: id });
   } catch (error) {
     next(error);
