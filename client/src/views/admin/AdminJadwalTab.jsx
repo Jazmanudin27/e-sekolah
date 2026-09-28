@@ -317,7 +317,25 @@ export default function AdminJadwalTab() {
     return conflicts;
   };
 
-  // Apply cell update into schedule state
+  // Save single cell change directly to DB
+  const saveSingleCellToDb = async (hari, jam, className, option) => {
+    try {
+      const kObj = kelasList.find(k => k.nama_kelas === className);
+      const kode_kelas = kObj ? kObj.kode_kelas : className;
+
+      await api.post('/jadwal', {
+        hari,
+        kode_jam: parseInt(jam, 10),
+        kode_kelas,
+        kode_guru: option && option.kode_guru !== '-' ? option.kode_guru : '-',
+        kode_mapel: option && option.kode_mapel ? option.kode_mapel : '-'
+      });
+    } catch (err) {
+      console.error('Auto-save single cell error:', err);
+    }
+  };
+
+  // Apply cell update into schedule state & auto-save to DB
   const applyCellUpdate = (jam, className, option) => {
     setScheduleState(prev => {
       const nextState = { ...prev };
@@ -339,6 +357,9 @@ export default function AdminJadwalTab() {
       nextState[selectedHari] = nextDay;
       return nextState;
     });
+
+    // Auto-save to database immediately
+    saveSingleCellToDb(selectedHari, jam, className, option);
     setActiveCell(null);
   };
 
@@ -604,27 +625,6 @@ export default function AdminJadwalTab() {
 
           {/* ACTION BUTTONS */}
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              className="btn-outline-admin"
-              onClick={handlePrintMatrix}
-              title="Cetak Jadwal Hari Ini"
-            >
-              <Printer size={13} /> Cetak
-            </button>
-
-            <button
-              type="button"
-              className="btn-primary-admin"
-              onClick={handleSaveSchedule}
-              disabled={saving}
-              style={{ background: '#16a34a', borderColor: '#15803d' }}
-            >
-              <Save size={13} /> {saving ? 'Menyimpan...' : 'Simpan Jadwal'}
-            </button>
-
-            <div style={{ width: 1, height: 22, background: '#cbd5e1', margin: '0 4px' }} />
-
             <button
               type="button"
               className={`btn-outline-admin ${viewMode === 'matrix' ? 'active' : ''}`}
