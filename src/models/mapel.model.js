@@ -2,7 +2,7 @@ const { query } = require('../config/database');
 
 class MapelModel {
   static async findAll() {
-    return await query('SELECT kode_mapel, nama_mapel, kkm FROM mapel ORDER BY nama_mapel ASC');
+    return await query('SELECT kode_mapel, nama_mapel, singkatan, kkm FROM mapel ORDER BY nama_mapel ASC');
   }
 
   static async countAll() {
@@ -10,10 +10,10 @@ class MapelModel {
     return rows[0].total || 0;
   }
 
-  static async create({ nama_mapel, kkm = 75 }) {
+  static async create({ nama_mapel, singkatan = '', kkm = 75 }) {
     const res = await query(
-      'INSERT INTO mapel (nama_mapel, kkm) VALUES (?, ?)',
-      [nama_mapel, kkm]
+      'INSERT INTO mapel (nama_mapel, singkatan, kkm) VALUES (?, ?, ?)',
+      [nama_mapel, singkatan, kkm]
     );
     return res.insertId;
   }
@@ -24,6 +24,10 @@ class MapelModel {
     if (data.nama_mapel !== undefined) {
       fields.push('nama_mapel = ?');
       params.push(data.nama_mapel);
+    }
+    if (data.singkatan !== undefined) {
+      fields.push('singkatan = ?');
+      params.push(data.singkatan);
     }
     if (data.kkm !== undefined) {
       fields.push('kkm = ?');

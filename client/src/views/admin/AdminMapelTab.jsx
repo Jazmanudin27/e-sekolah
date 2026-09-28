@@ -19,6 +19,7 @@ export default function AdminMapelTab() {
   const [currentId, setCurrentId] = useState(null);
   const [formData, setFormData] = useState({
     nama_mapel: '',
+    singkatan: '',
     kkm: 75
   });
   const [submitting, setSubmitting] = useState(false);
@@ -49,6 +50,7 @@ export default function AdminMapelTab() {
     setCurrentId(null);
     setFormData({
       nama_mapel: '',
+      singkatan: '',
       kkm: 75
     });
     setShowModal(true);
@@ -59,6 +61,7 @@ export default function AdminMapelTab() {
     setCurrentId(m.kode_mapel);
     setFormData({
       nama_mapel: m.nama_mapel || '',
+      singkatan: m.singkatan || '',
       kkm: m.kkm || 75
     });
     setShowModal(true);
@@ -119,7 +122,10 @@ export default function AdminMapelTab() {
   }, [search]);
 
   const filteredList = mapelList
-    .filter(m => (m.nama_mapel || '').toLowerCase().includes(search.toLowerCase()))
+    .filter(m => 
+      (m.nama_mapel || '').toLowerCase().includes(search.toLowerCase()) ||
+      (m.singkatan || '').toLowerCase().includes(search.toLowerCase())
+    )
     .sort((a, b) => (a.nama_mapel || '').localeCompare(b.nama_mapel || '', 'id', { sensitivity: 'base' }));
 
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -151,7 +157,7 @@ export default function AdminMapelTab() {
             <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
             <input
               type="text"
-              placeholder="Cari mata pelajaran..."
+              placeholder="Cari mata pelajaran atau singkatan..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="form-control-admin"
@@ -172,6 +178,7 @@ export default function AdminMapelTab() {
                 <th style={{ width: 50 }}>No</th>
                 <th>Kode Mapel</th>
                 <th>Nama Mata Pelajaran</th>
+                <th>Singkatan</th>
                 <th>Standar KKM</th>
                 <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
               </tr>
@@ -179,13 +186,13 @@ export default function AdminMapelTab() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                     Memuat data mata pelajaran...
                   </td>
                 </tr>
               ) : filteredList.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                     Tidak ada mata pelajaran yang cocok.
                   </td>
                 </tr>
@@ -200,6 +207,11 @@ export default function AdminMapelTab() {
                     </td>
                     <td>
                       <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 13 }}>{m.nama_mapel}</div>
+                    </td>
+                    <td>
+                      <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: 4, fontSize: 12, fontWeight: 700 }}>
+                        {m.singkatan || '-'}
+                      </span>
                     </td>
                     <td style={{ textAlign: 'center' }}>
                       <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '3px 10px', borderRadius: 4, fontSize: 12, fontWeight: 800 }}>
@@ -260,6 +272,17 @@ export default function AdminMapelTab() {
                       placeholder="Contoh: Matematika, Pemrograman Web, Bahasa Indonesia"
                       value={formData.nama_mapel}
                       onChange={(e) => setFormData({ ...formData, nama_mapel: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group-admin">
+                    <label>Singkatan Mapel</label>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      placeholder="Contoh: MTK, BING, PBO, PPKn (untuk matriks jadwal)"
+                      value={formData.singkatan}
+                      onChange={(e) => setFormData({ ...formData, singkatan: e.target.value })}
                     />
                   </div>
 

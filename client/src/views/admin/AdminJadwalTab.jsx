@@ -190,7 +190,8 @@ export default function AdminJadwalTab() {
               kode_guru: String(g.kode_guru || idx + 1),
               nama_guru: g.nama_guru,
               kode_mapel: m.kode_mapel,
-              nama_mapel: m.nama_mapel
+              nama_mapel: m.nama_mapel,
+              singkatan: m.singkatan || ''
             });
           });
         });
@@ -215,6 +216,7 @@ export default function AdminJadwalTab() {
               kode_guru: String(item.kode_guru || '-'),
               nama_guru: item.nama_guru || '',
               nama_mapel: item.nama_mapel || '',
+              singkatan: item.singkatan || '',
               kode_mapel: item.kode_mapel || '',
               kode_guru_mapel: item.kode_guru_mapel
             };
@@ -349,6 +351,7 @@ export default function AdminJadwalTab() {
           kode_guru: String(option.kode_guru),
           nama_guru: option.nama_guru || '',
           nama_mapel: option.nama_mapel || '',
+          singkatan: option.singkatan || '',
           kode_mapel: option.kode_mapel || ''
         };
       }
@@ -460,6 +463,7 @@ export default function AdminJadwalTab() {
     const q = cellSearchQuery.toLowerCase();
     return mapelGuruOptions.filter(opt =>
       opt.nama_mapel.toLowerCase().includes(q) ||
+      (opt.singkatan && opt.singkatan.toLowerCase().includes(q)) ||
       (opt.nama_guru && opt.nama_guru.toLowerCase().includes(q)) ||
       String(opt.kode_guru).includes(q)
     );
@@ -539,7 +543,7 @@ export default function AdminJadwalTab() {
       } else {
         classColumns.forEach(cls => {
           const cell = scheduleState[selectedHari]?.[slot.jam]?.[cls];
-          const display = cell ? `${cell.kode_guru} (${cell.nama_mapel})` : '-';
+          const display = cell ? `${cell.kode_guru} (${cell.singkatan || cell.nama_mapel})` : '-';
           tableHtml += `<td style="border: 1px solid #000; padding: 4px; font-weight: ${cell ? 'bold' : 'normal'};">${display}</td>`;
         });
       }
@@ -596,6 +600,7 @@ export default function AdminJadwalTab() {
             kode_guru: cell.kode_guru,
             nama_guru: cell.nama_guru || `Guru Kode ${cell.kode_guru}`,
             nama_mapel: cell.nama_mapel || 'Mata Pelajaran',
+            singkatan: cell.singkatan || '',
             isBentrok: isCellConflicting(slot.jam, cls)
           });
         }
@@ -835,8 +840,9 @@ export default function AdminJadwalTab() {
                           let tooltipText = 'Klik untuk memilih jadwal';
 
                           if (cell && cell.kode_guru && cell.kode_guru !== '-') {
-                            displayLabel = `${cell.kode_guru} (${cell.nama_mapel ? cell.nama_mapel.substring(0, 4) : ''})`;
-                            tooltipText = `Guru: ${cell.nama_guru || cell.kode_guru}\nMapel: ${cell.nama_mapel}`;
+                            const subName = cell.singkatan || (cell.nama_mapel ? cell.nama_mapel.substring(0, 8) : '');
+                            displayLabel = `${cell.kode_guru} (${subName})`;
+                            tooltipText = `Guru: ${cell.nama_guru || cell.kode_guru}\nMapel: ${cell.nama_mapel}${cell.singkatan ? ` (${cell.singkatan})` : ''}`;
                           }
 
                           return (
@@ -1006,7 +1012,7 @@ export default function AdminJadwalTab() {
                       >
                         <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           <span style={{ fontWeight: 800, color: '#0284c7' }}>{opt.kode_guru}</span>
-                          {' '}( {opt.nama_mapel} )
+                          {' '}( {opt.singkatan ? `${opt.singkatan} - ` : ''}{opt.nama_mapel} )
                           {opt.nama_guru && (
                             <span style={{ display: 'block', fontSize: 10, color: '#64748b', marginTop: 1 }}>
                               {opt.nama_guru}

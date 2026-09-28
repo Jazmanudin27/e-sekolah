@@ -6,7 +6,7 @@ class JadwalModel {
       SELECT j.kode_jadwal, j.hari, j.kode_jam, jj.jam_ke, jj.jam,
              j.kode_kelas, k.nama_kelas, k.jurusan,
              mg.kode_guru, g.nama_guru,
-             mg.kode_mapel, m.nama_mapel, j.kode_guru_mapel
+             mg.kode_mapel, m.nama_mapel, m.singkatan, j.kode_guru_mapel
       FROM jadwal j
       LEFT JOIN jadwal_jam jj ON j.kode_jam = jj.kode_jam
       LEFT JOIN kelas k ON j.kode_kelas = k.kode_kelas
