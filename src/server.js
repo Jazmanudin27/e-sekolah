@@ -21,7 +21,16 @@ app.use(cors({
 
 // Multi-Tenant Domain Middleware
 app.use((req, res, next) => {
-  const host = (req.headers['x-forwarded-host'] || req.headers.host || '').split(':')[0].toLowerCase();
+  let host = (req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].split(':')[0].toLowerCase().trim();
+  if (!host || host === 'localhost' || host === '127.0.0.1') {
+    const ref = req.headers.origin || req.headers.referer || '';
+    if (ref) {
+      try {
+        const u = new URL(ref);
+        host = u.hostname.toLowerCase();
+      } catch (e) {}
+    }
+  }
   tenantStorage.run(host, () => {
     next();
   });
