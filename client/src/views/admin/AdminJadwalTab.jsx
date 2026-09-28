@@ -768,25 +768,25 @@ export default function AdminJadwalTab() {
         {viewMode === 'matrix' && (
           <div style={{ position: 'relative' }}>
             <div className="portal-matrix-table-wrap" style={{ border: '1px solid #cbd5e1', borderRadius: 4 }}>
-              <table className="portal-matrix-table" style={{ width: '100%', fontSize: '11.5px' }}>
+              <table className="portal-matrix-table" style={{ width: '100%', fontSize: '10.5px' }}>
                 <thead>
                   {/* TOP HEADER */}
                   <tr style={{ background: '#f8fafc' }}>
-                    <th colSpan={2} className="matrix-th-waktu" style={{ border: '1px solid #cbd5e1', padding: '5px 8px', fontSize: '11.5px' }}>
+                    <th colSpan={2} className="matrix-th-waktu" style={{ border: '1px solid #cbd5e1', padding: '4px 6px', fontSize: '10.5px' }}>
                       WAKTU
                     </th>
-                    <th colSpan={classColumns.length} className="matrix-th-kelas" style={{ border: '1px solid #cbd5e1', padding: '5px 8px', fontSize: '11.5px', letterSpacing: '0.05em' }}>
+                    <th colSpan={classColumns.length} className="matrix-th-kelas" style={{ border: '1px solid #cbd5e1', padding: '4px 6px', fontSize: '10.5px', letterSpacing: '0.05em' }}>
                       KELAS
                     </th>
                   </tr>
                   {/* SUB HEADER */}
                   <tr style={{ background: '#f1f5f9' }}>
-                    <th className="matrix-th-jam" style={{ border: '1px solid #cbd5e1', width: 45, padding: '4px', fontSize: '11px' }}>JAM</th>
-                    <th className="matrix-th-range" style={{ border: '1px solid #cbd5e1', width: 95, padding: '4px', fontSize: '11px' }}>DARI - SAMPAI</th>
+                    <th className="matrix-th-jam" style={{ border: '1px solid #cbd5e1', width: 45, padding: '3px', fontSize: '10px' }}>JAM</th>
+                    <th className="matrix-th-range" style={{ border: '1px solid #cbd5e1', width: 95, padding: '3px', fontSize: '10px' }}>DARI - SAMPAI</th>
                     {classColumns.map(col => {
                       const parts = col.split(' ');
                       return (
-                        <th key={col} className="matrix-th-class" style={{ border: '1px solid #cbd5e1', minWidth: 62, padding: '4px 2px', fontSize: '11px' }}>
+                        <th key={col} className="matrix-th-class" style={{ border: '1px solid #cbd5e1', minWidth: 60, padding: '3px 2px', fontSize: '10px' }}>
                           <div>{parts[0]}</div>
                           <div style={{ fontWeight: 800, color: '#0f172a' }}>{parts[1]}</div>
                         </th>
@@ -799,10 +799,10 @@ export default function AdminJadwalTab() {
                     if (slot.isBreak) {
                       return (
                         <tr key={slot.jam} style={{ background: '#f8fafc' }}>
-                          <td className="matrix-td-jam" style={{ border: '1px solid #cbd5e1', fontWeight: 700, padding: '4px', color: '#64748b' }}>
+                          <td className="matrix-td-jam" style={{ border: '1px solid #cbd5e1', fontWeight: 700, padding: '3px', color: '#64748b', fontSize: '10px' }}>
                             {slot.jam}
                           </td>
-                          <td className="matrix-td-range" style={{ border: '1px solid #cbd5e1', padding: '4px', color: '#64748b' }}>
+                          <td className="matrix-td-range" style={{ border: '1px solid #cbd5e1', padding: '3px', color: '#64748b', fontSize: '10px' }}>
                             {slot.range}
                           </td>
                           <td
@@ -812,9 +812,9 @@ export default function AdminJadwalTab() {
                               background: '#f1f5f9',
                               color: '#64748b',
                               fontWeight: 700,
-                              fontSize: '11px',
+                              fontSize: '10px',
                               letterSpacing: '0.05em',
-                              padding: '6px'
+                              padding: '5px'
                             }}
                           >
                             — {slot.label} —
@@ -825,10 +825,10 @@ export default function AdminJadwalTab() {
 
                     return (
                       <tr key={slot.jam}>
-                        <td className="matrix-td-jam" style={{ border: '1px solid #cbd5e1', fontWeight: 700, padding: '3px 4px', fontSize: '11.5px', background: '#fff' }}>
+                        <td className="matrix-td-jam" style={{ border: '1px solid #cbd5e1', fontWeight: 700, padding: '2px 4px', fontSize: '10.5px', background: '#fff' }}>
                           {slot.jam}
                         </td>
-                        <td className="matrix-td-range" style={{ border: '1px solid #cbd5e1', padding: '3px 4px', fontSize: '11px', color: '#475569', background: '#fff' }}>
+                        <td className="matrix-td-range" style={{ border: '1px solid #cbd5e1', padding: '2px 4px', fontSize: '10px', color: '#475569', background: '#fff' }}>
                           {slot.range}
                         </td>
                         {classColumns.map(col => {
@@ -860,14 +860,14 @@ export default function AdminJadwalTab() {
                             >
                               <div
                                 style={{
-                                  height: '28px',
+                                  height: '26px',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
                                   gap: 2,
                                   borderRadius: 3,
-                                  padding: '0 4px',
-                                  fontSize: '11px',
+                                  padding: '0 3px',
+                                  fontSize: '10px',
                                   fontWeight: cell?.kode_guru ? 700 : 500,
                                   color: isBentrok ? '#dc2626' : cell?.kode_guru ? '#0f172a' : '#94a3b8',
                                   border: isBentrok ? '1.5px solid #ef4444' : isSelected ? '1.5px solid #0284c7' : '1px solid transparent',
@@ -877,7 +877,7 @@ export default function AdminJadwalTab() {
                                   textOverflow: 'ellipsis'
                                 }}
                               >
-                                {isBentrok && <AlertTriangle size={11} color="#dc2626" style={{ flexShrink: 0 }} />}
+                                {isBentrok && <AlertTriangle size={10} color="#dc2626" style={{ flexShrink: 0 }} />}
                                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                   {displayLabel}
                                 </span>

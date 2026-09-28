@@ -22,10 +22,6 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html {
-  zoom: 95%;
-}
-
 body {
   background: #f4f7fb;
   color: var(--text-dark);
