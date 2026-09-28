@@ -22,7 +22,12 @@ export default function AdminSettingsTab() {
   const fetchSekolahSettings = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/sekolah');
+      const userStr = localStorage.getItem('esekolah_user');
+      let km = null;
+      if (userStr) {
+        try { km = JSON.parse(userStr)?.kode_member; } catch (e) {}
+      }
+      const response = await api.get('/sekolah', { params: { kode_member: km } });
       if (response.data && response.data.success && response.data.data) {
         const d = response.data.data;
         setSettings({
@@ -32,7 +37,8 @@ export default function AdminSettingsTab() {
           kepala_sekolah: d.kepala_sekolah || 'Ali Irsan Shafar, SH.M.Pd',
           jam_masuk: d.jam_masuk || '07:00',
           toleransi_telat: d.toleransi_telat ? String(d.toleransi_telat) : '15',
-          jam_pulang: d.jam_pulang || '15:30'
+          jam_pulang: d.jam_pulang || '15:30',
+          kode_member: d.kode_member
         });
       }
     } catch (err) {

@@ -85,14 +85,19 @@ export default function AdminDesktopView({ user, onLogout }) {
   useEffect(() => {
     const fetchSekolah = async () => {
       try {
-        const res = await api.get('/sekolah');
+        const userStr = localStorage.getItem('esekolah_user');
+        let km = user?.kode_member;
+        if (!km && userStr) {
+          try { km = JSON.parse(userStr)?.kode_member; } catch (e) {}
+        }
+        const res = await api.get('/sekolah', { params: { kode_member: km } });
         if (res.data?.success && res.data?.data) {
           setSekolahInfo(res.data.data);
         }
       } catch (e) {}
     };
     fetchSekolah();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const updateClock = () => {
