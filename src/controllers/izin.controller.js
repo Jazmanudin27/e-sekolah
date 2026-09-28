@@ -7,21 +7,21 @@ async function getKodeMemberFromReq(req) {
   if (km) return km;
 
   if (req.user) {
-    if (req.user.type === 'Admin' || req.user.id || req.user.username) {
-      try {
-        const rows = await query(
-          'SELECT kode_member FROM users WHERE id = ? OR username = ? LIMIT 1',
-          [req.user.id || 0, req.user.username || '']
-        );
-        if (rows && rows[0]?.kode_member) return rows[0].kode_member;
-      } catch (e) {}
-    }
-
     if (req.user.type === 'Guru' || req.user.kode_guru) {
       try {
         const rows = await query(
           'SELECT kode_member FROM guru WHERE kode_guru = ? OR username = ? LIMIT 1',
           [req.user.kode_guru || '', req.user.username || '']
+        );
+        if (rows && rows[0]?.kode_member) return rows[0].kode_member;
+      } catch (e) {}
+    }
+
+    if (req.user.type === 'Admin' || req.user.id || req.user.username) {
+      try {
+        const rows = await query(
+          'SELECT kode_member FROM users WHERE id = ? OR username = ? LIMIT 1',
+          [req.user.id || 0, req.user.username || '']
         );
         if (rows && rows[0]?.kode_member) return rows[0].kode_member;
       } catch (e) {}
@@ -50,8 +50,8 @@ async function createIzin(req, res, next) {
     }
 
     const kode_member = await getKodeMemberFromReq(req);
-    const user_id = kode_guru || req.user?.id || null;
-    let pengaju = nama_guru || nama_pengaju;
+    const user_id = kode_guru || req.user?.kode_guru || req.user?.id || null;
+    let pengaju = nama_guru || nama_pengaju || req.user?.nama_guru || req.user?.name || req.user?.username;
 
     if (user_id && (!pengaju || !isNaN(pengaju) || pengaju === 'Guru Pengajar' || pengaju === 'Guru / Pegawai')) {
       try {

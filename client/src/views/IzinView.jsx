@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import api from '../api/client';
 import SearchableSelect from '../components/SearchableSelect';
 
-export default function IzinView({ showToast }) {
+export default function IzinView({ user, showToast }) {
   const [showForm, setShowForm] = useState(false);
   const [jenisIzin, setJenisIzin] = useState('Sakit');
   const [tanggalMulai, setTanggalMulai] = useState('');
@@ -40,6 +40,9 @@ export default function IzinView({ showToast }) {
 
     try {
       const payload = {
+        kode_guru: user?.kode_guru || user?.id,
+        nama_guru: user?.nama_guru || user?.name || user?.username,
+        kode_member: user?.kode_member,
         jenis: jenisIzin,
         tanggal_mulai: tanggalMulai,
         tanggal_selesai: tanggalSelesai || null,

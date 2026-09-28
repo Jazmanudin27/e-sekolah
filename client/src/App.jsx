@@ -228,7 +228,7 @@ export default function App() {
         {activeTab === 'absensiMapel' && <AbsensiMapelView user={currentUser} showToast={showToast} />}
         {activeTab === 'jadwal' && <JadwalView />}
         {activeTab === 'riwayat' && <RiwayatView />}
-        {activeTab === 'izin' && <IzinView showToast={showToast} />}
+        {activeTab === 'izin' && <IzinView user={currentUser} showToast={showToast} />}
         {activeTab === 'profil' && <ProfilView user={currentUser} onLogout={handleLogout} />}
         {activeTab === 'rekapSiswa' && <RekapSiswaView user={currentUser} />}
         {activeTab === 'rekapMapel' && <RekapMapelView />}
