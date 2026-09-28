@@ -142,14 +142,21 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
           </div>
         </div>
 
-        {/* MENU GRID KHUSUS KELAS (2 menu: Absen Siswa & Rekap Siswa) */}
+        {/* MENU GRID KHUSUS KELAS (3 menu: Absen Siswa, Jadwal, & Rekap Siswa) */}
         <div className="grid-8-menu-wrapper">
-          <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+          <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
             <button className="menu-blue-card" onClick={() => onSwitchTab('absensiSiswa')}>
               <div className="menu-icon-circle">
                 <UserCheck size={22} />
               </div>
               <span>Absen Siswa</span>
+            </button>
+
+            <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>
+              <div className="menu-icon-circle">
+                <Calendar size={22} />
+              </div>
+              <span>Jadwal</span>
             </button>
 
             <button className="menu-blue-card" onClick={() => onSwitchTab('rekapSiswa')}>

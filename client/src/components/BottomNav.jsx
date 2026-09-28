@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, FileText, Fingerprint, History, User, UserCheck, BookOpen, FileBarChart } from 'lucide-react';
+import { Home, FileText, Fingerprint, History, User, UserCheck, BookOpen, FileBarChart, Calendar } from 'lucide-react';
 
 export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user }) {
   const isClassAccount = user?.type === 'Kelas' || user?.role === 'Kelas';
@@ -32,7 +32,19 @@ export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user
             {activeTab === 'absensiSiswa' && <span className="active-dot" />}
           </button>
 
-          {/* 3. REKAP SISWA */}
+          {/* 3. JADWAL PELAJARAN */}
+          <button
+            className={`nav-link-item ${activeTab === 'jadwal' ? 'active' : ''}`}
+            onClick={() => onTabChange('jadwal')}
+          >
+            <div className="nav-icon-wrapper">
+              <Calendar size={21} />
+            </div>
+            <span>Jadwal</span>
+            {activeTab === 'jadwal' && <span className="active-dot" />}
+          </button>
+
+          {/* 4. REKAP SISWA */}
           <button
             className={`nav-link-item ${activeTab === 'rekapSiswa' ? 'active' : ''}`}
             onClick={() => onTabChange('rekapSiswa')}

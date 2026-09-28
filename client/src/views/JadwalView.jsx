@@ -3,7 +3,7 @@ import { Clock, Users, User, CalendarX, BookOpen, Filter } from 'lucide-react';
 import api from '../api/client';
 import SearchableSelect from '../components/SearchableSelect';
 
-export default function JadwalView() {
+export default function JadwalView({ user }) {
   const getTodayIndonesianDay = () => {
     const listDays = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const idx = new Date().getDay();
@@ -41,8 +41,10 @@ export default function JadwalView() {
       const res = await api.get('/kelas');
       if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
         setKelasList(res.data.data);
-        const firstVal = res.data.data[0].kode_kelas || res.data.data[0].id || res.data.data[0].nama_kelas;
-        setSelectedKelas(firstVal);
+        const userClassId = user?.kode_kelas;
+        const matched = userClassId && res.data.data.find(k => String(k.kode_kelas) === String(userClassId));
+        const initialVal = matched ? matched.kode_kelas : (res.data.data[0].kode_kelas || res.data.data[0].id || res.data.data[0].nama_kelas);
+        setSelectedKelas(initialVal);
       } else {
         const defaultKelas = [
           { kode_kelas: '1', nama_kelas: 'X RPL 1' },
@@ -51,7 +53,9 @@ export default function JadwalView() {
           { kode_kelas: '4', nama_kelas: 'XII MM 1' }
         ];
         setKelasList(defaultKelas);
-        setSelectedKelas('1');
+        const userClassId = user?.kode_kelas;
+        const matched = userClassId && defaultKelas.find(k => String(k.kode_kelas) === String(userClassId));
+        setSelectedKelas(matched ? matched.kode_kelas : '1');
       }
     } catch (err) {
       console.error(err);
