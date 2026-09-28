@@ -41,7 +41,7 @@ body {
 /* HEADER HERO BANNER (VIBRANT BLUE MODERN GRADIENT WITH MESH GLOW) */
 .header-blue-hero {
   background: linear-gradient(135deg, #071633 0%, #004ecc 50%, #0066ff 100%);
-  padding: 16px 18px 28px 18px;
+  padding: 14px 18px 44px 18px;
   color: #ffffff;
   position: relative;
   width: 100%;
@@ -84,7 +84,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .brand-title {
@@ -319,7 +319,7 @@ body {
 /* FLOATING OVERLAPPING SUMMARY CARD (4 VERTICAL ICON COLUMNS) */
 .summary-overlap-card {
   max-width: 680px;
-  margin: -2px auto 16px auto;
+  margin: -20px auto 16px auto;
   width: calc(100% - 32px);
   background: #ffffff;
   border-radius: 20px;
