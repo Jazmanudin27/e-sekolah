@@ -352,8 +352,7 @@ export default function AdminPresensiGuruTab() {
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         <button
-                          className="btn-outline-admin"
-                          style={{ padding: '4px 10px', fontSize: 11.5 }}
+                          className="btn-outline-detail"
                           onClick={() => setSelectedDetail(item)}
                           title="Lihat Detail Presensi"
                         >

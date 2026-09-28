@@ -355,7 +355,7 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                         {g.total_izin || 0}
                       </td>
                       <td style={{ textAlign: 'center' }}>
-                        <button className="btn-outline-admin" style={{ padding: '4px 8px', fontSize: 11 }} onClick={() => openDetail('guru', g)}>
+                        <button className="btn-outline-detail" onClick={() => openDetail('guru', g)}>
                           Rincian <ChevronRight size={12} />
                         </button>
                       </td>
@@ -415,7 +415,7 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                       <td style={{ textAlign: 'center', fontWeight: 800, color: '#d97706' }}>{s.total_izin || 0}</td>
                       <td style={{ textAlign: 'center', fontWeight: 800, color: '#dc2626' }}>{s.total_alpha || 0}</td>
                       <td style={{ textAlign: 'center' }}>
-                        <button className="btn-outline-admin" style={{ padding: '4px 8px', fontSize: 11 }} onClick={() => openDetail('siswa', s)}>
+                        <button className="btn-outline-detail" onClick={() => openDetail('siswa', s)}>
                           Rincian <ChevronRight size={12} />
                         </button>
                       </td>
@@ -481,7 +481,7 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                       <td style={{ textAlign: 'center', fontWeight: 800, color: '#d97706' }}>{m.total_izin || 0}</td>
                       <td style={{ textAlign: 'center', fontWeight: 800, color: '#dc2626' }}>{m.total_alpha || 0}</td>
                       <td style={{ textAlign: 'center' }}>
-                        <button className="btn-outline-admin" style={{ padding: '4px 8px', fontSize: 11 }} onClick={() => openDetail('mapel', m)}>
+                        <button className="btn-outline-detail" onClick={() => openDetail('mapel', m)}>
                           Rincian <ChevronRight size={12} />
                         </button>
                       </td>

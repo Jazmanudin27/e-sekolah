@@ -341,9 +341,8 @@ export default function AdminAbsensiMapelTab() {
               className="btn-outline-admin"
               onClick={() => loadStudentsAndAttendance(selectedMapel, selectedKelas, tanggal)}
               title="Refresh Data"
-              style={{ height: 42 }}
             >
-              <RefreshCw size={16} /> Muat Ulang
+              <RefreshCw size={13} /> Muat Ulang
             </button>
           </div>
         </div>
