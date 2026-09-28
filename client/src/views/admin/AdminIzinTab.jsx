@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   FileText, Search, Filter, Calendar, CheckCircle2, XCircle,
-  Clock, Trash2, RefreshCw, Plus, User, AlertCircle
+  Clock, Trash2, RefreshCw, Plus, User, AlertCircle, Edit
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
@@ -20,6 +20,7 @@ export default function AdminIzinTab() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({
     kode_guru: '',
     nama_guru: '',
@@ -63,6 +64,20 @@ export default function AdminIzinTab() {
     }
   };
 
+  const handleEdit = (item) => {
+    setEditingItem(item);
+    setFormData({
+      kode_guru: String(item.user_id || item.kode_guru || ''),
+      nama_guru: item.nama_guru || item.nama_pengaju || '',
+      jenis: item.jenis || item.jenis_izin || 'Sakit',
+      tanggal_mulai: item.tanggal_mulai || new Date().toISOString().split('T')[0],
+      tanggal_selesai: item.tanggal_selesai || item.tanggal_mulai || new Date().toISOString().split('T')[0],
+      status: item.status || 'Menunggu',
+      keterangan: item.keterangan || ''
+    });
+    setShowModal(true);
+  };
+
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nama_guru && !formData.kode_guru) {
@@ -77,13 +92,21 @@ export default function AdminIzinTab() {
         jenis: formData.jenis,
         tanggal_mulai: formData.tanggal_mulai,
         tanggal_selesai: formData.tanggal_selesai || formData.tanggal_mulai,
-        status: formData.status,
+        status: formData.status || 'Menunggu',
         keterangan: formData.keterangan
       };
-      const res = await api.post('/izin', payload);
+
+      let res;
+      if (editingItem) {
+        res = await api.put(`/izin/${editingItem.id}`, payload);
+      } else {
+        res = await api.post('/izin', payload);
+      }
+
       if (res.data?.success) {
-        Swal.fire('Berhasil!', 'Surat izin baru berhasil ditambahkan.', 'success');
+        Swal.fire('Berhasil!', editingItem ? 'Data surat izin berhasil diperbarui.' : 'Surat izin baru berhasil ditambahkan.', 'success');
         setShowModal(false);
+        setEditingItem(null);
         setFormData({
           kode_guru: '',
           nama_guru: '',
@@ -242,7 +265,19 @@ export default function AdminIzinTab() {
           <div style={{ display: 'flex', gap: 10 }}>
             <button
               className="btn-primary-admin"
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+                setEditingItem(null);
+                setFormData({
+                  kode_guru: '',
+                  nama_guru: '',
+                  jenis: 'Sakit',
+                  tanggal_mulai: new Date().toISOString().split('T')[0],
+                  tanggal_selesai: new Date().toISOString().split('T')[0],
+                  status: 'Menunggu',
+                  keterangan: ''
+                });
+                setShowModal(true);
+              }}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13 }}
             >
               <Plus size={16} /> Tambah Surat Izin
@@ -384,6 +419,14 @@ export default function AdminIzinTab() {
                             </button>
                           )}
                           <button
+                            className="btn-action-icon btn-edit"
+                            style={{ background: '#f59e0b', color: '#ffffff', border: '1px solid #d97706' }}
+                            onClick={() => handleEdit(item)}
+                            title="Edit Surat Izin"
+                          >
+                            <Edit size={13} />
+                          </button>
+                          <button
                             className="btn-action-icon btn-delete"
                             onClick={() => handleDelete(item)}
                             title="Hapus Surat Izin"
@@ -409,7 +452,7 @@ export default function AdminIzinTab() {
         />
       </div>
 
-      {/* MODAL TAMBAH SURAT IZIN */}
+      {/* MODAL TAMBAH / EDIT SURAT IZIN */}
       {showModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -428,7 +471,8 @@ export default function AdminIzinTab() {
               display: 'flex', alignItems: 'center', justifyContent: 'space-between'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 800, fontSize: 15, color: '#0f172a' }}>
-                <Plus size={18} color="#0066ff" /> Tambah Data Surat Izin Guru
+                {editingItem ? <Edit size={18} color="#0066ff" /> : <Plus size={18} color="#0066ff" />}
+                {editingItem ? 'Edit Data Surat Izin Guru' : 'Tambah Data Surat Izin Guru'}
               </div>
               <button
                 type="button"

@@ -44,6 +44,46 @@ async function createIzin(req, res, next) {
   }
 }
 
+async function updateIzin(req, res, next) {
+  try {
+    const { id } = req.params;
+    const existing = await IzinModel.findById(id);
+
+    if (!existing) {
+      return sendError(res, 'Data pengajuan izin tidak ditemukan.', 404);
+    }
+
+    const { jenis, jenis_izin, kode_guru, nama_guru, nama_pengaju, tanggal_mulai, tanggal_selesai, keterangan, status } = req.body;
+
+    const pengaju = nama_guru || nama_pengaju || existing.nama_pengaju;
+    const user_id = kode_guru !== undefined ? kode_guru : existing.user_id;
+    const finalJenis = jenis || jenis_izin || existing.jenis;
+    const tglMulai = tanggal_mulai || existing.tanggal_mulai;
+    const tglSelesai = tanggal_selesai || existing.tanggal_selesai || tglMulai;
+
+    let durasi = '1 Hari';
+    if (tglSelesai && tglSelesai !== tglMulai) {
+      durasi = 'Multi Hari';
+    }
+
+    const updatedData = await IzinModel.update(id, {
+      user_id,
+      nama_pengaju: pengaju,
+      jenis: finalJenis,
+      tanggal_mulai: tglMulai,
+      tanggal_selesai: tglSelesai,
+      durasi,
+      keterangan: keterangan !== undefined ? keterangan : existing.keterangan,
+      status: status !== undefined ? status : existing.status,
+      disetujui_oleh: status === 'Disetujui' ? 'Administrator' : existing.disetujui_oleh
+    });
+
+    sendSuccess(res, 'Data pengajuan izin berhasil diperbarui.', updatedData);
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function deleteIzin(req, res, next) {
   try {
     const { id } = req.params;
@@ -67,5 +107,6 @@ async function deleteIzin(req, res, next) {
 module.exports = {
   getIzin,
   createIzin,
+  updateIzin,
   deleteIzin
 };

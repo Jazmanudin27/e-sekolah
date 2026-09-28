@@ -76,6 +76,28 @@ class IzinModel {
     return res.insertId;
   }
 
+  static async update(id, { user_id, nama_pengaju, jenis, tanggal_mulai, tanggal_selesai, durasi, keterangan, status, disetujui_oleh }) {
+    await this.initTable();
+    const fields = [];
+    const params = [];
+
+    if (user_id !== undefined) { fields.push('user_id = ?'); params.push(user_id); }
+    if (nama_pengaju !== undefined) { fields.push('nama_pengaju = ?'); params.push(nama_pengaju); }
+    if (jenis !== undefined) { fields.push('jenis = ?'); params.push(jenis); }
+    if (tanggal_mulai !== undefined) { fields.push('tanggal_mulai = ?'); params.push(tanggal_mulai); }
+    if (tanggal_selesai !== undefined) { fields.push('tanggal_selesai = ?'); params.push(tanggal_selesai); }
+    if (durasi !== undefined) { fields.push('durasi = ?'); params.push(durasi); }
+    if (keterangan !== undefined) { fields.push('keterangan = ?'); params.push(keterangan); }
+    if (status !== undefined) { fields.push('status = ?'); params.push(status); }
+    if (disetujui_oleh !== undefined) { fields.push('disetujui_oleh = ?'); params.push(disetujui_oleh); }
+
+    if (fields.length > 0) {
+      params.push(id);
+      await query(`UPDATE pengajuan_izin SET ${fields.join(', ')} WHERE id = ?`, params);
+    }
+    return await this.findById(id);
+  }
+
   static async delete(id) {
     await this.initTable();
     await query('DELETE FROM pengajuan_izin WHERE id = ?', [id]);
