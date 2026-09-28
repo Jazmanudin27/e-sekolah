@@ -1,36 +1,98 @@
 const mysql = require('mysql2/promise');
+const { AsyncLocalStorage } = require('async_hooks');
 require('dotenv').config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT, 10) || 3306,
-  user: process.env.DB_USER || 'artanita',
-  password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : 'Jazman@271998',
-  database: process.env.DB_NAME || 'artanita',
-  waitForConnections: true,
-  connectionLimit: 25,
-  queueLimit: 0,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0
-});
+const tenantStorage = new AsyncLocalStorage();
+
+// Multi-Tenant Domain-to-Database Configuration Mapping
+const TENANT_CONFIGS = {
+  'sekolah.aspartech.com': {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT, 10) || 3306,
+    user: 'artanita',
+    password: 'Jazman@271998',
+    database: 'artanita'
+  },
+  'demosekolah.devorme.site': {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT, 10) || 3306,
+    user: 'user_demo',
+    password: 'Jazman@271998',
+    database: 'demo_sekolah'
+  }
+};
+
+const pools = {};
+
+function getTenantConfig(domain) {
+  if (!domain) return null;
+  const cleanDomain = String(domain).split(':')[0].toLowerCase().trim();
+
+  if (TENANT_CONFIGS[cleanDomain]) {
+    return TENANT_CONFIGS[cleanDomain];
+  }
+
+  if (cleanDomain.includes('demosekolah') || cleanDomain.includes('devorme')) {
+    return TENANT_CONFIGS['demosekolah.devorme.site'];
+  }
+  if (cleanDomain.includes('artanita') || cleanDomain.includes('aspartech')) {
+    return TENANT_CONFIGS['sekolah.aspartech.com'];
+  }
+
+  return null;
+}
+
+function getPool(customHost) {
+  const currentHost = customHost || tenantStorage.getStore();
+  const config = getTenantConfig(currentHost);
+
+  const dbHost = config ? config.host : (process.env.DB_HOST || 'localhost');
+  const dbPort = config ? config.port : (parseInt(process.env.DB_PORT, 10) || 3306);
+  const dbUser = config ? config.user : (process.env.DB_USER || 'artanita');
+  const dbPassword = config ? config.password : (process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : 'Jazman@271998');
+  const dbName = config ? config.database : (process.env.DB_NAME || 'artanita');
+
+  const poolKey = `${dbHost}:${dbPort}:${dbUser}:${dbName}`;
+
+  if (!pools[poolKey]) {
+    pools[poolKey] = mysql.createPool({
+      host: dbHost,
+      port: dbPort,
+      user: dbUser,
+      password: dbPassword,
+      database: dbName,
+      waitForConnections: true,
+      connectionLimit: 25,
+      queueLimit: 0,
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 0
+    });
+    console.log(`[DatabasePool] Dynamic pool initialized for tenant DB '${dbName}' (${dbUser}@${dbHost})`);
+  }
+
+  return pools[poolKey];
+}
 
 /**
- * Execute parameterized SQL Query safely
+ * Execute parameterized SQL Query safely for the target domain tenant
  * @param {string} sql 
  * @param {Array} params 
+ * @param {string} [customHost] 
  * @returns {Promise<Array>}
  */
-async function query(sql, params = []) {
+async function query(sql, params = [], customHost = null) {
+  const targetPool = getPool(customHost);
   try {
-    const [rows] = await pool.query(sql, params);
+    const [rows] = await targetPool.query(sql, params);
     return rows;
   } catch (err) {
-    const [rows] = await pool.execute(sql, params);
+    const [rows] = await targetPool.execute(sql, params);
     return rows;
   }
 }
 
 module.exports = {
-  pool,
+  tenantStorage,
+  getPool,
   query
 };

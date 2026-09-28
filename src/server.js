@@ -6,6 +6,8 @@ const helmet = require('helmet');
 const routes = require('./routes');
 const { notFoundHandler, errorHandler } = require('./middleware/error.middleware');
 
+const { tenantStorage } = require('./config/database');
+
 const app = express();
 const PORT = process.env.PORT || 5007;
 
@@ -16,6 +18,14 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Multi-Tenant Domain Middleware
+app.use((req, res, next) => {
+  const host = (req.headers['x-forwarded-host'] || req.headers.host || '').split(':')[0].toLowerCase();
+  tenantStorage.run(host, () => {
+    next();
+  });
+});
 
 // Body Parsing
 app.use(express.json({ limit: '10mb' }));
