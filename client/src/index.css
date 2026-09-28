@@ -117,7 +117,7 @@ body {
   font-weight: 800;
   letter-spacing: 0.5px;
   color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .brand-badge {
@@ -201,10 +201,12 @@ body {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
   }
+
   70% {
     transform: scale(1.1);
     box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
   }
+
   100% {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
@@ -319,7 +321,7 @@ body {
 /* FLOATING OVERLAPPING SUMMARY CARD (4 VERTICAL ICON COLUMNS) */
 .summary-overlap-card {
   max-width: 680px;
-  margin: -45px auto 16px auto;
+  margin: -25px auto 16px auto;
   width: calc(100% - 32px);
   background: #ffffff;
   border-radius: 20px;
@@ -723,7 +725,10 @@ body {
 
 .fab-pulse-ring {
   position: absolute;
-  top: -3px; left: -3px; right: -3px; bottom: -3px;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
   border-radius: 50%;
   border: 2px solid rgba(0, 114, 255, 0.4);
   animation: fabPulse 2s infinite;
@@ -731,9 +736,20 @@ body {
 }
 
 @keyframes fabPulse {
-  0% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.15); opacity: 0.2; }
-  100% { transform: scale(1); opacity: 0.8; }
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.15);
+    opacity: 0.2;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
 }
 
 .floating-center-fab:hover {
@@ -755,7 +771,10 @@ body {
 /* PRESENSI SCAN MODAL STYLES */
 .presensi-modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(15, 23, 42, 0.82);
   backdrop-filter: blur(10px);
   z-index: 200;
@@ -797,7 +816,9 @@ body {
 
 .scanner-line {
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 3px;
   background: linear-gradient(90deg, transparent, #38bdf8, transparent);
   box-shadow: 0 0 12px #38bdf8;
@@ -805,9 +826,17 @@ body {
 }
 
 @keyframes scanAnim {
-  0% { top: 0%; }
-  50% { top: 96%; }
-  100% { top: 0%; }
+  0% {
+    top: 0%;
+  }
+
+  50% {
+    top: 96%;
+  }
+
+  100% {
+    top: 0%;
+  }
 }
 
 .presensi-submit-btn {
@@ -989,10 +1018,29 @@ body {
   transition: all 0.15s ease;
 }
 
-.status-btn-pill.act-H { background: #22c55e; color: #ffffff; border-color: #22c55e; }
-.status-btn-pill.act-S { background: #38bdf8; color: #ffffff; border-color: #38bdf8; }
-.status-btn-pill.act-I { background: #f59e0b; color: #ffffff; border-color: #f59e0b; }
-.status-btn-pill.act-A { background: #ef4444; color: #ffffff; border-color: #ef4444; }
+.status-btn-pill.act-H {
+  background: #22c55e;
+  color: #ffffff;
+  border-color: #22c55e;
+}
+
+.status-btn-pill.act-S {
+  background: #38bdf8;
+  color: #ffffff;
+  border-color: #38bdf8;
+}
+
+.status-btn-pill.act-I {
+  background: #f59e0b;
+  color: #ffffff;
+  border-color: #f59e0b;
+}
+
+.status-btn-pill.act-A {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
 
 /* SWEETALERT2 POPUP STYLES */
 .swal2-custom-popup {
@@ -1103,5 +1151,3 @@ body {
     padding: 0;
   }
 }
-
-
