@@ -4,6 +4,10 @@ import api from '../api/client';
 import SearchableSelect from '../components/SearchableSelect';
 
 export default function JadwalView({ user }) {
+  const isClassAccount = user?.type === 'Kelas' || user?.role === 'Kelas';
+  const userClassId = user?.kode_kelas;
+  const userClassName = user?.nama_kelas || (userClassId ? `Kelas ${userClassId}` : 'Kelas');
+
   const getTodayIndonesianDay = () => {
     const listDays = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const idx = new Date().getDay();
@@ -12,7 +16,7 @@ export default function JadwalView({ user }) {
   };
 
   const [activeHari, setActiveHari] = useState(getTodayIndonesianDay());
-  const [selectedKelas, setSelectedKelas] = useState('');
+  const [selectedKelas, setSelectedKelas] = useState(userClassId || '');
   const [kelasList, setKelasList] = useState([]);
   const [jadwalList, setJadwalList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -27,21 +31,25 @@ export default function JadwalView({ user }) {
   ];
 
   useEffect(() => {
-    fetchKelas();
-  }, []);
+    if (isClassAccount && userClassId) {
+      setSelectedKelas(userClassId);
+    } else {
+      fetchKelas();
+    }
+  }, [userClassId, isClassAccount]);
 
   useEffect(() => {
-    if (selectedKelas) {
+    const effectiveKelas = isClassAccount && userClassId ? userClassId : selectedKelas;
+    if (effectiveKelas || !isClassAccount) {
       fetchJadwal();
     }
-  }, [activeHari, selectedKelas]);
+  }, [activeHari, selectedKelas, isClassAccount, userClassId]);
 
   const fetchKelas = async () => {
     try {
       const res = await api.get('/kelas');
       if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
         setKelasList(res.data.data);
-        const userClassId = user?.kode_kelas;
         const matched = userClassId && res.data.data.find(k => String(k.kode_kelas) === String(userClassId));
         const initialVal = matched ? matched.kode_kelas : (res.data.data[0].kode_kelas || res.data.data[0].id || res.data.data[0].nama_kelas);
         setSelectedKelas(initialVal);
@@ -53,7 +61,6 @@ export default function JadwalView({ user }) {
           { kode_kelas: '4', nama_kelas: 'XII MM 1' }
         ];
         setKelasList(defaultKelas);
-        const userClassId = user?.kode_kelas;
         const matched = userClassId && defaultKelas.find(k => String(k.kode_kelas) === String(userClassId));
         setSelectedKelas(matched ? matched.kode_kelas : '1');
       }
@@ -70,8 +77,9 @@ export default function JadwalView({ user }) {
 
   const fetchJadwal = async () => {
     setLoading(true);
+    const targetKelas = isClassAccount && userClassId ? userClassId : selectedKelas;
     try {
-      let url = `/jadwal?hari=${activeHari}&kode_kelas=${selectedKelas}`;
+      let url = `/jadwal?hari=${activeHari}&kode_kelas=${targetKelas}`;
 
       const res = await api.get(url);
       if (res.data?.success && Array.isArray(res.data.data)) {
@@ -95,9 +103,10 @@ export default function JadwalView({ user }) {
     { kode_jadwal: 5, hari: 'Sabtu', jam_ke: 1, jam: '07:30 - 09:00', nama_mapel: 'Project Kreatif & Kewirausahaan', kode_kelas: '1', nama_kelas: 'X RPL 1', nama_guru: 'Citra Dewi, S.Pd.' }
   ];
 
+  const targetKelas = isClassAccount && userClassId ? userClassId : selectedKelas;
   const filteredDemo = demoJadwal.filter(j => {
     const matchHari = j.hari === activeHari;
-    const matchKelas = String(j.kode_kelas) === String(selectedKelas) || j.nama_kelas === selectedKelas;
+    const matchKelas = String(j.kode_kelas) === String(targetKelas) || j.nama_kelas === targetKelas || j.nama_kelas === userClassName;
     return matchHari && matchKelas;
   });
 
@@ -110,14 +119,14 @@ export default function JadwalView({ user }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, color: '#0f172a', letterSpacing: '0.2px' }}>
             <Filter size={15} color="#0066ff" />
-            FILTER JADWAL PELAJARAN
+            {isClassAccount ? `JADWAL ${userClassName.toUpperCase()}` : 'FILTER JADWAL PELAJARAN'}
           </div>
           <span style={{ fontSize: 11, fontWeight: 700, color: '#0066ff', background: '#eff6ff', padding: '3px 10px', borderRadius: 12 }}>
             {displayJadwal.length} Jadwal Tampil
           </span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isClassAccount ? '1fr' : '1fr 1fr', gap: 12 }}>
           {/* FILTER HARI */}
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, display: 'block' }}>HARI</label>
@@ -129,19 +138,21 @@ export default function JadwalView({ user }) {
             />
           </div>
 
-          {/* FILTER KELAS */}
-          <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, display: 'block' }}>KELAS</label>
-            <SearchableSelect
-              options={kelasList.map(k => ({
-                value: String(k.kode_kelas || k.id),
-                label: k.nama_kelas
-              }))}
-              value={selectedKelas}
-              onChange={(e) => setSelectedKelas(e.target.value)}
-              placeholder="Semua Kelas"
-            />
-          </div>
+          {/* FILTER KELAS (HANYA MUNCUL JIKA BUKAN AKUN KELAS) */}
+          {!isClassAccount && (
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6, display: 'block' }}>KELAS</label>
+              <SearchableSelect
+                options={kelasList.map(k => ({
+                  value: String(k.kode_kelas || k.id),
+                  label: k.nama_kelas
+                }))}
+                value={selectedKelas}
+                onChange={(e) => setSelectedKelas(e.target.value)}
+                placeholder="Semua Kelas"
+              />
+            </div>
+          )}
         </div>
       </div>
 
