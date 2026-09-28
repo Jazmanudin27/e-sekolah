@@ -345,7 +345,7 @@ export default function AdminIzinTab() {
                 <th>Sampai Tanggal</th>
                 <th>Keterangan / Alasan</th>
                 <th>Status</th>
-                <th style={{ width: 120, textAlign: 'center' }}>Aksi</th>
+                <th style={{ width: 95, textAlign: 'center', paddingLeft: 6, paddingRight: 6 }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -411,12 +411,12 @@ export default function AdminIzinTab() {
                           </span>
                         )}
                       </td>
-                      <td style={{ textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: 6 }}>
+                      <td style={{ textAlign: 'center', width: 95, paddingLeft: 4, paddingRight: 4, whiteSpace: 'nowrap' }}>
+                        <div style={{ display: 'inline-flex', gap: 4, justifyContent: 'center' }}>
                           {status !== 'Disetujui' && (
                             <button
                               className="btn-action-icon"
-                              style={{ background: '#16a34a', color: '#ffffff', border: '1px solid #15803d' }}
+                              style={{ background: '#16a34a', color: '#ffffff', border: '1px solid #15803d', padding: '5px 7px' }}
                               onClick={() => handleUpdateStatus(item, 'Disetujui')}
                               title="Setujui Izin"
                             >
@@ -425,7 +425,7 @@ export default function AdminIzinTab() {
                           )}
                           <button
                             className="btn-action-icon btn-edit"
-                            style={{ background: '#f59e0b', color: '#ffffff', border: '1px solid #d97706' }}
+                            style={{ background: '#f59e0b', color: '#ffffff', border: '1px solid #d97706', padding: '5px 7px' }}
                             onClick={() => handleEdit(item)}
                             title="Edit Surat Izin"
                           >
@@ -433,6 +433,7 @@ export default function AdminIzinTab() {
                           </button>
                           <button
                             className="btn-action-icon btn-delete"
+                            style={{ padding: '5px 7px' }}
                             onClick={() => handleDelete(item)}
                             title="Hapus Surat Izin"
                           >
