@@ -153,8 +153,9 @@ export default function IzinView({ showToast }) {
               <SearchableSelect
                 options={[
                   { value: 'Sakit', label: 'Sakit' },
-                  { value: 'Izin', label: 'Izin Keperluan Keluarga' },
-                  { value: 'Dinas', label: 'Dinas / Tugas Sekolah' }
+                  { value: 'Izin', label: 'Izin' },
+                  { value: 'Cuti', label: 'Cuti' },
+                  { value: 'Dinas', label: 'Dinas' }
                 ]}
                 value={jenisIzin}
                 onChange={(e) => setJenisIzin(e.target.value)}

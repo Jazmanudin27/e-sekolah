@@ -469,10 +469,10 @@ export default function AdminIzinTab() {
                 </label>
                 <SearchableSelect
                   options={[
-                    { value: 'Sakit', label: 'Sakit (Kondisi Medis)' },
-                    { value: 'Izin', label: 'Izin Keperluan Pribadi' },
-                    { value: 'Cuti', label: 'Cuti Tahunan / Melahirkan' },
-                    { value: 'Dinas', label: 'Tugas Luar / Dinas' }
+                    { value: 'Sakit', label: 'Sakit' },
+                    { value: 'Izin', label: 'Izin' },
+                    { value: 'Cuti', label: 'Cuti' },
+                    { value: 'Dinas', label: 'Dinas' }
                   ]}
                   value={formData.jenis}
                   onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
