@@ -26,7 +26,7 @@ export default function AdminIzinTab() {
     jenis: 'Sakit',
     tanggal_mulai: new Date().toISOString().split('T')[0],
     tanggal_selesai: new Date().toISOString().split('T')[0],
-    status: 'Disetujui',
+    status: 'Menunggu',
     keterangan: ''
   });
 
@@ -90,7 +90,7 @@ export default function AdminIzinTab() {
           jenis: 'Sakit',
           tanggal_mulai: new Date().toISOString().split('T')[0],
           tanggal_selesai: new Date().toISOString().split('T')[0],
-          status: 'Disetujui',
+          status: 'Menunggu',
           keterangan: ''
         });
         fetchIzin();
@@ -463,37 +463,20 @@ export default function AdminIzinTab() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
-                    JENIS IZIN <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <SearchableSelect
-                    options={[
-                      { value: 'Sakit', label: 'Sakit (Kondisi Medis)' },
-                      { value: 'Izin', label: 'Izin Keperluan Pribadi' },
-                      { value: 'Cuti', label: 'Cuti Tahunan / Melahirkan' },
-                      { value: 'Dinas', label: 'Tugas Luar / Dinas' }
-                    ]}
-                    value={formData.jenis}
-                    onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
-                    STATUS VERIFIKASI
-                  </label>
-                  <SearchableSelect
-                    options={[
-                      { value: 'Disetujui', label: 'Disetujui' },
-                      { value: 'Menunggu', label: 'Menunggu Verifikasi' },
-                      { value: 'Ditolak', label: 'Ditolak' }
-                    ]}
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  />
-                </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
+                  JENIS IZIN <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <SearchableSelect
+                  options={[
+                    { value: 'Sakit', label: 'Sakit (Kondisi Medis)' },
+                    { value: 'Izin', label: 'Izin Keperluan Pribadi' },
+                    { value: 'Cuti', label: 'Cuti Tahunan / Melahirkan' },
+                    { value: 'Dinas', label: 'Tugas Luar / Dinas' }
+                  ]}
+                  value={formData.jenis}
+                  onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
+                />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

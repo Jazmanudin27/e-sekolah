@@ -35,7 +35,7 @@ async function createIzin(req, res, next) {
       tanggal_selesai: tanggal_selesai || tanggal_mulai,
       durasi,
       keterangan: keterangan || 'Pengajuan Izin',
-      status: status || 'Disetujui'
+      status: status || 'Menunggu'
     });
 
     sendSuccess(res, 'Surat izin berhasil ditambahkan ke database.', { id: insertId }, 201);

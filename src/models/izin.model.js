@@ -69,8 +69,8 @@ class IzinModel {
         tanggal_selesai || null,
         durasi || '1 Hari',
         keterangan || '',
-        status || 'Disetujui',
-        disetujui_oleh || 'Administrator'
+        status || 'Menunggu',
+        disetujui_oleh || 'Menunggu Persetujuan'
       ]
     );
     return res.insertId;
