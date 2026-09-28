@@ -662,16 +662,16 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
         </p>
       </div>
 
-      {/* FILTER CARD (EXACT LAYOUT AS USER SCREENSHOTS) */}
+      {/* FILTER CARD (EXACT LAYOUT AS USER SCREENSHOTS - SM SIZE) */}
       <div style={{
         background: '#ffffff',
         border: '1px solid #e2e8f0',
-        borderRadius: '10px',
-        padding: '22px 24px',
-        maxWidth: '520px',
-        boxShadow: '0 4px 12px rgba(15, 23, 42, 0.04)'
+        borderRadius: '8px',
+        padding: '16px 18px',
+        maxWidth: '440px',
+        boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)'
       }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           
           {/* 1. FILTER KELAS (For Siswa, Absensi Siswa, Absensi Mapel) */}
           {['laporanSiswa', 'laporanAbsensiSiswa', 'laporanAbsensiMapel'].includes(reportType) && (
@@ -746,7 +746,7 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
 
           {/* 5. FILTER DARI TANGGAL & SAMPAI TANGGAL (For Presensi Guru, Absensi Siswa, Absensi Mapel, Surat Izin) */}
           {['laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat', 'laporanIzin'].includes(reportType) && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <div className="form-group-admin">
                 <label>Dari Tanggal</label>
                 <input
@@ -786,7 +786,7 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
 
           {/* 7. FILTER JENIS & STATUS IZIN */}
           {['laporanSurat', 'laporanIzin'].includes(reportType) && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <div className="form-group-admin">
                 <label>Jenis Izin</label>
                 <SearchableSelect
@@ -817,8 +817,8 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
             </div>
           )}
 
-          {/* ACTION BUTTONS (CETAK & EXCEL) */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '8px' }}>
+          {/* ACTION BUTTONS (CETAK & EXCEL - SM COMPACT) */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '6px' }}>
             <button
               type="button"
               onClick={handleCetak}
@@ -827,20 +827,21 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px',
-                padding: '9px 16px',
-                borderRadius: '6px',
+                gap: '6px',
+                height: '30px',
+                padding: '4px 12px',
+                borderRadius: '4px',
                 background: '#2563eb',
                 color: '#ffffff',
                 border: 'none',
-                fontSize: '13px',
+                fontSize: '11.5px',
                 fontWeight: 700,
                 cursor: 'pointer',
-                boxShadow: '0 2px 4px rgba(37, 99, 235, 0.25)',
+                boxShadow: '0 1px 2px rgba(37, 99, 235, 0.25)',
                 transition: 'background 0.15s ease'
               }}
             >
-              <Printer size={16} /> {loading ? 'Memuat...' : 'CETAK'}
+              <Printer size={14} /> {loading ? 'Memuat...' : 'CETAK'}
             </button>
 
             <button
@@ -851,20 +852,21 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px',
-                padding: '9px 16px',
-                borderRadius: '6px',
+                gap: '6px',
+                height: '30px',
+                padding: '4px 12px',
+                borderRadius: '4px',
                 background: '#16a34a',
                 color: '#ffffff',
                 border: 'none',
-                fontSize: '13px',
+                fontSize: '11.5px',
                 fontWeight: 700,
                 cursor: 'pointer',
-                boxShadow: '0 2px 4px rgba(22, 163, 74, 0.25)',
+                boxShadow: '0 1px 2px rgba(22, 163, 74, 0.25)',
                 transition: 'background 0.15s ease'
               }}
             >
-              <FileSpreadsheet size={16} /> EXCEL
+              <FileSpreadsheet size={14} /> EXCEL
             </button>
           </div>
 
