@@ -105,7 +105,8 @@ async function login(req, res, next) {
         name: displayName,
         username: user.username || user.email || 'admin',
         email: user.email || '',
-        role: userRole
+        role: userRole,
+        kode_member: user.kode_member
       };
       userData = {
         type: 'Admin',
@@ -115,7 +116,8 @@ async function login(req, res, next) {
         username: user.username || user.email || 'admin',
         email: user.email || '',
         role: userRole,
-        status: user.status || 'Active'
+        status: user.status || 'Active',
+        kode_member: user.kode_member
       };
     } else if (userType === 'Guru') {
       const userRole = user.role || 'Guru';
@@ -183,7 +185,8 @@ async function getProfile(req, res, next) {
         username: adminData?.username || req.user.username,
         email: adminData?.email || req.user.email,
         role: adminData?.role || req.user.role || 'Admin',
-        status: adminData?.status || 'Active'
+        status: adminData?.status || 'Active',
+        kode_member: adminData?.kode_member || req.user.kode_member
       });
     }
 
@@ -195,6 +198,7 @@ async function getProfile(req, res, next) {
         nama_kelas: req.user.nama_kelas,
         nama_guru: `Akun Kelas ${req.user.nama_kelas}`,
         role: 'Kelas',
+        kode_member: kelasData?.kode_member || req.user.kode_member,
         details: kelasData
       });
     }
