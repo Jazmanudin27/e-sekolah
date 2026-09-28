@@ -6,6 +6,7 @@ class IzinModel {
       await query(`
         CREATE TABLE IF NOT EXISTS pengajuan_izin (
           id INT AUTO_INCREMENT PRIMARY KEY,
+          kode_member VARCHAR(50) NULL,
           user_id INT NULL,
           nama_pengaju VARCHAR(255) NULL,
           jenis VARCHAR(50) NOT NULL,
@@ -18,18 +19,32 @@ class IzinModel {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
+      await this.ensureColumns();
     } catch (err) {
       console.log('[IzinModel] Table init or check:', err.message);
     }
   }
 
-  static async findAll() {
+  static async ensureColumns() {
+    try {
+      const cols = await query('DESCRIBE pengajuan_izin');
+      const colNames = cols.map(c => c.Field);
+      if (!colNames.includes('kode_member')) {
+        await query('ALTER TABLE pengajuan_izin ADD COLUMN kode_member VARCHAR(50) NULL');
+      }
+    } catch (err) {
+      console.warn('[IzinModel.ensureColumns] Warning:', err.message);
+    }
+  }
+
+  static async findAll(targetKodeMember) {
     await this.initTable();
     try {
-      const rows = await query(`
+      let sql = `
         SELECT 
           p.id, 
           p.user_id, 
+          COALESCE(p.kode_member, g.kode_member) AS kode_member,
           COALESCE(NULLIF(TRIM(g.nama_guru), ''), NULLIF(TRIM(p.nama_pengaju), ''), 'Guru Pengajar') AS nama_guru,
           p.nama_pengaju, 
           p.jenis, 
@@ -43,8 +58,15 @@ class IzinModel {
           DATE_FORMAT(p.created_at, '%d %b %Y') AS tanggal
         FROM pengajuan_izin p
         LEFT JOIN guru g ON (p.user_id = g.kode_guru OR (p.user_id IS NULL AND p.nama_pengaju = g.nama_guru))
-        ORDER BY p.id DESC
-      `);
+      `;
+      const params = [];
+      if (targetKodeMember) {
+        sql += ` WHERE (p.kode_member = ? OR g.kode_member = ? OR (p.kode_member IS NULL AND (g.kode_member IS NULL OR g.kode_member = ?)))`;
+        params.push(targetKodeMember, targetKodeMember, targetKodeMember);
+      }
+      sql += ` ORDER BY p.id DESC`;
+
+      const rows = await query(sql, params);
       return rows;
     } catch (err) {
       console.error('[IzinModel.findAll] Error:', err.message);
@@ -58,13 +80,14 @@ class IzinModel {
     return rows[0] || null;
   }
 
-  static async create({ user_id, nama_pengaju, jenis, tanggal_mulai, tanggal_selesai, durasi, keterangan, status, disetujui_oleh }) {
+  static async create({ kode_member, user_id, nama_pengaju, jenis, tanggal_mulai, tanggal_selesai, durasi, keterangan, status, disetujui_oleh }) {
     await this.initTable();
     const res = await query(
       `INSERT INTO pengajuan_izin 
-       (user_id, nama_pengaju, jenis, tanggal_mulai, tanggal_selesai, durasi, keterangan, status, disetujui_oleh) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (kode_member, user_id, nama_pengaju, jenis, tanggal_mulai, tanggal_selesai, durasi, keterangan, status, disetujui_oleh) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
+        kode_member || null,
         user_id || null,
         nama_pengaju || 'Pengguna E-Sekolah',
         jenis || 'Sakit',
@@ -79,11 +102,12 @@ class IzinModel {
     return res.insertId;
   }
 
-  static async update(id, { user_id, nama_pengaju, jenis, tanggal_mulai, tanggal_selesai, durasi, keterangan, status, disetujui_oleh }) {
+  static async update(id, { kode_member, user_id, nama_pengaju, jenis, tanggal_mulai, tanggal_selesai, durasi, keterangan, status, disetujui_oleh }) {
     await this.initTable();
     const fields = [];
     const params = [];
 
+    if (kode_member !== undefined) { fields.push('kode_member = ?'); params.push(kode_member); }
     if (user_id !== undefined) { fields.push('user_id = ?'); params.push(user_id); }
     if (nama_pengaju !== undefined) { fields.push('nama_pengaju = ?'); params.push(nama_pengaju); }
     if (jenis !== undefined) { fields.push('jenis = ?'); params.push(jenis); }

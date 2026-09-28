@@ -2,9 +2,39 @@ const IzinModel = require('../models/izin.model');
 const { query } = require('../config/database');
 const { sendSuccess, sendError } = require('../utils/response.util');
 
+async function getKodeMemberFromReq(req) {
+  let km = req.user?.kode_member || req.query?.kode_member || req.body?.kode_member;
+  if (km) return km;
+
+  if (req.user) {
+    if (req.user.type === 'Admin' || req.user.id || req.user.username) {
+      try {
+        const rows = await query(
+          'SELECT kode_member FROM users WHERE id = ? OR username = ? LIMIT 1',
+          [req.user.id || 0, req.user.username || '']
+        );
+        if (rows && rows[0]?.kode_member) return rows[0].kode_member;
+      } catch (e) {}
+    }
+
+    if (req.user.type === 'Guru' || req.user.kode_guru) {
+      try {
+        const rows = await query(
+          'SELECT kode_member FROM guru WHERE kode_guru = ? OR username = ? LIMIT 1',
+          [req.user.kode_guru || '', req.user.username || '']
+        );
+        if (rows && rows[0]?.kode_member) return rows[0].kode_member;
+      } catch (e) {}
+    }
+  }
+
+  return null;
+}
+
 async function getIzin(req, res, next) {
   try {
-    const records = await IzinModel.findAll();
+    const kode_member = await getKodeMemberFromReq(req);
+    const records = await IzinModel.findAll(kode_member);
     sendSuccess(res, 'Data pengajuan izin berhasil diambil dari database.', records, 200, { count: records.length });
   } catch (error) {
     next(error);
@@ -19,6 +49,7 @@ async function createIzin(req, res, next) {
       return sendError(res, 'Tanggal mulai wajib diisi.', 400);
     }
 
+    const kode_member = await getKodeMemberFromReq(req);
     const user_id = kode_guru || req.user?.id || null;
     let pengaju = nama_guru || nama_pengaju;
 
@@ -40,6 +71,7 @@ async function createIzin(req, res, next) {
     }
 
     const insertId = await IzinModel.create({
+      kode_member,
       user_id,
       nama_pengaju: pengaju,
       jenis: finalJenis,
@@ -67,6 +99,7 @@ async function updateIzin(req, res, next) {
 
     const { jenis, jenis_izin, kode_guru, nama_guru, nama_pengaju, tanggal_mulai, tanggal_selesai, keterangan, status } = req.body;
 
+    const kode_member = await getKodeMemberFromReq(req) || existing.kode_member;
     const user_id = kode_guru !== undefined ? kode_guru : existing.user_id;
     let pengaju = nama_guru || nama_pengaju || existing.nama_pengaju;
 
@@ -89,6 +122,7 @@ async function updateIzin(req, res, next) {
     }
 
     const updatedData = await IzinModel.update(id, {
+      kode_member,
       user_id,
       nama_pengaju: pengaju,
       jenis: finalJenis,
