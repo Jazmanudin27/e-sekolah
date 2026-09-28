@@ -1,5 +1,5 @@
 {
   "appId": "com.esekolah.app",
   "appName": "E-Sekolah",
-  "webDir": "dist"
+  "webDir": "../public"
 }
