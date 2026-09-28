@@ -4,11 +4,12 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 async function getSiswaByKelas(req, res, next) {
   try {
     const { kode_kelas } = req.query;
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
     const effectiveKodeKelas = (req.user && req.user.type === 'Kelas' && req.user.kode_kelas) 
       ? req.user.kode_kelas 
       : kode_kelas;
 
-    const students = await SiswaModel.findAll(effectiveKodeKelas || null);
+    const students = await SiswaModel.findAll(effectiveKodeKelas || null, kode_member || null);
     sendSuccess(res, 'Data siswa berhasil diambil dari database.', students, 200, { count: students.length });
   } catch (error) {
     next(error);
@@ -17,7 +18,8 @@ async function getSiswaByKelas(req, res, next) {
 
 async function createSiswa(req, res, next) {
   try {
-    const id = await SiswaModel.create(req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member;
+    const id = await SiswaModel.create({ ...req.body, kode_member });
     sendSuccess(res, 'Data siswa berhasil ditambahkan.', { kode_siswa: id }, 201);
   } catch (error) {
     next(error);

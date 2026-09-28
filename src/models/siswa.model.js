@@ -1,7 +1,7 @@
 const { query } = require('../config/database');
 
 class SiswaModel {
-  static async findAll(kode_kelas = null) {
+  static async findAll(kode_kelas = null, kode_member = null) {
     try {
       let sql = `
         SELECT 
@@ -10,11 +10,17 @@ class SiswaModel {
           k.jurusan
         FROM siswa s
         LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas
+        WHERE 1=1
       `;
       const params = [];
 
+      if (kode_member) {
+        sql += ' AND (s.kode_member = ? OR s.kode_member IS NULL)';
+        params.push(kode_member);
+      }
+
       if (kode_kelas) {
-        sql += ' WHERE s.kode_kelas = ?';
+        sql += ' AND s.kode_kelas = ?';
         params.push(kode_kelas);
       }
 
@@ -33,10 +39,14 @@ class SiswaModel {
 
     // Try SELECT * FROM siswa if JOIN fails
     try {
-      let sql = 'SELECT * FROM siswa';
+      let sql = 'SELECT * FROM siswa WHERE 1=1';
       const params = [];
+      if (kode_member) {
+        sql += ' AND (kode_member = ? OR kode_member IS NULL)';
+        params.push(kode_member);
+      }
       if (kode_kelas) {
-        sql += ' WHERE kode_kelas = ?';
+        sql += ' AND kode_kelas = ?';
         params.push(kode_kelas);
       }
       sql += ' ORDER BY nama_siswa ASC';
@@ -54,23 +64,29 @@ class SiswaModel {
     return [];
   }
 
-  static async findByKelas(kode_kelas) {
-    return this.findAll(kode_kelas);
+  static async findByKelas(kode_kelas, kode_member = null) {
+    return this.findAll(kode_kelas, kode_member);
   }
 
-  static async countAll() {
+  static async countAll(kode_member = null) {
     try {
-      const rows = await query('SELECT COUNT(*) AS total FROM siswa');
+      let sql = 'SELECT COUNT(*) AS total FROM siswa WHERE 1=1';
+      const params = [];
+      if (kode_member) {
+        sql += ' AND (kode_member = ? OR kode_member IS NULL)';
+        params.push(kode_member);
+      }
+      const rows = await query(sql, params);
       return rows[0].total || 0;
     } catch (e) {
       return 0;
     }
   }
 
-  static async create({ nis_nisn, nama_siswa, jk = 'L', kode_kelas }) {
+  static async create({ nis_nisn, nama_siswa, jk = 'L', kode_kelas, kode_member }) {
     const res = await query(
-      'INSERT INTO siswa (nis, nama_siswa, jk, kode_kelas) VALUES (?, ?, ?, ?)',
-      [nis_nisn, nama_siswa, jk, kode_kelas]
+      'INSERT INTO siswa (nis, nama_siswa, jk, kode_kelas, kode_member) VALUES (?, ?, ?, ?, ?)',
+      [nis_nisn, nama_siswa, jk, kode_kelas, kode_member || null]
     );
     return res.insertId;
   }
