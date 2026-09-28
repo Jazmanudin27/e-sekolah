@@ -17,7 +17,7 @@ class IzinModel {
           status VARCHAR(50) DEFAULT 'Menunggu',
           disetujui_oleh VARCHAR(255) NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
       `);
       await this.ensureColumns();
     } catch (err) {
@@ -27,6 +27,7 @@ class IzinModel {
 
   static async ensureColumns() {
     try {
+      await query('ALTER TABLE pengajuan_izin CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci').catch(() => null);
       const cols = await query('DESCRIBE pengajuan_izin');
       const colNames = cols.map(c => c.Field);
       if (!colNames.includes('kode_member')) {
@@ -57,7 +58,7 @@ class IzinModel {
           p.disetujui_oleh, 
           DATE_FORMAT(p.created_at, '%d %b %Y') AS tanggal
         FROM pengajuan_izin p
-        LEFT JOIN guru g ON (p.user_id = g.kode_guru OR (p.user_id IS NULL AND p.nama_pengaju = g.nama_guru))
+        LEFT JOIN guru g ON (p.user_id = g.kode_guru OR (p.user_id IS NULL AND CONVERT(p.nama_pengaju USING utf8mb4) = CONVERT(g.nama_guru USING utf8mb4)))
       `;
       const params = [];
       if (targetKodeMember) {
