@@ -26,6 +26,7 @@ import AdminIzinTab from './AdminIzinTab';
 import AdminAbsensiSiswaTab from './AdminAbsensiSiswaTab';
 import AdminAbsensiMapelTab from './AdminAbsensiMapelTab';
 import AdminLaporanGeneratorTab from './AdminLaporanGeneratorTab';
+import AdminMenuHakAksesTab from './AdminMenuHakAksesTab';
 
 const VALID_ADMIN_TABS = [
   'dashboard', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal',
@@ -34,7 +35,7 @@ const VALID_ADMIN_TABS = [
   'laporanSiswa', 'laporanGuru', 'laporanKelas',
   'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel',
   'laporanSurat',
-  'users', 'settings'
+  'users', 'settings', 'menuHakAkses'
 ];
 
 const getInitialTab = () => {
@@ -518,6 +519,13 @@ export default function AdminDesktopView({ user, onLogout }) {
                 >
                   <span>Kelola Akun Users</span>
                 </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'menuHakAkses' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('menuHakAkses')}
+                >
+                  <span>Hak Akses Menu & Role</span>
+                </button>
               </div>
             )}
           </div>
@@ -626,6 +634,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           {/* 5. SISTEM & AKUN */}
           {activeTab === 'users' && <AdminUsersTab />}
           {activeTab === 'settings' && <AdminSettingsTab />}
+          {activeTab === 'menuHakAkses' && <AdminMenuHakAksesTab />}
         </main>
       </div>
     </div>
