@@ -44,7 +44,7 @@ class IzinModel {
         SELECT 
           p.id, 
           p.user_id, 
-          COALESCE(p.kode_member, g.kode_member) AS kode_member,
+          p.kode_member,
           COALESCE(NULLIF(TRIM(g.nama_guru), ''), NULLIF(TRIM(p.nama_pengaju), ''), 'Guru Pengajar') AS nama_guru,
           p.nama_pengaju, 
           p.jenis, 
@@ -61,8 +61,8 @@ class IzinModel {
       `;
       const params = [];
       if (targetKodeMember) {
-        sql += ` WHERE (p.kode_member = ? OR g.kode_member = ? OR p.kode_member IS NULL)`;
-        params.push(targetKodeMember, targetKodeMember);
+        sql += ` WHERE (p.kode_member = ? OR p.kode_member IS NULL)`;
+        params.push(targetKodeMember);
       }
       sql += ` ORDER BY p.id DESC`;
 
