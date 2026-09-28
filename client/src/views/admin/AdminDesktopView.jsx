@@ -24,11 +24,15 @@ import AdminPresensiGuruTab from './AdminPresensiGuruTab';
 import AdminIzinTab from './AdminIzinTab';
 import AdminAbsensiSiswaTab from './AdminAbsensiSiswaTab';
 import AdminAbsensiMapelTab from './AdminAbsensiMapelTab';
+import AdminLaporanGeneratorTab from './AdminLaporanGeneratorTab';
 
 const VALID_ADMIN_TABS = [
   'dashboard', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal',
   'izin', 'presensiGuru', 'absensiSiswa', 'absensiMapel',
   'rekapGuru', 'rekapSiswa', 'rekapMapel',
+  'laporanSiswa', 'laporanGuru', 'laporanKelas',
+  'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel',
+  'laporanSurat',
   'users', 'settings'
 ];
 
@@ -325,7 +329,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           <div className="portal-menu-group">
             <button
               type="button"
-              className="portal-menu-item has-submenu"
+              className={`portal-menu-item has-submenu ${['laporanSiswa', 'laporanGuru', 'laporanKelas'].includes(activeTab) ? 'has-active' : ''}`}
               onClick={() => toggleSubMenu('laporanMaster')}
             >
               <div className="menu-icon-wrap">
@@ -338,24 +342,24 @@ export default function AdminDesktopView({ user, onLogout }) {
               <div className="portal-submenu-list">
                 <button
                   type="button"
-                  className="portal-submenu-item"
-                  onClick={() => handleSelectTab('guru')}
+                  className={`portal-submenu-item ${activeTab === 'laporanSiswa' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('laporanSiswa')}
                 >
-                  <span>Laporan Data Guru</span>
+                  <span>Laporan Siswa</span>
                 </button>
                 <button
                   type="button"
-                  className="portal-submenu-item"
-                  onClick={() => handleSelectTab('siswa')}
+                  className={`portal-submenu-item ${activeTab === 'laporanGuru' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('laporanGuru')}
                 >
-                  <span>Laporan Data Siswa</span>
+                  <span>Laporan Guru</span>
                 </button>
                 <button
                   type="button"
-                  className="portal-submenu-item"
-                  onClick={() => handleSelectTab('kelas')}
+                  className={`portal-submenu-item ${activeTab === 'laporanKelas' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('laporanKelas')}
                 >
-                  <span>Laporan Data Kelas</span>
+                  <span>Laporan Kelas</span>
                 </button>
               </div>
             )}
@@ -365,7 +369,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           <div className="portal-menu-group">
             <button
               type="button"
-              className={`portal-menu-item has-submenu ${['rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(activeTab) ? 'has-active' : ''}`}
+              className={`portal-menu-item has-submenu ${['laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(activeTab) ? 'has-active' : ''}`}
               onClick={() => toggleSubMenu('laporanAbsensi')}
             >
               <div className="menu-icon-wrap">
@@ -378,24 +382,24 @@ export default function AdminDesktopView({ user, onLogout }) {
               <div className="portal-submenu-list">
                 <button
                   type="button"
-                  className={`portal-submenu-item ${activeTab === 'rekapGuru' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('rekapGuru')}
+                  className={`portal-submenu-item ${activeTab === 'laporanPresensiGuru' || activeTab === 'rekapGuru' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('laporanPresensiGuru')}
                 >
-                  <span>Rekap Presensi Guru</span>
+                  <span>Presensi Guru</span>
                 </button>
                 <button
                   type="button"
-                  className={`portal-submenu-item ${activeTab === 'rekapSiswa' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('rekapSiswa')}
+                  className={`portal-submenu-item ${activeTab === 'laporanAbsensiSiswa' || activeTab === 'rekapSiswa' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('laporanAbsensiSiswa')}
                 >
-                  <span>Rekap Absensi Siswa</span>
+                  <span>Absensi Siswa</span>
                 </button>
                 <button
                   type="button"
-                  className={`portal-submenu-item ${activeTab === 'rekapMapel' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('rekapMapel')}
+                  className={`portal-submenu-item ${activeTab === 'laporanAbsensiMapel' || activeTab === 'rekapMapel' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('laporanAbsensiMapel')}
                 >
-                  <span>Rekap Absensi Mapel</span>
+                  <span>Absensi Mapel</span>
                 </button>
               </div>
             )}
@@ -405,7 +409,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           <div className="portal-menu-group">
             <button
               type="button"
-              className="portal-menu-item has-submenu"
+              className={`portal-menu-item has-submenu ${['laporanSurat'].includes(activeTab) ? 'has-active' : ''}`}
               onClick={() => toggleSubMenu('laporanSurat')}
             >
               <div className="menu-icon-wrap">
@@ -418,10 +422,10 @@ export default function AdminDesktopView({ user, onLogout }) {
               <div className="portal-submenu-list">
                 <button
                   type="button"
-                  className="portal-submenu-item"
-                  onClick={() => handleSelectTab('izin')}
+                  className={`portal-submenu-item ${activeTab === 'laporanSurat' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('laporanSurat')}
                 >
-                  <span>Rekap Surat Izin</span>
+                  <span>Laporan Surat Izin</span>
                 </button>
               </div>
             )}
@@ -620,9 +624,12 @@ export default function AdminDesktopView({ user, onLogout }) {
           {activeTab === 'absensiMapel' && <AdminAbsensiMapelTab />}
 
           {/* 4. LAPORAN & REKAP */}
-          {activeTab === 'rekapGuru' && <AdminRekapTab initialSubTab="guru" />}
-          {activeTab === 'rekapSiswa' && <AdminRekapTab initialSubTab="siswa" />}
-          {activeTab === 'rekapMapel' && <AdminRekapTab initialSubTab="mapel" />}
+          {['laporanSiswa', 'laporanGuru', 'laporanKelas', 'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat'].includes(activeTab) && (
+            <AdminLaporanGeneratorTab reportType={activeTab} />
+          )}
+          {activeTab === 'rekapGuru' && <AdminLaporanGeneratorTab reportType="laporanPresensiGuru" />}
+          {activeTab === 'rekapSiswa' && <AdminLaporanGeneratorTab reportType="laporanAbsensiSiswa" />}
+          {activeTab === 'rekapMapel' && <AdminLaporanGeneratorTab reportType="laporanAbsensiMapel" />}
 
           {/* 5. SISTEM & AKUN */}
           {activeTab === 'users' && <AdminUsersTab />}
