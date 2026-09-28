@@ -321,7 +321,7 @@ body {
 /* FLOATING OVERLAPPING SUMMARY CARD (4 VERTICAL ICON COLUMNS) */
 .summary-overlap-card {
   max-width: 680px;
-  margin: -20px auto 16px auto;
+  margin: -55px auto 16px auto;
   width: calc(100% - 32px);
   background: #ffffff;
   border-radius: 20px;
