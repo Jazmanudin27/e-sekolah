@@ -28,19 +28,21 @@ class IzinModel {
     try {
       const rows = await query(`
         SELECT 
-          id, 
-          user_id, 
-          nama_pengaju, 
-          jenis, 
-          DATE_FORMAT(tanggal_mulai, '%Y-%m-%d') AS tanggal_mulai,
-          DATE_FORMAT(tanggal_selesai, '%Y-%m-%d') AS tanggal_selesai,
-          durasi, 
-          keterangan, 
-          status, 
-          disetujui_oleh, 
-          DATE_FORMAT(created_at, '%d %b %Y') AS tanggal
-        FROM pengajuan_izin 
-        ORDER BY id DESC
+          p.id, 
+          p.user_id, 
+          COALESCE(NULLIF(TRIM(g.nama_guru), ''), NULLIF(TRIM(p.nama_pengaju), ''), 'Guru Pengajar') AS nama_guru,
+          p.nama_pengaju, 
+          p.jenis, 
+          DATE_FORMAT(p.tanggal_mulai, '%Y-%m-%d') AS tanggal_mulai,
+          DATE_FORMAT(p.tanggal_selesai, '%Y-%m-%d') AS tanggal_selesai,
+          p.durasi, 
+          p.keterangan, 
+          p.status, 
+          p.disetujui_oleh, 
+          DATE_FORMAT(p.created_at, '%d %b %Y') AS tanggal
+        FROM pengajuan_izin p
+        LEFT JOIN guru g ON (p.user_id = g.kode_guru OR (p.user_id IS NULL AND p.nama_pengaju = g.nama_guru))
+        ORDER BY p.id DESC
       `);
       return rows;
     } catch (err) {

@@ -1,4 +1,5 @@
 const IzinModel = require('../models/izin.model');
+const { query } = require('../config/database');
 const { sendSuccess, sendError } = require('../utils/response.util');
 
 async function getIzin(req, res, next) {
@@ -18,8 +19,19 @@ async function createIzin(req, res, next) {
       return sendError(res, 'Tanggal mulai wajib diisi.', 400);
     }
 
-    const pengaju = nama_guru || nama_pengaju || req.user?.nama_guru || req.user?.name || req.user?.username || 'Guru / Pegawai';
     const user_id = kode_guru || req.user?.id || null;
+    let pengaju = nama_guru || nama_pengaju;
+
+    if (user_id && (!pengaju || !isNaN(pengaju) || pengaju === 'Guru Pengajar' || pengaju === 'Guru / Pegawai')) {
+      try {
+        const gRows = await query('SELECT nama_guru FROM guru WHERE kode_guru = ? LIMIT 1', [user_id]);
+        if (gRows && gRows[0]?.nama_guru) {
+          pengaju = gRows[0].nama_guru;
+        }
+      } catch (e) {}
+    }
+    if (!pengaju) pengaju = req.user?.nama_guru || req.user?.name || req.user?.username || 'Guru Pengajar';
+
     const finalJenis = jenis || jenis_izin || 'Sakit';
 
     let durasi = '1 Hari';
@@ -55,8 +67,18 @@ async function updateIzin(req, res, next) {
 
     const { jenis, jenis_izin, kode_guru, nama_guru, nama_pengaju, tanggal_mulai, tanggal_selesai, keterangan, status } = req.body;
 
-    const pengaju = nama_guru || nama_pengaju || existing.nama_pengaju;
     const user_id = kode_guru !== undefined ? kode_guru : existing.user_id;
+    let pengaju = nama_guru || nama_pengaju || existing.nama_pengaju;
+
+    if (user_id && (!pengaju || !isNaN(pengaju) || pengaju === 'Guru Pengajar' || pengaju === 'Guru / Pegawai')) {
+      try {
+        const gRows = await query('SELECT nama_guru FROM guru WHERE kode_guru = ? LIMIT 1', [user_id]);
+        if (gRows && gRows[0]?.nama_guru) {
+          pengaju = gRows[0].nama_guru;
+        }
+      } catch (e) {}
+    }
+
     const finalJenis = jenis || jenis_izin || existing.jenis;
     const tglMulai = tanggal_mulai || existing.tanggal_mulai;
     const tglSelesai = tanggal_selesai || existing.tanggal_selesai || tglMulai;
