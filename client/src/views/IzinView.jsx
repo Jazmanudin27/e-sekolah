@@ -106,37 +106,6 @@ export default function IzinView({ user, showToast }) {
 
   return (
     <div className="inner-page-wrapper" style={{ paddingBottom: 36, paddingTop: 4 }}>
-      {/* OVERVIEW STATS CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 18 }}>
-        {/* Total Pengajuan Card */}
-        <div style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', padding: '12px 10px', borderRadius: 16, color: '#ffffff', boxShadow: '0 4px 14px rgba(37,99,235,0.2)', textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
-            <FileText size={12} /> TOTAL PENGAJUAN
-          </div>
-          <div style={{ fontSize: 20, fontWeight: 900, lineHeight: 1.1 }}>{riwayatIzin.length}</div>
-        </div>
-
-        {/* Disetujui Card */}
-        <div style={{ background: 'linear-gradient(135deg, #10b981, #047857)', padding: '12px 10px', borderRadius: 16, color: '#ffffff', boxShadow: '0 4px 14px rgba(16,185,129,0.2)', textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
-            <CheckCircle size={12} /> DISETUJUI
-          </div>
-          <div style={{ fontSize: 20, fontWeight: 900, lineHeight: 1.1 }}>
-            {riwayatIzin.filter(i => i.status === 'Disetujui' || i.status === 'APPROVED').length}
-          </div>
-        </div>
-
-        {/* Menunggu Card */}
-        <div style={{ background: 'linear-gradient(135deg, #f59e0b, #b45309)', padding: '12px 10px', borderRadius: 16, color: '#ffffff', boxShadow: '0 4px 14px rgba(245,158,11,0.2)', textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, opacity: 0.9, fontSize: 10, fontWeight: 700, marginBottom: 2 }}>
-            <Clock size={12} /> MENUNGGU
-          </div>
-          <div style={{ fontSize: 20, fontWeight: 900, lineHeight: 1.1 }}>
-            {riwayatIzin.filter(i => i.status !== 'Disetujui' && i.status !== 'APPROVED').length}
-          </div>
-        </div>
-      </div>
-
       {/* FORM PENGAJUAN */}
       {showForm && (
         <div style={{ background: '#ffffff', padding: 18, borderRadius: 18, border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.06)', marginBottom: 20 }}>
@@ -322,28 +291,9 @@ export default function IzinView({ user, showToast }) {
           position: 'fixed',
           bottom: 90,
           right: 20,
-          zIndex: 150,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8
+          zIndex: 150
         }}
       >
-        {!showForm && (
-          <span
-            style={{
-              background: '#0f172a',
-              color: '#ffffff',
-              fontSize: 12,
-              fontWeight: 700,
-              padding: '6px 12px',
-              borderRadius: 20,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
-              pointerEvents: 'none'
-            }}
-          >
-            + Buat Izin
-          </span>
-        )}
         <button
           onClick={() => setShowForm(!showForm)}
           title={showForm ? 'Tutup Form' : 'Buat Pengajuan Izin Baru'}

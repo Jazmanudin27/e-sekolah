@@ -216,7 +216,7 @@ export default function App() {
 
       {activeTab === 'izin' && (
         <SubHeader
-          title="Pengajuan & Data Izin"
+          title="Pengajuan Izin"
           subtitle="Permohonan izin, sakit, dan dinas sekolah"
           onBack={() => setActiveTab('beranda')}
         />
