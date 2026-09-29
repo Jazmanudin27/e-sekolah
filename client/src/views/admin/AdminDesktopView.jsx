@@ -56,7 +56,7 @@ const getInitialOpenMenus = (tab) => ({
   laporanAbsensi: ['rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(tab),
   laporanSurat: false,
   perpustakaan: false,
-  pengaturan: ['settings', 'users'].includes(tab)
+  pengaturan: ['settings', 'users', 'menuHakAkses'].includes(tab)
 });
 
 export default function AdminDesktopView({ user, onLogout }) {
@@ -147,7 +147,7 @@ export default function AdminDesktopView({ user, onLogout }) {
         suratMenyurat: ['izin'].includes(tabId) ? true : prev.suratMenyurat,
         presensiAbsensi: ['presensiGuru', 'absensiSiswa', 'absensiMapel'].includes(tabId) ? true : prev.presensiAbsensi,
         laporanAbsensi: ['rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(tabId) ? true : prev.laporanAbsensi,
-        pengaturan: ['settings', 'users'].includes(tabId) ? true : prev.pengaturan,
+        pengaturan: ['settings', 'users', 'menuHakAkses'].includes(tabId) ? true : prev.pengaturan,
       }));
     }
   };
@@ -494,7 +494,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           <div className="portal-menu-group">
             <button
               type="button"
-              className={`portal-menu-item has-submenu ${['settings', 'users'].includes(activeTab) ? 'has-active' : ''}`}
+              className={`portal-menu-item has-submenu ${['settings', 'users', 'menuHakAkses'].includes(activeTab) ? 'has-active' : ''}`}
               onClick={() => toggleSubMenu('pengaturan')}
             >
               <div className="menu-icon-wrap">

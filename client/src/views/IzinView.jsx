@@ -140,18 +140,18 @@ export default function IzinView({ user, showToast }) {
                 <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 6, display: 'block' }}>TANGGAL MULAI</label>
                 <input
                   type="date"
+                  className="form-control-admin form-sm"
                   value={tanggalMulai}
                   onChange={(e) => setTanggalMulai(e.target.value)}
-                  style={{ width: '100%', padding: '11px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }}
                 />
               </div>
               <div>
                 <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 6, display: 'block' }}>SAMPAI (OPSIONAL)</label>
                 <input
                   type="date"
+                  className="form-control-admin form-sm"
                   value={tanggalSelesai}
                   onChange={(e) => setTanggalSelesai(e.target.value)}
-                  style={{ width: '100%', padding: '11px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }}
                 />
               </div>
             </div>

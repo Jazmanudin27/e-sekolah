@@ -44,7 +44,7 @@ async function login(req, res, next) {
     }
 
     if (!user) {
-      return sendError(res, `Username '${cleanUsername}' tidak ditemukan di sistem.`, 401);
+      return sendError(res, 'Username atau password salah.', 401);
     }
 
     // Verify Password:
@@ -88,7 +88,7 @@ async function login(req, res, next) {
     }
 
     if (!isMatch) {
-      return sendError(res, 'Password salah. Coba gunakan password default 123456 atau Jazman@271998.', 401);
+      return sendError(res, 'Username atau password salah.', 401);
     }
 
     // Construct Payload & Response

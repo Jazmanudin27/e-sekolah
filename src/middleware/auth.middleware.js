@@ -22,5 +22,6 @@ function authenticateToken(req, res, next) {
 
 module.exports = {
   authenticateToken,
+  verifyToken: authenticateToken,
   JWT_SECRET
 };

@@ -35,10 +35,19 @@ class MenuModel {
 
   static async ensureTableSchema() {
     try {
-      // Modify column type of kode_user to VARCHAR(50) so it can hold role names or user IDs
+      await query(`
+        CREATE TABLE IF NOT EXISTS \`menu\` (
+          \`id\` INT AUTO_INCREMENT PRIMARY KEY,
+          \`kode_user\` VARCHAR(50) DEFAULT NULL,
+          \`status\` VARCHAR(20) DEFAULT '1',
+          \`menu\` VARCHAR(100) DEFAULT NULL,
+          \`kode_member\` VARCHAR(50) DEFAULT NULL,
+          \`created_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      `);
       await query(`ALTER TABLE \`menu\` MODIFY COLUMN \`kode_user\` VARCHAR(50) DEFAULT NULL`);
     } catch (err) {
-      // Ignore if table or column alteration warning
+      console.warn('[MenuModel] ensureTableSchema warning:', err.message);
     }
   }
 
