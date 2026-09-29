@@ -161,7 +161,9 @@ async function getHistory(req, res, next) {
     const { kode_guru } = req.user;
     const { bulan, tahun, limit = 30 } = req.query;
 
-    const teacherId = (req.user.role === 'Guru') ? kode_guru : (req.query.kode_guru || kode_guru);
+    const userRole = String(req.user?.role || req.user?.level || '').toLowerCase();
+    const isFullAccess = ['admin', 'superadmin', 'kepala sekolah', 'kepala_sekolah', 'kepsek', 'tu', 'operator'].includes(userRole);
+    const teacherId = isFullAccess ? (req.query.kode_guru || kode_guru) : kode_guru;
 
     const records = await PresensiModel.getHistory({
       kode_guru: teacherId,

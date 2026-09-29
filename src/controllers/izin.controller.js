@@ -34,7 +34,20 @@ async function getKodeMemberFromReq(req) {
 async function getIzin(req, res, next) {
   try {
     const kode_member = await getKodeMemberFromReq(req);
-    const records = await IzinModel.findAll(kode_member);
+    let records = await IzinModel.findAll(kode_member);
+
+    const userRole = String(req.user?.role || req.user?.level || '').toLowerCase();
+    const isFullAccess = ['admin', 'superadmin', 'kepala sekolah', 'kepala_sekolah', 'kepsek', 'tu', 'operator'].includes(userRole);
+
+    if (!isFullAccess && (req.user?.kode_guru || req.user?.nama_guru)) {
+      const myGuruId = String(req.user.kode_guru || '');
+      const myNama = String(req.user.nama_guru || req.user.name || '').toLowerCase();
+      records = records.filter(r =>
+        (r.kode_guru && String(r.kode_guru) === myGuruId) ||
+        (r.nama_guru && String(r.nama_guru).toLowerCase() === myNama)
+      );
+    }
+
     sendSuccess(res, 'Data pengajuan izin berhasil diambil dari database.', records, 200, { count: records.length });
   } catch (error) {
     next(error);

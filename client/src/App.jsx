@@ -100,7 +100,7 @@ export default function App() {
     const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
     const stored = localStorage.getItem('esekolah_active_tab');
     if (!hash && !stored) {
-      const isAdmin = user?.type === 'Admin' || (user?.role && ['admin', 'superadmin', 'operator', 'kepala_sekolah'].includes(String(user.role).toLowerCase()));
+      const isAdmin = user?.type === 'Admin' || (user?.role && ['admin', 'superadmin', 'operator', 'kepala_sekolah', 'kepala sekolah', 'kepsek', 'tu'].includes(String(user.role).toLowerCase()));
       const isKelas = user?.type === 'Kelas' || user?.role === 'Kelas';
       setActiveTab(isAdmin ? 'dashboard' : isKelas ? 'absensiSiswa' : 'beranda');
     } else {
@@ -166,8 +166,8 @@ export default function App() {
     return <LoginView onLoginSuccess={handleLoginSuccess} showToast={showToast} />;
   }
 
-  // DESKTOP ADMIN PANEL (Only accessible by accounts from `users` table)
-  if (currentUser?.type === 'Admin' || (currentUser?.role && ['admin', 'superadmin', 'operator', 'kepala_sekolah'].includes(String(currentUser.role).toLowerCase()))) {
+  // DESKTOP ADMIN PANEL & MANAGEMENT PORTAL
+  if (currentUser?.type === 'Admin' || (currentUser?.role && ['admin', 'superadmin', 'operator', 'kepala_sekolah', 'kepala sekolah', 'kepsek', 'tu'].includes(String(currentUser.role).toLowerCase()))) {
     return <AdminDesktopView user={currentUser} onLogout={handleLogout} />;
   }
 
