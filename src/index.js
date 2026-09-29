@@ -13,7 +13,6 @@ const presensiRoutes = require('./routes/presensi.routes');
 const absensiSiswaRoutes = require('./routes/absensiSiswa.routes');
 const absensiMapelRoutes = require('./routes/absensiMapel.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
-const menuRoutes = require('./routes/menu.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5007;
@@ -49,7 +48,6 @@ app.use('/api/presensi', presensiRoutes);
 app.use('/api/absensi-siswa', absensiSiswaRoutes);
 app.use('/api/absensi-mapel', absensiMapelRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/menu', menuRoutes);
 
 // Error Handling Middleware
 app.use(errorHandler);
