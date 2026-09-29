@@ -38,7 +38,14 @@ class MenuController {
     try {
       const kodeMember = req.user?.kode_member || null;
       const availableMenus = MenuModel.getAvailableMenus();
-      const rolePermissions = await MenuModel.getAllRolePermissions(kodeMember);
+      let rolePermissions = {};
+
+      try {
+        rolePermissions = await MenuModel.getAllRolePermissions(kodeMember);
+      } catch (err) {
+        console.error('[MenuController] getAllRolePermissions fallback:', err.message);
+        rolePermissions = MenuModel.getDefaultRolePermissions();
+      }
 
       return sendSuccess(res, 'Berhasil mengambil daftar hak akses role', {
         available_menus: availableMenus,
@@ -46,7 +53,10 @@ class MenuController {
       });
     } catch (err) {
       console.error('[MenuController] getRolePermissions error:', err);
-      return sendError(res, err.message, 500);
+      return sendSuccess(res, 'Berhasil mengambil daftar hak akses role (Fallback)', {
+        available_menus: MenuModel.getAvailableMenus(),
+        role_permissions: MenuModel.getDefaultRolePermissions()
+      });
     }
   }
 

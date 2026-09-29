@@ -33,6 +33,10 @@ class MenuModel {
     return ALL_AVAILABLE_MENUS;
   }
 
+  static getDefaultRolePermissions() {
+    return DEFAULT_ROLE_MENUS;
+  }
+
   static async ensureTableSchema() {
     try {
       await query(`
