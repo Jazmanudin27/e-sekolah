@@ -31,8 +31,24 @@ async function getRekapMapel(req, res, next) {
 
 async function getRekapGuru(req, res, next) {
   try {
-    const { bulan, tahun } = req.query;
-    const records = await RekapModel.getRekapGuru({ bulan, tahun });
+    const { bulan, tahun, kode_guru } = req.query;
+    let records = await RekapModel.getRekapGuru({ bulan, tahun });
+
+    const userRole = String(req.user?.role || req.user?.level || '').toLowerCase();
+    const isFullAccess = ['admin', 'superadmin', 'kepala sekolah', 'kepala_sekolah', 'kepsek', 'tu', 'operator'].includes(userRole);
+
+    if (!isFullAccess && (req.user?.kode_guru || req.user?.nama_guru)) {
+      const myGuruId = String(req.user.kode_guru || '');
+      const myNama = String(req.user.nama_guru || req.user.name || '').toLowerCase();
+
+      records = records.filter(r =>
+        (r.kode_guru && String(r.kode_guru) === myGuruId) ||
+        (r.nama_guru && String(r.nama_guru).toLowerCase() === myNama)
+      );
+    } else if (kode_guru) {
+      records = records.filter(r => String(r.kode_guru) === String(kode_guru));
+    }
+
     sendSuccess(res, 'Laporan kehadiran presensi guru berhasil diambil.', records, 200, { count: records.length });
   } catch (error) {
     next(error);
@@ -67,11 +83,21 @@ async function getDetailMapel(req, res, next) {
 
 async function getDetailGuru(req, res, next) {
   try {
-    const { kode_guru, bulan, tahun } = req.query;
-    if (!kode_guru) {
+    const { bulan, tahun } = req.query;
+    let targetKodeGuru = req.query.kode_guru;
+
+    const userRole = String(req.user?.role || req.user?.level || '').toLowerCase();
+    const isFullAccess = ['admin', 'superadmin', 'kepala sekolah', 'kepala_sekolah', 'kepsek', 'tu', 'operator'].includes(userRole);
+
+    if (!isFullAccess && req.user?.kode_guru) {
+      targetKodeGuru = req.user.kode_guru;
+    }
+
+    if (!targetKodeGuru) {
       return sendError(res, 'kode_guru wajib diisi.', 400);
     }
-    const records = await RekapModel.getDetailGuru({ kode_guru, bulan, tahun });
+
+    const records = await RekapModel.getDetailGuru({ kode_guru: targetKodeGuru, bulan, tahun });
     sendSuccess(res, 'Detail presensi guru berhasil diambil.', records, 200, { count: records.length });
   } catch (error) {
     next(error);

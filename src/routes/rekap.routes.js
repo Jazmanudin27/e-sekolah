@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { authenticateToken } = require('../middleware/auth.middleware');
 const {
   getRekapSiswa,
   getRekapMapel,
@@ -9,13 +10,13 @@ const {
   getDetailGuru
 } = require('../controllers/rekap.controller');
 
-router.get('/siswa', getRekapSiswa);
-router.get('/siswa-detail', getDetailSiswa);
+router.get('/siswa', authenticateToken, getRekapSiswa);
+router.get('/siswa-detail', authenticateToken, getDetailSiswa);
 
-router.get('/mapel', getRekapMapel);
-router.get('/mapel-detail', getDetailMapel);
+router.get('/mapel', authenticateToken, getRekapMapel);
+router.get('/mapel-detail', authenticateToken, getDetailMapel);
 
-router.get('/guru', getRekapGuru);
-router.get('/guru-detail', getDetailGuru);
+router.get('/guru', authenticateToken, getRekapGuru);
+router.get('/guru-detail', authenticateToken, getDetailGuru);
 
 module.exports = router;
