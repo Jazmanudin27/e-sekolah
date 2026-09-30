@@ -143,11 +143,6 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
           </div>
         </div>
 
-        {/* PENGUMUMAN SLIDER BANNER */}
-        <div style={{ padding: '0 16px', marginTop: 12 }}>
-          <PengumumanSlider />
-        </div>
-
         {/* MENU GRID KHUSUS KELAS (3 menu: Absen Siswa, Jadwal, & Rekap Siswa) */}
         <div className="grid-8-menu-wrapper">
           <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
@@ -172,6 +167,11 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
               <span>Rekap Siswa</span>
             </button>
           </div>
+        </div>
+
+        {/* PENGUMUMAN SLIDER BANNER */}
+        <div style={{ padding: '0 16px', margin: '14px 0 20px 0' }}>
+          <PengumumanSlider />
         </div>
 
         {/* INFO BOX */}
@@ -254,99 +254,6 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
             <span className="summary-col-label">Cuti</span>
           </div>
 
-        </div>
-      </div>
-
-      {/* PENGUMUMAN SLIDER BANNER */}
-      <div style={{ padding: '0 16px', marginTop: 12 }}>
-        <PengumumanSlider />
-      </div>
-
-      {/* 2. DUAL SCAN ACTION CARDS (SCAN MASUK & SCAN PULANG) */}
-      <div className="dual-scan-row">
-        <button
-          className="scan-box-btn scan-masuk-btn"
-          onClick={() => onOpenPresensiModal('in')}
-        >
-          <div className="scan-icon-circle-box">
-            <Fingerprint size={24} />
-          </div>
-          <div>
-            <div className="scan-main-title">Absen Masuk</div>
-            <div className="scan-sub-text">
-              {todayStatus?.jam_in ? `Jam: ${todayStatus.jam_in}` : 'Belum Scan'}
-            </div>
-          </div>
-        </button>
-
-        <button
-          className="scan-box-btn scan-pulang-btn"
-          onClick={() => onOpenPresensiModal('out')}
-        >
-          <div className="scan-icon-circle-box">
-            <Fingerprint size={24} />
-          </div>
-          <div>
-            <div className="scan-main-title">Absen Pulang</div>
-            <div className="scan-sub-text">
-              {todayStatus?.jam_out ? `Jam: ${todayStatus.jam_out}` : 'Belum Scan'}
-            </div>
-          </div>
-        </button>
-      </div>
-
-      {/* 3. 8-GRID BLUE MENU CARDS */}
-      <div className="grid-8-menu-wrapper">
-        <div className="grid-8-menu">
-          <button className="menu-blue-card" onClick={() => onSwitchTab('siswa')}>
-            <div className="menu-icon-circle">
-              <Users size={22} />
-            </div>
-            <span>Siswa</span>
-          </button>
-
-          <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>
-            <div className="menu-icon-circle">
-              <Calendar size={22} />
-            </div>
-            <span>Jadwal</span>
-          </button>
-
-          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
-            <div className="menu-icon-circle">
-              <History size={22} />
-            </div>
-            <span>History</span>
-          </button>
-
-          <button className="menu-blue-card" onClick={() => onSwitchTab('absensiSiswa')}>
-            <div className="menu-icon-circle">
-              <UserCheck size={22} />
-            </div>
-            <span>Absen Siswa</span>
-          </button>
-
-          <button className="menu-blue-card" onClick={() => onSwitchTab('absensiMapel')}>
-            <div className="menu-icon-circle">
-              <BookOpen size={22} />
-            </div>
-            <span>Absen Mapel</span>
-          </button>
-
-          <button className="menu-blue-card" onClick={() => onSwitchTab('rekapSiswa')}>
-            <div className="menu-icon-circle">
-              <FileBarChart size={22} />
-            </div>
-            <span>Rekap Siswa</span>
-          </button>
-
-          <button className="menu-blue-card" onClick={() => onSwitchTab('rekapMapel')}>
-            <div className="menu-icon-circle">
-              <PieChart size={22} />
-            </div>
-            <span>Rekap Mapel</span>
-          </button>
-
           <button className="menu-blue-card" onClick={() => onSwitchTab('rekapGuru')}>
             <div className="menu-icon-circle">
               <Award size={22} />
@@ -354,6 +261,11 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
             <span>Rekap Guru</span>
           </button>
         </div>
+      </div>
+
+      {/* PENGUMUMAN SLIDER BANNER */}
+      <div style={{ padding: '0 16px', margin: '14px 0 20px 0' }}>
+        <PengumumanSlider />
       </div>
 
       {/* 4. HISTORI ABSENSI 5 HARI TERAKHIR */}
