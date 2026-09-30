@@ -55,10 +55,20 @@ async function deleteGuru(req, res, next) {
   }
 }
 
+async function getTodayBirthdays(req, res, next) {
+  try {
+    const list = await GuruModel.getTodayBirthdays();
+    sendSuccess(res, 'Data guru ulang tahun hari ini.', list);
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getAllGuru,
   getGuruById,
   createGuru,
   updateGuru,
-  deleteGuru
+  deleteGuru,
+  getTodayBirthdays
 };

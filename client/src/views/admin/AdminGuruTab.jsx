@@ -25,6 +25,7 @@ export default function AdminGuruTab() {
     jk: 'L',
     no_hp: '',
     email: '',
+    tgl_lahir: '',
     status_kepegawaian: 'PNS',
     status: 'Aktif',
     role: 'Guru',
@@ -63,6 +64,7 @@ export default function AdminGuruTab() {
       jk: 'L',
       no_hp: '',
       email: '',
+      tgl_lahir: '',
       status_kepegawaian: 'PNS',
       status: 'Aktif',
       role: 'Guru',
@@ -75,12 +77,19 @@ export default function AdminGuruTab() {
   const handleOpenEdit = (guru) => {
     setIsEditing(true);
     setCurrentId(guru.kode_guru);
+    let formattedDate = '';
+    if (guru.tgl_lahir) {
+      try {
+        formattedDate = new Date(guru.tgl_lahir).toISOString().split('T')[0];
+      } catch (e) {}
+    }
     setFormData({
       nip_nuptk: guru.nip_nuptk || '',
       nama_guru: guru.nama_guru || '',
       jk: guru.jk || 'L',
       no_hp: guru.no_hp || '',
       email: guru.email || '',
+      tgl_lahir: formattedDate,
       status_kepegawaian: guru.status_kepegawaian || 'PNS',
       status: guru.status || 'Aktif',
       role: guru.role || 'Guru',
@@ -221,6 +230,7 @@ export default function AdminGuruTab() {
                 <th>NIP / NUPTK</th>
                 <th>L/P</th>
                 <th>Kepegawaian</th>
+                <th>Tgl Lahir</th>
                 <th>No. Handphone</th>
                 <th>Status</th>
                 <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
@@ -229,13 +239,13 @@ export default function AdminGuruTab() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                  <td colSpan={9} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                     Memuat data guru...
                   </td>
                 </tr>
               ) : filteredList.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                  <td colSpan={9} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                     Tidak ada data guru yang cocok.
                   </td>
                 </tr>
@@ -261,6 +271,9 @@ export default function AdminGuruTab() {
                           {g.status_kepegawaian}
                         </span>
                       ) : ''}
+                    </td>
+                    <td style={{ textAlign: 'center', fontSize: 11.5, color: '#475569' }}>
+                      {g.tgl_lahir ? new Date(g.tgl_lahir).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                     </td>
                     <td style={{ textAlign: 'center' }}>{g.no_hp && g.no_hp !== '-' ? g.no_hp : ''}</td>
                     <td style={{ textAlign: 'center' }}>
@@ -360,6 +373,16 @@ export default function AdminGuruTab() {
                         { value: 'Honorer', label: 'Honorer' },
                         { value: 'Yayasan', label: 'Guru Tetap Yayasan' }
                       ]}
+                    />
+                  </div>
+
+                  <div className="form-group-admin">
+                    <label>Tanggal Lahir (Untuk Ultah)</label>
+                    <input
+                      type="date"
+                      className="form-control-admin"
+                      value={formData.tgl_lahir || ''}
+                      onChange={(e) => setFormData({ ...formData, tgl_lahir: e.target.value })}
                     />
                   </div>
 

@@ -4,6 +4,7 @@ const guruController = require('../controllers/guru.controller');
 const { authenticateToken } = require('../middleware/auth.middleware');
 
 router.get('/', authenticateToken, guruController.getAllGuru);
+router.get('/birthdays/today', authenticateToken, guruController.getTodayBirthdays);
 router.get('/:id', authenticateToken, guruController.getGuruById);
 router.post('/', authenticateToken, guruController.createGuru);
 router.put('/:id', authenticateToken, guruController.updateGuru);

@@ -18,7 +18,7 @@ class GuruModel {
   }
 
   static async findAll({ status, search, kode_member }) {
-    let sql = 'SELECT kode_guru, nip_nuptk, nama_guru, jk, no_hp, email, status_kepegawaian, status, role, kode_member FROM guru WHERE 1=1';
+    let sql = 'SELECT kode_guru, nip_nuptk, nama_guru, jk, no_hp, email, status_kepegawaian, tgl_lahir, status, role, kode_member FROM guru WHERE 1=1';
     const params = [];
 
     if (kode_member) {
@@ -38,6 +38,22 @@ class GuruModel {
     return await query(sql, params);
   }
 
+  static async getTodayBirthdays() {
+    const today = new Date();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    const rows = await query(
+      `SELECT kode_guru, nama_guru, jk, email, no_hp, status_kepegawaian, tgl_lahir
+       FROM guru
+       WHERE status = 'Aktif'
+         AND tgl_lahir IS NOT NULL
+         AND MONTH(tgl_lahir) = ?
+         AND DAY(tgl_lahir) = ?`,
+      [month, day]
+    );
+    return rows;
+  }
+
   static async countActive(kode_member) {
     let sql = 'SELECT COUNT(*) AS total FROM guru WHERE status = "Aktif"';
     const params = [];
@@ -49,11 +65,11 @@ class GuruModel {
     return rows[0].total || 0;
   }
 
-  static async create({ nip_nuptk, nama_guru, jk = 'L', no_hp, email, status_kepegawaian = 'PNS', status = 'Aktif', role = 'Guru', username, password, kode_member }) {
+  static async create({ nip_nuptk, nama_guru, jk = 'L', no_hp, email, tgl_lahir, status_kepegawaian = 'PNS', status = 'Aktif', role = 'Guru', username, password, kode_member }) {
     const res = await query(
-      `INSERT INTO guru (nip_nuptk, nama_guru, jk, no_hp, email, status_kepegawaian, status, role, username, password, kode_member)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [nip_nuptk || '-', nama_guru, jk, no_hp || '-', email || '-', status_kepegawaian, status, role, username || nip_nuptk || nama_guru.toLowerCase().replace(/\s+/g, ''), password || '123456', kode_member || null]
+      `INSERT INTO guru (nip_nuptk, nama_guru, jk, no_hp, email, tgl_lahir, status_kepegawaian, status, role, username, password, kode_member)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [nip_nuptk || '-', nama_guru, jk, no_hp || '-', email || '-', tgl_lahir || null, status_kepegawaian, status, role, username || nip_nuptk || nama_guru.toLowerCase().replace(/\s+/g, ''), password || '123456', kode_member || null]
     );
     return res.insertId;
   }
@@ -61,7 +77,7 @@ class GuruModel {
   static async update(id, data) {
     const fields = [];
     const params = [];
-    const allowed = ['nip_nuptk', 'nama_guru', 'jk', 'no_hp', 'email', 'status_kepegawaian', 'status', 'role', 'username', 'password'];
+    const allowed = ['nip_nuptk', 'nama_guru', 'jk', 'no_hp', 'email', 'tgl_lahir', 'status_kepegawaian', 'status', 'role', 'username', 'password'];
     for (const key of allowed) {
       if (data[key] !== undefined) {
         fields.push(`${key} = ?`);

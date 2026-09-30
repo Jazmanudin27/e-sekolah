@@ -18,6 +18,7 @@ import RekapMapelView from './views/RekapMapelView';
 import RekapGuruView from './views/RekapGuruView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
 import InstallPwaModal from './components/InstallPwaModal';
+import BirthdayModal from './components/BirthdayModal';
 import api from './api/client';
 
 const getInitialTab = () => {
@@ -177,6 +178,7 @@ export default function App() {
     return (
       <>
         <InstallPwaModal />
+        <BirthdayModal user={currentUser} />
         <AdminDesktopView user={currentUser} onLogout={handleLogout} />
       </>
     );
@@ -185,6 +187,7 @@ export default function App() {
   return (
     <div className="app-shell">
       <InstallPwaModal />
+      <BirthdayModal user={currentUser} />
       {/* SubHeaders for non-beranda views */}
       {activeTab === 'siswa' && (
         <SubHeader
