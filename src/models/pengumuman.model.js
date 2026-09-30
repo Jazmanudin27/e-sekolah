@@ -1,9 +1,8 @@
-const { getTenantPool } = require('../config/database');
+const { query } = require('../config/database');
 
 class PengumumanModel {
   static async ensureTable() {
-    const pool = getTenantPool();
-    const query = `
+    const createTableSql = `
       CREATE TABLE IF NOT EXISTS pengumuman (
         id INT AUTO_INCREMENT PRIMARY KEY,
         judul VARCHAR(255) NOT NULL,
@@ -18,11 +17,11 @@ class PengumumanModel {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `;
     try {
-      await pool.query(query);
+      await query(createTableSql);
       // Insert sample initial announcements if table is empty
-      const [rows] = await pool.query('SELECT COUNT(*) as cnt FROM pengumuman');
-      if (rows[0].cnt === 0) {
-        await pool.query(`
+      const rows = await query('SELECT COUNT(*) as cnt FROM pengumuman');
+      if (rows && rows[0] && rows[0].cnt === 0) {
+        await query(`
           INSERT INTO pengumuman (judul, kategori, isi, gambar_url, penulis, target_role, is_active) VALUES
           (
             'Ujian Akhir Semester (UAS) Ganjil Tahun Ajaran 2026/2027',
@@ -41,15 +40,6 @@ class PengumumanModel {
             'Tim IT Artanita',
             'Semua',
             1
-          ),
-          (
-            'Pengumuman Libur Nasional & Cuti Bersama',
-            'Libur',
-            'Kegiatan Belajar Mengajar (KBM) ditiadakan dalam rangka memperingati Hari Libur Nasional. KBM akan aktif kembali sesuai dengan kalender akademik.',
-            'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
-            'Tata Usaha',
-            'Semua',
-            1
           )
         `);
       }
@@ -60,27 +50,24 @@ class PengumumanModel {
 
   static async getAllActive() {
     await this.ensureTable();
-    const pool = getTenantPool();
-    const [rows] = await pool.query(
+    const rows = await query(
       `SELECT * FROM pengumuman WHERE is_active = 1 ORDER BY created_at DESC LIMIT 20`
     );
-    return rows;
+    return rows || [];
   }
 
   static async getAllAdmin() {
     await this.ensureTable();
-    const pool = getTenantPool();
-    const [rows] = await pool.query(
+    const rows = await query(
       `SELECT * FROM pengumuman ORDER BY created_at DESC`
     );
-    return rows;
+    return rows || [];
   }
 
   static async create(data) {
     await this.ensureTable();
-    const pool = getTenantPool();
     const { judul, kategori, isi, gambar_url, penulis, target_role, is_active } = data;
-    const [result] = await pool.query(
+    const res = await query(
       `INSERT INTO pengumuman (judul, kategori, isi, gambar_url, penulis, target_role, is_active)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -93,14 +80,13 @@ class PengumumanModel {
         is_active !== undefined ? is_active : 1
       ]
     );
-    return result.insertId;
+    return res ? res.insertId : null;
   }
 
   static async update(id, data) {
     await this.ensureTable();
-    const pool = getTenantPool();
     const { judul, kategori, isi, gambar_url, penulis, target_role, is_active } = data;
-    await pool.query(
+    await query(
       `UPDATE pengumuman
        SET judul = ?, kategori = ?, isi = ?, gambar_url = ?, penulis = ?, target_role = ?, is_active = ?
        WHERE id = ?`,
@@ -111,8 +97,7 @@ class PengumumanModel {
 
   static async delete(id) {
     await this.ensureTable();
-    const pool = getTenantPool();
-    await pool.query('DELETE FROM pengumuman WHERE id = ?', [id]);
+    await query('DELETE FROM pengumuman WHERE id = ?', [id]);
     return true;
   }
 }
