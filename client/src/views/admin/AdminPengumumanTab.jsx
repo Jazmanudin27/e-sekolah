@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Megaphone, Check, X, Calendar, Image as ImageIcon, Eye } from 'lucide-react';
-import api from '../../api/client';
+import {
+  Megaphone, Plus, Search, Edit2, Trash2, RefreshCw, X, Check, Eye, Calendar, User, Tag
+} from 'lucide-react';
 import Swal from 'sweetalert2';
+import api from '../../api/client';
+import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function AdminPengumumanTab() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filterKategori, setFilterKategori] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Modal State
   const [showModal, setShowModal] = useState(false);
-  const [editId, setEditId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentId, setCurrentId] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     judul: '',
@@ -20,25 +32,29 @@ export default function AdminPengumumanTab() {
   });
 
   useEffect(() => {
-    fetchData();
+    fetchAnnouncements();
   }, []);
 
-  const fetchData = async () => {
+  const fetchAnnouncements = async () => {
     setLoading(true);
     try {
       const res = await api.get('/pengumuman/admin');
-      if (res.data.success) {
+      if (res.data?.success && Array.isArray(res.data.data)) {
         setList(res.data.data);
+      } else {
+        setList([]);
       }
     } catch (err) {
-      console.error("Error fetching announcements admin:", err);
+      console.error(err);
+      setList([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleOpenAdd = () => {
-    setEditId(null);
+    setIsEditing(false);
+    setCurrentId(null);
     setFormData({
       judul: '',
       kategori: 'Penting',
@@ -52,37 +68,40 @@ export default function AdminPengumumanTab() {
   };
 
   const handleOpenEdit = (item) => {
-    setEditId(item.id);
+    setIsEditing(true);
+    setCurrentId(item.id);
     setFormData({
-      judul: item.judul,
+      judul: item.judul || '',
       kategori: item.kategori || 'Penting',
-      isi: item.isi,
+      isi: item.isi || '',
       gambar_url: item.gambar_url || '',
       penulis: item.penulis || 'Administrator',
       target_role: item.target_role || 'Semua',
-      is_active: item.is_active
+      is_active: item.is_active !== undefined ? item.is_active : 1
     });
     setShowModal(true);
   };
 
-  const handleDelete = (id, judul) => {
+  const handleDelete = (item) => {
     Swal.fire({
       title: 'Hapus Pengumuman?',
-      text: `Apakah Anda yakin ingin menghapus "${judul}"?`,
+      text: `Apakah Anda yakin ingin menghapus "${item.judul}"?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#64748b',
       confirmButtonText: 'Ya, Hapus',
       cancelButtonText: 'Batal'
-    }).then(async (res) => {
-      if (res.isConfirmed) {
+    }).then(async (result) => {
+      if (result.isConfirmed) {
         try {
-          await api.delete(`/pengumuman/${id}`);
-          Swal.fire('Berhasil!', 'Pengumuman telah dihapus.', 'success');
-          fetchData();
+          const res = await api.delete(`/pengumuman/${item.id}`);
+          if (res.data?.success) {
+            Swal.fire('Terhapus!', 'Pengumuman berhasil dihapus.', 'success');
+            fetchAnnouncements();
+          }
         } catch (err) {
-          Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus.', 'error');
+          Swal.fire('Gagal!', err.response?.data?.message || 'Gagal menghapus pengumuman.', 'error');
         }
       }
     });
@@ -91,238 +110,297 @@ export default function AdminPengumumanTab() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.judul || !formData.isi) {
-      Swal.fire('Perhatian', 'Judul dan isi pengumuman wajib diisi.', 'warning');
+      Swal.fire('Validasi Gagal', 'Judul dan isi pengumuman wajib diisi!', 'warning');
       return;
     }
 
+    setSubmitting(true);
     try {
-      if (editId) {
-        await api.put(`/pengumuman/${editId}`, formData);
+      if (isEditing) {
+        await api.put(`/pengumuman/${currentId}`, formData);
         Swal.fire('Berhasil!', 'Pengumuman berhasil diperbarui.', 'success');
       } else {
         await api.post('/pengumuman', formData);
         Swal.fire('Berhasil!', 'Pengumuman baru berhasil diterbitkan.', 'success');
       }
       setShowModal(false);
-      fetchData();
+      fetchAnnouncements();
     } catch (err) {
-      Swal.fire('Gagal!', err.response?.data?.message || 'Gagal menyimpan pengumuman.', 'error');
+      Swal.fire('Error', err.response?.data?.message || 'Gagal menyimpan pengumuman.', 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  return (
-    <div style={{ padding: '24px' }}>
-      {/* HEADER TITLE */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', margin: 0 }}>
-            📢 Manajemen Pengumuman Sekolah
-          </h2>
-          <p style={{ fontSize: 13, color: '#64748b', margin: '4px 0 0 0' }}>
-            Buat, edit, dan terbitkan pengumuman interaktif yang akan muncul di aplikasi mobile guru & kelas.
-          </p>
-        </div>
-        <button
-          onClick={handleOpenAdd}
-          style={{
-            background: 'linear-gradient(135deg, #0066ff, #0052cc)',
-            color: '#fff',
-            border: 'none',
-            padding: '10px 18px',
-            borderRadius: 12,
-            fontWeight: 700,
-            fontSize: 13.5,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            boxShadow: '0 4px 14px rgba(0, 102, 255, 0.35)'
-          }}
-        >
-          <Plus size={18} />
-          <span>Tambah Pengumuman Baru</span>
-        </button>
-      </div>
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterKategori]);
 
-      {/* TABLE DATA PENGUMUMAN */}
-      <div style={{ background: '#ffffff', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
-          <thead>
-            <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 700 }}>
-              <th style={{ padding: '14px 16px' }}>Pengumuman</th>
-              <th style={{ padding: '14px 16px' }}>Kategori</th>
-              <th style={{ padding: '14px 16px' }}>Penulis</th>
-              <th style={{ padding: '14px 16px' }}>Target</th>
-              <th style={{ padding: '14px 16px' }}>Status</th>
-              <th style={{ padding: '14px 16px', textAlign: 'center' }}>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
+  const filteredList = list.filter(item => {
+    const matchSearch = (item.judul || '').toLowerCase().includes(search.toLowerCase()) ||
+                        (item.isi || '').toLowerCase().includes(search.toLowerCase()) ||
+                        (item.penulis || '').toLowerCase().includes(search.toLowerCase());
+    const matchKategori = filterKategori === 'ALL' || item.kategori === filterKategori;
+    return matchSearch && matchKategori;
+  });
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
+
+  return (
+    <div>
+      <div className="admin-panel">
+        <div className="admin-panel-header">
+          <div>
+            <div className="admin-panel-title">
+              <Megaphone size={18} color="#0284c7" /> Manajemen Informasi & Pengumuman Sekolah
+            </div>
+            <div className="admin-panel-subtitle">
+              Total {filteredList.length} pengumuman terdaftar dalam sistem
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn-primary-admin" onClick={handleOpenAdd}>
+              <Plus size={16} /> Tambah Pengumuman Baru
+            </button>
+          </div>
+        </div>
+
+        {/* SEARCH & FILTER CONTROLS */}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 18, alignItems: 'center' }}>
+          <div style={{ position: 'relative', flex: 1 }}>
+            <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              type="text"
+              placeholder="Cari berdasarkan judul, isi, atau penulis..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="form-control-admin"
+              style={{ paddingLeft: 40 }}
+            />
+          </div>
+
+          <div style={{ width: 180 }}>
+            <SearchableSelect
+              options={[
+                { value: 'ALL', label: 'Semua Kategori' },
+                { value: 'Penting', label: 'Kategori: Penting' },
+                { value: 'Kegiatan', label: 'Kategori: Kegiatan' },
+                { value: 'Libur', label: 'Kategori: Libur' },
+                { value: 'Umum', label: 'Kategori: Umum' }
+              ]}
+              value={filterKategori}
+              onChange={(e) => setFilterKategori(e.target.value)}
+              placeholder="Semua Kategori"
+            />
+          </div>
+
+          <button className="btn-outline-admin" onClick={fetchAnnouncements} title="Refresh Data">
+            <RefreshCw size={16} />
+          </button>
+        </div>
+
+        {/* DATA TABLE */}
+        <div className="admin-table-wrapper">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td colSpan={6} style={{ padding: 30, textAlign: 'center', color: '#64748b' }}>
-                  Memuat data pengumuman...
-                </td>
+                <th style={{ width: 50 }}>No</th>
+                <th>Judul & Ringkasan Pengumuman</th>
+                <th>Kategori</th>
+                <th>Penulis / Pengirim</th>
+                <th>Target Role</th>
+                <th>Tanggal Terbit</th>
+                <th>Status</th>
+                <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
               </tr>
-            ) : list.length === 0 ? (
-              <tr>
-                <td colSpan={6} style={{ padding: 30, textAlign: 'center', color: '#64748b' }}>
-                  Belum ada pengumuman yang diterbitkan. Klik tombol di atas untuk membuat pengumuman pertama.
-                </td>
-              </tr>
-            ) : (
-              list.map((item) => (
-                <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '14px 16px', maxWidth: 320 }}>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 2 }}>{item.judul}</div>
-                    <div style={{ fontSize: 11.5, color: '#64748b', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {item.isi}
-                    </div>
-                  </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <span style={{
-                      background: item.kategori === 'Penting' ? '#fef2f2' : item.kategori === 'Kegiatan' ? '#e0f2fe' : '#ecfdf5',
-                      color: item.kategori === 'Penting' ? '#dc2626' : item.kategori === 'Kegiatan' ? '#0284c7' : '#059669',
-                      padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 800
-                    }}>
-                      {item.kategori}
-                    </span>
-                  </td>
-                  <td style={{ padding: '14px 16px', color: '#475569' }}>{item.penulis || 'Admin'}</td>
-                  <td style={{ padding: '14px 16px', color: '#475569' }}>{item.target_role || 'Semua'}</td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <span style={{
-                      background: item.is_active ? '#dcfce7' : '#f1f5f9',
-                      color: item.is_active ? '#166534' : '#64748b',
-                      padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700
-                    }}>
-                      {item.is_active ? 'Aktif' : 'Nonaktif'}
-                    </span>
-                  </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                      <button
-                        onClick={() => handleOpenEdit(item)}
-                        style={{ background: '#eff6ff', color: '#0066ff', border: 'none', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                        title="Edit Pengumuman"
-                      >
-                        <Edit2 size={15} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item.id, item.judul)}
-                        style={{ background: '#fef2f2', color: '#ef4444', border: 'none', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                        title="Hapus Pengumuman"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                    Memuat data pengumuman...
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : filteredList.length === 0 ? (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                    Tidak ada data pengumuman yang cocok.
+                  </td>
+                </tr>
+              ) : (
+                paginatedList.map((item, idx) => (
+                  <tr key={item.id || idx}>
+                    <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>{startIndex + idx + 1}</td>
+                    <td>
+                      <div style={{ fontWeight: 800, color: '#0f172a', marginBottom: 2 }}>{item.judul}</div>
+                      <div style={{ fontSize: 11.5, color: '#64748b', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {item.isi}
+                      </div>
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <span style={{
+                        background: item.kategori === 'Penting' ? '#fef2f2' : item.kategori === 'Kegiatan' ? '#e0f2fe' : '#ecfdf5',
+                        color: item.kategori === 'Penting' ? '#dc2626' : item.kategori === 'Kegiatan' ? '#0284c7' : '#059669',
+                        padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 800
+                      }}>
+                        {item.kategori || 'Umum'}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'center', fontWeight: 600 }}>{item.penulis || 'Administrator'}</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <span style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700 }}>
+                        {item.target_role || 'Semua'}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'center', fontSize: 11.5, color: '#64748b' }}>
+                      {item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <span className={item.is_active ? 'status-badge-active' : 'status-badge-inactive'}>
+                        {item.is_active ? 'Aktif' : 'Nonaktif'}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <div style={{ display: 'inline-flex', gap: 4 }}>
+                        <button className="btn-action-icon btn-edit" title="Edit Pengumuman" onClick={() => handleOpenEdit(item)}>
+                          <Edit2 size={13} />
+                        </button>
+                        <button className="btn-action-icon btn-delete" title="Hapus Pengumuman" onClick={() => handleDelete(item)}>
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* PAGINATION */}
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredList.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
-      {/* FORM MODAL ADD / EDIT */}
+      {/* ADD / EDIT MODAL */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div style={{ width: '100%', maxWidth: 580, background: '#ffffff', borderRadius: 20, boxShadow: '0 20px 40px rgba(0,0,0,0.2)', padding: 24, position: 'relative' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                {editId ? 'Edit Pengumuman' : 'Tambah Pengumuman Baru'}
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-box" style={{ maxWidth: 620 }}>
+            <div className="admin-modal-header">
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                {isEditing ? 'Edit Data Pengumuman' : 'Tambah Pengumuman Sekolah Baru'}
               </h3>
-              <button onClick={() => setShowModal(false)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                <X size={16} color="#64748b" />
+              <button
+                onClick={() => setShowModal(false)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
+              >
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
-                  JUDUL PENGUMUMAN *
-                </label>
-                <input
-                  type="text"
-                  value={formData.judul}
-                  onChange={(e) => setFormData({ ...formData, judul: e.target.value })}
-                  placeholder="Contoh: Jadwal Ujian Tengah Semester (UTS)"
-                  required
-                  style={{ width: '100%', height: 42, padding: '0 12px', borderRadius: 10, border: '1px solid #cbd5e1', outline: 'none', fontSize: 13 }}
-                />
-              </div>
+            <form onSubmit={handleSubmit}>
+              <div className="admin-modal-body">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>
+                    <label>Judul Pengumuman *</label>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      required
+                      placeholder="Contoh: Ujian Akhir Semester (UAS) Ganjil"
+                      value={formData.judul}
+                      onChange={(e) => setFormData({ ...formData, judul: e.target.value })}
+                    />
+                  </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
-                    KATEGORI
-                  </label>
-                  <select
-                    value={formData.kategori}
-                    onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
-                    style={{ width: '100%', height: 42, padding: '0 12px', borderRadius: 10, border: '1px solid #cbd5e1', outline: 'none', fontSize: 13, background: '#fff' }}
-                  >
-                    <option value="Penting">🔥 Penting</option>
-                    <option value="Kegiatan">📅 Kegiatan</option>
-                    <option value="Libur">🎉 Libur</option>
-                    <option value="Umum">📢 Umum</option>
-                  </select>
+                  <div className="form-group-admin">
+                    <label>Kategori Pengumuman</label>
+                    <SearchableSelect
+                      value={formData.kategori}
+                      onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
+                      options={[
+                        { value: 'Penting', label: '🔥 Penting' },
+                        { value: 'Kegiatan', label: '📅 Kegiatan' },
+                        { value: 'Libur', label: '🎉 Libur' },
+                        { value: 'Umum', label: '📢 Umum' }
+                      ]}
+                    />
+                  </div>
+
+                  <div className="form-group-admin">
+                    <label>Penulis / Pengirim</label>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      placeholder="Kepala Sekolah / Tim IT"
+                      value={formData.penulis}
+                      onChange={(e) => setFormData({ ...formData, penulis: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group-admin">
+                    <label>Target Penerima</label>
+                    <SearchableSelect
+                      value={formData.target_role}
+                      onChange={(e) => setFormData({ ...formData, target_role: e.target.value })}
+                      options={[
+                        { value: 'Semua', label: 'Semua Pengguna' },
+                        { value: 'Guru', label: 'Dewan Guru' },
+                        { value: 'Siswa', label: 'Siswa / Kelas' }
+                      ]}
+                    />
+                  </div>
+
+                  <div className="form-group-admin">
+                    <label>Status Publikasi</label>
+                    <SearchableSelect
+                      value={formData.is_active}
+                      onChange={(e) => setFormData({ ...formData, is_active: Number(e.target.value) })}
+                      options={[
+                        { value: 1, label: 'Aktif (Tampilkan)' },
+                        { value: 0, label: 'Nonaktif (Sembunyikan)' }
+                      ]}
+                    />
+                  </div>
+
+                  <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>
+                    <label>URL Gambar Banner (Opsional)</label>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      placeholder="https://images.unsplash.com/... atau URL Gambar"
+                      value={formData.gambar_url}
+                      onChange={(e) => setFormData({ ...formData, gambar_url: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>
+                    <label>Isi Lengkap Pengumuman *</label>
+                    <textarea
+                      className="form-control-admin"
+                      rows={5}
+                      required
+                      placeholder="Tuliskan isi pengumuman secara rinci di sini..."
+                      value={formData.isi}
+                      onChange={(e) => setFormData({ ...formData, isi: e.target.value })}
+                      style={{ height: 'auto', padding: 12, resize: 'vertical' }}
+                    />
+                  </div>
                 </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
-                    PENULIS / PENGIRIM
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.penulis}
-                    onChange={(e) => setFormData({ ...formData, penulis: e.target.value })}
-                    placeholder="Kepala Sekolah / Tim IT"
-                    style={{ width: '100%', height: 42, padding: '0 12px', borderRadius: 10, border: '1px solid #cbd5e1', outline: 'none', fontSize: 13 }}
-                  />
-                </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
-                  URL GAMBAR BANNER (OPSIONAL)
-                </label>
-                <input
-                  type="text"
-                  value={formData.gambar_url}
-                  onChange={(e) => setFormData({ ...formData, gambar_url: e.target.value })}
-                  placeholder="https://domain.com/gambar.jpg"
-                  style={{ width: '100%', height: 42, padding: '0 12px', borderRadius: 10, border: '1px solid #cbd5e1', outline: 'none', fontSize: 13 }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
-                  ISI PENGUMUMAN LENGKAP *
-                </label>
-                <textarea
-                  value={formData.isi}
-                  onChange={(e) => setFormData({ ...formData, isi: e.target.value })}
-                  placeholder="Tuliskan isi pengumuman secara rinci di sini..."
-                  rows={4}
-                  required
-                  style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid #cbd5e1', outline: 'none', fontSize: 13, resize: 'vertical' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  style={{ background: '#f1f5f9', color: '#475569', border: 'none', padding: '10px 18px', borderRadius: 10, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
-                >
+              <div className="admin-modal-footer">
+                <button type="button" className="btn-outline-admin" onClick={() => setShowModal(false)}>
                   Batal
                 </button>
-                <button
-                  type="submit"
-                  style={{ background: '#0066ff', color: '#ffffff', border: 'none', padding: '10px 20px', borderRadius: 10, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
-                >
-                  {editId ? 'Simpan Perubahan' : 'Terbitkan Pengumuman'}
+                <button type="submit" className="btn-primary-admin" disabled={submitting}>
+                  {submitting ? 'Menyimpan...' : isEditing ? 'Simpan Perubahan' : 'Terbitkan Pengumuman'}
                 </button>
               </div>
             </form>
