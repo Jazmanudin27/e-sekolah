@@ -351,40 +351,6 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
         </div>
       </div>
 
-      {/* 4. HISTORI ABSENSI 5 HARI TERAKHIR */}
-      <div className="history-section-wrapper">
-        <div className="section-header-row">
-          <h3 className="section-title-bold">Histori Absensi 5 Hari Terakhir</h3>
-          <button className="view-all-link" onClick={() => onSwitchTab('riwayat')}>View All</button>
-        </div>
-
-        {historyItems.length > 0 ? (
-          historyItems.slice(0, 5).map((item, idx) => (
-            <div key={item.id || idx} className="history-item-card">
-              <div className="history-fingerprint-box">
-                <Fingerprint size={20} color="#0066ff" />
-              </div>
-              <div className="history-item-content">
-                <div className="history-item-date">{formatFullDate(item.tanggal || item.date)}</div>
-                {renderTimeRange(item.jam_in, item.jam_out)}
-              </div>
-            </div>
-          ))
-        ) : (
-          defaultHistoryCards.map((item, idx) => (
-            <div key={idx} className="history-item-card">
-              <div className="history-fingerprint-box">
-                <Fingerprint size={24} color="#0066ff" />
-              </div>
-              <div className="history-item-content">
-                <div className="history-item-date">{item.date}</div>
-                {renderTimeRange(item.jam_in, item.jam_out)}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
       {/* PENGUMUMAN SLIDER BANNER (PALING BAWAH) */}
       <div style={{ padding: '0 16px', marginTop: 16, marginBottom: 20 }}>
         <PengumumanSlider />
