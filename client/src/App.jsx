@@ -17,6 +17,7 @@ import RekapSiswaView from './views/RekapSiswaView';
 import RekapMapelView from './views/RekapMapelView';
 import RekapGuruView from './views/RekapGuruView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
+import InstallPwaModal from './components/InstallPwaModal';
 import api from './api/client';
 
 const getInitialTab = () => {
@@ -163,16 +164,27 @@ export default function App() {
   }
 
   if (!currentUser) {
-    return <LoginView onLoginSuccess={handleLoginSuccess} showToast={showToast} />;
+    return (
+      <>
+        <InstallPwaModal />
+        <LoginView onLoginSuccess={handleLoginSuccess} showToast={showToast} />
+      </>
+    );
   }
 
   // DESKTOP ADMIN PANEL & MANAGEMENT PORTAL
   if (currentUser?.type === 'Admin' || (currentUser?.role && ['admin', 'superadmin', 'operator', 'kepala_sekolah', 'kepala sekolah', 'kepsek', 'tu'].includes(String(currentUser.role).toLowerCase()))) {
-    return <AdminDesktopView user={currentUser} onLogout={handleLogout} />;
+    return (
+      <>
+        <InstallPwaModal />
+        <AdminDesktopView user={currentUser} onLogout={handleLogout} />
+      </>
+    );
   }
 
   return (
     <div className="app-shell">
+      <InstallPwaModal />
       {/* SubHeaders for non-beranda views */}
       {activeTab === 'siswa' && (
         <SubHeader

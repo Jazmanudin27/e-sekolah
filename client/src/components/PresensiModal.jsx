@@ -23,7 +23,11 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
   };
 
   // Real GPS Geolocation & Fake GPS Detection Effect
-  useEffect(() => {
+  const fetchLocation = () => {
+    setGpsReady(false);
+    setGpsError(null);
+    setCoordsString('Mencari lokasi GPS...');
+
     if (navigator.geolocation) {
       const handleSuccess = (pos) => {
         const lat = pos.coords.latitude;
@@ -41,25 +45,48 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
       const handleError = (err) => {
         console.warn("GPS error:", err);
         setGpsReady(true);
-        setGpsError("Gagal mendeteksi lokasi GPS. Harap aktifkan & berikan izin GPS lokasi di browser/HP Anda.");
+        let detailMsg = "Gagal mendeteksi lokasi GPS.";
+        if (err.code === 1) { // PERMISSION_DENIED
+          detailMsg = "Izin Lokasi Ditolak! Buka ikon Gembok 🔒 / Setelan di baris URL Chrome -> Setelan Situs -> Lokasi -> Pilih 'Izinkan'.";
+        } else if (err.code === 2) { // POSITION_UNAVAILABLE
+          detailMsg = "GPS HP Tidak Aktif / Sinyal lemah. Pastikan GPS/Lokasi HP sudah 'ON', Akurasi Tinggi diaktifkan, dan aplikasi Chrome sudah diupdate.";
+        } else if (err.code === 3) { // TIMEOUT
+          detailMsg = "Pencarian titik GPS waktu habis (Timeout). Pastikan Anda tidak berada di dalam ruangan tertutup rapat.";
+        } else if (err.message) {
+          detailMsg = err.message;
+        }
+        setGpsError(detailMsg);
       };
 
       navigator.geolocation.getCurrentPosition(
         handleSuccess,
         handleError,
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
       );
+    } else {
+      setGpsReady(true);
+      setGpsError("Browser Anda tidak mendukung fitur lokasi GPS. Harap update Google Chrome ke versi terbaru.");
+    }
+  };
 
+  useEffect(() => {
+    fetchLocation();
+    if (navigator.geolocation) {
+      const handleSuccess = (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setCoords({ lat, lng });
+        setCoordsString(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        setGpsReady(true);
+        setGpsError(null);
+      };
+      const handleError = () => {};
       const watchId = navigator.geolocation.watchPosition(
         handleSuccess,
         handleError,
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
       );
-
       return () => navigator.geolocation.clearWatch(watchId);
-    } else {
-      setGpsReady(true);
-      setGpsError("Browser tidak mendukung fitur lokasi GPS.");
     }
   }, []);
 
@@ -211,31 +238,35 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
 
         {/* GPS & RADIUS VERIFICATION STATUS CARD */}
         <div style={{
-          background: !coords ? '#eff6ff' : (isFakeGpsDetected || isOutOfRadius) ? '#fef2f2' : '#f0fdf4',
-          border: `1px solid ${!coords ? '#bfdbfe' : (isFakeGpsDetected || isOutOfRadius) ? '#fecaca' : '#bbf7d0'}`,
+          background: !coords ? (gpsError ? '#fff1f2' : '#eff6ff') : (isFakeGpsDetected || isOutOfRadius) ? '#fef2f2' : '#f0fdf4',
+          border: `1px solid ${!coords ? (gpsError ? '#fecdd3' : '#bfdbfe') : (isFakeGpsDetected || isOutOfRadius) ? '#fecaca' : '#bbf7d0'}`,
           borderRadius: 14,
           padding: '12px 14px',
           marginBottom: 14
         }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
             {!coords ? (
-              <Navigation size={22} color="#0066ff" className="spin" style={{ marginTop: 2, flexShrink: 0 }} />
+              gpsError ? (
+                <AlertTriangle size={22} color="#e11d48" style={{ marginTop: 2, flexShrink: 0 }} />
+              ) : (
+                <Navigation size={22} color="#0066ff" className="spin" style={{ marginTop: 2, flexShrink: 0 }} />
+              )
             ) : isFakeGpsDetected || isOutOfRadius ? (
               <AlertTriangle size={22} color="#dc2626" style={{ marginTop: 2, flexShrink: 0 }} />
             ) : (
               <CheckCircle2 size={22} color="#16a34a" style={{ marginTop: 2, flexShrink: 0 }} />
             )}
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: !coords ? '#1e40af' : (isFakeGpsDetected || isOutOfRadius) ? '#991b1b' : '#166534' }}>
+            <div style={{ width: '100%' }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: !coords ? (gpsError ? '#9f1239' : '#1e40af') : (isFakeGpsDetected || isOutOfRadius) ? '#991b1b' : '#166534' }}>
                 {!coords
-                  ? 'Mencari Satelit GPS Perangkat...'
+                  ? (gpsError ? 'Kendala Lokasi GPS / Chrome' : 'Mencari Satelit GPS Perangkat...')
                   : isFakeGpsDetected
                   ? 'Fake GPS Terdeteksi!'
                   : isOutOfRadius
                   ? `Di Luar Radius Safe Zone (${distanceMeter}m)`
                   : 'Lokasi Terverifikasi (Dalam Safe Zone)'}
               </div>
-              <div style={{ fontSize: 11.5, color: !coords ? '#1d4ed8' : (isFakeGpsDetected || isOutOfRadius) ? '#b91c1c' : '#15803d', marginTop: 3, lineHeight: 1.4 }}>
+              <div style={{ fontSize: 11.5, color: !coords ? (gpsError ? '#be123c' : '#1d4ed8') : (isFakeGpsDetected || isOutOfRadius) ? '#b91c1c' : '#15803d', marginTop: 3, lineHeight: 1.45 }}>
                 {!coords
                   ? (gpsError || 'Sedang mengambil titik koordinat GPS fisik perangkat Anda...')
                   : isFakeGpsDetected
@@ -244,6 +275,49 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
                   ? `Presensi ditolak karena Anda berada ${distanceMeter}m dari sekolah. Maksimal radius: ${SCHOOL_LOCATION.radiusMeter}m.`
                   : `Jarak Anda ke sekolah: ${distanceMeter}m. Lokasi aman & memenuhi syarat presensi.`}
               </div>
+
+              {/* RETRY & TROUBLESHOOTING BUTTON WHEN GPS FAILS */}
+              {!coords && (
+                <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button
+                    onClick={fetchLocation}
+                    style={{
+                      background: '#0066ff',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: 8,
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
+                  >
+                    <Navigation size={12} />
+                    <span>Coba Deteksi Ulang GPS</span>
+                  </button>
+
+                  {gpsError && (
+                    <button
+                      onClick={() => alert("PANDUAN MENGATASI LOKASI GPS:\n\n1. Buka Pengaturan HP -> Lokasi / GPS -> Aktifkan GPS ('Modus Akurasi Tinggi').\n2. Di Google Chrome: Ketik ikon Gembok 🔒 di sebelah kiri URL domain -> Izin Situs -> Lokasi -> Pilih 'Izinkan'.\n3. Jika tetap gagal, Buka Play Store -> Cari 'Google Chrome' -> Klik 'Update' (Perbarui) ke versi terbaru.\n4. Buka kembali aplikasi dan tekan tombol 'Coba Deteksi Ulang GPS'.")}
+                      style={{
+                        background: '#ffffff',
+                        color: '#be123c',
+                        border: '1px solid #fecdd3',
+                        padding: '6px 12px',
+                        borderRadius: 8,
+                        fontSize: 11.5,
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      💡 Solusi & Cara Izinkan GPS
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
