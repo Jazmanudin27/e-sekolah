@@ -27,9 +27,10 @@ import AdminAbsensiSiswaTab from './AdminAbsensiSiswaTab';
 import AdminAbsensiMapelTab from './AdminAbsensiMapelTab';
 import AdminLaporanGeneratorTab from './AdminLaporanGeneratorTab';
 import AdminPengumumanTab from './AdminPengumumanTab';
+import AdminKalenderTab from './AdminKalenderTab';
 
 const VALID_ADMIN_TABS = [
-  'dashboard', 'pengumuman', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal',
+  'dashboard', 'pengumuman', 'kalender', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal',
   'izin', 'presensiGuru', 'absensiSiswa', 'absensiMapel',
   'rekapGuru', 'rekapSiswa', 'rekapMapel',
   'laporanSiswa', 'laporanGuru', 'laporanKelas',
@@ -218,6 +219,18 @@ export default function AdminDesktopView({ user, onLogout }) {
               <Megaphone size={17} />
             </div>
             <span className="menu-label">Pengumuman</span>
+          </button>
+
+          {/* 1.6 Kalender Pendidikan */}
+          <button
+            type="button"
+            className={`portal-menu-item ${activeTab === 'kalender' ? 'active' : ''}`}
+            onClick={() => handleSelectTab('kalender')}
+          >
+            <div className="menu-icon-wrap">
+              <Calendar size={17} />
+            </div>
+            <span className="menu-label">Kalender Pendidikan</span>
           </button>
 
           {/* 2. Data Master (Expandable) */}
@@ -615,6 +628,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           {/* 1. DASHBOARD & PENGUMUMAN */}
           {activeTab === 'dashboard' && <AdminDashboardTab onSwitchTab={handleSelectTab} />}
           {activeTab === 'pengumuman' && <AdminPengumumanTab />}
+          {activeTab === 'kalender' && <AdminKalenderTab />}
 
           {/* 2. DATA MASTER */}
           {activeTab === 'kelas' && <AdminKelasTab />}

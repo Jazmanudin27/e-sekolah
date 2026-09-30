@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   CheckSquare, Building2, FileText, Clock, Fingerprint,
   Users, GraduationCap, History, UserCheck, BookOpen,
-  FileBarChart, PieChart, Award, Calendar, X, AlertCircle, CheckCircle2
+  FileBarChart, PieChart, Award, Calendar, CalendarDays, X, AlertCircle, CheckCircle2
 } from 'lucide-react';
 import api from '../api/client';
 import TopBar from '../components/TopBar';
@@ -143,9 +143,9 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
           </div>
         </div>
 
-        {/* MENU GRID KHUSUS KELAS (3 menu: Absen Siswa, Jadwal, & Rekap Siswa) */}
+        {/* MENU GRID KHUSUS KELAS (4 menu: Absen Siswa, Jadwal, Rekap Siswa, Kalender) */}
         <div className="grid-8-menu-wrapper">
-          <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+          <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
             <button className="menu-blue-card" onClick={() => onSwitchTab('absensiSiswa')}>
               <div className="menu-icon-circle">
                 <UserCheck size={22} />
@@ -165,6 +165,13 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
                 <FileBarChart size={22} />
               </div>
               <span>Rekap Siswa</span>
+            </button>
+
+            <button className="menu-blue-card" onClick={() => onSwitchTab('kalender')}>
+              <div className="menu-icon-circle">
+                <CalendarDays size={22} />
+              </div>
+              <span>Kalender</span>
             </button>
           </div>
         </div>
@@ -290,9 +297,9 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
         </button>
       </div>
 
-      {/* 3. 8-GRID BLUE MENU CARDS */}
+      {/* 3. 9-GRID BLUE MENU CARDS */}
       <div className="grid-8-menu-wrapper">
-        <div className="grid-8-menu">
+        <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
           <button className="menu-blue-card" onClick={() => onSwitchTab('siswa')}>
             <div className="menu-icon-circle">
               <Users size={22} />
@@ -305,6 +312,13 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
               <Calendar size={22} />
             </div>
             <span>Jadwal</span>
+          </button>
+
+          <button className="menu-blue-card" onClick={() => onSwitchTab('kalender')}>
+            <div className="menu-icon-circle">
+              <CalendarDays size={22} />
+            </div>
+            <span>Kalender</span>
           </button>
 
           <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>

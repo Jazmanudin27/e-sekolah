@@ -16,6 +16,7 @@ import ProfilView from './views/ProfilView';
 import RekapSiswaView from './views/RekapSiswaView';
 import RekapMapelView from './views/RekapMapelView';
 import RekapGuruView from './views/RekapGuruView';
+import KalenderView from './views/KalenderView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
 import InstallPwaModal from './components/InstallPwaModal';
 import BirthdayModal from './components/BirthdayModal';
@@ -269,6 +270,14 @@ export default function App() {
         />
       )}
 
+      {activeTab === 'kalender' && (
+        <SubHeader
+          title="Kalender Pendidikan"
+          subtitle="Pedoman Akademik Disdik Jabar 2026/2027"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
       {/* Main Content Area */}
       <main className="main-content-area">
         {activeTab === 'beranda' && (
@@ -289,6 +298,7 @@ export default function App() {
         {activeTab === 'rekapSiswa' && <RekapSiswaView user={currentUser} />}
         {activeTab === 'rekapMapel' && <RekapMapelView />}
         {activeTab === 'rekapGuru' && <RekapGuruView />}
+        {activeTab === 'kalender' && <KalenderView />}
       </main>
 
       {/* Bottom Navigation */}
