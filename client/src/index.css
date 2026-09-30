@@ -487,47 +487,45 @@ body {
 }
 
 .menu-blue-card {
-  background: linear-gradient(135deg, #0066ff, #0052cc);
-  border-radius: 18px;
-  padding: 10px 2px;
+  border-radius: 20px;
+  padding: 12px 3px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(0, 102, 255, 0.22);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-  min-height: 82px;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease;
+  min-height: 94px;
   overflow: hidden;
 }
 
 .menu-blue-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 24px rgba(0, 102, 255, 0.38);
-  background: linear-gradient(135deg, #0072ff, #005ce6);
+  transform: translateY(-4px) scale(1.02);
 }
 
 .menu-icon-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   color: #ffffff;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
 .menu-blue-card span {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   text-align: center;
-  line-height: 1;
+  line-height: 1.1;
   color: #ffffff;
   letter-spacing: -0.2px;
   white-space: nowrap;
@@ -535,6 +533,59 @@ body {
   text-overflow: ellipsis;
   width: 100%;
   padding: 0 2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* WARNA KATEGORI MENU MOBILE (A, B, C, D, E) */
+
+/* Kategori A: Data Master (Siswa, Guru, Mapel) -> Vibrant Royal Indigo Blue */
+.menu-cat-master {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.32);
+}
+.menu-cat-master:hover {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.46);
+}
+
+/* Kategori B: Histori & Izin (History, Izin) -> Warm Sunset Amber Orange */
+.menu-cat-history {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.32);
+}
+.menu-cat-history:hover {
+  background: linear-gradient(135deg, #fbbf24, #b45309);
+  box-shadow: 0 12px 26px rgba(245, 158, 11, 0.46);
+}
+
+/* Kategori C: Jadwal & Kalender (Jadwal, Kalender) -> Emerald Fresh Green */
+.menu-cat-calendar {
+  background: linear-gradient(135deg, #10b981, #047857);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.32);
+}
+.menu-cat-calendar:hover {
+  background: linear-gradient(135deg, #34d399, #065f46);
+  box-shadow: 0 12px 26px rgba(16, 185, 129, 0.46);
+}
+
+/* Kategori D: Absensi (Absen Siswa, Absen Mapel) -> Deep Velvet Purple */
+.menu-cat-absensi {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.32);
+}
+.menu-cat-absensi:hover {
+  background: linear-gradient(135deg, #a78bfa, #5b21b6);
+  box-shadow: 0 12px 26px rgba(139, 92, 246, 0.46);
+}
+
+/* Kategori E: Rekap Laporan (Rekap Siswa, Rekap Mapel, Rekap Guru) -> Deep Cyan Blue */
+.menu-cat-rekap {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.32);
+}
+.menu-cat-rekap:hover {
+  background: linear-gradient(135deg, #38bdf8, #075985);
+  box-shadow: 0 12px 26px rgba(2, 132, 199, 0.46);
 }
 
 /* HISTORI SECTION */
