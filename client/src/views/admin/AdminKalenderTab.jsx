@@ -58,13 +58,14 @@ export default function AdminKalenderTab() {
   const handleOpenAdd = () => {
     setIsEditing(false);
     setCurrentId(null);
+    const todayStr = new Date().toISOString().split('T')[0];
     setFormData({
       tahun_ajaran: '2026/2027',
       semester: 1,
       kategori: 'Kegiatan',
       nama_kegiatan: '',
-      tanggal_mulai: '',
-      tanggal_selesai: '',
+      tanggal_mulai: todayStr,
+      tanggal_selesai: todayStr,
       keterangan: '',
       warna: '#0066ff',
       tingkat_target: 'Semua'

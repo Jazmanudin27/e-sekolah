@@ -44,22 +44,33 @@ export default function InstallPwaModal() {
     };
   }, []);
 
+  const [isInstalling, setIsInstalling] = useState(false);
+
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
       if (isIOS) {
         alert('Untuk menginstall di iPhone/iPad:\n1. Ketik ikon "Share" (Bagikan) di bagian bawah Safari\n2. Pilih "Tambahkan ke Layar Utama" (Add to Home Screen)');
+      } else {
+        alert('Petunjuk Install Manual (Chrome):\n1. Klik ikon Titik Tiga (⋮) di sudut kanan atas Chrome\n2. Pilih "Install aplikasi" atau "Tambahkan ke Layar Utama" (Add to Home Screen)');
       }
       return;
     }
 
-    // Show Native Install Prompt
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setIsInstalled(true);
+    try {
+      setIsInstalling(true);
+      // Show Native Install Prompt
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setIsInstalled(true);
+      }
+    } catch (err) {
+      console.error('Error during PWA install:', err);
+    } finally {
+      setIsInstalling(false);
+      setDeferredPrompt(null);
+      setShowModal(false);
     }
-    setDeferredPrompt(null);
-    setShowModal(false);
   };
 
   const handleDismiss = () => {
@@ -202,27 +213,33 @@ export default function InstallPwaModal() {
         {/* INSTALL BUTTON */}
         <button
           onClick={handleInstallClick}
+          disabled={isInstalling}
           style={{
             width: '100%',
             height: 48,
-            background: 'linear-gradient(135deg, #0066ff, #0052cc)',
+            background: isInstalling ? '#334155' : 'linear-gradient(135deg, #0066ff, #0052cc)',
             border: 'none',
             borderRadius: 14,
             color: '#ffffff',
             fontSize: 14.5,
             fontWeight: 700,
-            cursor: 'pointer',
+            cursor: isInstalling ? 'wait' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8,
-            boxShadow: '0 6px 20px rgba(0, 102, 255, 0.45)',
+            boxShadow: isInstalling ? 'none' : '0 6px 20px rgba(0, 102, 255, 0.45)',
             marginBottom: 10,
+            opacity: isInstalling ? 0.8 : 1,
             transition: 'transform 0.15s ease'
           }}
         >
           <Download size={18} />
-          <span>{isIOS ? 'Petunjuk Install iOS' : 'Install Aplikasi Sekarang'}</span>
+          <span>
+            {isInstalling 
+              ? 'Memproses Install...' 
+              : (isIOS ? 'Petunjuk Install iOS' : 'Install Aplikasi Sekarang')}
+          </span>
         </button>
 
         <button

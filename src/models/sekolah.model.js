@@ -9,6 +9,10 @@ class SekolahModel {
       if (!colNames.includes('jam_masuk')) await query("ALTER TABLE member ADD COLUMN jam_masuk VARCHAR(10) DEFAULT '07:00'");
       if (!colNames.includes('toleransi_telat')) await query("ALTER TABLE member ADD COLUMN toleransi_telat INT DEFAULT 15");
       if (!colNames.includes('jam_pulang')) await query("ALTER TABLE member ADD COLUMN jam_pulang VARCHAR(10) DEFAULT '15:30'");
+      if (!colNames.includes('radius_gps')) await query("ALTER TABLE member ADD COLUMN radius_gps INT DEFAULT 100");
+      if (!colNames.includes('mode_presensi_guru')) await query("ALTER TABLE member ADD COLUMN mode_presensi_guru VARCHAR(30) DEFAULT 'gps_kamera'");
+      if (!colNames.includes('lat_sekolah')) await query("ALTER TABLE member ADD COLUMN lat_sekolah VARCHAR(50) DEFAULT '-7.325205'");
+      if (!colNames.includes('lng_sekolah')) await query("ALTER TABLE member ADD COLUMN lng_sekolah VARCHAR(50) DEFAULT '108.208354'");
     } catch (err) {
       console.warn('[SekolahModel.ensureColumns] Warning:', err.message);
     }
@@ -41,8 +45,12 @@ class SekolahModel {
           email: m.email || '',
           kepala_sekolah: m.kepala_sekolah || 'Kepala Sekolah',
           jam_masuk: m.jam_masuk || '07:00',
-          toleransi_telat: m.toleransi_telat || 15,
-          jam_pulang: m.jam_pulang || '15:30'
+          toleransi_telat: m.toleransi_telat !== undefined ? m.toleransi_telat : 15,
+          jam_pulang: m.jam_pulang || '15:30',
+          radius_gps: m.radius_gps !== undefined ? parseInt(m.radius_gps, 10) : 100,
+          mode_presensi_guru: m.mode_presensi_guru || 'gps_kamera',
+          lat_sekolah: m.lat_sekolah || '-7.325205',
+          lng_sekolah: m.lng_sekolah || '108.208354'
         };
       }
       return {
@@ -52,7 +60,11 @@ class SekolahModel {
         kepala_sekolah: 'Ali Irsan Shafar, SH.M.Pd',
         jam_masuk: '07:00',
         toleransi_telat: 15,
-        jam_pulang: '15:30'
+        jam_pulang: '15:30',
+        radius_gps: 100,
+        mode_presensi_guru: 'gps_kamera',
+        lat_sekolah: '-7.325205',
+        lng_sekolah: '108.208354'
       };
     } catch (e) {
       console.warn('[SekolahModel.get] Error:', e.message);
@@ -63,7 +75,11 @@ class SekolahModel {
         kepala_sekolah: 'Ali Irsan Shafar, SH.M.Pd',
         jam_masuk: '07:00',
         toleransi_telat: 15,
-        jam_pulang: '15:30'
+        jam_pulang: '15:30',
+        radius_gps: 100,
+        mode_presensi_guru: 'gps_kamera',
+        lat_sekolah: '-7.325205',
+        lng_sekolah: '108.208354'
       };
     }
   }
@@ -85,6 +101,10 @@ class SekolahModel {
         if (data.jam_masuk !== undefined) { fields.push('jam_masuk = ?'); params.push(data.jam_masuk); }
         if (data.toleransi_telat !== undefined) { fields.push('toleransi_telat = ?'); params.push(data.toleransi_telat); }
         if (data.jam_pulang !== undefined) { fields.push('jam_pulang = ?'); params.push(data.jam_pulang); }
+        if (data.radius_gps !== undefined) { fields.push('radius_gps = ?'); params.push(data.radius_gps); }
+        if (data.mode_presensi_guru !== undefined) { fields.push('mode_presensi_guru = ?'); params.push(data.mode_presensi_guru); }
+        if (data.lat_sekolah !== undefined) { fields.push('lat_sekolah = ?'); params.push(data.lat_sekolah); }
+        if (data.lng_sekolah !== undefined) { fields.push('lng_sekolah = ?'); params.push(data.lng_sekolah); }
 
         if (fields.length > 0) {
           params.push(km);
