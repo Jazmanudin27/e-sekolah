@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import api from '../api/client';
 import TopBar from '../components/TopBar';
+import PengumumanSlider from '../components/PengumumanSlider';
 
 export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwitchTab }) {
   const isClassAccount = user?.type === 'Kelas' || user?.role === 'Kelas';
@@ -142,6 +143,11 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
           </div>
         </div>
 
+        {/* PENGUMUMAN SLIDER BANNER */}
+        <div style={{ padding: '0 16px', marginTop: 12 }}>
+          <PengumumanSlider />
+        </div>
+
         {/* MENU GRID KHUSUS KELAS (3 menu: Absen Siswa, Jadwal, & Rekap Siswa) */}
         <div className="grid-8-menu-wrapper">
           <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
@@ -249,6 +255,11 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
           </div>
 
         </div>
+      </div>
+
+      {/* PENGUMUMAN SLIDER BANNER */}
+      <div style={{ padding: '0 16px', marginTop: 12 }}>
+        <PengumumanSlider />
       </div>
 
       {/* 2. DUAL SCAN ACTION CARDS (SCAN MASUK & SCAN PULANG) */}

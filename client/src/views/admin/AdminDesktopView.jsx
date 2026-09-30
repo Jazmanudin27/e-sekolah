@@ -4,7 +4,7 @@ import {
   ClipboardList, Send, Calendar, BookOpen, Package, Settings,
   ChevronDown, ChevronRight, Menu, X, Bell, Clock, LogOut,
   Building2, GraduationCap, Users, ShieldCheck, UserCheck, BookOpenCheck,
-  Fingerprint, Award, FileSpreadsheet, BarChart3, Shield
+  Fingerprint, Award, FileSpreadsheet, BarChart3, Shield, Megaphone
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import ArtanitaLogo from '../../components/ArtanitaLogo';
@@ -26,9 +26,10 @@ import AdminIzinTab from './AdminIzinTab';
 import AdminAbsensiSiswaTab from './AdminAbsensiSiswaTab';
 import AdminAbsensiMapelTab from './AdminAbsensiMapelTab';
 import AdminLaporanGeneratorTab from './AdminLaporanGeneratorTab';
+import AdminPengumumanTab from './AdminPengumumanTab';
 
 const VALID_ADMIN_TABS = [
-  'dashboard', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal',
+  'dashboard', 'pengumuman', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal',
   'izin', 'presensiGuru', 'absensiSiswa', 'absensiMapel',
   'rekapGuru', 'rekapSiswa', 'rekapMapel',
   'laporanSiswa', 'laporanGuru', 'laporanKelas',
@@ -205,6 +206,18 @@ export default function AdminDesktopView({ user, onLogout }) {
               <LayoutDashboard size={17} />
             </div>
             <span className="menu-label">Dashboard</span>
+          </button>
+
+          {/* 1.5 Pengumuman Sekolah */}
+          <button
+            type="button"
+            className={`portal-menu-item ${activeTab === 'pengumuman' ? 'active' : ''}`}
+            onClick={() => handleSelectTab('pengumuman')}
+          >
+            <div className="menu-icon-wrap">
+              <Megaphone size={17} />
+            </div>
+            <span className="menu-label">Pengumuman</span>
           </button>
 
           {/* 2. Data Master (Expandable) */}
@@ -599,8 +612,9 @@ export default function AdminDesktopView({ user, onLogout }) {
             PAGE CONTENT INNER
             ======================================================== */}
         <main className="portal-page-body">
-          {/* 1. DASHBOARD */}
+          {/* 1. DASHBOARD & PENGUMUMAN */}
           {activeTab === 'dashboard' && <AdminDashboardTab onSwitchTab={handleSelectTab} />}
+          {activeTab === 'pengumuman' && <AdminPengumumanTab />}
 
           {/* 2. DATA MASTER */}
           {activeTab === 'kelas' && <AdminKelasTab />}
