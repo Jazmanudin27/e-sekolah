@@ -334,11 +334,11 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
             <span>Mapel</span>
           </button>
 
-          <button className="menu-blue-card" onClick={() => onSwitchTab('izin')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
             <div className="menu-icon-circle">
-              <Send size={22} />
+              <History size={22} />
             </div>
-            <span>Izin</span>
+            <span>History</span>
           </button>
 
           <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>
@@ -355,11 +355,11 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
             <span>Kalender</span>
           </button>
 
-          <button className="menu-blue-card" onClick={() => onSwitchTab('riwayat')}>
+          <button className="menu-blue-card" onClick={() => onSwitchTab('izin')}>
             <div className="menu-icon-circle">
-              <History size={22} />
+              <Send size={22} />
             </div>
-            <span>History</span>
+            <span>Izin</span>
           </button>
 
           <button className="menu-blue-card" onClick={() => onSwitchTab('absensiSiswa')}>
