@@ -23,9 +23,13 @@ export default function AdminGuruTab() {
     nip_nuptk: '',
     nama_guru: '',
     jk: 'L',
+    tempat_lahir: '',
+    tgl_lahir: '',
+    agama: 'Islam',
+    alamat: '',
     no_hp: '',
     email: '',
-    tgl_lahir: '',
+    pendidikan_terakhir: 'S1',
     status_kepegawaian: 'PNS',
     status: 'Aktif',
     role: 'Guru',
@@ -62,9 +66,13 @@ export default function AdminGuruTab() {
       nip_nuptk: '',
       nama_guru: '',
       jk: 'L',
+      tempat_lahir: '',
+      tgl_lahir: '',
+      agama: 'Islam',
+      alamat: '',
       no_hp: '',
       email: '',
-      tgl_lahir: '',
+      pendidikan_terakhir: 'S1',
       status_kepegawaian: 'PNS',
       status: 'Aktif',
       role: 'Guru',
@@ -87,9 +95,13 @@ export default function AdminGuruTab() {
       nip_nuptk: guru.nip_nuptk || '',
       nama_guru: guru.nama_guru || '',
       jk: guru.jk || 'L',
+      tempat_lahir: guru.tempat_lahir || '',
+      tgl_lahir: formattedDate,
+      agama: guru.agama || 'Islam',
+      alamat: guru.alamat || '',
       no_hp: guru.no_hp || '',
       email: guru.email || '',
-      tgl_lahir: formattedDate,
+      pendidikan_terakhir: guru.pendidikan_terakhir || 'S1',
       status_kepegawaian: guru.status_kepegawaian || 'PNS',
       status: guru.status || 'Aktif',
       role: guru.role || 'Guru',
@@ -377,12 +389,65 @@ export default function AdminGuruTab() {
                   </div>
 
                   <div className="form-group-admin">
+                    <label>Tempat Lahir</label>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      placeholder="Contoh: Tasikmalaya"
+                      value={formData.tempat_lahir}
+                      onChange={(e) => setFormData({ ...formData, tempat_lahir: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group-admin">
                     <label>Tanggal Lahir (Untuk Ultah)</label>
                     <input
                       type="date"
                       className="form-control-admin"
                       value={formData.tgl_lahir || ''}
                       onChange={(e) => setFormData({ ...formData, tgl_lahir: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group-admin">
+                    <label>Pendidikan Terakhir</label>
+                    <SearchableSelect
+                      value={formData.pendidikan_terakhir}
+                      onChange={(e) => setFormData({ ...formData, pendidikan_terakhir: e.target.value })}
+                      options={[
+                        { value: 'D3', label: 'D3 / Diploma' },
+                        { value: 'S1', label: 'S1 / Sarjana' },
+                        { value: 'S2', label: 'S2 / Magister' },
+                        { value: 'S3', label: 'S3 / Doktor' },
+                        { value: 'Lainnya', label: 'Lainnya' }
+                      ]}
+                    />
+                  </div>
+
+                  <div className="form-group-admin">
+                    <label>Agama</label>
+                    <SearchableSelect
+                      value={formData.agama}
+                      onChange={(e) => setFormData({ ...formData, agama: e.target.value })}
+                      options={[
+                        { value: 'Islam', label: 'Islam' },
+                        { value: 'Kristen', label: 'Kristen' },
+                        { value: 'Katolik', label: 'Katolik' },
+                        { value: 'Hindu', label: 'Hindu' },
+                        { value: 'Buddha', label: 'Buddha' },
+                        { value: 'Konghucu', label: 'Konghucu' }
+                      ]}
+                    />
+                  </div>
+
+                  <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>
+                    <label>Alamat Lengkap</label>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      placeholder="Alamat domisili lengkap..."
+                      value={formData.alamat}
+                      onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
                     />
                   </div>
 

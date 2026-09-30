@@ -18,7 +18,7 @@ class GuruModel {
   }
 
   static async findAll({ status, search, kode_member }) {
-    let sql = 'SELECT kode_guru, nip_nuptk, nama_guru, jk, no_hp, email, status_kepegawaian, tgl_lahir, status, role, kode_member FROM guru WHERE 1=1';
+    let sql = 'SELECT kode_guru, nip_nuptk, nama_guru, jk, tempat_lahir, tgl_lahir, agama, alamat, no_hp, email, pendidikan_terakhir, tmt, status_kepegawaian, status, role, kode_member FROM guru WHERE 1=1';
     const params = [];
 
     if (kode_member) {
@@ -30,8 +30,8 @@ class GuruModel {
       params.push(status);
     }
     if (search) {
-      sql += ' AND (nama_guru LIKE ? OR nip_nuptk LIKE ? OR email LIKE ?)';
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      sql += ' AND (nama_guru LIKE ? OR nip_nuptk LIKE ? OR email LIKE ? OR alamat LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     sql += ' ORDER BY nama_guru ASC';
@@ -50,7 +50,7 @@ class GuruModel {
 
     // 1. Guru yang berulang tahun HARI INI
     const todayRows = await query(
-      `SELECT kode_guru, nama_guru, jk, email, no_hp, status_kepegawaian, tgl_lahir,
+      `SELECT kode_guru, nama_guru, jk, email, no_hp, status_kepegawaian, tgl_lahir, tempat_lahir, pendidikan_terakhir,
               'today' AS birthday_timing, 0 AS days_remaining
        FROM guru
        WHERE status = 'Aktif'
@@ -62,7 +62,7 @@ class GuruModel {
 
     // 2. Guru yang berulang tahun BESOK (H-1)
     const tomorrowRows = await query(
-      `SELECT kode_guru, nama_guru, jk, email, no_hp, status_kepegawaian, tgl_lahir,
+      `SELECT kode_guru, nama_guru, jk, email, no_hp, status_kepegawaian, tgl_lahir, tempat_lahir, pendidikan_terakhir,
               'tomorrow' AS birthday_timing, 1 AS days_remaining
        FROM guru
        WHERE status = 'Aktif'
@@ -90,11 +90,29 @@ class GuruModel {
     return rows[0].total || 0;
   }
 
-  static async create({ nip_nuptk, nama_guru, jk = 'L', no_hp, email, tgl_lahir, status_kepegawaian = 'PNS', status = 'Aktif', role = 'Guru', username, password, kode_member }) {
+  static async create({ nip_nuptk, nama_guru, jk = 'L', tempat_lahir, tgl_lahir, agama, alamat, no_hp, email, pendidikan_terakhir, tmt, status_kepegawaian = 'PNS', status = 'Aktif', role = 'Guru', username, password, kode_member }) {
     const res = await query(
-      `INSERT INTO guru (nip_nuptk, nama_guru, jk, no_hp, email, tgl_lahir, status_kepegawaian, status, role, username, password, kode_member)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [nip_nuptk || '-', nama_guru, jk, no_hp || '-', email || '-', tgl_lahir || null, status_kepegawaian, status, role, username || nip_nuptk || nama_guru.toLowerCase().replace(/\s+/g, ''), password || '123456', kode_member || null]
+      `INSERT INTO guru (nip_nuptk, nama_guru, jk, tempat_lahir, tgl_lahir, agama, alamat, no_hp, email, pendidikan_terakhir, tmt, status_kepegawaian, status, role, username, password, kode_member)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        nip_nuptk || '-',
+        nama_guru,
+        jk,
+        tempat_lahir || null,
+        tgl_lahir || null,
+        agama || 'Islam',
+        alamat || '-',
+        no_hp || '-',
+        email || '-',
+        pendidikan_terakhir || 'S1',
+        tmt || null,
+        status_kepegawaian,
+        status,
+        role,
+        username || nip_nuptk || nama_guru.toLowerCase().replace(/\s+/g, ''),
+        password || '123456',
+        kode_member || null
+      ]
     );
     return res.insertId;
   }
@@ -102,7 +120,11 @@ class GuruModel {
   static async update(id, data) {
     const fields = [];
     const params = [];
-    const allowed = ['nip_nuptk', 'nama_guru', 'jk', 'no_hp', 'email', 'tgl_lahir', 'status_kepegawaian', 'status', 'role', 'username', 'password'];
+    const allowed = [
+      'nip_nuptk', 'nama_guru', 'jk', 'tempat_lahir', 'tgl_lahir', 'agama', 'alamat',
+      'no_hp', 'email', 'pendidikan_terakhir', 'tmt', 'status_kepegawaian', 'status',
+      'role', 'username', 'password'
+    ];
     for (const key of allowed) {
       if (data[key] !== undefined) {
         fields.push(`${key} = ?`);

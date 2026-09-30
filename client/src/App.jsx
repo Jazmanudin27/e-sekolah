@@ -16,6 +16,7 @@ import ProfilView from './views/ProfilView';
 import RekapSiswaView from './views/RekapSiswaView';
 import RekapMapelView from './views/RekapMapelView';
 import RekapGuruView from './views/RekapGuruView';
+import GuruView from './views/GuruView';
 import KalenderView from './views/KalenderView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
 import InstallPwaModal from './components/InstallPwaModal';
@@ -198,6 +199,14 @@ export default function App() {
         />
       )}
 
+      {activeTab === 'guru' && (
+        <SubHeader
+          title="Data Guru & Tendik"
+          subtitle="Direktori lengkap tenaga pendidik dan kependidikan"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
       {activeTab === 'absensiSiswa' && (
         <SubHeader
           title="Absensi Siswa"
@@ -289,6 +298,7 @@ export default function App() {
           />
         )}
         {activeTab === 'siswa' && <SiswaView showToast={showToast} onSwitchTab={(t) => setActiveTab(t)} />}
+        {activeTab === 'guru' && <GuruView showToast={showToast} />}
         {activeTab === 'absensiSiswa' && <AbsensiSiswaView user={currentUser} showToast={showToast} />}
         {activeTab === 'absensiMapel' && <AbsensiMapelView user={currentUser} showToast={showToast} />}
         {activeTab === 'jadwal' && <JadwalView user={currentUser} />}

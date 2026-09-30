@@ -302,9 +302,16 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
         <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
           <button className="menu-blue-card" onClick={() => onSwitchTab('siswa')}>
             <div className="menu-icon-circle">
-              <Users size={22} />
+              <GraduationCap size={22} />
             </div>
             <span>Siswa</span>
+          </button>
+
+          <button className="menu-blue-card" onClick={() => onSwitchTab('guru')}>
+            <div className="menu-icon-circle">
+              <Users size={22} />
+            </div>
+            <span>Guru</span>
           </button>
 
           <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>
