@@ -384,7 +384,8 @@ class RekapModel {
 
   static async getDetailGuru({ kode_guru, bulan, tahun }) {
     try {
-      let sql = `
+      // 1. Ambil data scan dari tabel presensi (Hadir)
+      let sqlPresensi = `
         SELECT 
           p.id,
           p.kode_guru,
@@ -395,34 +396,90 @@ class RekapModel {
           p.jam_in,
           p.jam_out,
           p.lokasi_in,
-          p.lokasi_out
+          p.lokasi_out,
+          'Hadir' AS jenis_status,
+          NULL AS keterangan,
+          'Hadir' AS status_pengajuan
         FROM presensi p
         LEFT JOIN guru g ON (
           CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.kode_guru USING utf8mb4) 
           OR CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.nip_nuptk USING utf8mb4)
+          OR CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.nama_guru USING utf8mb4)
         )
         WHERE (
           CONVERT(p.kode_guru USING utf8mb4) = CONVERT(? USING utf8mb4) 
-          OR CONVERT(p.kode_guru USING utf8mb4) = (SELECT CONVERT(nip_nuptk USING utf8mb4) FROM guru WHERE CONVERT(kode_guru USING utf8mb4) = CONVERT(? USING utf8mb4) LIMIT 1) 
-          OR CONVERT(p.kode_guru USING utf8mb4) = (SELECT CONVERT(nama_guru USING utf8mb4) FROM guru WHERE CONVERT(kode_guru USING utf8mb4) = CONVERT(? USING utf8mb4) LIMIT 1)
+          OR CONVERT(g.kode_guru USING utf8mb4) = CONVERT(? USING utf8mb4)
+          OR CONVERT(g.nip_nuptk USING utf8mb4) = CONVERT(? USING utf8mb4)
+          OR CONVERT(g.nama_guru USING utf8mb4) = CONVERT(? USING utf8mb4)
         )
       `;
-      const params = [kode_guru, kode_guru, kode_guru];
+      const pParams = [kode_guru, kode_guru, kode_guru, kode_guru];
 
       if (bulan) {
         const bInt = parseInt(bulan, 10);
         const bPad = String(bInt).padStart(2, '0');
-        sql += ' AND (MONTH(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%c") = ? OR DATE_FORMAT(p.tanggal, "%m") = ? OR p.tanggal LIKE ?)';
-        params.push(bInt, String(bInt), bPad, `%-${bPad}-%`);
+        sqlPresensi += ' AND (MONTH(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%c") = ? OR DATE_FORMAT(p.tanggal, "%m") = ? OR p.tanggal LIKE ?)';
+        pParams.push(bInt, String(bInt), bPad, `%-${bPad}-%`);
       }
       if (tahun) {
         const tInt = parseInt(tahun, 10);
-        sql += ' AND (YEAR(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%Y") = ? OR p.tanggal LIKE ?)';
-        params.push(tInt, String(tInt), `${tInt}-%`);
+        sqlPresensi += ' AND (YEAR(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%Y") = ? OR p.tanggal LIKE ?)';
+        pParams.push(tInt, String(tInt), `${tInt}-%`);
       }
 
-      sql += ' ORDER BY p.tanggal DESC';
-      return await query(sql, params);
+      sqlPresensi += ' ORDER BY p.tanggal DESC';
+      const presensiRows = await query(sqlPresensi, pParams).catch(() => []);
+
+      // 2. Ambil data izin/sakit/cuti/dinas dari pengajuan_izin
+      let sqlIzin = `
+        SELECT 
+          CONCAT('izin_', i.id) AS id,
+          i.user_id AS kode_guru,
+          COALESCE(g.nama_guru, i.nama_pengaju, 'Guru / Pengajar') AS nama_guru,
+          COALESCE(g.nip_nuptk, '-') AS nip_nuptk,
+          DATE_FORMAT(i.tanggal_mulai, '%Y-%m-%d') AS tanggal,
+          DATE_FORMAT(i.tanggal_mulai, '%W, %d %b %Y') AS tanggal_format,
+          NULL AS jam_in,
+          NULL AS jam_out,
+          NULL AS lokasi_in,
+          NULL AS lokasi_out,
+          COALESCE(NULLIF(TRIM(i.jenis), ''), 'Izin') AS jenis_status,
+          i.keterangan,
+          COALESCE(i.status, 'Disetujui') AS status_pengajuan
+        FROM pengajuan_izin i
+        LEFT JOIN guru g ON (
+          CONVERT(i.user_id USING utf8mb4) = CONVERT(g.kode_guru USING utf8mb4) 
+          OR CONVERT(i.user_id USING utf8mb4) = CONVERT(g.nip_nuptk USING utf8mb4) 
+          OR CONVERT(i.nama_pengaju USING utf8mb4) = CONVERT(g.nama_guru USING utf8mb4)
+        )
+        WHERE (
+          CONVERT(i.user_id USING utf8mb4) = CONVERT(? USING utf8mb4)
+          OR CONVERT(i.nama_pengaju USING utf8mb4) = CONVERT(? USING utf8mb4)
+          OR CONVERT(g.kode_guru USING utf8mb4) = CONVERT(? USING utf8mb4)
+          OR CONVERT(g.nip_nuptk USING utf8mb4) = CONVERT(? USING utf8mb4)
+          OR CONVERT(g.nama_guru USING utf8mb4) = CONVERT(? USING utf8mb4)
+        )
+      `;
+      const iParams = [kode_guru, kode_guru, kode_guru, kode_guru, kode_guru];
+
+      if (bulan) {
+        const bInt = parseInt(bulan, 10);
+        const bPad = String(bInt).padStart(2, '0');
+        sqlIzin += ' AND (MONTH(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%c") = ? OR DATE_FORMAT(i.tanggal_mulai, "%m") = ? OR i.tanggal_mulai LIKE ?)';
+        iParams.push(bInt, String(bInt), bPad, `%-${bPad}-%`);
+      }
+      if (tahun) {
+        const tInt = parseInt(tahun, 10);
+        sqlIzin += ' AND (YEAR(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%Y") = ? OR i.tanggal_mulai LIKE ?)';
+        iParams.push(tInt, String(tInt), `${tInt}-%`);
+      }
+
+      sqlIzin += ' ORDER BY i.tanggal_mulai DESC';
+      const izinRows = await query(sqlIzin, iParams).catch(() => []);
+
+      const combined = [...(presensiRows || []), ...(izinRows || [])];
+      combined.sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
+      return combined;
     } catch (e) {
       console.error('[RekapModel.getDetailGuru] Error:', e.message);
       return [];

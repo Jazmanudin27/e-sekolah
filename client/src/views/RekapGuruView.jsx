@@ -447,19 +447,42 @@ export default function RekapGuruView() {
                           <Calendar size={14} color="#0066ff" />
                           {det.tanggal_format || det.tanggal}
                         </div>
-                        <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
-                          Masuk: {det.jam_in ? (
-                            <span style={{ color: '#16a34a', fontWeight: 700 }}>{det.jam_in}</span>
-                          ) : (
-                            <span style={{ color: '#ef4444', fontWeight: 800, background: '#fef2f2', padding: '1px 6px', borderRadius: 6, border: '1px solid #fecaca' }}>Belum Scan</span>
-                          )} • Pulang: {det.jam_out ? (
-                            <span style={{ color: '#0066ff', fontWeight: 700 }}>{det.jam_out}</span>
-                          ) : (
-                            <span style={{ color: '#ef4444', fontWeight: 800, background: '#fef2f2', padding: '1px 6px', borderRadius: 6, border: '1px solid #fecaca' }}>Belum Scan</span>
-                          )}
-                        </div>
+                        {det.jenis_status && det.jenis_status.toLowerCase() !== 'hadir' ? (
+                          <div style={{ fontSize: 11.5, color: '#475569', marginTop: 3 }}>
+                            Status: <strong style={{ color: '#0f172a' }}>{det.jenis_status}</strong>
+                            {det.keterangan ? ` • "${det.keterangan}"` : ''}
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                            Masuk: {det.jam_in ? (
+                              <span style={{ color: '#16a34a', fontWeight: 700 }}>{det.jam_in}</span>
+                            ) : (
+                              <span style={{ color: '#ef4444', fontWeight: 800, background: '#fef2f2', padding: '1px 6px', borderRadius: 6, border: '1px solid #fecaca' }}>Belum Scan</span>
+                            )} • Pulang: {det.jam_out ? (
+                              <span style={{ color: '#0066ff', fontWeight: 700 }}>{det.jam_out}</span>
+                            ) : (
+                              <span style={{ color: '#ef4444', fontWeight: 800, background: '#fef2f2', padding: '1px 6px', borderRadius: 6, border: '1px solid #fecaca' }}>Belum Scan</span>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      {det.jam_in && det.jam_out ? (
+                      {det.jenis_status && det.jenis_status.toLowerCase() === 'sakit' ? (
+                        <span style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', padding: '3px 9px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
+                          Sakit
+                        </span>
+                      ) : det.jenis_status && det.jenis_status.toLowerCase() === 'izin' ? (
+                        <span style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', padding: '3px 9px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
+                          Izin
+                        </span>
+                      ) : det.jenis_status && det.jenis_status.toLowerCase() === 'cuti' ? (
+                        <span style={{ background: '#faf5ff', color: '#9333ea', border: '1px solid #e9d5ff', padding: '3px 9px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
+                          Cuti
+                        </span>
+                      ) : det.jenis_status && det.jenis_status.toLowerCase() === 'dinas' ? (
+                        <span style={{ background: '#e0f2fe', color: '#0284c7', border: '1px solid #bae6fd', padding: '3px 9px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
+                          Dinas
+                        </span>
+                      ) : det.jam_in && det.jam_out ? (
                         <span style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', padding: '3px 9px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
                           Hadir Lengkap
                         </span>

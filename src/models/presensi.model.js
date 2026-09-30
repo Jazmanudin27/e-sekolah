@@ -28,36 +28,52 @@ class PresensiModel {
     );
   }
 
-  static async getHistory({ kode_guru, bulan, tahun, limit = 30 }) {
+  static async getHistory({ kode_guru, bulan, tahun, limit = 50 }) {
     let sql = `
       SELECT 
-        id,
-        kode_guru,
-        DATE_FORMAT(tanggal, '%Y-%m-%d') AS tanggal,
-        jam_in,
-        jam_out,
-        lokasi_in,
-        lokasi_out,
-        created_at
-      FROM presensi 
+        p.id,
+        p.kode_guru,
+        COALESCE(g.nama_guru, p.kode_guru) AS nama_guru,
+        COALESCE(g.nip_nuptk, '-') AS nip_nuptk,
+        DATE_FORMAT(p.tanggal, '%Y-%m-%d') AS tanggal,
+        DATE_FORMAT(p.tanggal, '%W, %d %b %Y') AS tanggal_format,
+        p.jam_in,
+        p.jam_out,
+        p.lokasi_in,
+        p.lokasi_out,
+        p.created_at
+      FROM presensi p
+      LEFT JOIN guru g ON (
+        CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.kode_guru USING utf8mb4)
+        OR CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.nip_nuptk USING utf8mb4)
+        OR CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.nama_guru USING utf8mb4)
+      )
       WHERE 1=1
     `;
     const params = [];
 
     if (kode_guru) {
-      sql += ' AND kode_guru = ?';
-      params.push(kode_guru);
+      sql += ` AND (
+        CONVERT(p.kode_guru USING utf8mb4) = CONVERT(? USING utf8mb4)
+        OR CONVERT(g.kode_guru USING utf8mb4) = CONVERT(? USING utf8mb4)
+        OR CONVERT(g.nip_nuptk USING utf8mb4) = CONVERT(? USING utf8mb4)
+        OR CONVERT(g.nama_guru USING utf8mb4) = CONVERT(? USING utf8mb4)
+      )`;
+      params.push(kode_guru, kode_guru, kode_guru, kode_guru);
     }
     if (bulan) {
-      sql += ' AND MONTH(tanggal) = ?';
-      params.push(parseInt(bulan, 10));
+      const bInt = parseInt(bulan, 10);
+      const bPad = String(bInt).padStart(2, '0');
+      sql += ' AND (MONTH(p.tanggal) = ? OR p.tanggal LIKE ?)';
+      params.push(bInt, `%-${bPad}-%`);
     }
     if (tahun) {
-      sql += ' AND YEAR(tanggal) = ?';
-      params.push(parseInt(tahun, 10));
+      const tInt = parseInt(tahun, 10);
+      sql += ' AND (YEAR(p.tanggal) = ? OR p.tanggal LIKE ?)';
+      params.push(tInt, `${tInt}-%`);
     }
 
-    sql += ' ORDER BY tanggal DESC, id DESC LIMIT ?';
+    sql += ' ORDER BY p.tanggal DESC, p.id DESC LIMIT ?';
     params.push(parseInt(limit, 10));
 
     return await query(sql, params);

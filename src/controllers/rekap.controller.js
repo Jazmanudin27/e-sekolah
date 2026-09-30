@@ -84,14 +84,7 @@ async function getDetailMapel(req, res, next) {
 async function getDetailGuru(req, res, next) {
   try {
     const { bulan, tahun } = req.query;
-    let targetKodeGuru = req.query.kode_guru;
-
-    const userRole = String(req.user?.role || req.user?.level || '').toLowerCase();
-    const isFullAccess = ['admin', 'superadmin', 'kepala sekolah', 'kepala_sekolah', 'kepsek', 'tu', 'operator'].includes(userRole);
-
-    if (!isFullAccess && req.user?.kode_guru) {
-      targetKodeGuru = req.user.kode_guru;
-    }
+    const targetKodeGuru = req.query.kode_guru || req.user?.kode_guru;
 
     if (!targetKodeGuru) {
       return sendError(res, 'kode_guru wajib diisi.', 400);
