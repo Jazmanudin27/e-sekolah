@@ -20,6 +20,41 @@ export default function AdminPengumumanTab() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      Swal.fire('File Terlalu Besar', 'Ukuran gambar maksimal 5MB.', 'warning');
+      return;
+    }
+
+    const payload = new FormData();
+    payload.append('image', file);
+
+    setUploadingImage(true);
+    try {
+      const res = await api.post('/pengumuman/upload-banner', payload, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.data.success) {
+        setFormData(prev => ({ ...prev, gambar_url: res.data.url }));
+        Swal.fire({
+          icon: 'success',
+          title: 'Upload Berhasil!',
+          text: 'Gambar banner berhasil disimpan di server.',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      }
+    } catch (err) {
+      Swal.fire('Upload Gagal', err.response?.data?.message || 'Gagal mengupload gambar.', 'error');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     judul: '',
@@ -370,14 +405,45 @@ export default function AdminPengumumanTab() {
                   </div>
 
                   <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>
-                    <label>URL Gambar Banner (Opsional)</label>
+                    <label>Upload Gambar Banner (Disimpan di Server)</label>
                     <input
-                      type="text"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
                       className="form-control-admin"
-                      placeholder="https://images.unsplash.com/... atau URL Gambar"
-                      value={formData.gambar_url}
-                      onChange={(e) => setFormData({ ...formData, gambar_url: e.target.value })}
+                      disabled={uploadingImage}
+                      style={{ padding: '8px 12px' }}
                     />
+                    {uploadingImage && (
+                      <div style={{ fontSize: 12, color: '#0066ff', marginTop: 4, fontWeight: 600 }}>
+                        ⏳ Mengupload gambar ke server...
+                      </div>
+                    )}
+
+                    {formData.gambar_url && (
+                      <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12, background: '#f8fafc', padding: 8, borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                        <img
+                          src={formData.gambar_url}
+                          alt="Banner Preview"
+                          style={{ width: 80, height: 50, objectFit: 'cover', borderRadius: 8, border: '1px solid #cbd5e1' }}
+                        />
+                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                          <div style={{ fontSize: 11.5, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {formData.gambar_url}
+                          </div>
+                          <div style={{ fontSize: 10.5, color: '#10b981', fontWeight: 600 }}>
+                            ✓ Gambar tersimpan di server
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, gambar_url: '' }))}
+                          style={{ background: '#fef2f2', color: '#ef4444', border: 'none', padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          Hapus Gambar
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>

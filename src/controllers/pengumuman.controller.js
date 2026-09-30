@@ -69,3 +69,18 @@ exports.deleteAnnouncement = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.uploadBanner = (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      message: 'Tidak ada file gambar yang diupload.'
+    });
+  }
+  const fileUrl = `/uploads/pengumuman/${req.file.filename}`;
+  res.json({
+    success: true,
+    message: 'Gambar banner berhasil diupload ke server!',
+    url: fileUrl
+  });
+};
