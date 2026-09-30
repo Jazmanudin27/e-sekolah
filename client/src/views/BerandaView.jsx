@@ -298,9 +298,9 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
         </button>
       </div>
 
-      {/* 3. 9-GRID BLUE MENU CARDS */}
+      {/* 3. 12-GRID BLUE MENU CARDS (SEJAJAR EMPAT-EMPAT) */}
       <div className="grid-8-menu-wrapper">
-        <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+        <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
           <button className="menu-blue-card" onClick={() => onSwitchTab('siswa')}>
             <div className="menu-icon-circle">
               <GraduationCap size={22} />
