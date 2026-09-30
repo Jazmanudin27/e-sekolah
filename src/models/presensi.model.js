@@ -41,6 +41,8 @@ class PresensiModel {
         p.jam_out,
         p.lokasi_in,
         p.lokasi_out,
+        p.foto_in,
+        p.foto_out,
         p.created_at
       FROM presensi p
       LEFT JOIN guru g ON (

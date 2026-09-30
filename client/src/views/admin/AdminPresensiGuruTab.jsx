@@ -491,16 +491,33 @@ export default function AdminPresensiGuruTab() {
               })()}
 
               {/* FOTO SELFIE PRESENSI */}
-              {selectedDetail.foto_in && (
-                <div style={{ background: '#ffffff', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 8, textAlign: 'left' }}>
-                    Foto Selfie Presensi
-                  </div>
-                  <img
-                    src={selectedDetail.foto_in}
-                    alt="Foto Selfie"
-                    style={{ width: '100%', maxHeight: 240, objectFit: 'contain', borderRadius: 8, border: '1px solid #e2e8f0' }}
-                  />
+              {(selectedDetail.foto_in || selectedDetail.foto_out) && (
+                <div style={{ display: 'grid', gridTemplateColumns: (selectedDetail.foto_in && selectedDetail.foto_out) ? '1fr 1fr' : '1fr', gap: 12 }}>
+                  {selectedDetail.foto_in && (
+                    <div style={{ background: '#ffffff', padding: '12px', borderRadius: 12, border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', textTransform: 'uppercase', marginBottom: 8, textAlign: 'left' }}>
+                        📷 Foto Selfie Masuk
+                      </div>
+                      <img
+                        src={selectedDetail.foto_in}
+                        alt="Foto Selfie Masuk"
+                        style={{ width: '100%', maxHeight: 220, objectFit: 'contain', borderRadius: 8, border: '1px solid #e2e8f0' }}
+                      />
+                    </div>
+                  )}
+
+                  {selectedDetail.foto_out && (
+                    <div style={{ background: '#ffffff', padding: '12px', borderRadius: 12, border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#ef4444', textTransform: 'uppercase', marginBottom: 8, textAlign: 'left' }}>
+                        📷 Foto Selfie Pulang
+                      </div>
+                      <img
+                        src={selectedDetail.foto_out}
+                        alt="Foto Selfie Pulang"
+                        style={{ width: '100%', maxHeight: 220, objectFit: 'contain', borderRadius: 8, border: '1px solid #e2e8f0' }}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
