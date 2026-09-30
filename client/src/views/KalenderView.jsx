@@ -128,75 +128,52 @@ export default function KalenderView() {
 
   return (
     <div style={{ padding: '16px', maxWidth: 640, margin: '0 auto', paddingBottom: 90 }}>
-      {/* HEADER CARD */}
+      {/* SEMESTER TABS */}
       <div style={{
-        background: 'linear-gradient(135deg, #07193f 0%, #0066ff 100%)',
-        borderRadius: 22,
-        padding: '20px 18px',
-        color: '#ffffff',
+        display: 'flex',
+        gap: 8,
         marginBottom: 16,
-        boxShadow: '0 8px 25px rgba(0, 102, 255, 0.25)',
-        position: 'relative',
-        overflow: 'hidden'
+        background: '#f1f5f9',
+        padding: 5,
+        borderRadius: 14,
+        border: '1px solid #e2e8f0'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.2)',
-            padding: 8,
-            borderRadius: 12,
-            display: 'flex',
-            backdropFilter: 'blur(6px)'
-          }}>
-            <CalendarIcon size={22} color="#ffffff" />
-          </div>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#38bdf8', letterSpacing: '0.5px' }}>
-              DISDIK PROVINSI JAWA BARAT
-            </div>
-            <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>
-              Kalender Pendidikan 2026/2027
-            </h2>
-          </div>
-        </div>
-        <p style={{ fontSize: 12, color: '#cbd5e1', margin: 0, lineHeight: 1.45 }}>
-          Pedoman agenda akademik, MPLS, jadwal ujian, asesmen, pembagian rapor, dan libur resmi Disdik Jabar.
-        </p>
-
-        {/* QUICK SEMESTER JUMP BUTTONS */}
-        <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
-          <button
-            onClick={() => handleJumpSemester(1)}
-            style={{
-              flex: 1,
-              padding: '7px 0',
-              borderRadius: 10,
-              border: 'none',
-              background: currentMonth >= 6 && currentYear === 2026 ? '#ffffff' : 'rgba(255, 255, 255, 0.15)',
-              color: currentMonth >= 6 && currentYear === 2026 ? '#0066ff' : '#ffffff',
-              fontWeight: 800,
-              fontSize: 12,
-              cursor: 'pointer'
-            }}
-          >
-            Semester 1 (Ganjil)
-          </button>
-          <button
-            onClick={() => handleJumpSemester(2)}
-            style={{
-              flex: 1,
-              padding: '7px 0',
-              borderRadius: 10,
-              border: 'none',
-              background: currentYear === 2027 ? '#ffffff' : 'rgba(255, 255, 255, 0.15)',
-              color: currentYear === 2027 ? '#0066ff' : '#ffffff',
-              fontWeight: 800,
-              fontSize: 12,
-              cursor: 'pointer'
-            }}
-          >
-            Semester 2 (Genap)
-          </button>
-        </div>
+        <button
+          onClick={() => handleJumpSemester(1)}
+          style={{
+            flex: 1,
+            padding: '9px 0',
+            borderRadius: 10,
+            border: 'none',
+            background: currentMonth >= 6 && currentYear === 2026 ? '#0066ff' : 'transparent',
+            color: currentMonth >= 6 && currentYear === 2026 ? '#ffffff' : '#64748b',
+            fontWeight: 800,
+            fontSize: 13,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: currentMonth >= 6 && currentYear === 2026 ? '0 4px 12px rgba(0, 102, 255, 0.25)' : 'none'
+          }}
+        >
+          Semester 1 (Ganjil)
+        </button>
+        <button
+          onClick={() => handleJumpSemester(2)}
+          style={{
+            flex: 1,
+            padding: '9px 0',
+            borderRadius: 10,
+            border: 'none',
+            background: (currentYear === 2027 || (currentYear === 2026 && currentMonth < 6)) ? '#0066ff' : 'transparent',
+            color: (currentYear === 2027 || (currentYear === 2026 && currentMonth < 6)) ? '#ffffff' : '#64748b',
+            fontWeight: 800,
+            fontSize: 13,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: (currentYear === 2027 || (currentYear === 2026 && currentMonth < 6)) ? '0 4px 12px rgba(0, 102, 255, 0.25)' : 'none'
+          }}
+        >
+          Semester 2 (Genap)
+        </button>
       </div>
 
       {/* MONTH NAVIGATION BAR */}
