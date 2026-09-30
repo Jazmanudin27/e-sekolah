@@ -17,33 +17,14 @@ export default function PengumumanSlider() {
   const fetchAnnouncements = async () => {
     try {
       const res = await api.get('/pengumuman');
-      if (res.data.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
+      if (res.data.success && Array.isArray(res.data.data)) {
         setAnnouncements(res.data.data);
       } else {
-        // Fallback default sample announcements
-        setAnnouncements([
-          {
-            id: 1,
-            judul: 'Ujian Akhir Semester (UAS) Ganjil Tahun Ajaran 2026/2027',
-            kategori: 'Penting',
-            isi: 'Diberitahukan kepada seluruh siswa dan dewan guru bahwa pelaksanaan Ujian Akhir Semester (UAS) Ganjil akan dilaksanakan secara serentak mulai minggu depan. Harap mempersiapkan jadwal mengajar & kartu ujian.',
-            gambar_url: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1200&q=80',
-            penulis: 'Kepala Sekolah',
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 2,
-            judul: 'Sosialisasi Presensi Digital Smart Campus SMK Artanita',
-            kategori: 'Kegiatan',
-            isi: 'Sistem Presensi Digital E-Sekolah berbasis GPS & Anti-Fake GPS kini resmi diaktifkan. Seluruh siswa & guru diwajibkan melakukan scan presensi tepat waktu.',
-            gambar_url: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80',
-            penulis: 'Tim IT Artanita',
-            created_at: new Date().toISOString()
-          }
-        ]);
+        setAnnouncements([]);
       }
     } catch (err) {
-      console.warn("Failed to fetch announcements:", err);
+      console.warn("Failed to fetch announcements from MySQL:", err);
+      setAnnouncements([]);
     } finally {
       setLoading(false);
     }

@@ -18,31 +18,6 @@ class PengumumanModel {
     `;
     try {
       await query(createTableSql);
-      // Insert sample initial announcements if table is empty
-      const rows = await query('SELECT COUNT(*) as cnt FROM pengumuman');
-      if (rows && rows[0] && rows[0].cnt === 0) {
-        await query(`
-          INSERT INTO pengumuman (judul, kategori, isi, gambar_url, penulis, target_role, is_active) VALUES
-          (
-            'Ujian Akhir Semester (UAS) Ganjil Tahun Ajaran 2026/2027',
-            'Penting',
-            'Diberitahukan kepada seluruh siswa dan dewan guru bahwa pelaksanaan Ujian Akhir Semester (UAS) Ganjil akan dilaksanakan secara serentak mulai minggu depan. Harap mempersiapkan jadwal mengajar & kartu ujian.',
-            'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1200&q=80',
-            'Kepala Sekolah',
-            'Semua',
-            1
-          ),
-          (
-            'Sosialisasi Presensi Digital Smart Campus SMK Artanita',
-            'Kegiatan',
-            'Sistem Presensi Digital E-Sekolah berbasis GPS & Anti-Fake GPS kini resmi diaktifkan. Seluruh siswa & guru diwajibkan melakukan scan presensi tepat waktu.',
-            'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80',
-            'Tim IT Artanita',
-            'Semua',
-            1
-          )
-        `);
-      }
     } catch (err) {
       console.error('[PengumumanModel.ensureTable] Error:', err.message);
     }
