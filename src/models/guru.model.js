@@ -39,19 +39,44 @@ class GuruModel {
   }
 
   static async getTodayBirthdays() {
-    const today = new Date();
-    const month = today.getMonth() + 1;
-    const day = today.getDate();
-    const rows = await query(
-      `SELECT kode_guru, nama_guru, jk, email, no_hp, status_kepegawaian, tgl_lahir
+    // Zona waktu Indonesia (WIB)
+    const nowWib = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+    const todayMonth = nowWib.getMonth() + 1;
+    const todayDay = nowWib.getDate();
+
+    const tomorrowWib = new Date(nowWib.getTime() + 24 * 60 * 60 * 1000);
+    const tomorrowMonth = tomorrowWib.getMonth() + 1;
+    const tomorrowDay = tomorrowWib.getDate();
+
+    // 1. Guru yang berulang tahun HARI INI
+    const todayRows = await query(
+      `SELECT kode_guru, nama_guru, jk, email, no_hp, status_kepegawaian, tgl_lahir,
+              'today' AS birthday_timing, 0 AS days_remaining
        FROM guru
        WHERE status = 'Aktif'
          AND tgl_lahir IS NOT NULL
          AND MONTH(tgl_lahir) = ?
          AND DAY(tgl_lahir) = ?`,
-      [month, day]
+      [todayMonth, todayDay]
     );
-    return rows;
+
+    // 2. Guru yang berulang tahun BESOK (H-1)
+    const tomorrowRows = await query(
+      `SELECT kode_guru, nama_guru, jk, email, no_hp, status_kepegawaian, tgl_lahir,
+              'tomorrow' AS birthday_timing, 1 AS days_remaining
+       FROM guru
+       WHERE status = 'Aktif'
+         AND tgl_lahir IS NOT NULL
+         AND MONTH(tgl_lahir) = ?
+         AND DAY(tgl_lahir) = ?`,
+      [tomorrowMonth, tomorrowDay]
+    );
+
+    const combined = [
+      ...(todayRows || []).map(r => ({ ...r, birthday_timing: 'today', days_remaining: 0 })),
+      ...(tomorrowRows || []).map(r => ({ ...r, birthday_timing: 'tomorrow', days_remaining: 1 }))
+    ];
+    return combined;
   }
 
   static async countActive(kode_member) {
