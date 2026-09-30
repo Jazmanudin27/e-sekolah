@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Users, Search, RefreshCw, Phone, Mail, MapPin, Calendar,
+  Users, Search, RefreshCw, Phone, MapPin, Calendar,
   Award, GraduationCap, Briefcase, ChevronRight, X, Heart, Cake
 } from 'lucide-react';
 import api from '../api/client';
@@ -421,13 +421,7 @@ export default function GuruView({ showToast }) {
                   )}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: '#f8fafc', borderRadius: 12 }}>
-                  <Mail size={16} color="#0284c7" style={{ flexShrink: 0 }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ color: '#64748b', fontSize: 11, display: 'block' }}>Alamat Email</span>
-                    <strong style={{ color: '#0f172a', wordBreak: 'break-all' }}>{selectedGuru.email || '-'}</strong>
-                  </div>
-                </div>
+
 
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', background: '#f8fafc', borderRadius: 12 }}>
                   <MapPin size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: 2 }} />

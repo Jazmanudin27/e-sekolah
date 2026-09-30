@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   CheckSquare, Building2, FileText, Clock, Fingerprint,
   Users, GraduationCap, History, UserCheck, BookOpen,
-  FileBarChart, PieChart, Award, Calendar, CalendarDays, X, AlertCircle, CheckCircle2
+  FileBarChart, PieChart, Award, Calendar, CalendarDays, X, AlertCircle, CheckCircle2,
+  Send, Library
 } from 'lucide-react';
 import api from '../api/client';
 import TopBar from '../components/TopBar';
@@ -312,6 +313,20 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
               <Users size={22} />
             </div>
             <span>Guru</span>
+          </button>
+
+          <button className="menu-blue-card" onClick={() => onSwitchTab('mapel')}>
+            <div className="menu-icon-circle">
+              <Library size={22} />
+            </div>
+            <span>Mapel</span>
+          </button>
+
+          <button className="menu-blue-card" onClick={() => onSwitchTab('izin')}>
+            <div className="menu-icon-circle">
+              <Send size={22} />
+            </div>
+            <span>Izin</span>
           </button>
 
           <button className="menu-blue-card" onClick={() => onSwitchTab('jadwal')}>

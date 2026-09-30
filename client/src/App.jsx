@@ -17,6 +17,7 @@ import RekapSiswaView from './views/RekapSiswaView';
 import RekapMapelView from './views/RekapMapelView';
 import RekapGuruView from './views/RekapGuruView';
 import GuruView from './views/GuruView';
+import MapelView from './views/MapelView';
 import KalenderView from './views/KalenderView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
 import InstallPwaModal from './components/InstallPwaModal';
@@ -207,6 +208,14 @@ export default function App() {
         />
       )}
 
+      {activeTab === 'mapel' && (
+        <SubHeader
+          title="Data Mata Pelajaran"
+          subtitle="Daftar mata pelajaran kurikulum dan standar KKM"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
       {activeTab === 'absensiSiswa' && (
         <SubHeader
           title="Absensi Siswa"
@@ -299,6 +308,7 @@ export default function App() {
         )}
         {activeTab === 'siswa' && <SiswaView showToast={showToast} onSwitchTab={(t) => setActiveTab(t)} />}
         {activeTab === 'guru' && <GuruView showToast={showToast} />}
+        {activeTab === 'mapel' && <MapelView showToast={showToast} />}
         {activeTab === 'absensiSiswa' && <AbsensiSiswaView user={currentUser} showToast={showToast} />}
         {activeTab === 'absensiMapel' && <AbsensiMapelView user={currentUser} showToast={showToast} />}
         {activeTab === 'jadwal' && <JadwalView user={currentUser} />}
