@@ -16,6 +16,11 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
   const [izinItems, setIzinItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
+  const now = new Date();
+  const currentBulan = now.getMonth() + 1;
+  const currentTahun = now.getFullYear();
+  const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][now.getMonth()];
+
   useEffect(() => {
     if (!isClassAccount) {
       fetchTodayStatus();
@@ -37,7 +42,7 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
 
   const fetchHistory = async () => {
     try {
-      const res = await api.get('/presensi/history?limit=30');
+      const res = await api.get(`/presensi/history?bulan=${currentBulan}&tahun=${currentTahun}&limit=100`);
       if (res.data.success) {
         setHistoryItems(res.data.data);
       }
@@ -60,11 +65,18 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
   const isCheckInDisabled = todayStatus?.status === 'CHECKIN' || todayStatus?.status === 'CHECKOUT';
   const isCheckOutDisabled = todayStatus?.status === 'BELUM_CHECKIN' || todayStatus?.status === 'CHECKOUT';
 
-  // Categorize lists
+  // Helper: apakah tanggal berada di bulan+tahun ini
+  const isThisMonth = (dateStr) => {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    return d.getMonth() + 1 === currentBulan && d.getFullYear() === currentTahun;
+  };
+
+  // Categorize lists — hanya data bulan ini
   const hadirList = historyItems.filter(h => h.jam_in);
-  const sakitList = izinItems.filter(i => (i.jenis || i.jenis_izin || '').toLowerCase() === 'sakit');
-  const izinList = izinItems.filter(i => (i.jenis || i.jenis_izin || '').toLowerCase() === 'izin');
-  const cutiList = izinItems.filter(i => (i.jenis || i.jenis_izin || '').toLowerCase() === 'cuti');
+  const sakitList = izinItems.filter(i => (i.jenis || i.jenis_izin || '').toLowerCase() === 'sakit' && isThisMonth(i.tanggal_mulai || i.tanggal));
+  const izinList = izinItems.filter(i => (i.jenis || i.jenis_izin || '').toLowerCase() === 'izin' && isThisMonth(i.tanggal_mulai || i.tanggal));
+  const cutiList = izinItems.filter(i => (i.jenis || i.jenis_izin || '').toLowerCase() === 'cuti' && isThisMonth(i.tanggal_mulai || i.tanggal));
 
   const defaultHistoryCards = [
     { date: 'Friday, 25 September 2026', time: '06:23:35 - 15:08:46' },
@@ -419,8 +431,8 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
                   {selectedCategory === 'Cuti' && <Clock size={22} />}
                 </div>
                 <div>
-                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Detail Status: {selectedCategory}</h3>
-                  <div style={{ fontSize: 11, color: '#64748b' }}>Total Data: {getModalList().length} Catatan</div>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Detail: {selectedCategory}</h3>
+                  <div style={{ fontSize: 11, color: '#64748b' }}>{namaBulan} {currentTahun} &bull; {getModalList().length} Catatan</div>
                 </div>
               </div>
               <button
