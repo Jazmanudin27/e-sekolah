@@ -102,9 +102,9 @@ export default function App() {
     const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
     const stored = localStorage.getItem('esekolah_active_tab');
     if (!hash && !stored) {
-      const isAdmin = user?.type === 'Admin' || (user?.role && ['admin', 'superadmin', 'operator', 'kepala_sekolah', 'kepala sekolah', 'kepsek', 'tu'].includes(String(user.role).toLowerCase()));
-      const isKelas = user?.type === 'Kelas' || user?.role === 'Kelas';
-      setActiveTab(isAdmin ? 'dashboard' : isKelas ? 'absensiSiswa' : 'beranda');
+      const isAdminAccount = user?.type === 'Admin' && !user?.kode_guru;
+      const isKelasAccount = user?.type === 'Kelas' || user?.role === 'Kelas';
+      setActiveTab(isAdminAccount ? 'dashboard' : isKelasAccount ? 'absensiSiswa' : 'beranda');
     } else {
       setActiveTab(hash || stored);
     }
@@ -173,8 +173,8 @@ export default function App() {
     );
   }
 
-  // DESKTOP ADMIN PANEL & MANAGEMENT PORTAL
-  if (currentUser?.type === 'Admin' || (currentUser?.role && ['admin', 'superadmin', 'operator', 'kepala_sekolah', 'kepala sekolah', 'kepsek', 'tu'].includes(String(currentUser.role).toLowerCase()))) {
+  // DESKTOP ADMIN PANEL & MANAGEMENT PORTAL (Only for pure Admin type accounts)
+  if (currentUser?.type === 'Admin' && !currentUser?.kode_guru) {
     return (
       <>
         <InstallPwaModal />
