@@ -201,32 +201,30 @@ class RekapModel {
    */
   static async getRekapGuru({ bulan, tahun } = {}) {
     try {
+      const currentD = new Date();
+      const effBulan = bulan !== undefined && bulan !== '' ? parseInt(bulan, 10) : (currentD.getMonth() + 1);
+      const effTahun = tahun !== undefined && tahun !== '' ? parseInt(tahun, 10) : currentD.getFullYear();
+
       const pParams = [];
       let pWhere = '';
-      if (bulan) {
-        const bInt = parseInt(bulan, 10);
-        const bPad = String(bInt).padStart(2, '0');
-        pWhere += ' AND (MONTH(p.tanggal) = ? OR p.tanggal LIKE ?)';
-        pParams.push(bInt, `%-${bPad}-%`);
+      if (effBulan) {
+        pWhere += ' AND MONTH(p.tanggal) = ?';
+        pParams.push(effBulan);
       }
-      if (tahun) {
-        const tInt = parseInt(tahun, 10);
-        pWhere += ' AND (YEAR(p.tanggal) = ? OR p.tanggal LIKE ?)';
-        pParams.push(tInt, `${tInt}-%`);
+      if (effTahun) {
+        pWhere += ' AND YEAR(p.tanggal) = ?';
+        pParams.push(effTahun);
       }
 
       const iParams = [];
       let iWhere = '';
-      if (bulan) {
-        const bInt = parseInt(bulan, 10);
-        const bPad = String(bInt).padStart(2, '0');
-        iWhere += ' AND (MONTH(i.tanggal_mulai) = ? OR i.tanggal_mulai LIKE ?)';
-        iParams.push(bInt, `%-${bPad}-%`);
+      if (effBulan) {
+        iWhere += ' AND MONTH(i.tanggal_mulai) = ?';
+        iParams.push(effBulan);
       }
-      if (tahun) {
-        const tInt = parseInt(tahun, 10);
-        iWhere += ' AND (YEAR(i.tanggal_mulai) = ? OR i.tanggal_mulai LIKE ?)';
-        iParams.push(tInt, `${tInt}-%`);
+      if (effTahun) {
+        iWhere += ' AND YEAR(i.tanggal_mulai) = ?';
+        iParams.push(effTahun);
       }
 
       const params = [...pParams, ...iParams];
@@ -415,19 +413,20 @@ class RekapModel {
       `;
       const pParams = [kode_guru, kode_guru, kode_guru, kode_guru];
 
-      if (bulan) {
-        const bInt = parseInt(bulan, 10);
-        const bPad = String(bInt).padStart(2, '0');
-        sqlPresensi += ' AND (MONTH(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%c") = ? OR DATE_FORMAT(p.tanggal, "%m") = ? OR p.tanggal LIKE ?)';
-        pParams.push(bInt, String(bInt), bPad, `%-${bPad}-%`);
+      const currentD = new Date();
+      const effBulan = bulan !== undefined && bulan !== '' ? parseInt(bulan, 10) : (currentD.getMonth() + 1);
+      const effTahun = tahun !== undefined && tahun !== '' ? parseInt(tahun, 10) : currentD.getFullYear();
+
+      if (effBulan) {
+        sqlPresensi += ' AND MONTH(p.tanggal) = ?';
+        pParams.push(effBulan);
       }
-      if (tahun) {
-        const tInt = parseInt(tahun, 10);
-        sqlPresensi += ' AND (YEAR(p.tanggal) = ? OR DATE_FORMAT(p.tanggal, "%Y") = ? OR p.tanggal LIKE ?)';
-        pParams.push(tInt, String(tInt), `${tInt}-%`);
+      if (effTahun) {
+        sqlPresensi += ' AND YEAR(p.tanggal) = ?';
+        pParams.push(effTahun);
       }
 
-      sqlPresensi += ' ORDER BY p.tanggal DESC';
+      sqlPresensi += ' ORDER BY p.tanggal DESC, p.id DESC';
       const presensiRows = await query(sqlPresensi, pParams).catch(() => []);
 
       // 2. Ambil data izin/sakit/cuti/dinas dari pengajuan_izin
@@ -462,19 +461,16 @@ class RekapModel {
       `;
       const iParams = [kode_guru, kode_guru, kode_guru, kode_guru, kode_guru];
 
-      if (bulan) {
-        const bInt = parseInt(bulan, 10);
-        const bPad = String(bInt).padStart(2, '0');
-        sqlIzin += ' AND (MONTH(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%c") = ? OR DATE_FORMAT(i.tanggal_mulai, "%m") = ? OR i.tanggal_mulai LIKE ?)';
-        iParams.push(bInt, String(bInt), bPad, `%-${bPad}-%`);
+      if (effBulan) {
+        sqlIzin += ' AND MONTH(i.tanggal_mulai) = ?';
+        iParams.push(effBulan);
       }
-      if (tahun) {
-        const tInt = parseInt(tahun, 10);
-        sqlIzin += ' AND (YEAR(i.tanggal_mulai) = ? OR DATE_FORMAT(i.tanggal_mulai, "%Y") = ? OR i.tanggal_mulai LIKE ?)';
-        iParams.push(tInt, String(tInt), `${tInt}-%`);
+      if (effTahun) {
+        sqlIzin += ' AND YEAR(i.tanggal_mulai) = ?';
+        iParams.push(effTahun);
       }
 
-      sqlIzin += ' ORDER BY i.tanggal_mulai DESC';
+      sqlIzin += ' ORDER BY i.tanggal_mulai DESC, i.id DESC';
       const izinRows = await query(sqlIzin, iParams).catch(() => []);
 
       const combined = [...(presensiRows || []), ...(izinRows || [])];

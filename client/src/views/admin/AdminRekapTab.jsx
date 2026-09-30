@@ -572,35 +572,59 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
             {/* QUICK STATS SUMMARY BANNER */}
             {(() => {
               const details = detailModal.details || [];
-              const hCount = details.filter(d => d.status === 'H' || (!d.status && d.jam_in)).length;
-              const sCount = details.filter(d => d.status === 'S').length;
-              const iCount = details.filter(d => d.status === 'I').length;
-              const aCount = details.filter(d => d.status === 'A').length;
+              const hCount = details.filter(d => {
+                const js = (d.jenis_status || d.status || '').toLowerCase();
+                return js === 'h' || js === 'hadir' || (!d.status && d.jam_in);
+              }).length;
+              const sCount = details.filter(d => {
+                const js = (d.jenis_status || d.status || '').toLowerCase();
+                return js === 's' || js === 'sakit';
+              }).length;
+              const iCount = details.filter(d => {
+                const js = (d.jenis_status || d.status || '').toLowerCase();
+                return js === 'i' || js === 'izin';
+              }).length;
+              const dCount = details.filter(d => {
+                const js = (d.jenis_status || d.status || '').toLowerCase();
+                return js === 'd' || js === 'dinas';
+              }).length;
+              const cCount = details.filter(d => {
+                const js = (d.jenis_status || d.status || '').toLowerCase();
+                return js === 'c' || js === 'cuti';
+              }).length;
+              const aCount = details.filter(d => {
+                const js = (d.jenis_status || d.status || '').toLowerCase();
+                return js === 'a' || js === 'alpa' || js === 'alpha';
+              }).length;
 
               return (
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: 10,
+                  gridTemplateColumns: 'repeat(5, 1fr)',
+                  gap: 8,
                   padding: '12px 20px',
                   background: '#ffffff',
                   borderBottom: '1px solid #e2e8f0'
                 }}>
                   <div style={{ padding: '8px 10px', background: '#ecfdf5', borderRadius: 8, border: '1px solid #a7f3d0', textAlign: 'center' }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: '#059669' }}>H</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#059669' }}>Hadir (H)</div>
                     <div style={{ fontSize: 16, fontWeight: 800, color: '#047857', marginTop: 1 }}>{hCount}</div>
                   </div>
                   <div style={{ padding: '8px 10px', background: '#eff6ff', borderRadius: 8, border: '1px solid #bfdbfe', textAlign: 'center' }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: '#2563eb' }}>S</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#2563eb' }}>Sakit (S)</div>
                     <div style={{ fontSize: 16, fontWeight: 800, color: '#1d4ed8', marginTop: 1 }}>{sCount}</div>
                   </div>
                   <div style={{ padding: '8px 10px', background: '#fffbeb', borderRadius: 8, border: '1px solid #fde68a', textAlign: 'center' }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: '#d97706' }}>I</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#d97706' }}>Izin (I)</div>
                     <div style={{ fontSize: 16, fontWeight: 800, color: '#b45309', marginTop: 1 }}>{iCount}</div>
                   </div>
-                  <div style={{ padding: '8px 10px', background: '#fef2f2', borderRadius: 8, border: '1px solid #fecaca', textAlign: 'center' }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: '#dc2626' }}>A</div>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: '#b91c1c', marginTop: 1 }}>{aCount}</div>
+                  <div style={{ padding: '8px 10px', background: '#e0f2fe', borderRadius: 8, border: '1px solid #bae6fd', textAlign: 'center' }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#0284c7' }}>Dinas (D)</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: '#0369a1', marginTop: 1 }}>{dCount}</div>
+                  </div>
+                  <div style={{ padding: '8px 10px', background: '#faf5ff', borderRadius: 8, border: '1px solid #e9d5ff', textAlign: 'center' }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#9333ea' }}>Cuti (C)</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: '#7e22ce', marginTop: 1 }}>{cCount}</div>
                   </div>
                 </div>
               );
@@ -618,17 +642,24 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                   <AlertCircle size={32} style={{ margin: '0 auto 8px', color: '#94a3b8', display: 'block' }} />
                   <div style={{ fontWeight: 700, color: '#334155', fontSize: 14 }}>Belum Ada Catatan Kehadiran</div>
                   <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
-                    Tidak ditemukan catatan presensi/absensi untuk periode yang dipilih.
+                    Tidak ditemukan catatan presensi/absensi untuk periode bulan ini.
                   </div>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {detailModal.details.map((d, i) => {
-                    const isH = d.status === 'H' || (!d.status && d.jam_in);
-                    const isS = d.status === 'S';
-                    const isI = d.status === 'I';
-                    const isA = d.status === 'A';
-                    const statusLetter = isH ? 'H' : isS ? 'S' : isI ? 'I' : 'A';
+                    const js = (d.jenis_status || d.status || '').toLowerCase();
+                    const isH = js === 'h' || js === 'hadir' || (!d.status && d.jam_in);
+                    const isS = js === 's' || js === 'sakit';
+                    const isI = js === 'i' || js === 'izin';
+                    const isD = js === 'd' || js === 'dinas';
+                    const isC = js === 'c' || js === 'cuti';
+                    const statusLetter = isH ? 'H' : isS ? 'S' : isI ? 'I' : isD ? 'D' : isC ? 'C' : 'A';
+                    const statusLabel = isH ? 'Hadir' : isS ? 'Sakit' : isI ? 'Izin' : isD ? 'Dinas' : isC ? 'Cuti' : 'Alpha';
+
+                    const bgCol = isH ? '#ecfdf5' : isS ? '#eff6ff' : isI ? '#fffbeb' : isD ? '#e0f2fe' : isC ? '#faf5ff' : '#fef2f2';
+                    const textCol = isH ? '#059669' : isS ? '#2563eb' : isI ? '#d97706' : isD ? '#0284c7' : isC ? '#9333ea' : '#dc2626';
+                    const borderCol = isH ? '#a7f3d0' : isS ? '#bfdbfe' : isI ? '#fde68a' : isD ? '#bae6fd' : isC ? '#e9d5ff' : '#fecaca';
 
                     return (
                       <div
@@ -647,17 +678,17 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
                           <div style={{
-                            width: 32,
-                            height: 32,
+                            width: 34,
+                            height: 34,
                             borderRadius: 8,
-                            background: isH ? '#ecfdf5' : isS ? '#eff6ff' : isI ? '#fffbeb' : '#fef2f2',
-                            color: isH ? '#059669' : isS ? '#2563eb' : isI ? '#d97706' : '#dc2626',
+                            background: bgCol,
+                            color: textCol,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontWeight: 800,
-                            fontSize: 12,
-                            border: `1px solid ${isH ? '#a7f3d0' : isS ? '#bfdbfe' : isI ? '#fde68a' : '#fecaca'}`,
+                            fontSize: 13,
+                            border: `1px solid ${borderCol}`,
                             flexShrink: 0
                           }}>
                             {statusLetter}
@@ -675,12 +706,12 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
                               )}
                               {d.jam_in && (
                                 <span style={{ fontSize: 11, color: '#64748b' }}>
-                                  Masuk: {d.jam_in} • Pulang: {d.jam_out || '-'}
+                                  Masuk: <strong style={{ color: '#16a34a' }}>{d.jam_in}</strong> • Pulang: <strong style={{ color: '#0066ff' }}>{d.jam_out || 'Belum Scan'}</strong>
                                 </span>
                               )}
-                              {d.catatan && (
+                              {d.keterangan && (
                                 <span style={{ fontSize: 11, color: '#475569', fontStyle: 'italic' }}>
-                                  ({d.catatan})
+                                  "{d.keterangan}"
                                 </span>
                               )}
                             </div>
@@ -689,18 +720,18 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
 
                         <div style={{ flexShrink: 0 }}>
                           <span style={{
-                            background: isH ? '#ecfdf5' : isS ? '#eff6ff' : isI ? '#fffbeb' : '#fef2f2',
-                            color: isH ? '#059669' : isS ? '#2563eb' : isI ? '#d97706' : '#dc2626',
-                            border: `1px solid ${isH ? '#a7f3d0' : isS ? '#bfdbfe' : isI ? '#fde68a' : '#fecaca'}`,
+                            background: bgCol,
+                            color: textCol,
+                            border: `1px solid ${borderCol}`,
                             padding: '3px 12px',
                             borderRadius: 6,
-                            fontSize: 12,
+                            fontSize: 11.5,
                             fontWeight: 800,
                             display: 'inline-block',
-                            minWidth: 28,
+                            minWidth: 50,
                             textAlign: 'center'
                           }}>
-                            {statusLetter}
+                            {statusLabel}
                           </span>
                         </div>
                       </div>

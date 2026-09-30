@@ -353,6 +353,46 @@ export default function AdminDesktopView({ user, onLogout }) {
             )}
           </div>
 
+          {/* Rekapitulasi Presensi (Expandable) */}
+          <div className="portal-menu-group">
+            <button
+              type="button"
+              className={`portal-menu-item has-submenu ${['rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(activeTab) ? 'has-active' : ''}`}
+              onClick={() => toggleSubMenu('rekapPresensi')}
+            >
+              <div className="menu-icon-wrap">
+                <BarChart3 size={17} />
+              </div>
+              <span className="menu-label">Rekap Presensi</span>
+              {openMenus.rekapPresensi ? <ChevronDown size={14} className="submenu-arrow" /> : <ChevronRight size={14} className="submenu-arrow" />}
+            </button>
+            {openMenus.rekapPresensi && (
+              <div className="portal-submenu-list">
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'rekapGuru' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('rekapGuru')}
+                >
+                  <span>Rekap Presensi Guru</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'rekapSiswa' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('rekapSiswa')}
+                >
+                  <span>Rekap Absensi Siswa</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'rekapMapel' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('rekapMapel')}
+                >
+                  <span>Rekap Absensi Mapel</span>
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* ----------------- LAPORAN & REKAP ----------------- */}
           <div className="portal-menu-section-label">LAPORAN & REKAP</div>
 
@@ -647,9 +687,9 @@ export default function AdminDesktopView({ user, onLogout }) {
           {['laporanSiswa', 'laporanGuru', 'laporanKelas', 'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat'].includes(activeTab) && (
             <AdminLaporanGeneratorTab reportType={activeTab} />
           )}
-          {activeTab === 'rekapGuru' && <AdminLaporanGeneratorTab reportType="laporanPresensiGuru" />}
-          {activeTab === 'rekapSiswa' && <AdminLaporanGeneratorTab reportType="laporanAbsensiSiswa" />}
-          {activeTab === 'rekapMapel' && <AdminLaporanGeneratorTab reportType="laporanAbsensiMapel" />}
+          {activeTab === 'rekapGuru' && <AdminRekapTab initialSubTab="guru" />}
+          {activeTab === 'rekapSiswa' && <AdminRekapTab initialSubTab="siswa" />}
+          {activeTab === 'rekapMapel' && <AdminRekapTab initialSubTab="mapel" />}
 
           {/* 5. SISTEM & AKUN */}
           {activeTab === 'users' && <AdminUsersTab />}
