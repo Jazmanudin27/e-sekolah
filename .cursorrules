@@ -1,0 +1,63 @@
+# AGENT RULES & EFFICIENCY GUIDE - E-SEKOLAH (MOBILE & WEB PRESENSI)
+
+## 1. Ringkasan Arsitektur Proyek (Project Architecture)
+
+Proyek ini adalah sistem E-Sekolah Monorepo (Express REST API Backend + React Vite Frontend) untuk presensi guru, siswa, kelas, dan manajemen sekolah.
+
+### Pemetaan Folder Utama:
+- `/src/` : **Backend Node.js & Express REST API**
+  - `/src/server.js` : Entry point server Express.
+  - `/src/controllers/` : Controller logika bisnis REST API (auth, presensi, sekolah, guru, siswa, kelas, jadwal, kalender, dll).
+  - `/src/models/` : Model query database MySQL & Auto-Migration schema (misal `SekolahModel.ensureColumns()`, `PresensiModel`, `GuruModel`, dll).
+  - `/src/routes/` : Express routing endpoints.
+  - `/src/middleware/` : Auth middleware (JWT token validation, role checking).
+  - `/src/utils/` : Helper utilitas backend (response formatting, date calculation).
+  - `/src/config/` : Konfigurasi database MySQL (`database.js`).
+
+- `/client/` : **Frontend Single Page Application (React 19 + Vite)**
+  - `/client/src/views/` : Halaman tampilan utama (`BerandaView.jsx`, `KalenderView.jsx`, `admin/AdminDesktopView.jsx`, `admin/AdminSettingsTab.jsx`, `admin/AdminPresensiGuruTab.jsx`, dll).
+  - `/client/src/components/` : Komponen UI reusable (`PresensiModal.jsx`, `InstallPwaModal.jsx`, `TopBar.jsx`, `PengumumanSlider.jsx`, `SubHeader.jsx`, `BirthdayModal.jsx`).
+  - `/client/src/api/` : Axios HTTP client configuration (`client.js`).
+  - `/client/src/index.css` & `/client/src/admin.css` : Design system CSS Vanilla & layout styles.
+  - `/client/vite.config.js` : Konfigurasi Vite (build output disetting ke `../public`).
+
+- `/public/` : **Production Static Assets & PWA Output**
+  - Hasil kompilasi `npm run build` dari frontend React Vite.
+  - File PWA (`manifest.json`, `sw.js`, `logo.png`).
+
+---
+
+## 2. Tech Stack & Conventions
+
+### Backend:
+- Node.js menggunakan **CommonJS** (`const x = require(...)` / `module.exports = ...`).
+- Express.js v4 + MySQL2.
+- Respon API standar menggunakan helper `sendSuccess(res, msg, data)` & `sendError(res, msg, code)`.
+- Menggunakan Auto Column Migration di Model (`ensureColumns()`) saat backend terhubung ke database.
+
+### Frontend:
+- **React 19** Functional Components dengan React Hooks (`useState`, `useEffect`, `useRef`).
+- **Vite v5** sebagai build tool.
+- Styling: **Vanilla CSS** (`index.css` & `admin.css`) dipadu dengan clean inline styles untuk kalkulasi dinamis (Tanpa TailwindCSS).
+- Icons: `lucide-react`.
+- Alerts: `sweetalert2` (`Swal.fire`).
+- HTTP Client: `axios` terintegrasi via `@/api/client`.
+
+---
+
+## 3. Instruksi Eksekusi Agent (Hemat Token & Performa Cepat)
+
+1. **Fokus Terarah pada File Target (@file)**:
+   - Agent HARUS fokus HANYA pada file yang di-mention oleh pengguna (menggunakan `@file`), file yang sedang terbuka di editor, atau file yang langsung berkaitan dengan tugas.
+   - DILARANG melakukan pencarian masif (*workspace search/grep*) ke seluruh folder jika pengguna sudah memberikan konteks file spesifik.
+
+2. **Ringkas & To-The-Point (Minimal Diff Edits)**:
+   - Berikan kode HANYA pada bagian/blok yang diubah saja.
+   - HINDARI menulis ulang seluruh isi file raksasa jika perubahan hanya pada beberapa baris.
+
+3. **Preserve Contracts & Integrity**:
+   - Pertahankan struktur API response, kontrak data, dan logika yang sudah ada tanpa duplikasi.
+   - Jangan menyembunyikan error atau mengembalikan data fallback palsu.
+
+4. **Kompilasi Automatis**:
+   - Setelah mengedit file di `/client/src/`, jalankan `npm run build` di folder `/client` agar folder `/public` ter-update secara otomatis.
