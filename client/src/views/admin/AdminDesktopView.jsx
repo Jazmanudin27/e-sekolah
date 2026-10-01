@@ -68,8 +68,13 @@ const getInitialOpenMenus = (tab) => ({
 export default function AdminDesktopView({ user, onLogout }) {
   const roleStr = String(user?.role || user?.username || '').toLowerCase();
   const isPerpusAdmin = roleStr.includes('perpus') || roleStr.includes('pustakawan');
+  const isSaprasAdmin = roleStr.includes('sarpas') || roleStr.includes('sarpras');
 
-  const [activeTab, setActiveTab] = useState(() => isPerpusAdmin ? 'perpustakaan' : getInitialTab());
+  const [activeTab, setActiveTab] = useState(() => {
+    if (isPerpusAdmin) return 'perpustakaan';
+    if (isSaprasAdmin) return 'sapras';
+    return getInitialTab();
+  });
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
@@ -84,8 +89,13 @@ export default function AdminDesktopView({ user, onLogout }) {
         setActiveTab('perpustakaan');
       }
       setOpenMenus(prev => ({ ...prev, perpustakaan: true }));
+    } else if (isSaprasAdmin) {
+      if (activeTab !== 'sapras') {
+        setActiveTab('sapras');
+      }
+      setOpenMenus(prev => ({ ...prev, sapras: true }));
     }
-  }, [isPerpusAdmin, activeTab]);
+  }, [isPerpusAdmin, isSaprasAdmin, activeTab]);
 
   // Listen to hash change (e.g. browser back/forward buttons)
   useEffect(() => {
@@ -138,6 +148,9 @@ export default function AdminDesktopView({ user, onLogout }) {
   };
 
   const handleSelectTab = (tabId) => {
+    if (isPerpusAdmin && tabId !== 'perpustakaan') return;
+    if (isSaprasAdmin && tabId !== 'sapras') return;
+
     setActiveTab(tabId);
     try {
       localStorage.setItem('admin_active_tab', tabId);
@@ -206,7 +219,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           <div className="school-info">
             <div className="school-name">{sekolahInfo?.nama_sekolah || 'SMK ARTANITA'}</div>
             <div className="school-badge-admin">
-              {isPerpusAdmin ? 'PUSTAKAWAN' : (user?.role?.toUpperCase() || 'ADMIN')}
+              {isPerpusAdmin ? 'PUSTAKAWAN' : isSaprasAdmin ? 'SARPRAS' : (user?.role?.toUpperCase() || 'ADMIN')}
             </div>
           </div>
         </div>
@@ -225,6 +238,20 @@ export default function AdminDesktopView({ user, onLogout }) {
                   <BookOpen size={17} />
                 </div>
                 <span className="menu-label">Katalog & Peminjaman Buku</span>
+              </button>
+            </>
+          ) : isSaprasAdmin ? (
+            <>
+              <div className="portal-menu-section-label">SARANA & PRASARANA</div>
+              <button
+                type="button"
+                className={`portal-menu-item ${activeTab === 'sapras' ? 'active' : ''}`}
+                onClick={() => handleSelectTab('sapras')}
+              >
+                <div className="menu-icon-wrap">
+                  <Package size={17} />
+                </div>
+                <span className="menu-label">Sarana Prasarana</span>
               </button>
             </>
           ) : (
@@ -641,13 +668,15 @@ export default function AdminDesktopView({ user, onLogout }) {
                     <div style={{ fontWeight: 700, color: '#0f172a' }}>{user?.name || user?.username || 'Admin Artanita'}</div>
                     <div style={{ fontSize: 11, color: '#64748b' }}>{user?.email || 'admin@artanita.com'}</div>
                   </div>
-                  <button
-                    type="button"
-                    className="dropdown-item"
-                    onClick={() => handleSelectTab('settings')}
-                  >
-                    <Settings size={14} /> Pengaturan Profil
-                  </button>
+                  {!isPerpusAdmin && !isSaprasAdmin && (
+                    <button
+                      type="button"
+                      className="dropdown-item"
+                      onClick={() => handleSelectTab('settings')}
+                    >
+                      <Settings size={14} /> Pengaturan Profil
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="dropdown-item dropdown-item-danger"
@@ -670,6 +699,8 @@ export default function AdminDesktopView({ user, onLogout }) {
           <main className="portal-page-body">
             {isPerpusAdmin ? (
               <AdminPerpustakaanTab />
+            ) : isSaprasAdmin ? (
+              <AdminSaprasTab />
             ) : (
               <>
                 {/* 1. DASHBOARD & PENGUMUMAN */}
