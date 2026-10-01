@@ -5,6 +5,7 @@
 Proyek ini adalah sistem E-Sekolah Monorepo (Express REST API Backend + React Vite Frontend) untuk presensi guru, siswa, kelas, dan manajemen sekolah.
 
 ### Pemetaan Folder Utama:
+
 - `/src/` : **Backend Node.js & Express REST API**
   - `/src/server.js` : Entry point server Express.
   - `/src/controllers/` : Controller logika bisnis REST API (auth, presensi, sekolah, guru, siswa, kelas, jadwal, kalender, dll).
@@ -30,12 +31,14 @@ Proyek ini adalah sistem E-Sekolah Monorepo (Express REST API Backend + React Vi
 ## 2. Tech Stack & Conventions
 
 ### Backend:
+
 - Node.js menggunakan **CommonJS** (`const x = require(...)` / `module.exports = ...`).
 - Express.js v4 + MySQL2.
 - Respon API standar menggunakan helper `sendSuccess(res, msg, data)` & `sendError(res, msg, code)`.
 - Menggunakan Auto Column Migration di Model (`ensureColumns()`) saat backend terhubung ke database.
 
 ### Frontend:
+
 - **React 19** Functional Components dengan React Hooks (`useState`, `useEffect`, `useRef`).
 - **Vite v5** sebagai build tool.
 - Styling: **Vanilla CSS** (`index.css` & `admin.css`) dipadu dengan clean inline styles untuk kalkulasi dinamis (Tanpa TailwindCSS).
@@ -49,7 +52,7 @@ Proyek ini adalah sistem E-Sekolah Monorepo (Express REST API Backend + React Vi
 
 1. **Fokus Terarah pada File Target (@file)**:
    - Agent HARUS fokus HANYA pada file yang di-mention oleh pengguna (menggunakan `@file`), file yang sedang terbuka di editor, atau file yang langsung berkaitan dengan tugas.
-   - DILARANG melakukan pencarian masif (*workspace search/grep*) ke seluruh folder jika pengguna sudah memberikan konteks file spesifik.
+   - DILARANG melakukan pencarian masif (_workspace search/grep_) ke seluruh folder jika pengguna sudah memberikan konteks file spesifik.
 
 2. **Ringkas & To-The-Point (Minimal Diff Edits)**:
    - Berikan kode HANYA pada bagian/blok yang diubah saja.

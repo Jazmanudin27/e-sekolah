@@ -406,13 +406,13 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
 
       {/* DETAIL MODAL UNTUK CARD HADIR, SAKIT, IZIN, CUTI */}
       {selectedCategory && (
-        <div style={{
+        <div className="beranda-modal-backdrop" style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)',
           display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
           zIndex: 999999
         }}>
-          <div style={{
+          <div className="beranda-modal-card" style={{
             background: '#ffffff', borderTopLeftRadius: 24, borderTopRightRadius: 24,
             width: '100%', maxWidth: 500, maxHeight: '80vh', overflowY: 'auto',
             boxShadow: '0 -10px 25px rgba(0,0,0,0.15)', padding: '20px 18px 30px'
