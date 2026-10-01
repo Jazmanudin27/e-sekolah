@@ -3,7 +3,7 @@ import {
   Users, GraduationCap, Building2, BookOpen, Calendar,
   Clock, RefreshCw, ChevronDown, ChevronRight, List, FileSpreadsheet,
   X, Search, UserCheck, CheckCircle2, AlertCircle, CalendarDays,
-  UserX, Sparkles
+  UserX, Sparkles, Award
 } from 'lucide-react';
 import api from '../../api/client';
 import SearchableSelect from '../../components/SearchableSelect';
@@ -464,6 +464,37 @@ export default function AdminDashboardTab({ onSwitchTab }) {
     <div className="portal-dashboard-view">
       {/* PAGE TITLE */}
       <h1 className="portal-dashboard-title">Dashboard</h1>
+
+      {/* QUICK ACCESS BANNER: E-RAPOR SISWA */}
+      <div 
+        onClick={() => onSwitchTab?.('laporanRapor')}
+        style={{
+          background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+          color: '#ffffff',
+          borderRadius: 16,
+          padding: '16px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          boxShadow: '0 4px 16px rgba(2, 132, 199, 0.25)',
+          marginBottom: 18,
+          transition: 'all 0.2s ease'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 12, padding: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Award size={26} color="#ffffff" />
+          </div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 800 }}>📜 E-Rapor Siswa (Laporan Hasil Belajar)</div>
+            <div style={{ fontSize: 12, opacity: 0.9 }}>Pratinjau, olah nilai, dan cetak dokumen Rapor resmi siswa</div>
+          </div>
+        </div>
+        <button style={{ background: '#ffffff', color: '#0284c7', border: 'none', padding: '8px 16px', borderRadius: 10, fontWeight: 800, fontSize: 12, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          Buka E-Rapor ➔
+        </button>
+      </div>
 
       {/* 4 MODERN PREMIUM STAT CARDS */}
       <div className="portal-stat-grid">
