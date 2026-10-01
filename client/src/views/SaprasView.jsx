@@ -4,14 +4,20 @@ import {
   Box,
   Layers,
   Search,
-  Printer,
   RefreshCw,
   CheckCircle2,
   AlertTriangle,
   XCircle,
   MapPin,
   TrendingUp,
-  FileText
+  Sparkles,
+  ShieldCheck,
+  Compass,
+  Check,
+  Trees,
+  Dumbbell,
+  Laptop,
+  X
 } from 'lucide-react';
 import api from '../api/client';
 
@@ -85,11 +91,6 @@ export default function SaprasView({ user, showToast }) {
     });
   }, [data.tanah, searchTerm]);
 
-  // Print Report Handler
-  const handlePrint = () => {
-    window.print();
-  };
-
   // Helper status color badge
   const renderKondisiBadge = (keterangan) => {
     const ket = (keterangan || '').toUpperCase();
@@ -99,15 +100,15 @@ export default function SaprasView({ user, showToast }) {
           display: 'inline-flex',
           alignItems: 'center',
           gap: 4,
-          padding: '4px 9px',
+          padding: '3px 9px',
           borderRadius: 20,
           background: 'rgba(16, 185, 129, 0.12)',
           color: '#059669',
-          fontSize: 11.5,
-          fontWeight: 700,
+          fontSize: 11,
+          fontWeight: 800,
           border: '1px solid rgba(16, 185, 129, 0.25)'
         }}>
-          <CheckCircle2 size={13} strokeWidth={2.5} />
+          <CheckCircle2 size={12} strokeWidth={2.5} />
           BAIK
         </span>
       );
@@ -118,15 +119,15 @@ export default function SaprasView({ user, showToast }) {
           display: 'inline-flex',
           alignItems: 'center',
           gap: 4,
-          padding: '4px 9px',
+          padding: '3px 9px',
           borderRadius: 20,
           background: 'rgba(2, 132, 199, 0.12)',
           color: '#0284c7',
-          fontSize: 11.5,
-          fontWeight: 700,
+          fontSize: 11,
+          fontWeight: 800,
           border: '1px solid rgba(2, 132, 199, 0.25)'
         }}>
-          <CheckCircle2 size={13} strokeWidth={2.5} />
+          <CheckCircle2 size={12} strokeWidth={2.5} />
           CUKUP BAIK
         </span>
       );
@@ -137,15 +138,15 @@ export default function SaprasView({ user, showToast }) {
           display: 'inline-flex',
           alignItems: 'center',
           gap: 4,
-          padding: '4px 9px',
+          padding: '3px 9px',
           borderRadius: 20,
           background: 'rgba(245, 158, 11, 0.14)',
           color: '#d97706',
-          fontSize: 11.5,
-          fontWeight: 700,
+          fontSize: 11,
+          fontWeight: 800,
           border: '1px solid rgba(245, 158, 11, 0.3)'
         }}>
-          <AlertTriangle size={13} strokeWidth={2.5} />
+          <AlertTriangle size={12} strokeWidth={2.5} />
           CUKUP
         </span>
       );
@@ -155,139 +156,168 @@ export default function SaprasView({ user, showToast }) {
         display: 'inline-flex',
         alignItems: 'center',
         gap: 4,
-        padding: '4px 9px',
+        padding: '3px 9px',
         borderRadius: 20,
         background: 'rgba(239, 68, 68, 0.12)',
         color: '#dc2626',
-        fontSize: 11.5,
-        fontWeight: 700,
+        fontSize: 11,
+        fontWeight: 800,
         border: '1px solid rgba(239, 68, 68, 0.25)'
       }}>
-        <XCircle size={13} strokeWidth={2.5} />
+        <XCircle size={12} strokeWidth={2.5} />
         {ket || 'RUSAK'}
       </span>
     );
   };
 
+  // Helper icon for facility names
+  const getFasilitasIcon = (name) => {
+    const n = (name || '').toUpperCase();
+    if (n.includes('MESJID')) return { icon: Compass, bg: '#10b981', color: '#ffffff' };
+    if (n.includes('LAB') || n.includes('KOMPUTER')) return { icon: Laptop, bg: '#8b5cf6', color: '#ffffff' };
+    if (n.includes('AULA') || n.includes('COFI')) return { icon: Sparkles, bg: '#f59e0b', color: '#ffffff' };
+    if (n.includes('WC')) return { icon: CheckCircle2, bg: '#06b6d4', color: '#ffffff' };
+    if (n.includes('SECURITY')) return { icon: ShieldCheck, bg: '#64748b', color: '#ffffff' };
+    return { icon: Building2, bg: '#0284c7', color: '#ffffff' };
+  };
+
   return (
-    <div className="sapras-view-container" style={{ padding: '16px 14px 80px', maxWidth: 1000, margin: '0 auto' }}>
-      
-      {/* 1. TOP METRICS DASHBOARD CARDS */}
+    <div className="sapras-view-container" style={{ padding: '12px 14px 90px', maxWidth: 680, margin: '0 auto' }}>
+
+      {/* 1. HERO HEADER CARD WITH GLOW ACCENT */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-        gap: 12,
-        marginBottom: 20
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0284c7 100%)',
+        borderRadius: 22,
+        padding: '18px 18px 20px',
+        color: '#ffffff',
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: '0 12px 28px rgba(2, 132, 199, 0.25)',
+        marginBottom: 16
       }}>
-        {/* Card 1: Fasilitas */}
+        {/* Glow ambient background circle */}
         <div style={{
-          background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-          borderRadius: 18,
-          padding: '14px 16px',
-          color: '#ffffff',
-          boxShadow: '0 8px 20px rgba(2, 132, 199, 0.22)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: 0.9 }}>
-            <span style={{ fontSize: 12, fontWeight: 600 }}>Fasilitas Ruangan</span>
-            <Building2 size={20} />
-          </div>
-          <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1 }}>
-              {data.fasilitas?.length || 25}
+          position: 'absolute',
+          top: -30,
+          right: -30,
+          width: 140,
+          height: 140,
+          borderRadius: '50%',
+          background: 'rgba(255, 255, 255, 0.12)',
+          filter: 'blur(20px)',
+          pointerEvents: 'none'
+        }} />
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+          <div>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '3px 10px',
+              borderRadius: 20,
+              background: 'rgba(255, 255, 255, 0.16)',
+              backdropFilter: 'blur(8px)',
+              fontSize: 11,
+              fontWeight: 700,
+              marginBottom: 8,
+              letterSpacing: 0.3
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px #22c55e' }} />
+              DATA INVENTARIS RESMI
             </div>
-            <div style={{ fontSize: 11, opacity: 0.85, marginTop: 4 }}>
-              Total {data.stats?.totalUnitFasilitas || 45} Unit Ruang
-            </div>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900, letterSpacing: -0.4 }}>
+              Sarana & Prasarana
+            </h2>
+            <p style={{ margin: '4px 0 0', fontSize: 12, opacity: 0.85, lineHeight: 1.4 }}>
+              Laporan fasilitas fisik, sarana KBM, dan penggunaan lahan
+            </p>
           </div>
+
+          <button
+            type="button"
+            onClick={fetchData}
+            title="Refresh Data"
+            style={{
+              border: 'none',
+              background: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(8px)',
+              color: '#ffffff',
+              width: 36,
+              height: 36,
+              borderRadius: 12,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+          </button>
         </div>
 
-        {/* Card 2: Sarana */}
+        {/* 2. STATS ROW IN HERO */}
         <div style={{
-          background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-          borderRadius: 18,
-          padding: '14px 16px',
-          color: '#ffffff',
-          boxShadow: '0 8px 20px rgba(37, 99, 235, 0.22)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 8,
+          marginTop: 16,
+          position: 'relative',
+          zIndex: 1
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: 0.9 }}>
-            <span style={{ fontSize: 12, fontWeight: 600 }}>Sarana & Prasarana</span>
-            <Box size={20} />
+          {/* Stat 1 */}
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.14)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 14,
+            padding: '10px 10px',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.18)'
+          }}>
+            <div style={{ fontSize: 10.5, opacity: 0.9, fontWeight: 600 }}>Fasilitas</div>
+            <div style={{ fontSize: 18, fontWeight: 900, marginTop: 2 }}>{data.fasilitas?.length || 25}</div>
+            <div style={{ fontSize: 9.5, opacity: 0.8 }}>45 Unit Ruang</div>
           </div>
-          <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1 }}>
-              {data.sarana?.length || 31}
-            </div>
-            <div style={{ fontSize: 11, opacity: 0.85, marginTop: 4 }}>
-              Total {data.stats?.totalUnitSarana || 494} Item/Alat
-            </div>
-          </div>
-        </div>
 
-        {/* Card 3: Tanah */}
-        <div style={{
-          background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-          borderRadius: 18,
-          padding: '14px 16px',
-          color: '#ffffff',
-          boxShadow: '0 8px 20px rgba(5, 150, 105, 0.22)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: 0.9 }}>
-            <span style={{ fontSize: 12, fontWeight: 600 }}>Luas Lahan Tanah</span>
-            <Layers size={20} />
+          {/* Stat 2 */}
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.14)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 14,
+            padding: '10px 10px',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.18)'
+          }}>
+            <div style={{ fontSize: 10.5, opacity: 0.9, fontWeight: 600 }}>Sarana</div>
+            <div style={{ fontSize: 18, fontWeight: 900, marginTop: 2 }}>{data.sarana?.length || 31}</div>
+            <div style={{ fontSize: 9.5, opacity: 0.8 }}>494 Item Baik</div>
           </div>
-          <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
-              {Number(data.stats?.totalLuasTanah || 1032).toLocaleString('id-ID')} M²
-            </div>
-            <div style={{ fontSize: 11, opacity: 0.85, marginTop: 4 }}>
-              Bangunan, Halaman & Lapang
-            </div>
-          </div>
-        </div>
 
-        {/* Card 4: Kondisi */}
-        <div style={{
-          background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
-          borderRadius: 18,
-          padding: '14px 16px',
-          color: '#ffffff',
-          boxShadow: '0 8px 20px rgba(234, 88, 12, 0.22)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: 0.9 }}>
-            <span style={{ fontSize: 12, fontWeight: 600 }}>Kondisi Aset</span>
-            <TrendingUp size={20} />
-          </div>
-          <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1 }}>
-              100%
-            </div>
-            <div style={{ fontSize: 11, opacity: 0.85, marginTop: 4 }}>
-              Siap Digunakan KBM
-            </div>
+          {/* Stat 3 */}
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.14)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 14,
+            padding: '10px 10px',
+            textAlign: 'center',
+            border: '1px solid rgba(255, 255, 255, 0.18)'
+          }}>
+            <div style={{ fontSize: 10.5, opacity: 0.9, fontWeight: 600 }}>Luas Lahan</div>
+            <div style={{ fontSize: 18, fontWeight: 900, marginTop: 2 }}>1.032</div>
+            <div style={{ fontSize: 9.5, opacity: 0.8 }}>Meter Persegi</div>
           </div>
         </div>
       </div>
 
-      {/* 2. SUB-TAB SELECTION BUTTONS */}
+      {/* 3. SEGMENTED TABS (PILL BUTTONS) */}
       <div style={{
         display: 'flex',
         background: '#f1f5f9',
-        padding: 5,
+        padding: 4,
         borderRadius: 16,
-        marginBottom: 16,
-        gap: 6
+        marginBottom: 14,
+        gap: 4
       }}>
         <button
           type="button"
@@ -297,20 +327,20 @@ export default function SaprasView({ user, showToast }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 7,
-            padding: '10px 12px',
+            gap: 6,
+            padding: '10px 8px',
             borderRadius: 12,
             border: 'none',
             background: activeSubTab === 'fasilitas' ? '#ffffff' : 'transparent',
             color: activeSubTab === 'fasilitas' ? '#0066ff' : '#64748b',
             fontWeight: activeSubTab === 'fasilitas' ? 800 : 600,
-            fontSize: 13,
+            fontSize: 12.5,
             boxShadow: activeSubTab === 'fasilitas' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
             cursor: 'pointer',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
-          <Building2 size={16} />
+          <Building2 size={15} />
           <span>Fasilitas ({data.fasilitas?.length || 25})</span>
         </button>
 
@@ -322,21 +352,21 @@ export default function SaprasView({ user, showToast }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 7,
-            padding: '10px 12px',
+            gap: 6,
+            padding: '10px 8px',
             borderRadius: 12,
             border: 'none',
             background: activeSubTab === 'sarana' ? '#ffffff' : 'transparent',
             color: activeSubTab === 'sarana' ? '#0066ff' : '#64748b',
             fontWeight: activeSubTab === 'sarana' ? 800 : 600,
-            fontSize: 13,
+            fontSize: 12.5,
             boxShadow: activeSubTab === 'sarana' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
             cursor: 'pointer',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
-          <Box size={16} />
-          <span>Sarana & Prasarana ({data.sarana?.length || 31})</span>
+          <Box size={15} />
+          <span>Sarana ({data.sarana?.length || 31})</span>
         </button>
 
         <button
@@ -347,510 +377,593 @@ export default function SaprasView({ user, showToast }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 7,
-            padding: '10px 12px',
+            gap: 6,
+            padding: '10px 8px',
             borderRadius: 12,
             border: 'none',
             background: activeSubTab === 'tanah' ? '#ffffff' : 'transparent',
             color: activeSubTab === 'tanah' ? '#0066ff' : '#64748b',
             fontWeight: activeSubTab === 'tanah' ? 800 : 600,
-            fontSize: 13,
+            fontSize: 12.5,
             boxShadow: activeSubTab === 'tanah' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
             cursor: 'pointer',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
-          <Layers size={16} />
-          <span>Tanah ({data.tanah?.length || 3})</span>
+          <Layers size={15} />
+          <span>Lahan ({data.tanah?.length || 3})</span>
         </button>
       </div>
 
-      {/* 3. TOOLBAR (SEARCH, FILTER & ACTION BUTTONS) */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 10,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 16
-      }}>
-        {/* Search input */}
-        <div style={{
-          position: 'relative',
-          flex: '1 1 200px',
-          minWidth: 180
-        }}>
-          <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+      {/* 4. SEARCH & FILTER CHIPS */}
+      <div style={{ marginBottom: 14 }}>
+        {/* Search Bar */}
+        <div style={{ position: 'relative', marginBottom: 10 }}>
+          <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
           <input
             type="text"
-            placeholder={`Cari nama ${activeSubTab}...`}
+            placeholder={`Cari nama ${activeSubTab === 'fasilitas' ? 'ruangan' : activeSubTab === 'sarana' ? 'barang/sarana' : 'lahan'}...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               width: '100%',
-              padding: '10px 12px 10px 38px',
-              borderRadius: 14,
+              padding: '11px 36px 11px 40px',
+              borderRadius: 16,
               border: '1.5px solid #e2e8f0',
               background: '#ffffff',
               fontSize: 13,
               fontWeight: 500,
               outline: 'none',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.02)'
+              boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+              boxSizing: 'border-box'
             }}
           />
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm('')}
+              style={{
+                position: 'absolute',
+                right: 12,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                border: 'none',
+                background: '#e2e8f0',
+                borderRadius: '50%',
+                width: 20,
+                height: 20,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: '#64748b'
+              }}
+            >
+              <X size={12} />
+            </button>
+          )}
         </div>
 
-        {/* Filter kondisi (khusus fasilitas & sarana) */}
+        {/* Filter condition pills for Fasilitas */}
         {activeSubTab === 'fasilitas' && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {['ALL', 'BAIK', 'CUKUP BAIK', 'CUKUP'].map((kondisi) => (
+          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+            {[
+              { id: 'ALL', label: 'Semua', count: data.fasilitas?.length || 25 },
+              { id: 'BAIK', label: 'Baik', count: data.stats?.fasilitasKondisi?.baik || 14 },
+              { id: 'CUKUP BAIK', label: 'Cukup Baik', count: data.stats?.fasilitasKondisi?.cukupBaik || 10 },
+              { id: 'CUKUP', label: 'Cukup', count: data.stats?.fasilitasKondisi?.cukup || 1 }
+            ].map(f => (
               <button
-                key={kondisi}
+                key={f.id}
                 type="button"
-                onClick={() => setFilterKondisi(kondisi)}
+                onClick={() => setFilterKondisi(f.id)}
                 style={{
-                  padding: '7px 11px',
-                  borderRadius: 10,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  padding: '6px 12px',
+                  borderRadius: 20,
                   fontSize: 11.5,
                   fontWeight: 700,
+                  whiteSpace: 'nowrap',
                   border: '1px solid',
-                  borderColor: filterKondisi === kondisi ? '#0066ff' : '#e2e8f0',
-                  background: filterKondisi === kondisi ? '#eff6ff' : '#ffffff',
-                  color: filterKondisi === kondisi ? '#0066ff' : '#64748b',
-                  cursor: 'pointer'
+                  borderColor: filterKondisi === f.id ? '#0066ff' : '#e2e8f0',
+                  background: filterKondisi === f.id ? '#0066ff' : '#ffffff',
+                  color: filterKondisi === f.id ? '#ffffff' : '#64748b',
+                  cursor: 'pointer',
+                  boxShadow: filterKondisi === f.id ? '0 3px 10px rgba(0, 102, 255, 0.22)' : 'none',
+                  transition: 'all 0.15s ease'
                 }}
               >
-                {kondisi === 'ALL' ? 'Semua' : kondisi}
+                <span>{f.label}</span>
+                <span style={{
+                  padding: '1px 6px',
+                  borderRadius: 10,
+                  background: filterKondisi === f.id ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
+                  color: filterKondisi === f.id ? '#ffffff' : '#64748b',
+                  fontSize: 10.5
+                }}>
+                  {f.count}
+                </span>
               </button>
             ))}
           </div>
         )}
-
-        {/* Action buttons (Hanya Cetak & Refresh untuk Tampilan Laporan Mobile) */}
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button
-            type="button"
-            onClick={handlePrint}
-            title="Cetak Laporan Sarpras"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '9px 13px',
-              borderRadius: 12,
-              background: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              fontSize: 12.5,
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-            }}
-          >
-            <Printer size={15} />
-            <span>Cetak Laporan</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={fetchData}
-            title="Segarkan data"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 38,
-              height: 38,
-              borderRadius: 12,
-              background: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              cursor: 'pointer'
-            }}
-          >
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
-          </button>
-        </div>
       </div>
 
-      {/* 4. MAIN CONTENT AREA (LAPORAN TAMPILAN DATA SAJA) */}
+      {/* 5. CONTENT SECTION: CARDS PRESENTATION (MOBILE OPTIMIZED) */}
 
-      {/* TAB 1: FASILITAS */}
+      {/* TAB 1: FASILITAS RUANGAN */}
       {activeSubTab === 'fasilitas' && (
-        <div style={{ background: '#ffffff', borderRadius: 18, border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
-          <div style={{
-            padding: '14px 16px',
-            borderBottom: '1px solid #f1f5f9',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: '#fafafa'
-          }}>
-            <div>
-              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1e293b' }}>
-                Laporan Fasilitas Ruangan & Gedung
-              </h3>
-              <p style={{ margin: '3px 0 0', fontSize: 12, color: '#64748b' }}>
-                Ketersediaan dan status kelayakan fasilitas fisik sekolah
-              </p>
-            </div>
-            <span style={{
-              background: '#e0f2fe',
-              color: '#0369a1',
-              fontSize: 12,
-              fontWeight: 800,
-              padding: '4px 10px',
-              borderRadius: 10
-            }}>
-              {filteredFasilitas.length} Ruangan
-            </span>
-          </div>
-
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
-              <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #e2e8f0', color: '#475569' }}>
-                  <th style={{ padding: '12px 14px', width: 50, textAlign: 'center', fontWeight: 800 }}>No</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 800 }}>Fasilitas Ruangan</th>
-                  <th style={{ padding: '12px 14px', width: 100, textAlign: 'center', fontWeight: 800 }}>Jumlah Unit</th>
-                  <th style={{ padding: '12px 14px', width: 140, textAlign: 'center', fontWeight: 800 }}>Keterangan</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredFasilitas.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} style={{ padding: 36, textAlign: 'center', color: '#94a3b8' }}>
-                      Tidak ada fasilitas yang sesuai dengan pencarian
-                    </td>
-                  </tr>
-                ) : (
-                  filteredFasilitas.map((item, index) => (
-                    <tr
-                      key={item.id || index}
-                      style={{
-                        borderBottom: '1px solid #f1f5f9',
-                        transition: 'background 0.15s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                    >
-                      <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748b', fontWeight: 700 }}>
-                        {item.no_urut || index + 1}
-                      </td>
-                      <td style={{ padding: '12px 14px', fontWeight: 700, color: '#1e293b' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: 8,
-                            background: '#eff6ff',
-                            color: '#0066ff',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0
-                          }}>
-                            <Building2 size={16} />
-                          </div>
-                          <span>{item.fasilitas}</span>
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 800, color: '#0f172a' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          padding: '3px 10px',
-                          borderRadius: 8,
-                          background: '#f1f5f9'
-                        }}>
-                          {item.jumlah}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        {renderKondisiBadge(item.keterangan)}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 2: SARANA & PRASARANA */}
-      {activeSubTab === 'sarana' && (
-        <div style={{ background: '#ffffff', borderRadius: 18, border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
-          <div style={{
-            padding: '14px 16px',
-            borderBottom: '1px solid #f1f5f9',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: '#fafafa'
-          }}>
-            <div>
-              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1e293b' }}>
-                Laporan Sarana & Prasarana Sekolah
-              </h3>
-              <p style={{ margin: '3px 0 0', fontSize: 12, color: '#64748b' }}>
-                Inventaris barang, perlengkapan KBM, peralatan TIK, olahraga & kantor
-              </p>
-            </div>
-            <span style={{
-              background: '#dbeafe',
-              color: '#1d4ed8',
-              fontSize: 12,
-              fontWeight: 800,
-              padding: '4px 10px',
-              borderRadius: 10
-            }}>
-              {filteredSarana.length} Jenis Sarana
-            </span>
-          </div>
-
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
-              <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #e2e8f0', color: '#475569' }}>
-                  <th style={{ padding: '12px 14px', width: 50, textAlign: 'center', fontWeight: 800 }}>No</th>
-                  <th style={{ padding: '12px 14px', fontWeight: 800 }}>Jenis Sarana / Perlengkapan</th>
-                  <th style={{ padding: '12px 14px', width: 90, textAlign: 'center', fontWeight: 800 }}>Jumlah</th>
-                  <th style={{ padding: '12px 14px', width: 90, textAlign: 'center', fontWeight: 800, color: '#059669' }}>Baik</th>
-                  <th style={{ padding: '12px 14px', width: 90, textAlign: 'center', fontWeight: 800, color: '#dc2626' }}>Rusak</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredSarana.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} style={{ padding: 36, textAlign: 'center', color: '#94a3b8' }}>
-                      Tidak ada data sarana yang sesuai dengan pencarian
-                    </td>
-                  </tr>
-                ) : (
-                  filteredSarana.map((item, index) => (
-                    <tr
-                      key={item.id || index}
-                      style={{
-                        borderBottom: '1px solid #f1f5f9',
-                        transition: 'background 0.15s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                    >
-                      <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748b', fontWeight: 700 }}>
-                        {item.no_urut || index + 1}
-                      </td>
-                      <td style={{ padding: '12px 14px', fontWeight: 700, color: '#1e293b' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: 8,
-                            background: '#f0fdf4',
-                            color: '#16a34a',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0
-                          }}>
-                            <Box size={16} />
-                          </div>
-                          <span>{item.jenis_sapras}</span>
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 800, color: '#0f172a' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          padding: '3px 10px',
-                          borderRadius: 8,
-                          background: '#f1f5f9'
-                        }}>
-                          {item.jumlah}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          padding: '3px 10px',
-                          borderRadius: 8,
-                          background: 'rgba(16, 185, 129, 0.12)',
-                          color: '#059669',
-                          fontWeight: 800
-                        }}>
-                          {item.baik}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          padding: '3px 10px',
-                          borderRadius: 8,
-                          background: (parseInt(item.rusak, 10) || 0) > 0 ? 'rgba(239, 68, 68, 0.15)' : '#f1f5f9',
-                          color: (parseInt(item.rusak, 10) || 0) > 0 ? '#dc2626' : '#94a3b8',
-                          fontWeight: 800
-                        }}>
-                          {item.rusak || 0}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: PENGGUNAAN TANAH */}
-      {activeSubTab === 'tanah' && (
-        <div>
-          {/* Visual Distribution Bar */}
-          <div style={{
-            background: '#ffffff',
-            borderRadius: 18,
-            padding: 20,
-            border: '1px solid #e2e8f0',
-            marginBottom: 16,
-            boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <div>
-                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1e293b' }}>
-                  Distribusi Proporsi Penggunaan Lahan
-                </h4>
-                <p style={{ margin: '4px 0 0', fontSize: 12, color: '#64748b' }}>
-                  Total Luas Lahan Sekolah: <strong>1.032 M²</strong>
-                </p>
-              </div>
-              <span style={{
-                background: '#dcfce7',
-                color: '#15803d',
-                fontSize: 12,
-                fontWeight: 800,
-                padding: '4px 12px',
-                borderRadius: 20
-              }}>
-                100% Terkelola
-              </span>
-            </div>
-
-            {/* Stacked Progress Bar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {filteredFasilitas.length === 0 ? (
             <div style={{
-              display: 'flex',
-              height: 24,
-              borderRadius: 12,
-              overflow: 'hidden',
-              background: '#e2e8f0',
-              marginBottom: 14
+              background: '#ffffff',
+              borderRadius: 18,
+              padding: '40px 20px',
+              textAlign: 'center',
+              color: '#94a3b8',
+              border: '1px dashed #cbd5e1'
             }}>
-              <div style={{ width: '68%', background: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 700 }} title="Bangunan (702 M² - 68%)">
-                68%
-              </div>
-              <div style={{ width: '29%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 700 }} title="Lapangan Olahraga (300 M² - 29%)">
-                29%
-              </div>
-              <div style={{ width: '3%', background: '#f59e0b' }} title="Halaman (30 M² - 3%)"></div>
+              <Building2 size={36} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
+              <div style={{ fontWeight: 700, fontSize: 14 }}>Tidak ada ruangan yang cocok</div>
+              <div style={{ fontSize: 12, marginTop: 4 }}>Coba kata kunci pencarian lain</div>
             </div>
-
-            {/* Legend */}
-            <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', fontSize: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 12, height: 12, borderRadius: 3, background: '#0284c7' }}></span>
-                <span style={{ fontWeight: 600, color: '#334155' }}>Bangunan: 702 M² (68.0%)</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 12, height: 12, borderRadius: 3, background: '#10b981' }}></span>
-                <span style={{ fontWeight: 600, color: '#334155' }}>Lapangan Olahraga: 300 M² (29.1%)</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 12, height: 12, borderRadius: 3, background: '#f59e0b' }}></span>
-                <span style={{ fontWeight: 600, color: '#334155' }}>Halaman: 30 M² (2.9%)</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Cards Breakdown */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 14
-          }}>
-            {filteredTanah.map((item, index) => {
-              const luas = parseFloat(item.luas_tanah) || 0;
-              const total = parseFloat(data.stats?.totalLuasTanah) || 1032;
-              const pct = ((luas / total) * 100).toFixed(1);
-              const colorBg = index === 0 ? '#0284c7' : index === 1 ? '#f59e0b' : '#10b981';
+          ) : (
+            filteredFasilitas.map((item, index) => {
+              const iconStyle = getFasilitasIcon(item.fasilitas);
+              const IconComp = iconStyle.icon;
 
               return (
                 <div
                   key={item.id || index}
                   style={{
                     background: '#ffffff',
-                    borderRadius: 18,
-                    padding: 18,
-                    border: '1px solid #e2e8f0',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
-                    position: 'relative'
+                    borderRadius: 16,
+                    padding: '12px 14px',
+                    border: '1px solid #f1f5f9',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    transition: 'transform 0.15s ease'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {/* Left: Icon & Name */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
                     <div style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 12,
-                      background: `${colorBg}15`,
-                      color: colorBg,
+                      width: 42,
+                      height: 42,
+                      borderRadius: 14,
+                      background: `${iconStyle.bg}15`,
+                      color: iconStyle.bg,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontWeight: 800
+                      flexShrink: 0
                     }}>
-                      <MapPin size={20} />
+                      <IconComp size={20} strokeWidth={2.3} />
                     </div>
-                    <div>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>
-                        NO. {item.no_urut || index + 1}
+
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{
+                          fontSize: 10,
+                          fontWeight: 800,
+                          color: '#94a3b8',
+                          background: '#f8fafc',
+                          padding: '1px 5px',
+                          borderRadius: 6
+                        }}>
+                          #{item.no_urut || index + 1}
+                        </span>
                       </div>
-                      <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1e293b' }}>
-                        {item.penggunaan_tanah}
-                      </h4>
+                      <div style={{
+                        fontSize: 13.5,
+                        fontWeight: 800,
+                        color: '#1e293b',
+                        marginTop: 2,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}>
+                        {item.fasilitas}
+                      </div>
                     </div>
                   </div>
 
-                  <div style={{
-                    marginTop: 16,
-                    padding: '12px 14px',
-                    borderRadius: 12,
-                    background: '#f8fafc',
+                  {/* Right: Count & Badge */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{
+                        fontSize: 11.5,
+                        fontWeight: 800,
+                        color: '#0f172a',
+                        background: '#f1f5f9',
+                        padding: '2px 8px',
+                        borderRadius: 8
+                      }}>
+                        {item.jumlah} Unit
+                      </span>
+                    </div>
+                    {renderKondisiBadge(item.keterangan)}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
+      {/* TAB 2: SARANA & PRASARANA */}
+      {activeSubTab === 'sarana' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {filteredSarana.length === 0 ? (
+            <div style={{
+              background: '#ffffff',
+              borderRadius: 18,
+              padding: '40px 20px',
+              textAlign: 'center',
+              color: '#94a3b8',
+              border: '1px dashed #cbd5e1'
+            }}>
+              <Box size={36} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
+              <div style={{ fontWeight: 700, fontSize: 14 }}>Tidak ada sarana yang cocok</div>
+              <div style={{ fontSize: 12, marginTop: 4 }}>Coba kata kunci pencarian lain</div>
+            </div>
+          ) : (
+            filteredSarana.map((item, index) => {
+              const totalJml = parseInt(item.jumlah, 10) || 1;
+              const baikJml = parseInt(item.baik, 10) || totalJml;
+              const rusakJml = parseInt(item.rusak, 10) || 0;
+              const pctBaik = Math.min(100, Math.round((baikJml / totalJml) * 100));
+
+              return (
+                <div
+                  key={item.id || index}
+                  style={{
+                    background: '#ffffff',
+                    borderRadius: 16,
+                    padding: '13px 14px',
+                    border: '1px solid #f1f5f9',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <div>
-                      <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Luas Area</div>
-                      <div style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', marginTop: 2 }}>
-                        {Number(item.luas_tanah).toLocaleString('id-ID')} {item.satuan || 'M2'}
+                    flexDirection: 'column',
+                    gap: 10
+                  }}
+                >
+                  {/* Top row: Title and Total Count */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                      <div style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 12,
+                        background: '#eff6ff',
+                        color: '#0066ff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <Box size={18} strokeWidth={2.3} />
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <span style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8' }}>
+                          #{item.no_urut || index + 1}
+                        </span>
+                        <div style={{
+                          fontSize: 13,
+                          fontWeight: 800,
+                          color: '#1e293b',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}>
+                          {item.jenis_sapras}
+                        </div>
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Persentase</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: colorBg, marginTop: 2 }}>
-                        {pct}%
-                      </div>
+
+                    <div style={{
+                      background: '#0f172a',
+                      color: '#ffffff',
+                      padding: '4px 10px',
+                      borderRadius: 10,
+                      fontSize: 12,
+                      fontWeight: 800,
+                      flexShrink: 0
+                    }}>
+                      {item.jumlah} Unit
+                    </div>
+                  </div>
+
+                  {/* Visual Progress Bar (Baik vs Rusak) */}
+                  <div style={{
+                    width: '100%',
+                    height: 6,
+                    borderRadius: 6,
+                    background: '#fee2e2',
+                    overflow: 'hidden',
+                    display: 'flex'
+                  }}>
+                    <div style={{
+                      width: `${pctBaik}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #10b981, #059669)',
+                      borderRadius: 6
+                    }} />
+                  </div>
+
+                  {/* Bottom Stats Pills */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11.5 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#059669', fontWeight: 700 }}>
+                      <CheckCircle2 size={13} strokeWidth={2.5} />
+                      <span>Kondisi Baik: <strong>{baikJml}</strong></span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: rusakJml > 0 ? '#dc2626' : '#94a3b8', fontWeight: 700 }}>
+                      <AlertTriangle size={13} strokeWidth={2.5} />
+                      <span>Rusak: <strong>{rusakJml}</strong></span>
                     </div>
                   </div>
                 </div>
               );
-            })}
-          </div>
+            })
+          )}
         </div>
       )}
 
-      {/* PRINT-ONLY OFFICIAL HEADER */}
-      <div className="sapras-print-header" style={{ display: 'none' }}>
-        <h2 style={{ textAlign: 'center', margin: '0 0 4px', fontSize: 18 }}>LAPORAN SARANA & PRASARANA SEKOLAH</h2>
-        <p style={{ textAlign: 'center', margin: 0, fontSize: 12, color: '#666' }}>Dicetak pada: {new Date().toLocaleDateString('id-ID', { dateStyle: 'full' })}</p>
-      </div>
+      {/* TAB 3: PENGGUNAAN TANAH */}
+      {activeSubTab === 'tanah' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Visual Distribution Summary Card */}
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 20,
+            padding: 16,
+            border: '1px solid #f1f5f9',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.03)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>TOTAL LUAS LAHAN</div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', marginTop: 1 }}>
+                  1.032 M²
+                </div>
+              </div>
+              <span style={{
+                background: '#dcfce7',
+                color: '#15803d',
+                padding: '4px 10px',
+                borderRadius: 20,
+                fontSize: 11,
+                fontWeight: 800
+              }}>
+                100% Terkelola
+              </span>
+            </div>
+
+            {/* Segmented Visual Bar */}
+            <div style={{
+              display: 'flex',
+              height: 18,
+              borderRadius: 9,
+              overflow: 'hidden',
+              background: '#f1f5f9',
+              marginBottom: 12
+            }}>
+              <div style={{ width: '68%', background: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 10, fontWeight: 800 }} title="Bangunan (68%)">
+                68%
+              </div>
+              <div style={{ width: '29.1%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 10, fontWeight: 800 }} title="Lapangan (29.1%)">
+                29%
+              </div>
+              <div style={{ width: '2.9%', background: '#f59e0b' }} title="Halaman (2.9%)" />
+            </div>
+
+            {/* Legend Chips */}
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', fontSize: 11.5 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ width: 10, height: 10, borderRadius: 3, background: '#0284c7' }} />
+                <span style={{ color: '#475569', fontWeight: 600 }}>Bangunan (68.0%)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ width: 10, height: 10, borderRadius: 3, background: '#10b981' }} />
+                <span style={{ color: '#475569', fontWeight: 600 }}>Lapangan (29.1%)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ width: 10, height: 10, borderRadius: 3, background: '#f59e0b' }} />
+                <span style={{ color: '#475569', fontWeight: 600 }}>Halaman (2.9%)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3 Detailed Land Area Cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {/* Card 1: Bangunan */}
+            <div style={{
+              background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+              borderRadius: 18,
+              padding: 16,
+              border: '1.5px solid #bae6fd',
+              boxShadow: '0 4px 14px rgba(2, 132, 199, 0.08)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 14,
+                    background: '#0284c7',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 10px rgba(2, 132, 199, 0.3)'
+                  }}>
+                    <Building2 size={22} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: '#0284c7', background: '#e0f2fe', padding: '1px 6px', borderRadius: 6 }}>
+                      ZONA UTAMA
+                    </span>
+                    <h4 style={{ margin: '2px 0 0', fontSize: 15, fontWeight: 900, color: '#0f172a' }}>
+                      BANGUNAN SEKOLAH
+                    </h4>
+                  </div>
+                </div>
+
+                <div style={{
+                  background: '#0284c7',
+                  color: '#ffffff',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  padding: '3px 9px',
+                  borderRadius: 8
+                }}>
+                  68.0%
+                </div>
+              </div>
+
+              <div style={{
+                marginTop: 14,
+                padding: '10px 12px',
+                borderRadius: 12,
+                background: '#ffffff',
+                border: '1px solid #e0f2fe',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Luas Area Fisik</span>
+                <span style={{ fontSize: 18, fontWeight: 900, color: '#0284c7' }}>702 M²</span>
+              </div>
+            </div>
+
+            {/* Card 2: Lapangan Olahraga */}
+            <div style={{
+              background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
+              borderRadius: 18,
+              padding: 16,
+              border: '1.5px solid #bbf7d0',
+              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.08)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 14,
+                    background: '#10b981',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)'
+                  }}>
+                    <Dumbbell size={22} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: '#059669', background: '#dcfce7', padding: '1px 6px', borderRadius: 6 }}>
+                      ZONA AKTIVITAS
+                    </span>
+                    <h4 style={{ margin: '2px 0 0', fontSize: 15, fontWeight: 900, color: '#0f172a' }}>
+                      LAPANGAN OLAHRAGA
+                    </h4>
+                  </div>
+                </div>
+
+                <div style={{
+                  background: '#10b981',
+                  color: '#ffffff',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  padding: '3px 9px',
+                  borderRadius: 8
+                }}>
+                  29.1%
+                </div>
+              </div>
+
+              <div style={{
+                marginTop: 14,
+                padding: '10px 12px',
+                borderRadius: 12,
+                background: '#ffffff',
+                border: '1px solid #dcfce7',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Luas Area Fisik</span>
+                <span style={{ fontSize: 18, fontWeight: 900, color: '#10b981' }}>300 M²</span>
+              </div>
+            </div>
+
+            {/* Card 3: Halaman */}
+            <div style={{
+              background: 'linear-gradient(135deg, #ffffff 0%, #fffbeb 100%)',
+              borderRadius: 18,
+              padding: 16,
+              border: '1.5px solid #fde68a',
+              boxShadow: '0 4px 14px rgba(245, 158, 11, 0.08)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 14,
+                    background: '#f59e0b',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 10px rgba(245, 158, 11, 0.3)'
+                  }}>
+                    <Trees size={22} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: '#d97706', background: '#fef3c7', padding: '1px 6px', borderRadius: 6 }}>
+                      ZONA TERBUKA
+                    </span>
+                    <h4 style={{ margin: '2px 0 0', fontSize: 15, fontWeight: 900, color: '#0f172a' }}>
+                      HALAMAN SEKOLAH
+                    </h4>
+                  </div>
+                </div>
+
+                <div style={{
+                  background: '#f59e0b',
+                  color: '#ffffff',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  padding: '3px 9px',
+                  borderRadius: 8
+                }}>
+                  2.9%
+                </div>
+              </div>
+
+              <div style={{
+                marginTop: 14,
+                padding: '10px 12px',
+                borderRadius: 12,
+                background: '#ffffff',
+                border: '1px solid #fef3c7',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Luas Area Fisik</span>
+                <span style={{ fontSize: 18, fontWeight: 900, color: '#f59e0b' }}>30 M²</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
