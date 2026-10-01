@@ -255,7 +255,7 @@ export default function AdminRaporTab() {
       `}</style>
 
       {/* CONTROL BAR (SCREEN ONLY) */}
-      <div className="admin-rapor-controls" style={{ background: '#ffffff', padding: 20, borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', marginBottom: 20 }}>
+      <div className="admin-rapor-controls" style={{ background: '#ffffff', padding: '20px 24px', borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', marginBottom: 20, maxWidth: 960, margin: '0 auto 20px auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -397,7 +397,7 @@ export default function AdminRaporTab() {
 
       {/* COLLAPSIBLE OFFICIAL FASE GUIDE CARD */}
       {showFaseGuide && (
-        <div className="fase-guide-card" style={{ background: '#ffffff', borderRadius: 16, padding: 18, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', marginBottom: 20, border: '1px solid #e2e8f0' }}>
+        <div className="fase-guide-card" style={{ background: '#ffffff', borderRadius: 16, padding: '20px 24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', marginBottom: 20, border: '1px solid #e2e8f0', maxWidth: 960, margin: '0 auto 20px auto' }}>
           <h4 style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
             <BookOpen size={16} color="#0284c7" /> Tabel Acuan Fase Kurikulum Merdeka (Resmi Disdik)
           </h4>
@@ -425,7 +425,7 @@ export default function AdminRaporTab() {
       )}
 
       {/* RAPOR PAPER CONTAINER */}
-      <div className="rapor-paper" style={{ background: '#ffffff', margin: '0 auto', maxWidth: 920, padding: '40px 48px', borderRadius: 16, boxShadow: '0 8px 30px rgba(0,0,0,0.08)', fontFamily: 'serif', color: '#0f172a' }}>
+      <div className="rapor-paper" style={{ background: '#ffffff', margin: '0 auto', maxWidth: 960, padding: '36px 36px', borderRadius: 16, boxShadow: '0 8px 30px rgba(0,0,0,0.08)', fontFamily: 'serif', color: '#0f172a' }}>
         
         {/* HEADER TITLE */}
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
