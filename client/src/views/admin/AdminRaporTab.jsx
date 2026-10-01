@@ -196,16 +196,39 @@ export default function AdminRaporTab() {
         const mapelMap = {};
 
         rawKomponen.forEach(k => {
-          const mName = k.nama_mapel || k.nama_kategori || k.nama_komponen;
-          if (!mapelMap[mName]) mapelMap[mName] = [];
+          const mName = k.nama_mapel || k.nama_kategori || k.nama_komponen || 'Mata Pelajaran';
+          if (!mapelMap[mName]) {
+            mapelMap[mName] = { lm: [], sas: null };
+          }
           const score = (rawNilaiMap[siswaId] && rawNilaiMap[siswaId][k.id] !== undefined) ? parseFloat(rawNilaiMap[siswaId][k.id]) : 0;
-          if (score > 0) mapelMap[mName].push(score);
+          if (score > 0) {
+            const isSas = (k.kode_kategori === 'UAS' || k.kode_kategori === 'SAS' || (k.nama_komponen && k.nama_komponen.toUpperCase().includes('SAS')));
+            if (isSas) {
+              mapelMap[mName].sas = score;
+            } else {
+              mapelMap[mName].lm.push(score);
+            }
+          }
         });
 
         const newNilai = Object.keys(mapelMap).map((mName, idx) => {
-          const scores = mapelMap[mName];
-          const avg = scores.length > 0 ? (scores.reduce((a,b)=>a+b, 0)/scores.length) : 80;
-          const rounded = parseFloat(avg.toFixed(0));
+          const item = mapelMap[mName];
+          const lmScores = item.lm;
+          const sasScore = item.sas;
+          let finalScore = 80;
+
+          if (lmScores.length > 0 && sasScore !== null) {
+            // Formula A (Kurikulum Merdeka PPA): 60% Rata-rata Sumatif Lingkup Materi (LM) + 40% Sumatif Akhir Semester (SAS)
+            const avgLm = lmScores.reduce((a, b) => a + b, 0) / lmScores.length;
+            finalScore = (avgLm * 0.6) + (sasScore * 0.4);
+          } else if (lmScores.length > 0) {
+            // Formula B (Murni Sumatif LM / Tanpa SAS): Rata-rata dinamis dari komponen yang diisi
+            finalScore = lmScores.reduce((a, b) => a + b, 0) / lmScores.length;
+          } else if (sasScore !== null) {
+            finalScore = sasScore;
+          }
+
+          const rounded = Math.round(finalScore);
           return {
             id: idx + 1,
             nama_mapel: mName,
