@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
+import PresensiSubTabNav from './PresensiSubTabNav';
 
 const getTodayIndonesianDate = () => {
   try {
@@ -20,7 +21,7 @@ const getTodayIndonesianDate = () => {
   }
 };
 
-export default function AdminAbsensiSiswaTab() {
+export default function AdminAbsensiSiswaTab({ activeSubTab = 'siswa', onTabChange }) {
   const [kelasList, setKelasList] = useState([]);
   const [selectedKelas, setSelectedKelas] = useState('');
   const [tanggal, setTanggal] = useState(getTodayIndonesianDate());
@@ -271,6 +272,9 @@ export default function AdminAbsensiSiswaTab() {
             </button>
           </div>
         </div>
+
+        {/* SUBTAB TOGGLE (DI ATAS FILTER SEPERTI REKAP PRESENSI) */}
+        <PresensiSubTabNav activeSubTab={activeSubTab} onTabChange={onTabChange} />
 
         {/* CONTROLS */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 14, marginBottom: 18, alignItems: 'center' }}>

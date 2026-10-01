@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
+import PresensiSubTabNav from './PresensiSubTabNav';
 
 const getTodayIndonesianDate = () => {
   try {
@@ -20,7 +21,7 @@ const getTodayIndonesianDate = () => {
   }
 };
 
-export default function AdminAbsensiMapelTab() {
+export default function AdminAbsensiMapelTab({ activeSubTab = 'mapel', onTabChange }) {
   const [mapelList, setMapelList] = useState([]);
   const [kelasList, setKelasList] = useState([]);
   const [selectedMapel, setSelectedMapel] = useState('');
@@ -288,6 +289,9 @@ export default function AdminAbsensiMapelTab() {
             </button>
           </div>
         </div>
+
+        {/* SUBTAB TOGGLE (DI ATAS FILTER SEPERTI REKAP PRESENSI) */}
+        <PresensiSubTabNav activeSubTab={activeSubTab} onTabChange={onTabChange} />
 
         {/* CONTROLS */}
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr auto', gap: 14, marginBottom: 18, alignItems: 'center' }}>

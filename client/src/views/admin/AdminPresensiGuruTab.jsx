@@ -7,6 +7,7 @@ import {
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
+import PresensiSubTabNav from './PresensiSubTabNav';
 
 const getCoordinates = (item) => {
   if (!item) return null;
@@ -27,7 +28,7 @@ const getCoordinates = (item) => {
   return null;
 };
 
-export default function AdminPresensiGuruTab() {
+export default function AdminPresensiGuruTab({ activeSubTab = 'guru', onTabChange }) {
   const now = new Date();
   const [selectedBulan, setSelectedBulan] = useState(now.getMonth() + 1);
   const [selectedTahun, setSelectedTahun] = useState(now.getFullYear());
@@ -223,6 +224,9 @@ export default function AdminPresensiGuruTab() {
             </button>
           </div>
         </div>
+
+        {/* SUBTAB TOGGLE (DI ATAS FILTER SEPERTI REKAP PRESENSI) */}
+        <PresensiSubTabNav activeSubTab={activeSubTab} onTabChange={onTabChange} />
 
         {/* TOOLBAR CONTROLS */}
         <div className="table-toolbar-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: 12, marginBottom: 18 }}>

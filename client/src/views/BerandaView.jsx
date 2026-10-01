@@ -401,14 +401,14 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
             <div className="menu-icon-circle">
               <FileSpreadsheet size={35} strokeWidth={2.5} />
             </div>
-            <span>Input Nilai</span>
+            <span>Penilaian</span>
           </button>
 
           <button className="menu-blue-card menu-item-nilai-laporan" onClick={() => onSwitchTab('penilaianLaporan')}>
             <div className="menu-icon-circle">
               <FileCheck size={35} strokeWidth={2.5} />
             </div>
-            <span>Rapor Nilai</span>
+            <span>Nilah Akhir</span>
           </button>
 
           <button className="menu-blue-card menu-item-perpus" onClick={() => onSwitchTab('perpustakaan')}>
