@@ -206,7 +206,7 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
         </div>
 
         {/* PENGUMUMAN SLIDER BANNER (PALING BAWAH) */}
-        <div style={{ padding: '0 16px', marginTop: 16, marginBottom: 20 }}>
+        <div style={{ padding: '0 16px', marginTop: 6, marginBottom: 4 }}>
           <PengumumanSlider />
         </div>
       </div>
@@ -421,7 +421,7 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
       </div>
 
       {/* PENGUMUMAN SLIDER BANNER (PALING BAWAH) */}
-      <div style={{ padding: '0 16px', marginTop: 16, marginBottom: 20 }}>
+      <div style={{ padding: '0 16px', marginTop: 6, marginBottom: 4 }}>
         <PengumumanSlider />
       </div>
 
