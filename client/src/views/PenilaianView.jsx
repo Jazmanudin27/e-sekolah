@@ -54,15 +54,24 @@ export default function PenilaianView({ onBack }) {
 
       if (resKelas.data.success && Array.isArray(resKelas.data.data)) {
         setKelasList(resKelas.data.data);
-        if (resKelas.data.data.length > 0) setSelectedKelas(resKelas.data.data[0].id);
+        if (resKelas.data.data.length > 0) {
+          const firstK = resKelas.data.data[0];
+          setSelectedKelas(firstK.kode_kelas || firstK.id || '');
+        }
       }
       if (resMapel.data.success && Array.isArray(resMapel.data.data)) {
         setMapelList(resMapel.data.data);
-        if (resMapel.data.data.length > 0) setSelectedMapel(resMapel.data.data[0].id);
+        if (resMapel.data.data.length > 0) {
+          const firstM = resMapel.data.data[0];
+          setSelectedMapel(firstM.kode_mapel || firstM.id || '');
+        }
       }
       if (resKat.data.success && Array.isArray(resKat.data.data)) {
         setKategoriList(resKat.data.data);
-        if (resKat.data.data.length > 0) setNewKomponen(prev => ({ ...prev, kategori_id: resKat.data.data[0].id }));
+        if (resKat.data.data.length > 0) {
+          const firstKat = resKat.data.data[0];
+          setNewKomponen(prev => ({ ...prev, kategori_id: firstKat.id || firstKat.kode_kategori || '' }));
+        }
       }
     } catch (err) {
       console.error(err);
@@ -245,19 +254,39 @@ export default function PenilaianView({ onBack }) {
         <div style={{ background: '#ffffff', borderRadius: 20, padding: '16px 18px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>KELAS</label>
-            <select className="form-control-admin" value={selectedKelas} onChange={e => setSelectedKelas(e.target.value)}>
-              {kelasList.map(k => (
-                <option key={k.id} value={k.id}>{k.nama_kelas || k.nama}</option>
-              ))}
+            <select
+              className="form-control-admin"
+              style={{ cursor: 'pointer', opacity: 1, pointerEvents: 'auto' }}
+              value={selectedKelas}
+              onChange={e => setSelectedKelas(e.target.value)}
+            >
+              {kelasList.map(k => {
+                const kVal = k.kode_kelas || k.id;
+                return (
+                  <option key={kVal} value={kVal}>
+                    {k.nama_kelas || k.nama || kVal}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>MATA PELAJARAN</label>
-            <select className="form-control-admin" value={selectedMapel} onChange={e => setSelectedMapel(e.target.value)}>
-              {mapelList.map(m => (
-                <option key={m.id} value={m.id}>{m.nama_mapel || m.nama}</option>
-              ))}
+            <select
+              className="form-control-admin"
+              style={{ cursor: 'pointer', opacity: 1, pointerEvents: 'auto' }}
+              value={selectedMapel}
+              onChange={e => setSelectedMapel(e.target.value)}
+            >
+              {mapelList.map(m => {
+                const mVal = m.kode_mapel || m.id;
+                return (
+                  <option key={mVal} value={mVal}>
+                    {m.nama_mapel || m.nama || mVal}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -414,12 +443,18 @@ export default function PenilaianView({ onBack }) {
                 <label style={{ fontSize: 11.5, fontWeight: 700, color: '#475569', display: 'block', marginBottom: 4 }}>Kategori Penilaian</label>
                 <select
                   className="form-control-admin"
+                  style={{ cursor: 'pointer', opacity: 1, pointerEvents: 'auto' }}
                   value={newKomponen.kategori_id}
                   onChange={e => setNewKomponen({ ...newKomponen, kategori_id: e.target.value })}
                 >
-                  {kategoriList.map(k => (
-                    <option key={k.id} value={k.id}>{k.nama_kategori} ({k.kelompok})</option>
-                  ))}
+                  {kategoriList.map(k => {
+                    const katVal = k.id || k.kode_kategori;
+                    return (
+                      <option key={katVal} value={katVal}>
+                        {k.nama_kategori} ({k.kelompok})
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 

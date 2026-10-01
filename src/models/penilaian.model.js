@@ -157,18 +157,16 @@ class PenilaianModel {
   static async getMatrixNilai({ mapel_id, kelas_id, tahun_ajaran = '2026/2027', semester = '1' }) {
     await this.ensureTables();
 
-    // 1. Get Students in Class
-    const siswaList = await query(`
-      SELECT id, nis, nama, jenis_kelamin FROM siswa
-      WHERE kelas_id = ? OR id_kelas = ? OR id IN (SELECT id_siswa FROM siswa WHERE id_kelas = ?)
-      ORDER BY nama ASC
-    `, [kelas_id, kelas_id, kelas_id]);
+    // 1. Get Students in Class using SiswaModel
+    const SiswaModel = require('./siswa.model');
+    const studentsRaw = await SiswaModel.findAll(kelas_id);
 
-    // Fallback if no siswa in query with kelas_id
-    let students = siswaList;
-    if (!students || students.length === 0) {
-      students = await query(`SELECT id, nis, nama, jenis_kelamin FROM siswa ORDER BY nama ASC LIMIT 50`);
-    }
+    const students = (studentsRaw || []).map(s => ({
+      id: s.kode_siswa || s.id,
+      nis: s.nis_nisn || s.nis || s.nisn || `NIS-${s.kode_siswa || s.id}`,
+      nama: s.nama_siswa || s.nama || s.nama_lengkap || 'Siswa',
+      jenis_kelamin: s.jk || s.jenis_kelamin || 'L'
+    }));
 
     // 2. Get Komponen list
     const komponenList = await this.getKomponen({ mapel_id, kelas_id, tahun_ajaran, semester });
