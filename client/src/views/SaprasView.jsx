@@ -4,20 +4,14 @@ import {
   Box,
   Layers,
   Search,
-  Plus,
   Printer,
   RefreshCw,
   CheckCircle2,
   AlertTriangle,
   XCircle,
-  HelpCircle,
-  Filter,
-  Edit2,
-  Trash2,
   MapPin,
   TrendingUp,
-  SlidersHorizontal,
-  ChevronDown
+  FileText
 } from 'lucide-react';
 import api from '../api/client';
 
@@ -42,25 +36,6 @@ export default function SaprasView({ user, showToast }) {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterKondisi, setFilterKondisi] = useState('ALL');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState('fasilitas'); // 'fasilitas' | 'sarana' | 'tanah'
-  const [editItem, setEditItem] = useState(null);
-
-  // Form states
-  const [formData, setFormData] = useState({
-    no_urut: '',
-    fasilitas: '',
-    jumlah: 1,
-    keterangan: 'BAIK',
-    jenis_sapras: '',
-    baik: 1,
-    rusak: 0,
-    penggunaan_tanah: '',
-    luas_tanah: '',
-    satuan: 'M2'
-  });
-
-  const canManage = user?.role === 'admin' || user?.role === 'kepsek' || user?.type === 'Admin';
 
   const fetchData = async () => {
     setLoading(true);
@@ -109,100 +84,6 @@ export default function SaprasView({ user, showToast }) {
       return (item.penggunaan_tanah || '').toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [data.tanah, searchTerm]);
-
-  // Open Modal for Add
-  const handleOpenAdd = (type) => {
-    setModalType(type);
-    setEditItem(null);
-    setFormData({
-      no_urut: '',
-      fasilitas: '',
-      jumlah: 1,
-      keterangan: 'BAIK',
-      jenis_sapras: '',
-      baik: 1,
-      rusak: 0,
-      penggunaan_tanah: '',
-      luas_tanah: '',
-      satuan: 'M2'
-    });
-    setModalOpen(true);
-  };
-
-  // Open Modal for Edit
-  const handleOpenEdit = (type, item) => {
-    setModalType(type);
-    setEditItem(item);
-    setFormData({
-      no_urut: item.no_urut || '',
-      fasilitas: item.fasilitas || '',
-      jumlah: item.jumlah || 1,
-      keterangan: item.keterangan || 'BAIK',
-      jenis_sapras: item.jenis_sapras || '',
-      baik: item.baik || 0,
-      rusak: item.rusak || 0,
-      penggunaan_tanah: item.penggunaan_tanah || '',
-      luas_tanah: item.luas_tanah || '',
-      satuan: item.satuan || 'M2'
-    });
-    setModalOpen(true);
-  };
-
-  // Submit Add / Edit
-  const handleSubmitForm = async (e) => {
-    e.preventDefault();
-    try {
-      if (modalType === 'fasilitas') {
-        if (editItem) {
-          await api.put(`/sapras/fasilitas/${editItem.id}`, formData);
-          showToast?.('Fasilitas berhasil diperbarui');
-        } else {
-          await api.post('/sapras/fasilitas', formData);
-          showToast?.('Fasilitas baru berhasil ditambahkan');
-        }
-      } else if (modalType === 'sarana') {
-        if (editItem) {
-          await api.put(`/sapras/sarana/${editItem.id}`, formData);
-          showToast?.('Sarana berhasil diperbarui');
-        } else {
-          await api.post('/sapras/sarana', formData);
-          showToast?.('Sarana baru berhasil ditambahkan');
-        }
-      } else if (modalType === 'tanah') {
-        if (editItem) {
-          await api.put(`/sapras/tanah/${editItem.id}`, formData);
-          showToast?.('Data tanah berhasil diperbarui');
-        } else {
-          await api.post('/sapras/tanah', formData);
-          showToast?.('Data tanah baru berhasil ditambahkan');
-        }
-      }
-      setModalOpen(false);
-      fetchData();
-    } catch (err) {
-      showToast?.(err.response?.data?.message || err.message, false);
-    }
-  };
-
-  // Delete Item
-  const handleDeleteItem = async (type, item) => {
-    if (!window.confirm(`Yakin ingin menghapus data ${item.fasilitas || item.jenis_sapras || item.penggunaan_tanah}?`)) {
-      return;
-    }
-    try {
-      if (type === 'fasilitas') {
-        await api.delete(`/sapras/fasilitas/${item.id}`);
-      } else if (type === 'sarana') {
-        await api.delete(`/sapras/sarana/${item.id}`);
-      } else if (type === 'tanah') {
-        await api.delete(`/sapras/tanah/${item.id}`);
-      }
-      showToast?.('Data berhasil dihapus');
-      fetchData();
-    } catch (err) {
-      showToast?.(err.response?.data?.message || err.message, false);
-    }
-  };
 
   // Print Report Handler
   const handlePrint = () => {
@@ -307,9 +188,7 @@ export default function SaprasView({ user, showToast }) {
           boxShadow: '0 8px 20px rgba(2, 132, 199, 0.22)',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between',
-          position: 'relative',
-          overflow: 'hidden'
+          justifyContent: 'space-between'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: 0.9 }}>
             <span style={{ fontSize: 12, fontWeight: 600 }}>Fasilitas Ruangan</span>
@@ -547,7 +426,7 @@ export default function SaprasView({ user, showToast }) {
           </div>
         )}
 
-        {/* Action buttons */}
+        {/* Action buttons (Hanya Cetak & Refresh untuk Tampilan Laporan Mobile) */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button
             type="button"
@@ -569,7 +448,7 @@ export default function SaprasView({ user, showToast }) {
             }}
           >
             <Printer size={15} />
-            <span>Cetak</span>
+            <span>Cetak Laporan</span>
           </button>
 
           <button
@@ -591,32 +470,10 @@ export default function SaprasView({ user, showToast }) {
           >
             <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
           </button>
-
-          <button
-            type="button"
-            onClick={() => handleOpenAdd(activeSubTab)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '9px 14px',
-              borderRadius: 12,
-              background: 'linear-gradient(135deg, #0066ff 0%, #0052cc 100%)',
-              border: 'none',
-              color: '#ffffff',
-              fontSize: 12.5,
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0, 102, 255, 0.28)'
-            }}
-          >
-            <Plus size={16} strokeWidth={2.5} />
-            <span>Tambah</span>
-          </button>
         </div>
       </div>
 
-      {/* 4. MAIN CONTENT AREA (BY SUB-TAB) */}
+      {/* 4. MAIN CONTENT AREA (LAPORAN TAMPILAN DATA SAJA) */}
 
       {/* TAB 1: FASILITAS */}
       {activeSubTab === 'fasilitas' && (
@@ -631,10 +488,10 @@ export default function SaprasView({ user, showToast }) {
           }}>
             <div>
               <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1e293b' }}>
-                Fasilitas Ruangan & Gedung
+                Laporan Fasilitas Ruangan & Gedung
               </h3>
               <p style={{ margin: '3px 0 0', fontSize: 12, color: '#64748b' }}>
-                Daftar ketersediaan dan status kelayakan fasilitas fisik sekolah
+                Ketersediaan dan status kelayakan fasilitas fisik sekolah
               </p>
             </div>
             <span style={{
@@ -655,15 +512,14 @@ export default function SaprasView({ user, showToast }) {
                 <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #e2e8f0', color: '#475569' }}>
                   <th style={{ padding: '12px 14px', width: 50, textAlign: 'center', fontWeight: 800 }}>No</th>
                   <th style={{ padding: '12px 14px', fontWeight: 800 }}>Fasilitas Ruangan</th>
-                  <th style={{ padding: '12px 14px', width: 90, textAlign: 'center', fontWeight: 800 }}>Jumlah</th>
+                  <th style={{ padding: '12px 14px', width: 100, textAlign: 'center', fontWeight: 800 }}>Jumlah Unit</th>
                   <th style={{ padding: '12px 14px', width: 140, textAlign: 'center', fontWeight: 800 }}>Keterangan</th>
-                  <th style={{ padding: '12px 14px', width: 100, textAlign: 'center', fontWeight: 800 }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredFasilitas.length === 0 ? (
                   <tr>
-                    <td colSpan={5} style={{ padding: 36, textAlign: 'center', color: '#94a3b8' }}>
+                    <td colSpan={4} style={{ padding: 36, textAlign: 'center', color: '#94a3b8' }}>
                       Tidak ada fasilitas yang sesuai dengan pencarian
                     </td>
                   </tr>
@@ -712,40 +568,6 @@ export default function SaprasView({ user, showToast }) {
                       <td style={{ padding: '12px 14px', textAlign: 'center' }}>
                         {renderKondisiBadge(item.keterangan)}
                       </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: 6 }}>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEdit('fasilitas', item)}
-                            style={{
-                              border: 'none',
-                              background: '#f1f5f9',
-                              color: '#0284c7',
-                              padding: 6,
-                              borderRadius: 8,
-                              cursor: 'pointer'
-                            }}
-                            title="Edit"
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteItem('fasilitas', item)}
-                            style={{
-                              border: 'none',
-                              background: '#fef2f2',
-                              color: '#dc2626',
-                              padding: 6,
-                              borderRadius: 8,
-                              cursor: 'pointer'
-                            }}
-                            title="Hapus"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
                     </tr>
                   ))
                 )}
@@ -768,7 +590,7 @@ export default function SaprasView({ user, showToast }) {
           }}>
             <div>
               <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1e293b' }}>
-                Sarana & Prasarana Sekolah
+                Laporan Sarana & Prasarana Sekolah
               </h3>
               <p style={{ margin: '3px 0 0', fontSize: 12, color: '#64748b' }}>
                 Inventaris barang, perlengkapan KBM, peralatan TIK, olahraga & kantor
@@ -795,13 +617,12 @@ export default function SaprasView({ user, showToast }) {
                   <th style={{ padding: '12px 14px', width: 90, textAlign: 'center', fontWeight: 800 }}>Jumlah</th>
                   <th style={{ padding: '12px 14px', width: 90, textAlign: 'center', fontWeight: 800, color: '#059669' }}>Baik</th>
                   <th style={{ padding: '12px 14px', width: 90, textAlign: 'center', fontWeight: 800, color: '#dc2626' }}>Rusak</th>
-                  <th style={{ padding: '12px 14px', width: 100, textAlign: 'center', fontWeight: 800 }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredSarana.length === 0 ? (
                   <tr>
-                    <td colSpan={6} style={{ padding: 36, textAlign: 'center', color: '#94a3b8' }}>
+                    <td colSpan={5} style={{ padding: 36, textAlign: 'center', color: '#94a3b8' }}>
                       Tidak ada data sarana yang sesuai dengan pencarian
                     </td>
                   </tr>
@@ -870,40 +691,6 @@ export default function SaprasView({ user, showToast }) {
                         }}>
                           {item.rusak || 0}
                         </span>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: 6 }}>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEdit('sarana', item)}
-                            style={{
-                              border: 'none',
-                              background: '#f1f5f9',
-                              color: '#0284c7',
-                              padding: 6,
-                              borderRadius: 8,
-                              cursor: 'pointer'
-                            }}
-                            title="Edit"
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteItem('sarana', item)}
-                            style={{
-                              border: 'none',
-                              background: '#fef2f2',
-                              color: '#dc2626',
-                              padding: 6,
-                              borderRadius: 8,
-                              cursor: 'pointer'
-                            }}
-                            title="Hapus"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
                       </td>
                     </tr>
                   ))
@@ -1006,46 +793,27 @@ export default function SaprasView({ user, showToast }) {
                     position: 'relative'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 12,
-                        background: `${colorBg}15`,
-                        color: colorBg,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 800
-                      }}>
-                        <MapPin size={20} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>
-                          NO. {item.no_urut || index + 1}
-                        </div>
-                        <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1e293b' }}>
-                          {item.penggunaan_tanah}
-                        </h4>
-                      </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      background: `${colorBg}15`,
+                      color: colorBg,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 800
+                    }}>
+                      <MapPin size={20} />
                     </div>
-
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEdit('tanah', item)}
-                        style={{ border: 'none', background: '#f1f5f9', color: '#0284c7', padding: 6, borderRadius: 8, cursor: 'pointer' }}
-                      >
-                        <Edit2 size={13} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteItem('tanah', item)}
-                        style={{ border: 'none', background: '#fef2f2', color: '#dc2626', padding: 6, borderRadius: 8, cursor: 'pointer' }}
-                      >
-                        <Trash2 size={13} />
-                      </button>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>
+                        NO. {item.no_urut || index + 1}
+                      </div>
+                      <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1e293b' }}>
+                        {item.penggunaan_tanah}
+                      </h4>
                     </div>
                   </div>
 
@@ -1074,361 +842,6 @@ export default function SaprasView({ user, showToast }) {
                 </div>
               );
             })}
-          </div>
-        </div>
-      )}
-
-      {/* 5. MODAL FORM TAMBAH / EDIT */}
-      {modalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 99999,
-          padding: 16
-        }}>
-          <div style={{
-            background: '#ffffff',
-            borderRadius: 22,
-            width: '100%',
-            maxWidth: 480,
-            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-            overflow: 'hidden',
-            animation: 'fadeInUpCard 0.25s ease'
-          }}>
-            {/* Modal Header */}
-            <div style={{
-              padding: '18px 20px',
-              borderBottom: '1px solid #f1f5f9',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              background: '#fafafa'
-            }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
-                {editItem ? 'Edit Data ' : 'Tambah Data '}
-                {modalType === 'fasilitas' ? 'Fasilitas' : modalType === 'sarana' ? 'Sarana & Prasarana' : 'Penggunaan Tanah'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setModalOpen(false)}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  fontSize: 20,
-                  cursor: 'pointer',
-                  color: '#64748b'
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <form onSubmit={handleSubmitForm} style={{ padding: '20px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                
-                {/* No Urut */}
-                <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 5 }}>
-                    Nomor Urut
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.no_urut}
-                    onChange={(e) => setFormData({ ...formData, no_urut: e.target.value })}
-                    placeholder="Contoh: 1"
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      borderRadius: 10,
-                      border: '1.5px solid #cbd5e1',
-                      fontSize: 13,
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-
-                {/* Form Fields: Fasilitas */}
-                {modalType === 'fasilitas' && (
-                  <>
-                    <div>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 5 }}>
-                        Nama Fasilitas Ruangan / Gedung *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.fasilitas}
-                        onChange={(e) => setFormData({ ...formData, fasilitas: e.target.value.toUpperCase() })}
-                        placeholder="Contoh: RUANG KBM, LAB KOMPUTER"
-                        style={{
-                          width: '100%',
-                          padding: '10px 12px',
-                          borderRadius: 10,
-                          border: '1.5px solid #cbd5e1',
-                          fontSize: 13,
-                          boxSizing: 'border-box'
-                        }}
-                      />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 5 }}>
-                          Jumlah Unit
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          required
-                          value={formData.jumlah}
-                          onChange={(e) => setFormData({ ...formData, jumlah: parseInt(e.target.value, 10) || 1 })}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            borderRadius: 10,
-                            border: '1.5px solid #cbd5e1',
-                            fontSize: 13,
-                            boxSizing: 'border-box'
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 5 }}>
-                          Keterangan / Kondisi
-                        </label>
-                        <select
-                          value={formData.keterangan}
-                          onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            borderRadius: 10,
-                            border: '1.5px solid #cbd5e1',
-                            fontSize: 13,
-                            background: '#ffffff',
-                            boxSizing: 'border-box'
-                          }}
-                        >
-                          <option value="BAIK">BAIK</option>
-                          <option value="CUKUP BAIK">CUKUP BAIK</option>
-                          <option value="CUKUP">CUKUP</option>
-                          <option value="RUSAK">RUSAK</option>
-                        </select>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Form Fields: Sarana */}
-                {modalType === 'sarana' && (
-                  <>
-                    <div>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 5 }}>
-                        Jenis Sarana & Prasarana *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.jenis_sapras}
-                        onChange={(e) => setFormData({ ...formData, jenis_sapras: e.target.value.toUpperCase() })}
-                        placeholder="Contoh: KURSI SISWA, LAPTOP, PROYEKTOR"
-                        style={{
-                          width: '100%',
-                          padding: '10px 12px',
-                          borderRadius: 10,
-                          border: '1.5px solid #cbd5e1',
-                          fontSize: 13,
-                          boxSizing: 'border-box'
-                        }}
-                      />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 5 }}>
-                          Jumlah Total
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          required
-                          value={formData.jumlah}
-                          onChange={(e) => {
-                            const val = parseInt(e.target.value, 10) || 1;
-                            setFormData({ ...formData, jumlah: val, baik: val });
-                          }}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            borderRadius: 10,
-                            border: '1.5px solid #cbd5e1',
-                            fontSize: 13,
-                            boxSizing: 'border-box'
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#16a34a', marginBottom: 5 }}>
-                          Kondisi Baik
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={formData.baik}
-                          onChange={(e) => setFormData({ ...formData, baik: parseInt(e.target.value, 10) || 0 })}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            borderRadius: 10,
-                            border: '1.5px solid #cbd5e1',
-                            fontSize: 13,
-                            boxSizing: 'border-box'
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#dc2626', marginBottom: 5 }}>
-                          Kondisi Rusak
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={formData.rusak}
-                          onChange={(e) => setFormData({ ...formData, rusak: parseInt(e.target.value, 10) || 0 })}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            borderRadius: 10,
-                            border: '1.5px solid #cbd5e1',
-                            fontSize: 13,
-                            boxSizing: 'border-box'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Form Fields: Tanah */}
-                {modalType === 'tanah' && (
-                  <>
-                    <div>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 5 }}>
-                        Penggunaan Tanah *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.penggunaan_tanah}
-                        onChange={(e) => setFormData({ ...formData, penggunaan_tanah: e.target.value.toUpperCase() })}
-                        placeholder="Contoh: BANGUNAN, HALAMAN, LAPANGAN"
-                        style={{
-                          width: '100%',
-                          padding: '10px 12px',
-                          borderRadius: 10,
-                          border: '1.5px solid #cbd5e1',
-                          fontSize: 13,
-                          boxSizing: 'border-box'
-                        }}
-                      />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 5 }}>
-                          Luas Tanah
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          required
-                          value={formData.luas_tanah}
-                          onChange={(e) => setFormData({ ...formData, luas_tanah: e.target.value })}
-                          placeholder="Contoh: 702"
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            borderRadius: 10,
-                            border: '1.5px solid #cbd5e1',
-                            fontSize: 13,
-                            boxSizing: 'border-box'
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 5 }}>
-                          Satuan
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.satuan}
-                          onChange={(e) => setFormData({ ...formData, satuan: e.target.value.toUpperCase() })}
-                          placeholder="M2"
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            borderRadius: 10,
-                            border: '1.5px solid #cbd5e1',
-                            fontSize: 13,
-                            boxSizing: 'border-box'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-
-              </div>
-
-              {/* Modal Buttons */}
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 22 }}>
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  style={{
-                    padding: '10px 16px',
-                    borderRadius: 10,
-                    border: '1px solid #cbd5e1',
-                    background: '#f8fafc',
-                    color: '#64748b',
-                    fontSize: 13,
-                    fontWeight: 700,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  style={{
-                    padding: '10px 18px',
-                    borderRadius: 10,
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #0066ff 0%, #0052cc 100%)',
-                    color: '#ffffff',
-                    fontSize: 13,
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0, 102, 255, 0.25)'
-                  }}
-                >
-                  Simpan Data
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

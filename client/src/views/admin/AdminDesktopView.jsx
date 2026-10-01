@@ -31,6 +31,7 @@ import AdminKalenderTab from './AdminKalenderTab';
 import AdminRaporTab from './AdminRaporTab';
 import AdminEkskulTab from './AdminEkskulTab';
 import AdminPerpustakaanTab from './AdminPerpustakaanTab';
+import AdminSaprasTab from './AdminSaprasTab';
 
 const VALID_ADMIN_TABS = [
   'dashboard', 'pengumuman', 'kalender', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal', 'ekskul',
@@ -38,7 +39,7 @@ const VALID_ADMIN_TABS = [
   'rekapGuru', 'rekapSiswa', 'rekapMapel',
   'laporanRapor', 'laporanSiswa', 'laporanGuru', 'laporanKelas',
   'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel',
-  'laporanSurat', 'perpustakaan',
+  'laporanSurat', 'perpustakaan', 'sapras',
   'users', 'settings'
 ];
 
@@ -595,8 +596,8 @@ export default function AdminDesktopView({ user, onLogout }) {
           {/* 10. Sarana Prasarana */}
           <button
             type="button"
-            className="portal-menu-item"
-            onClick={() => Swal.fire('Info', 'Modul Sarana Prasarana sedang dalam proses integrasi inventaris.', 'info')}
+            className={`portal-menu-item ${activeTab === 'sapras' ? 'active' : ''}`}
+            onClick={() => handleSelectTab('sapras')}
           >
             <div className="menu-icon-wrap">
               <Package size={17} />
@@ -753,6 +754,7 @@ export default function AdminDesktopView({ user, onLogout }) {
 
               {/* 5. SISTEM & AKUN */}
               {activeTab === 'perpustakaan' && <AdminPerpustakaanTab />}
+              {activeTab === 'sapras' && <AdminSaprasTab />}
               {activeTab === 'users' && <AdminUsersTab />}
               {activeTab === 'settings' && <AdminSettingsTab />}
             </>
