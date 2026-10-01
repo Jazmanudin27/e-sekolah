@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import { Plus } from 'lucide-react';
 import TopBar from './components/TopBar';
 import SubHeader from './components/SubHeader';
 import BottomNav from './components/BottomNav';
@@ -40,6 +41,8 @@ const getInitialTab = () => {
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
+  const [sekolahInfo, setSekolahInfo] = useState(null);
+  const [tambahBukuTrigger, setTambahBukuTrigger] = useState(0);
   const [activeTab, setActiveTabState] = useState(getInitialTab);
   const [presensiModalType, setPresensiModalType] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -89,6 +92,22 @@ export default function App() {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    const fetchSekolah = async () => {
+      try {
+        const res = await api.get('/sekolah');
+        if (res.data?.success && res.data?.data) {
+          setSekolahInfo(res.data.data);
+        }
+      } catch (err) {
+        console.warn('Gagal memuat info sekolah:', err);
+      }
+    };
+    if (currentUser) {
+      fetchSekolah();
+    }
+  }, [currentUser]);
 
   const fetchProfile = async () => {
     try {
@@ -324,9 +343,35 @@ export default function App() {
 
       {activeTab === 'perpustakaan' && (
         <SubHeader
-          title="Perpustakaan E-Katalog"
-          subtitle="Katalog koleksi buku dan transaksi peminjaman"
+          title="Perpustakaan"
+          subtitle={sekolahInfo?.nama_sekolah || currentUser?.nama_sekolah || 'SMK ARTANITA TASIKMALAYA'}
           onBack={() => setActiveTab('beranda')}
+          rightAction={
+            <button
+              type="button"
+              onClick={() => setTambahBukuTrigger(Date.now())}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '6px 11px',
+                borderRadius: 12,
+                background: 'rgba(255, 255, 255, 0.22)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255, 255, 255, 0.35)',
+                color: '#ffffff',
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              <Plus size={15} strokeWidth={2.5} />
+              <span>Tambah Buku</span>
+            </button>
+          }
         />
       )}
 
@@ -353,7 +398,13 @@ export default function App() {
         {activeTab === 'rekapMapel' && <RekapMapelView />}
         {activeTab === 'rekapGuru' && <RekapGuruView />}
         {activeTab === 'kalender' && <KalenderView />}
-        {activeTab === 'perpustakaan' && <PerpustakaanView user={currentUser} showToast={showToast} />}
+        {activeTab === 'perpustakaan' && (
+          <PerpustakaanView
+            user={currentUser}
+            showToast={showToast}
+            tambahBukuTrigger={tambahBukuTrigger}
+          />
+        )}
         {(activeTab === 'penilaianInput' || activeTab === 'penilaian') && <PenilaianInputView onBack={() => setActiveTab('beranda')} />}
         {activeTab === 'penilaianLaporan' && <PenilaianLaporanView onBack={() => setActiveTab('beranda')} />}
       </main>

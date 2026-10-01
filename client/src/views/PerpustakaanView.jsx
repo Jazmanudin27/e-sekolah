@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import api from '../api/client';
 import SearchableSelect from '../components/SearchableSelect';
 
-export default function PerpustakaanView({ user, showToast }) {
+export default function PerpustakaanView({ user, showToast, tambahBukuTrigger }) {
   const [activeTab, setActiveTab] = useState('katalog'); // 'katalog' | 'peminjaman' | 'aturan'
   const [bukuList, setBukuList] = useState([]);
   const [peminjamanList, setPeminjamanList] = useState([]);
@@ -36,6 +36,22 @@ export default function PerpustakaanView({ user, showToast }) {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  // Tambah Buku Modal State (Mobile)
+  const [showAddBukuModal, setShowAddBukuModal] = useState(false);
+  const [newBukuForm, setNewBukuForm] = useState({
+    kode_buku: '',
+    judul: '',
+    pengarang: '',
+    penerbit: '',
+    tahun_terbit: new Date().getFullYear().toString(),
+    isbn: '',
+    kategori: 'Pelajaran',
+    lokasi_rak: 'Rak A-1',
+    stok: 5,
+    deskripsi: ''
+  });
+  const [submittingNewBuku, setSubmittingNewBuku] = useState(false);
+
   const categories = [
     'Semua', 'Pelajaran', 'Fiksi', 'Sejarah', 'Sains', 'Teknologi', 'Psikologi', 'Agama', 'Umum'
   ];
@@ -43,6 +59,12 @@ export default function PerpustakaanView({ user, showToast }) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (tambahBukuTrigger) {
+      handleOpenAddBukuModal();
+    }
+  }, [tambahBukuTrigger]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -74,6 +96,41 @@ export default function PerpustakaanView({ user, showToast }) {
     if (kFound && kFound.nama_kelas) return kFound.nama_kelas;
     if (s.kelas) return s.kelas;
     return s.kode_kelas ? `Kelas ${s.kode_kelas}` : '-';
+  };
+
+  const handleOpenAddBukuModal = () => {
+    setNewBukuForm({
+      kode_buku: `BUK-${Math.floor(100 + Math.random() * 900)}`,
+      judul: '',
+      pengarang: '',
+      penerbit: '',
+      tahun_terbit: new Date().getFullYear().toString(),
+      isbn: '',
+      kategori: 'Pelajaran',
+      lokasi_rak: 'Rak A-1',
+      stok: 5,
+      deskripsi: ''
+    });
+    setShowAddBukuModal(true);
+  };
+
+  const handleSubmitNewBuku = async (e) => {
+    e.preventDefault();
+    if (!newBukuForm.judul || !newBukuForm.pengarang) {
+      Swal.fire('Validasi', 'Judul buku dan nama pengarang wajib diisi!', 'warning');
+      return;
+    }
+    setSubmittingNewBuku(true);
+    try {
+      await api.post('/perpustakaan/buku', newBukuForm);
+      Swal.fire('Berhasil!', 'Buku baru berhasil ditambahkan ke katalog.', 'success');
+      setShowAddBukuModal(false);
+      fetchData();
+    } catch (err) {
+      Swal.fire('Gagal!', err.response?.data?.message || 'Gagal menambahkan buku baru.', 'error');
+    } finally {
+      setSubmittingNewBuku(false);
+    }
   };
 
   const handleOpenPinjamModal = (buku = null) => {
@@ -663,6 +720,171 @@ export default function PerpustakaanView({ user, showToast }) {
                 </button>
                 <button type="submit" className="btn-primary-admin" disabled={submitting}>
                   {submitting ? 'Memproses...' : 'Kirim Peminjaman'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================================== */}
+      {/* MODAL TAMBAH BUKU BARU (MOBILE)                                          */}
+      {/* ======================================================================== */}
+      {showAddBukuModal && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-box" style={{ maxWidth: 480, padding: 18, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Plus size={18} color="#0284c7" /> Tambah Koleksi Buku
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAddBukuModal(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitNewBuku} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <div style={{ overflowY: 'auto', paddingRight: 4, maxHeight: '68vh' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 12 }}>
+                  <div className="form-group-admin" style={{ minWidth: 0 }}>
+                    <label style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>Kode Buku *</label>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      style={{ fontSize: 12 }}
+                      required
+                      placeholder="Contoh: BUK-009"
+                      value={newBukuForm.kode_buku}
+                      onChange={(e) => setNewBukuForm({ ...newBukuForm, kode_buku: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group-admin" style={{ minWidth: 0 }}>
+                    <label style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>ISBN (Opsional)</label>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      style={{ fontSize: 12 }}
+                      placeholder="978-..."
+                      value={newBukuForm.isbn}
+                      onChange={(e) => setNewBukuForm({ ...newBukuForm, isbn: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group-admin" style={{ marginBottom: 12 }}>
+                  <label style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>Judul Buku *</label>
+                  <input
+                    type="text"
+                    className="form-control-admin"
+                    style={{ fontSize: 12 }}
+                    required
+                    placeholder="Judul lengkap buku..."
+                    value={newBukuForm.judul}
+                    onChange={(e) => setNewBukuForm({ ...newBukuForm, judul: e.target.value })}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 12 }}>
+                  <div className="form-group-admin" style={{ minWidth: 0 }}>
+                    <label style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>Pengarang / Penulis *</label>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      style={{ fontSize: 12 }}
+                      required
+                      placeholder="Nama penulis..."
+                      value={newBukuForm.pengarang}
+                      onChange={(e) => setNewBukuForm({ ...newBukuForm, pengarang: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group-admin" style={{ minWidth: 0 }}>
+                    <label style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>Penerbit</label>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      style={{ fontSize: 12 }}
+                      placeholder="Nama penerbit..."
+                      value={newBukuForm.penerbit}
+                      onChange={(e) => setNewBukuForm({ ...newBukuForm, penerbit: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: 10, marginBottom: 12 }}>
+                  <div className="form-group-admin" style={{ minWidth: 0 }}>
+                    <label style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>Kategori *</label>
+                    <select
+                      className="form-control-admin"
+                      style={{ fontSize: 12 }}
+                      value={newBukuForm.kategori}
+                      onChange={(e) => setNewBukuForm({ ...newBukuForm, kategori: e.target.value })}
+                    >
+                      {categories.filter(c => c !== 'Semua').map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group-admin" style={{ minWidth: 0 }}>
+                    <label style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>Tahun Terbit</label>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      style={{ fontSize: 12 }}
+                      placeholder="2024"
+                      value={newBukuForm.tahun_terbit}
+                      onChange={(e) => setNewBukuForm({ ...newBukuForm, tahun_terbit: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: 10, marginBottom: 12 }}>
+                  <div className="form-group-admin" style={{ minWidth: 0 }}>
+                    <label style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>Lokasi Rak</label>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      style={{ fontSize: 12 }}
+                      placeholder="Contoh: Rak A-1"
+                      value={newBukuForm.lokasi_rak}
+                      onChange={(e) => setNewBukuForm({ ...newBukuForm, lokasi_rak: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group-admin" style={{ minWidth: 0 }}>
+                    <label style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>Jumlah Stok *</label>
+                    <input
+                      type="number"
+                      min="1"
+                      className="form-control-admin"
+                      style={{ fontSize: 12 }}
+                      required
+                      value={newBukuForm.stok}
+                      onChange={(e) => setNewBukuForm({ ...newBukuForm, stok: parseInt(e.target.value, 10) || 1 })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group-admin" style={{ marginBottom: 12 }}>
+                  <label style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>Deskripsi / Sinopsis (Opsional)</label>
+                  <textarea
+                    className="form-control-admin"
+                    style={{ fontSize: 12, resize: 'vertical' }}
+                    rows={2}
+                    placeholder="Sinopsis singkat tentang buku..."
+                    value={newBukuForm.deskripsi}
+                    onChange={(e) => setNewBukuForm({ ...newBukuForm, deskripsi: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="admin-modal-footer" style={{ padding: '14px 0 0 0', display: 'flex', gap: 10, justifyContent: 'flex-end', borderTop: '1px solid #f1f5f9', marginTop: 4 }}>
+                <button type="button" className="btn-outline-admin" onClick={() => setShowAddBukuModal(false)}>
+                  Batal
+                </button>
+                <button type="submit" className="btn-primary-admin" disabled={submittingNewBuku}>
+                  {submittingNewBuku ? 'Menyimpan...' : 'Simpan Buku'}
                 </button>
               </div>
             </form>
