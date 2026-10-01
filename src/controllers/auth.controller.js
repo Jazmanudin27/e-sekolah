@@ -230,48 +230,52 @@ async function debugUsers(req, res) {
   }
 }
 
-// Update Username & Password for Logged-In User (Admin, Guru, or Kelas)
+// Update Email / Username & Password for Logged-In User (Admin, Guru, or Kelas)
 async function updateCredentials(req, res, next) {
   try {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
     const userType = req.user.type; // 'Admin', 'Guru', 'Kelas'
 
-    if (!username && !password) {
-      return sendError(res, 'Username atau password baru harus diisi.', 400);
-    }
-
-    const cleanUsername = username ? String(username).trim() : null;
+    const inputEmail = email ? String(email).trim() : null;
+    const inputUsername = username ? String(username).trim() : null;
     const cleanPassword = password ? String(password).trim() : null;
 
-    if (cleanUsername && cleanUsername.length < 3) {
-      return sendError(res, 'Username minimal 3 karakter.', 400);
+    // Gunakan email atau username yang dikirim
+    const primaryIdentifier = inputEmail || inputUsername;
+
+    if (!primaryIdentifier && !cleanPassword) {
+      return sendError(res, 'Email / Username atau password baru harus diisi.', 400);
+    }
+
+    if (primaryIdentifier && primaryIdentifier.length < 3) {
+      return sendError(res, 'Email / Username minimal 3 karakter.', 400);
     }
 
     if (cleanPassword && cleanPassword.length < 4) {
       return sendError(res, 'Password baru minimal 4 karakter.', 400);
     }
 
-    // 1. Validasi keunikan username jika diubah
-    if (cleanUsername) {
-      const existingAdmin = await UserModel.findByUsernameOrEmail(cleanUsername);
+    // 1. Validasi keunikan email / username jika diubah
+    if (primaryIdentifier) {
+      const existingAdmin = await UserModel.findByUsernameOrEmail(primaryIdentifier);
       if (existingAdmin) {
         const existingAdminId = existingAdmin.id || existingAdmin.id_user;
         if (userType !== 'Admin' || String(existingAdminId) !== String(req.user.id)) {
-          return sendError(res, `Username '${cleanUsername}' sudah digunakan akun lain.`, 400);
+          return sendError(res, `'${primaryIdentifier}' sudah digunakan oleh akun lain.`, 400);
         }
       }
 
-      const existingGuru = await GuruModel.findByUsernameOrEmail(cleanUsername);
+      const existingGuru = await GuruModel.findByUsernameOrEmail(primaryIdentifier);
       if (existingGuru) {
         if (userType !== 'Guru' || String(existingGuru.kode_guru) !== String(req.user.kode_guru)) {
-          return sendError(res, `Username '${cleanUsername}' sudah digunakan akun guru lain.`, 400);
+          return sendError(res, `'${primaryIdentifier}' sudah digunakan oleh akun guru lain.`, 400);
         }
       }
 
-      const existingKelas = await KelasModel.findByUsername(cleanUsername);
+      const existingKelas = await KelasModel.findByUsername(primaryIdentifier);
       if (existingKelas) {
         if (userType !== 'Kelas' || String(existingKelas.kode_kelas) !== String(req.user.kode_kelas)) {
-          return sendError(res, `Username '${cleanUsername}' sudah digunakan akun kelas lain.`, 400);
+          return sendError(res, `'${primaryIdentifier}' sudah digunakan oleh akun kelas lain.`, 400);
         }
       }
     }
@@ -280,7 +284,14 @@ async function updateCredentials(req, res, next) {
 
     if (userType === 'Admin') {
       const updateData = {};
-      if (cleanUsername) updateData.username = cleanUsername;
+      if (primaryIdentifier) {
+        if (primaryIdentifier.includes('@') || inputEmail) {
+          updateData.email = primaryIdentifier;
+          updateData.username = inputUsername || primaryIdentifier;
+        } else {
+          updateData.username = primaryIdentifier;
+        }
+      }
       if (cleanPassword) updateData.password = cleanPassword;
       await UserModel.update(req.user.id, updateData);
 
@@ -290,15 +301,22 @@ async function updateCredentials(req, res, next) {
         id: req.user.id,
         name: fresh?.name || fresh?.nama || req.user.name || 'Administrator',
         nama_guru: fresh?.name || fresh?.nama || req.user.name || 'Administrator',
-        username: fresh?.username || cleanUsername || req.user.username,
-        email: fresh?.email || req.user.email || '',
+        username: fresh?.username || primaryIdentifier || req.user.username,
+        email: fresh?.email || (primaryIdentifier?.includes('@') ? primaryIdentifier : req.user.email) || '',
         role: fresh?.role || req.user.role || 'Admin',
         status: fresh?.status || 'Active',
         kode_member: fresh?.kode_member || req.user.kode_member
       };
     } else if (userType === 'Guru') {
       const updateData = {};
-      if (cleanUsername) updateData.username = cleanUsername;
+      if (primaryIdentifier) {
+        if (primaryIdentifier.includes('@') || inputEmail) {
+          updateData.email = primaryIdentifier;
+          updateData.username = inputUsername || primaryIdentifier;
+        } else {
+          updateData.username = primaryIdentifier;
+        }
+      }
       if (cleanPassword) updateData.password = cleanPassword;
       await GuruModel.update(req.user.kode_guru, updateData);
 
@@ -308,15 +326,15 @@ async function updateCredentials(req, res, next) {
         kode_guru: req.user.kode_guru,
         nip_nuptk: fresh?.nip_nuptk || req.user.nip_nuptk,
         nama_guru: fresh?.nama_guru || req.user.nama_guru,
-        username: fresh?.username || cleanUsername || req.user.username,
-        email: fresh?.email || req.user.email,
+        username: fresh?.username || primaryIdentifier || req.user.username,
+        email: fresh?.email || (primaryIdentifier?.includes('@') ? primaryIdentifier : req.user.email),
         role: fresh?.role || req.user.role,
         status: fresh?.status,
         kode_member: fresh?.kode_member || req.user.kode_member
       };
     } else if (userType === 'Kelas') {
       const updateData = {};
-      if (cleanUsername) updateData.username = cleanUsername;
+      if (primaryIdentifier) updateData.username = primaryIdentifier;
       if (cleanPassword) updateData.password = cleanPassword;
       await KelasModel.update(req.user.kode_kelas, updateData);
 
@@ -327,7 +345,7 @@ async function updateCredentials(req, res, next) {
         nama_kelas: fresh?.nama_kelas || req.user.nama_kelas,
         jurusan: fresh?.jurusan || req.user.jurusan,
         nama_guru: `Akun Kelas ${fresh?.nama_kelas || req.user.nama_kelas}`,
-        username: cleanUsername || req.user.username,
+        username: primaryIdentifier || req.user.username,
         role: 'Kelas',
         kode_member: req.user.kode_member
       };
@@ -337,7 +355,7 @@ async function updateCredentials(req, res, next) {
 
     const token = jwt.sign(updatedUserData, JWT_SECRET, { expiresIn: '7d' });
 
-    return sendSuccess(res, 'Username dan/atau password berhasil diperbarui.', {
+    return sendSuccess(res, 'Email / Username dan password berhasil diperbarui.', {
       token,
       user: updatedUserData
     });

@@ -63,7 +63,7 @@ export default function TopBar({ user, onLogout, onUserUpdated }) {
               type="button"
               className="header-icon-btn key-btn-hero"
               onClick={() => setShowAccountModal(true)}
-              title="Ubah Username & Password"
+              title="Ubah Email & Password"
             >
               <KeyRound size={17} />
             </button>
@@ -83,7 +83,7 @@ export default function TopBar({ user, onLogout, onUserUpdated }) {
             className="hero-avatar-wrapper"
             onClick={() => setShowAccountModal(true)}
             style={{ cursor: 'pointer' }}
-            title="Klik untuk ubah username / password"
+            title="Klik untuk ubah email / password"
           >
             <div className="user-avatar-circle">
               {user?.avatar ? (

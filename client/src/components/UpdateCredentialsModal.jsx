@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { KeyRound, User, Lock, Eye, EyeOff, X, ShieldCheck, Check } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, X, ShieldCheck, Check } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../api/client';
 
 export default function UpdateCredentialsModal({ user, onClose, onUpdateSuccess }) {
-  const [username, setUsername] = useState(user?.username || '');
+  const initialIdentifier = user?.email || user?.username || '';
+  const [identifier, setIdentifier] = useState(initialIdentifier);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -14,16 +15,16 @@ export default function UpdateCredentialsModal({ user, onClose, onUpdateSuccess 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const cleanUsername = username.trim();
+    const cleanIdentifier = identifier.trim();
     const cleanPassword = password.trim();
 
-    if (!cleanUsername && !cleanPassword) {
-      Swal.fire('Perhatian', 'Isi username atau password yang ingin diperbarui.', 'warning');
+    if (!cleanIdentifier && !cleanPassword) {
+      Swal.fire('Perhatian', 'Isi email / username atau password yang ingin diperbarui.', 'warning');
       return;
     }
 
-    if (cleanUsername && cleanUsername.length < 3) {
-      Swal.fire('Validasi Gagal', 'Username minimal 3 karakter.', 'warning');
+    if (cleanIdentifier && cleanIdentifier.length < 3) {
+      Swal.fire('Validasi Gagal', 'Email / Username minimal 3 karakter.', 'warning');
       return;
     }
 
@@ -41,15 +42,16 @@ export default function UpdateCredentialsModal({ user, onClose, onUpdateSuccess 
     setSubmitting(true);
     try {
       const payload = {};
-      if (cleanUsername && cleanUsername !== user?.username) {
-        payload.username = cleanUsername;
+      if (cleanIdentifier && cleanIdentifier !== initialIdentifier) {
+        payload.email = cleanIdentifier;
+        payload.username = cleanIdentifier;
       }
       if (cleanPassword) {
         payload.password = cleanPassword;
       }
 
       if (Object.keys(payload).length === 0) {
-        Swal.fire('Info', 'Tidak ada perubahan username atau password yang dimasukkan.', 'info');
+        Swal.fire('Info', 'Tidak ada perubahan email atau password yang dimasukkan.', 'info');
         setSubmitting(false);
         return;
       }
@@ -72,8 +74,8 @@ export default function UpdateCredentialsModal({ user, onClose, onUpdateSuccess 
         Swal.fire({
           icon: 'success',
           title: 'Berhasil Diperbarui!',
-          text: 'Username / Password akun Anda berhasil disimpan. Harap ingat kredensial baru ini untuk login berikutnya.',
-          confirmButtonColor: '#0066ff'
+          text: 'Email / Username dan Password akun Anda berhasil disimpan. Anda dapat menggunakannya untuk login.',
+          confirmButtonColor: '#0284c7'
         });
 
         onClose();
@@ -139,12 +141,12 @@ export default function UpdateCredentialsModal({ user, onClose, onUpdateSuccess 
                 backdropFilter: 'blur(4px)'
               }}
             >
-              <KeyRound size={22} color="#ffffff" />
+              <Mail size={22} color="#ffffff" />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Ubah Akun Login</h3>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Ubah Email & Password Login</h3>
               <p style={{ margin: '2px 0 0 0', fontSize: 12, opacity: 0.85 }}>
-                Perbarui Username & Password Akun
+                Perbarui Email / Username dan Password Akun
               </p>
             </div>
           </div>
@@ -171,19 +173,19 @@ export default function UpdateCredentialsModal({ user, onClose, onUpdateSuccess 
         {/* FORM BODY */}
         <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {/* USERNAME FIELD */}
+            {/* EMAIL / USERNAME FIELD */}
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                Username Login
+                Email / Username Login
               </label>
               <div style={{ position: 'relative' }}>
-                <User size={16} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+                <Mail size={16} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="text"
                   required
-                  placeholder="Masukkan username baru..."
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Masukkan email atau username login..."
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   style={{
                     width: '100%',
                     padding: '10px 14px 10px 38px',
@@ -197,7 +199,7 @@ export default function UpdateCredentialsModal({ user, onClose, onUpdateSuccess 
                 />
               </div>
               <span style={{ fontSize: 11, color: '#64748b', marginTop: 4, display: 'block' }}>
-                Username saat ini: <strong>{user?.username || '-'}</strong>
+                Email / Akun saat ini: <strong>{user?.email || user?.username || '-'}</strong>
               </span>
             </div>
 
@@ -302,7 +304,7 @@ export default function UpdateCredentialsModal({ user, onClose, onUpdateSuccess 
             >
               <ShieldCheck size={20} color="#16a34a" style={{ flexShrink: 0 }} />
               <div style={{ fontSize: 11.5, color: '#166534', lineHeight: 1.4 }}>
-                Perubahan langsung aktif saat disimpan. Pastikan Anda mengingat atau mencatat kredensial baru.
+                Bisa menggunakan <strong>Email</strong> atau <strong>Username</strong> untuk login beserta password akun.
               </div>
             </div>
           </div>
@@ -347,7 +349,7 @@ export default function UpdateCredentialsModal({ user, onClose, onUpdateSuccess 
               }}
             >
               <Check size={16} />
-              {submitting ? 'Menyimpan...' : 'Simpan Kredensial'}
+              {submitting ? 'Menyimpan...' : 'Simpan Email & Password'}
             </button>
           </div>
         </form>

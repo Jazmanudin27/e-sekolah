@@ -278,7 +278,7 @@ export default function ProfilView({ user, onLogout, onUserUpdated }) {
         }}
       >
         <KeyRound size={17} />
-        Ubah Username & Password
+        Ubah Email & Password
       </button>
 
       {/* LOGOUT BUTTON */}

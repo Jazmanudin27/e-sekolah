@@ -685,7 +685,7 @@ export default function AdminDesktopView({ user, onLogout }) {
                     className="dropdown-item"
                     onClick={() => setShowAccountModal(true)}
                   >
-                    <KeyRound size={14} color="#0284c7" /> Ubah Username & Password
+                    <KeyRound size={14} color="#0284c7" /> Ubah Email & Password
                   </button>
                   <button
                     type="button"
