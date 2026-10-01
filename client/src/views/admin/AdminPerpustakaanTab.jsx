@@ -7,6 +7,7 @@ import {
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import SearchableSelect from '../../components/SearchableSelect';
 
 export default function AdminPerpustakaanTab() {
   const [activeSubTab, setActiveSubTab] = useState('katalog'); // 'katalog' | 'peminjaman' | 'statistik'
@@ -1259,24 +1260,25 @@ export default function AdminPerpustakaanTab() {
 
             <form onSubmit={handleSubmitPinjam}>
               <div className="admin-modal-body" style={{ maxHeight: '65vh', overflowY: 'auto' }}>
-                <div className="form-group-admin" style={{ marginBottom: 12 }}>
-                  <label>Pilih Buku Yang Dipinjam *</label>
-                  <select
-                    className="form-control-admin"
-                    required
+                <div className="form-group-admin" style={{ marginBottom: 14 }}>
+                  <label>Pilih Buku Yang Dipinjam * (Ketik untuk mencari)</label>
+                  <SearchableSelect
+                    placeholder="-- Cari berdasarkan judul, kode, pengarang, atau lokasi rak --"
                     value={pinjamForm.buku_id}
                     onChange={(e) => setPinjamForm({ ...pinjamForm, buku_id: e.target.value })}
-                  >
-                    <option value="">-- Pilih Buku --</option>
-                    {bukuList.map(b => (
-                      <option key={b.id} value={b.id} disabled={b.tersedia < 1}>
-                        {b.kode_buku} - {b.judul} ({b.tersedia > 0 ? `${b.tersedia} tersedia` : 'Stok Habis'})
-                      </option>
-                    ))}
-                  </select>
+                    options={bukuList.map(b => ({
+                      value: b.id,
+                      label: `${b.kode_buku} - ${b.judul}`,
+                      sublabel: b.tersedia > 0
+                        ? `Stok: ${b.tersedia} dari ${b.stok} eksemplar | ${b.kategori} (${b.lokasi_rak})`
+                        : '⚠️ Stok Habis (Tidak dapat dipinjam)'
+                    }))}
+                    required
+                    isClearable
+                  />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12, marginBottom: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12, marginBottom: 14 }}>
                   <div className="form-group-admin">
                     <label>Tipe Peminjam *</label>
                     <select
@@ -1291,28 +1293,27 @@ export default function AdminPerpustakaanTab() {
                     </select>
                   </div>
                   <div className="form-group-admin">
-                    <label>Pilih {pinjamForm.peminjam_type === 'siswa' ? 'Siswa' : 'Guru'} *</label>
-                    <select
-                      className="form-control-admin"
-                      required
+                    <label>Pilih {pinjamForm.peminjam_type === 'siswa' ? 'Siswa' : 'Guru'} * (Ketik nama/NIS/NIP)</label>
+                    <SearchableSelect
+                      placeholder={`-- Cari nama/NIS/NIP ${pinjamForm.peminjam_type === 'siswa' ? 'Siswa' : 'Guru'} --`}
                       value={pinjamForm.peminjam_id}
                       onChange={(e) => handleSelectPeminjamUser(e.target.value)}
-                    >
-                      <option value="">-- Pilih Data {pinjamForm.peminjam_type === 'siswa' ? 'Siswa' : 'Guru'} --</option>
-                      {pinjamForm.peminjam_type === 'siswa' ? (
-                        siswaOptions.map(s => (
-                          <option key={s.kode_siswa || s.id} value={s.kode_siswa || s.id}>
-                            {s.nama_siswa || s.nama} (NIS: {s.nis || '-'}) - {s.kelas || s.kode_kelas || ''}
-                          </option>
-                        ))
+                      options={pinjamForm.peminjam_type === 'siswa' ? (
+                        siswaOptions.map(s => ({
+                          value: s.kode_siswa || s.id,
+                          label: `${s.nama_siswa || s.nama} (NIS: ${s.nis || '-'})`,
+                          sublabel: `Kelas: ${s.kelas || s.kode_kelas || '-'}`
+                        }))
                       ) : (
-                        guruOptions.map(g => (
-                          <option key={g.kode_guru || g.id} value={g.kode_guru || g.id}>
-                            {g.nama_guru || g.nama} (NIP: {g.nip || '-'})
-                          </option>
-                        ))
+                        guruOptions.map(g => ({
+                          value: g.kode_guru || g.id,
+                          label: `${g.nama_guru || g.nama} (NIP: ${g.nip || '-'})`,
+                          sublabel: `Jabatan: ${g.jabatan || 'Guru'}`
+                        }))
                       )}
-                    </select>
+                      required
+                      isClearable
+                    />
                   </div>
                 </div>
 
