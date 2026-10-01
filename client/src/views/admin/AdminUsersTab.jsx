@@ -325,7 +325,9 @@ export default function AdminUsersTab() {
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                       options={[
-                        { value: 'admin', label: 'Admin' },
+                        { value: 'admin', label: 'Admin Utama' },
+                        { value: 'Admin Perpustakaan', label: 'Admin Perpustakaan' },
+                        { value: 'Pustakawan', label: 'Pustakawan / Petugas Perpus' },
                         { value: 'superadmin', label: 'Super Admin' },
                         { value: 'operator', label: 'Operator Sekolah' },
                         { value: 'kepala_sekolah', label: 'Kepala Sekolah' }

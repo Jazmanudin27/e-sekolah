@@ -45,6 +45,12 @@ async function resolveUserTableInfo() {
     cachedUserTable = foundTable;
     cachedColumns = cols;
     console.log(`[UserModel] Resolved User Table: '${foundTable}' with columns: [${cols.join(', ')}]`);
+
+    // Auto-seed default library admin accounts if missing
+    setTimeout(() => {
+      UserModel.ensureDefaultUsers().catch(e => console.warn('[UserModel] seed warning:', e.message));
+    }, 100);
+
     return { tableName: foundTable, columns: cols };
   } catch (err) {
     console.warn('[UserModel] Error resolving tables:', err.message);
@@ -266,6 +272,38 @@ class UserModel {
       return {
         error: err.message
       };
+    }
+  }
+
+  static async ensureDefaultUsers() {
+    try {
+      const perpusUser = await this.findByUsernameOrEmail('adminperpus');
+      if (!perpusUser) {
+        await this.create({
+          name: 'Admin Perpustakaan',
+          username: 'adminperpus',
+          email: 'perpus@artanita.sch.id',
+          password: '123456',
+          role: 'Admin Perpustakaan',
+          status: 'Active'
+        });
+        console.log('[UserModel] Created default account: adminperpus / 123456');
+      }
+
+      const pustakawanUser = await this.findByUsernameOrEmail('pustakawan');
+      if (!pustakawanUser) {
+        await this.create({
+          name: 'Pustakawan Artanita',
+          username: 'pustakawan',
+          email: 'pustakawan@artanita.sch.id',
+          password: '123456',
+          role: 'Pustakawan',
+          status: 'Active'
+        });
+        console.log('[UserModel] Created default account: pustakawan / 123456');
+      }
+    } catch (e) {
+      console.warn('[UserModel.ensureDefaultUsers] Warning:', e.message);
     }
   }
 }
