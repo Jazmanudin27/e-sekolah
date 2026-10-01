@@ -211,24 +211,30 @@ export default function PenilaianLaporanView({ onBack }) {
         </div>
       </div>
 
-      {/* STATS OVERVIEW CARDS */}
-      <div style={{ maxWidth: 960, margin: '0 auto 16px auto', padding: '0 16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-        <div style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#fff', padding: '16px', borderRadius: 16, boxShadow: '0 4px 14px rgba(2, 132, 199, 0.25)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, opacity: 0.9 }}>RATA-RATA KELAS</div>
-          <div style={{ fontSize: 24, fontWeight: 800, marginTop: 4 }}>{avgKelas}</div>
-          <div style={{ fontSize: 10, opacity: 0.85, marginTop: 2 }}>Skor rata-rata terbobot</div>
+      {/* STATS OVERVIEW CARDS (HORIZONTAL ROW SIDE-BY-SIDE) */}
+      <div style={{ maxWidth: 960, margin: '0 auto 16px auto', padding: '0 16px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+        <div style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#fff', padding: '14px 16px', borderRadius: 16, boxShadow: '0 4px 14px rgba(2, 132, 199, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: 10.5, fontWeight: 700, opacity: 0.9 }}>RATA-RATA KELAS</div>
+            <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2 }}>{avgKelas}</div>
+          </div>
+          <Award size={24} style={{ opacity: 0.8 }} />
         </div>
 
-        <div style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: '#fff', padding: '16px', borderRadius: 16, boxShadow: '0 4px 14px rgba(34, 197, 94, 0.25)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, opacity: 0.9 }}>SISWA TUNTAS</div>
-          <div style={{ fontSize: 24, fontWeight: 800, marginTop: 4 }}>{tuntasCount} <span style={{ fontSize: 13, fontWeight: 600 }}>/ {totalSiswa} Siswa</span></div>
-          <div style={{ fontSize: 10, opacity: 0.85, marginTop: 2 }}>Nilai ≥ KKM (75)</div>
+        <div style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: '#fff', padding: '14px 16px', borderRadius: 16, boxShadow: '0 4px 14px rgba(34, 197, 94, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: 10.5, fontWeight: 700, opacity: 0.9 }}>SISWA TUNTAS</div>
+            <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2 }}>{tuntasCount} <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.9 }}>/ {totalSiswa}</span></div>
+          </div>
+          <CheckCircle2 size={24} style={{ opacity: 0.8 }} />
         </div>
 
-        <div style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', padding: '16px', borderRadius: 16, boxShadow: '0 4px 14px rgba(239, 68, 68, 0.25)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, opacity: 0.9 }}>PERLU REMEDIAL</div>
-          <div style={{ fontSize: 24, fontWeight: 800, marginTop: 4 }}>{remedialCount} <span style={{ fontSize: 13, fontWeight: 600 }}>Siswa</span></div>
-          <div style={{ fontSize: 10, opacity: 0.85, marginTop: 2 }}>Nilai di bawah KKTP/KKM</div>
+        <div style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', padding: '14px 16px', borderRadius: 16, boxShadow: '0 4px 14px rgba(239, 68, 68, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: 10.5, fontWeight: 700, opacity: 0.9 }}>PERLU REMEDIAL</div>
+            <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2 }}>{remedialCount} <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.9 }}>Siswa</span></div>
+          </div>
+          <AlertTriangle size={24} style={{ opacity: 0.8 }} />
         </div>
       </div>
 
@@ -262,14 +268,9 @@ export default function PenilaianLaporanView({ onBack }) {
                   <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textTransform: 'uppercase', color: '#475569', fontSize: 11, fontWeight: 800 }}>
                     <th style={{ padding: '12px 14px', textAlign: 'center', width: 45 }}>No</th>
                     <th style={{ padding: '12px 14px', textAlign: 'left' }}>Nama Siswa</th>
-                    <th style={{ padding: '12px 10px', textAlign: 'center' }}>Rerata PH</th>
-                    <th style={{ padding: '12px 10px', textAlign: 'center' }}>Rerata Praktik</th>
-                    <th style={{ padding: '12px 10px', textAlign: 'center' }}>UTS</th>
-                    <th style={{ padding: '12px 10px', textAlign: 'center' }}>UAS</th>
                     <th style={{ padding: '12px 10px', textAlign: 'center', background: '#eff6ff' }}>Nilai Akhir</th>
                     <th style={{ padding: '12px 10px', textAlign: 'center' }}>Predikat</th>
                     <th style={{ padding: '12px 10px', textAlign: 'center' }}>Status</th>
-                    <th style={{ padding: '12px 14px', textAlign: 'center' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -280,30 +281,18 @@ export default function PenilaianLaporanView({ onBack }) {
                         {s.nama}
                         <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>NIS: {s.nis || '-'}</div>
                       </td>
-                      <td style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 600 }}>{s.avgPH}</td>
-                      <td style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 600 }}>{s.avgPraktik}</td>
-                      <td style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 600 }}>{s.utsScore || 0}</td>
-                      <td style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 600 }}>{s.uasScore || 0}</td>
-                      <td style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 800, fontSize: 13, background: '#eff6ff', color: s.isPass ? '#0284c7' : '#dc2626' }}>
+                      <td style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 800, fontSize: 14, background: '#eff6ff', color: s.isPass ? '#0284c7' : '#dc2626' }}>
                         {s.finalScore}
                       </td>
                       <td style={{ padding: '12px 10px', textAlign: 'center' }}>
-                        <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: s.predikat === 'A' ? '#dcfce7' : s.predikat === 'B' ? '#e0f2fe' : '#fef3c7', color: s.predikat === 'A' ? '#15803d' : s.predikat === 'B' ? '#0369a1' : '#b45309' }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 8, background: s.predikat === 'A' ? '#dcfce7' : s.predikat === 'B' ? '#e0f2fe' : '#fef3c7', color: s.predikat === 'A' ? '#15803d' : s.predikat === 'B' ? '#0369a1' : '#b45309' }}>
                           {s.predikat}
                         </span>
                       </td>
                       <td style={{ padding: '12px 10px', textAlign: 'center' }}>
-                        <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 12, background: s.isPass ? '#ecfdf5' : '#fef2f2', color: s.isPass ? '#047857' : '#b91c1c', border: `1px solid ${s.isPass ? '#a7f3d0' : '#fecaca'}` }}>
+                        <span style={{ fontSize: 10.5, fontWeight: 800, padding: '4px 10px', borderRadius: 12, background: s.isPass ? '#ecfdf5' : '#fef2f2', color: s.isPass ? '#047857' : '#b91c1c', border: `1px solid ${s.isPass ? '#a7f3d0' : '#fecaca'}` }}>
                           {s.isPass ? 'TUNTAS' : 'REMEDIAL'}
                         </span>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        <button
-                          onClick={() => handlePrintRapor(s)}
-                          style={{ background: '#0066ff', color: '#ffffff', border: 'none', padding: '5px 12px', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                        >
-                          <Printer size={12} /> Cetak
-                        </button>
                       </td>
                     </tr>
                   ))}
