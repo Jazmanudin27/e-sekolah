@@ -1,12 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import {
-  FileSpreadsheet, Plus, Save, AlertCircle, Trash2, CheckCircle2, Edit3, HelpCircle
+  FileSpreadsheet, Plus, Save, AlertCircle, Trash2, CheckCircle2, Edit3, HelpCircle, Lock
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../api/client';
 import SubHeader from '../components/SubHeader';
 
+const getLocalDateString = (dStr) => {
+  if (!dStr) return '';
+  const d = new Date(dStr);
+  if (isNaN(d.getTime())) return '';
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function PenilaianInputView({ onBack }) {
+  const todayStr = getLocalDateString(new Date());
+
   const [kelasList, setKelasList] = useState([]);
   const [mapelList, setMapelList] = useState([]);
   const [kategoriList, setKategoriList] = useState([]);
@@ -23,6 +35,7 @@ export default function PenilaianInputView({ onBack }) {
   const [students, setStudents] = useState([]);
   const [komponenList, setKomponenList] = useState([]);
   const [nilaiMap, setNilaiMap] = useState({});
+  const [savedKeys, setSavedKeys] = useState({});
   const [bobot, setBobot] = useState({ bobot_ph: 25, bobot_praktik: 25, bobot_uts: 25, bobot_uas: 25, kktp_kkm: 75 });
 
   // Modal State
@@ -30,7 +43,7 @@ export default function PenilaianInputView({ onBack }) {
   const [newKomponen, setNewKomponen] = useState({
     kategori_id: '',
     nama_komponen: '',
-    tanggal_penilaian: ''
+    tanggal_penilaian: todayStr
   });
 
   useEffect(() => {
@@ -69,7 +82,7 @@ export default function PenilaianInputView({ onBack }) {
         setKategoriList(resKat.data.data);
         if (resKat.data.data.length > 0) {
           const firstKat = resKat.data.data[0];
-          setNewKomponen(prev => ({ ...prev, kategori_id: firstKat.id || firstKat.kode_kategori || '' }));
+          setNewKomponen(prev => ({ ...prev, kategori_id: firstKat.id || firstKat.kode_kategori || '', tanggal_penilaian: todayStr }));
         }
       }
     } catch (err) {
@@ -83,10 +96,26 @@ export default function PenilaianInputView({ onBack }) {
     try {
       const res = await api.get(`/penilaian/matrix?kelas_id=${selectedKelas}&mapel_id=${selectedMapel}&tahun_ajaran=${tahunAjaran}&semester=${semester}`);
       if (res.data.success) {
-        setStudents(res.data.data.students || []);
-        setKomponenList(res.data.data.komponen || []);
-        setNilaiMap(res.data.data.nilaiMap || {});
+        const rawStudents = res.data.data.students || [];
+        const rawKomponen = res.data.data.komponen || [];
+        const loadedNilaiMap = res.data.data.nilaiMap || {};
+
+        setStudents(rawStudents);
+        setKomponenList(rawKomponen);
+        setNilaiMap(loadedNilaiMap);
         if (res.data.data.bobot) setBobot(res.data.data.bobot);
+
+        // Mark existing saved scores in DB as locked (read-only)
+        const keysMap = {};
+        Object.keys(loadedNilaiMap).forEach(sId => {
+          Object.keys(loadedNilaiMap[sId]).forEach(kId => {
+            const val = loadedNilaiMap[sId][kId];
+            if (val !== null && val !== undefined && val !== '') {
+              keysMap[`${sId}_${kId}`] = true;
+            }
+          });
+        });
+        setSavedKeys(keysMap);
       }
     } catch (err) {
       console.error(err);
@@ -96,6 +125,9 @@ export default function PenilaianInputView({ onBack }) {
   };
 
   const handleCellChange = (siswaId, komponenId, val) => {
+    const cellKey = `${siswaId}_${komponenId}`;
+    if (savedKeys[cellKey]) return; // Read-only guard
+
     const numericVal = val === '' ? '' : Math.min(100, Math.max(0, parseFloat(val) || 0));
     setNilaiMap(prev => ({
       ...prev,
@@ -117,7 +149,7 @@ export default function PenilaianInputView({ onBack }) {
         kelas_id: selectedKelas,
         kategori_id: newKomponen.kategori_id,
         nama_komponen: newKomponen.nama_komponen,
-        tanggal_penilaian: newKomponen.tanggal_penilaian || null,
+        tanggal_penilaian: newKomponen.tanggal_penilaian || todayStr,
         tahun_ajaran: tahunAjaran,
         semester: semester
       });
@@ -125,7 +157,7 @@ export default function PenilaianInputView({ onBack }) {
       if (res.data.success) {
         Swal.fire({ title: 'Berhasil!', text: 'Komponen nilai baru ditambahkan', icon: 'success', timer: 1500, showConfirmButton: false });
         setShowAddModal(false);
-        setNewKomponen(prev => ({ ...prev, nama_komponen: '', tanggal_penilaian: '' }));
+        setNewKomponen(prev => ({ ...prev, nama_komponen: '', tanggal_penilaian: todayStr }));
         fetchMatrixData();
       }
     } catch (err) {
@@ -155,13 +187,19 @@ export default function PenilaianInputView({ onBack }) {
     }
   };
 
+  const activeKomponenList = komponenList.filter(k => {
+    if (!k.tanggal_penilaian) return true;
+    const kDate = getLocalDateString(k.tanggal_penilaian);
+    return kDate >= todayStr;
+  });
+
   const handleSaveAll = async () => {
-    if (komponenList.length === 0) {
-      return Swal.fire('Info', 'Belum ada komponen nilai yang ditambahkan', 'info');
+    if (activeKomponenList.length === 0) {
+      return Swal.fire('Info', 'Tidak ada komponen nilai aktif untuk disimpan', 'info');
     }
     setSaving(true);
     try {
-      for (const k of komponenList) {
+      for (const k of activeKomponenList) {
         const nilai_list = students.map(s => ({
           siswa_id: s.id,
           nilai: (nilaiMap[s.id] && nilaiMap[s.id][k.id] !== undefined) ? nilaiMap[s.id][k.id] : 0
@@ -173,9 +211,21 @@ export default function PenilaianInputView({ onBack }) {
         });
       }
 
+      // Lock all newly saved values
+      const newSaved = { ...savedKeys };
+      students.forEach(s => {
+        activeKomponenList.forEach(k => {
+          const val = nilaiMap[s.id]?.[k.id];
+          if (val !== null && val !== undefined && val !== '') {
+            newSaved[`${s.id}_${k.id}`] = true;
+          }
+        });
+      });
+      setSavedKeys(newSaved);
+
       Swal.fire({
         title: 'Berhasil Disimpan!',
-        text: 'Seluruh nilai siswa berhasil diperbarui ke database',
+        text: 'Nilai yang diisi telah disimpan dan dikunci (Read-Only)',
         icon: 'success',
         confirmButtonColor: '#0066ff'
       });
@@ -339,6 +389,12 @@ export default function PenilaianInputView({ onBack }) {
               <AlertCircle size={36} color="#cbd5e1" style={{ marginBottom: 8 }} />
               <p style={{ fontSize: 13, fontWeight: 600 }}>Tidak ada data siswa ditemukan di kelas ini.</p>
             </div>
+          ) : activeKomponenList.length === 0 ? (
+            <div style={{ padding: '40px 0', textAlign: 'center', color: '#64748b' }}>
+              <AlertCircle size={36} color="#94a3b8" style={{ marginBottom: 8 }} />
+              <p style={{ fontSize: 13, fontWeight: 700, color: '#334155', margin: 0 }}>Tidak ada penilaian aktif untuk hari ini ({todayStr}).</p>
+              <p style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>Komponen tanggal yang sudah lewat tidak ditampilkan di lembar input.</p>
+            </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
@@ -347,16 +403,18 @@ export default function PenilaianInputView({ onBack }) {
                     <th style={{ padding: '12px 14px', textAlign: 'center', width: 45 }}>No</th>
                     <th style={{ padding: '12px 14px', textAlign: 'left', minWidth: 170 }}>Nama Siswa</th>
                     
-                    {/* DYNAMIC KOMPONEN COLUMNS */}
-                    {komponenList.map((k) => (
-                      <th key={k.id} style={{ padding: '10px 10px', textAlign: 'center', minWidth: 95, borderLeft: '1px solid #e2e8f0', background: k.kode_kategori === 'PH' ? '#eff6ff' : k.kode_kategori === 'PRAKTIK' ? '#f0fdf4' : k.kode_kategori === 'UTS' ? '#fffbeb' : '#fef2f2' }}>
+                    {/* DYNAMIC KOMPONEN COLUMNS (ACTIVE TODAY) */}
+                    {activeKomponenList.map((k) => (
+                      <th key={k.id} style={{ padding: '10px 10px', textAlign: 'center', minWidth: 105, borderLeft: '1px solid #e2e8f0', background: k.kode_kategori === 'PH' ? '#eff6ff' : k.kode_kategori === 'PRAKTIK' ? '#f0fdf4' : k.kode_kategori === 'UTS' ? '#fffbeb' : '#fef2f2' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
                           <span>{k.nama_komponen}</span>
                           <button onClick={() => handleDeleteKomponen(k.id, k.nama_komponen)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 2 }} title="Hapus Kolom">
                             <Trash2 size={12} />
                           </button>
                         </div>
-                        <div style={{ fontSize: 9, fontWeight: 700, color: '#64748b', marginTop: 2 }}>{k.nama_kategori}</div>
+                        <div style={{ fontSize: 9, fontWeight: 700, color: '#64748b', marginTop: 2 }}>
+                          {k.nama_kategori} {k.tanggal_penilaian ? `• ${getLocalDateString(k.tanggal_penilaian)}` : ''}
+                        </div>
                       </th>
                     ))}
                   </tr>
@@ -371,31 +429,42 @@ export default function PenilaianInputView({ onBack }) {
                           <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>NIS: {s.nis || '-'}</div>
                         </td>
 
-                        {/* CELL INPUTS FOR EACH KOMPONEN */}
-                        {komponenList.map(k => {
+                        {/* CELL INPUTS FOR EACH ACTIVE KOMPONEN */}
+                        {activeKomponenList.map(k => {
+                          const cellKey = `${s.id}_${k.id}`;
+                          const isSaved = Boolean(savedKeys[cellKey]);
                           const val = (nilaiMap[s.id] && nilaiMap[s.id][k.id] !== undefined) ? nilaiMap[s.id][k.id] : '';
                           return (
                             <td key={k.id} style={{ padding: '6px 8px', textAlign: 'center', borderLeft: '1px solid #f1f5f9' }}>
-                              <input
-                                type="number"
-                                min="0"
-                                max="100"
-                                step="0.5"
-                                value={val}
-                                onChange={e => handleCellChange(s.id, k.id, e.target.value)}
-                                style={{
-                                  width: '100%',
-                                  padding: '5px 4px',
-                                  textAlign: 'center',
-                                  fontWeight: 700,
-                                  fontSize: 12,
-                                  border: '1px solid #cbd5e1',
-                                  borderRadius: 8,
-                                  outline: 'none',
-                                  background: val !== '' ? (parseFloat(val) >= (bobot.kktp_kkm || 75) ? '#f0fdf4' : '#fef2f2') : '#ffffff',
-                                  color: val !== '' ? (parseFloat(val) >= (bobot.kktp_kkm || 75) ? '#166534' : '#991b1b') : '#0f172a'
-                                }}
-                              />
+                              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  step="0.5"
+                                  value={val}
+                                  readOnly={isSaved}
+                                  title={isSaved ? "Nilai sudah tersimpan (Read-Only)" : "Input Nilai Siswa"}
+                                  onChange={e => !isSaved && handleCellChange(s.id, k.id, e.target.value)}
+                                  style={{
+                                    width: '100%',
+                                    padding: '5px 4px',
+                                    paddingRight: isSaved ? 16 : 4,
+                                    textAlign: 'center',
+                                    fontWeight: 700,
+                                    fontSize: 12,
+                                    border: isSaved ? '1px solid #cbd5e1' : '1px solid #94a3b8',
+                                    borderRadius: 8,
+                                    outline: 'none',
+                                    background: isSaved ? '#f1f5f9' : (val !== '' ? (parseFloat(val) >= (bobot.kktp_kkm || 75) ? '#f0fdf4' : '#fef2f2') : '#ffffff'),
+                                    color: isSaved ? '#475569' : (val !== '' ? (parseFloat(val) >= (bobot.kktp_kkm || 75) ? '#166534' : '#991b1b') : '#0f172a'),
+                                    cursor: isSaved ? 'not-allowed' : 'text'
+                                  }}
+                                />
+                                {isSaved && (
+                                  <Lock size={11} color="#64748b" style={{ position: 'absolute', right: 5, pointerEvents: 'none' }} />
+                                )}
+                              </div>
                             </td>
                           );
                         })}
