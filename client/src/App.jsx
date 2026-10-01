@@ -228,7 +228,7 @@ export default function App() {
       <>
         <InstallPwaModal />
         <BirthdayModal user={currentUser} />
-        <AdminDesktopView user={currentUser} onLogout={handleLogout} />
+        <AdminDesktopView user={currentUser} onLogout={handleLogout} onUserUpdated={(u) => setCurrentUser(u)} />
       </>
     );
   }
@@ -392,6 +392,7 @@ export default function App() {
             onLogout={handleLogout}
             onOpenPresensiModal={(type) => setPresensiModalType(type)}
             onSwitchTab={(t) => setActiveTab(t)}
+            onUserUpdated={(u) => setCurrentUser(u)}
           />
         )}
         {activeTab === 'siswa' && <SiswaView showToast={showToast} onSwitchTab={(t) => setActiveTab(t)} />}
@@ -402,7 +403,7 @@ export default function App() {
         {activeTab === 'jadwal' && <JadwalView user={currentUser} />}
         {activeTab === 'riwayat' && <RiwayatView />}
         {activeTab === 'izin' && <IzinView user={currentUser} showToast={showToast} />}
-        {activeTab === 'profil' && <ProfilView user={currentUser} onLogout={handleLogout} />}
+        {activeTab === 'profil' && <ProfilView user={currentUser} onLogout={handleLogout} onUserUpdated={(u) => setCurrentUser(u)} />}
         {activeTab === 'rekapSiswa' && <RekapSiswaView user={currentUser} />}
         {activeTab === 'rekapMapel' && <RekapMapelView />}
         {activeTab === 'rekapGuru' && <RekapGuruView />}

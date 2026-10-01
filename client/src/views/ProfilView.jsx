@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
   User, Shield, Mail, Phone, Building, LogOut, CheckCircle2,
-  Calendar, MapPin, GraduationCap, Briefcase, Hash, RefreshCw
+  Calendar, MapPin, GraduationCap, Briefcase, Hash, RefreshCw, KeyRound
 } from 'lucide-react';
 import api from '../api/client';
+import UpdateCredentialsModal from '../components/UpdateCredentialsModal';
 
-export default function ProfilView({ user, onLogout }) {
+export default function ProfilView({ user, onLogout, onUserUpdated }) {
   const [profile, setProfile] = useState(user || null);
   const [loading, setLoading] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -252,6 +254,33 @@ export default function ProfilView({ user, onLogout }) {
         )}
       </div>
 
+      {/* CHANGE CREDENTIALS BUTTON */}
+      <button
+        type="button"
+        onClick={() => setShowAccountModal(true)}
+        style={{
+          width: '100%',
+          padding: '13px 16px',
+          borderRadius: 16,
+          background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+          color: '#ffffff',
+          border: 'none',
+          fontWeight: 800,
+          fontSize: 13.5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          cursor: 'pointer',
+          marginBottom: 12,
+          boxShadow: '0 4px 14px rgba(2, 132, 199, 0.3)',
+          transition: 'all 0.15s ease'
+        }}
+      >
+        <KeyRound size={17} />
+        Ubah Username & Password
+      </button>
+
       {/* LOGOUT BUTTON */}
       <button
         onClick={onLogout}
@@ -275,6 +304,18 @@ export default function ProfilView({ user, onLogout }) {
         <LogOut size={18} />
         Keluar dari Aplikasi (Logout)
       </button>
+
+      {/* MODAL UBAH USERNAME & PASSWORD */}
+      {showAccountModal && (
+        <UpdateCredentialsModal
+          user={profile || user}
+          onClose={() => setShowAccountModal(false)}
+          onUpdateSuccess={(newUserData) => {
+            setProfile(newUserData);
+            if (onUserUpdated) onUserUpdated(newUserData);
+          }}
+        />
+      )}
     </div>
   );
 }

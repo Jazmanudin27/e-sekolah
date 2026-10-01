@@ -4,10 +4,11 @@ import {
   ClipboardList, Send, Calendar, BookOpen, Package, Settings,
   ChevronDown, ChevronRight, Menu, X, Bell, Clock, LogOut,
   Building2, GraduationCap, Users, ShieldCheck, UserCheck, BookOpenCheck,
-  Fingerprint, Award, FileSpreadsheet, BarChart3, Shield, Megaphone, Trophy
+  Fingerprint, Award, FileSpreadsheet, BarChart3, Shield, Megaphone, Trophy, KeyRound
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import ArtanitaLogo from '../../components/ArtanitaLogo';
+import UpdateCredentialsModal from '../../components/UpdateCredentialsModal';
 import '../../admin.css';
 import api from '../../api/client';
 
@@ -79,6 +80,8 @@ export default function AdminDesktopView({ user, onLogout }) {
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const [currentUserData, setCurrentUserData] = useState(user);
 
   // Accordion open states
   const [openMenus, setOpenMenus] = useState(() => getInitialOpenMenus(getInitialTab()));
@@ -679,6 +682,13 @@ export default function AdminDesktopView({ user, onLogout }) {
                   )}
                   <button
                     type="button"
+                    className="dropdown-item"
+                    onClick={() => setShowAccountModal(true)}
+                  >
+                    <KeyRound size={14} color="#0284c7" /> Ubah Username & Password
+                  </button>
+                  <button
+                    type="button"
                     className="dropdown-item dropdown-item-danger"
                     onClick={onLogout}
                   >
@@ -756,6 +766,17 @@ export default function AdminDesktopView({ user, onLogout }) {
           </main>
         )}
       </div>
+
+      {/* MODAL UBAH USERNAME & PASSWORD */}
+      {showAccountModal && (
+        <UpdateCredentialsModal
+          user={currentUserData || user}
+          onClose={() => setShowAccountModal(false)}
+          onUpdateSuccess={(newUserData) => {
+            setCurrentUserData(newUserData);
+          }}
+        />
+      )}
     </div>
   );
 }

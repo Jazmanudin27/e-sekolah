@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Bell, LogOut, Calendar } from 'lucide-react';
+import { GraduationCap, Bell, LogOut, Calendar, KeyRound } from 'lucide-react';
+import UpdateCredentialsModal from './UpdateCredentialsModal';
 
-export default function TopBar({ user, onLogout }) {
+export default function TopBar({ user, onLogout, onUserUpdated }) {
+  const [showAccountModal, setShowAccountModal] = useState(false);
   const [currentDate, setCurrentDate] = useState('');
   const [currentTime, setCurrentTime] = useState('');
   const [greeting, setGreeting] = useState({ text: 'Selamat Datang', emoji: '👋' });
@@ -57,6 +59,14 @@ export default function TopBar({ user, onLogout }) {
           </div>
 
           <div className="header-icons">
+            <button
+              type="button"
+              className="header-icon-btn key-btn-hero"
+              onClick={() => setShowAccountModal(true)}
+              title="Ubah Username & Password"
+            >
+              <KeyRound size={17} />
+            </button>
             <button className="header-icon-btn notif-btn-hero" title="Notifikasi">
               <Bell size={18} />
               <span className="bell-dot"></span>
@@ -69,7 +79,12 @@ export default function TopBar({ user, onLogout }) {
 
         {/* HERO WELCOME USER CARD */}
         <div className="hero-welcome-card">
-          <div className="hero-avatar-wrapper">
+          <div
+            className="hero-avatar-wrapper"
+            onClick={() => setShowAccountModal(true)}
+            style={{ cursor: 'pointer' }}
+            title="Klik untuk ubah username / password"
+          >
             <div className="user-avatar-circle">
               {user?.avatar ? (
                 <img src={user.avatar} alt={displayName} />
@@ -97,6 +112,15 @@ export default function TopBar({ user, onLogout }) {
           </div>
         </div>
       </div>
+
+      {/* MODAL UBAH USERNAME & PASSWORD */}
+      {showAccountModal && (
+        <UpdateCredentialsModal
+          user={user}
+          onClose={() => setShowAccountModal(false)}
+          onUpdateSuccess={onUserUpdated}
+        />
+      )}
     </header>
   );
 }

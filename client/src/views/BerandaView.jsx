@@ -9,7 +9,7 @@ import api from '../api/client';
 import TopBar from '../components/TopBar';
 import PengumumanSlider from '../components/PengumumanSlider';
 
-export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwitchTab }) {
+export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwitchTab, onUserUpdated }) {
   const isClassAccount = user?.type === 'Kelas' || user?.role === 'Kelas';
   const [todayStatus, setTodayStatus] = useState(null);
   const [historyItems, setHistoryItems] = useState([]);
@@ -137,7 +137,7 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
     return (
       <div className="beranda-view-container">
         {/* HERO BLUE HEADER */}
-        <TopBar user={user} onLogout={onLogout} />
+        <TopBar user={user} onLogout={onLogout} onUserUpdated={onUserUpdated} />
 
         {/* WELCOME CARD KELAS */}
         <div className="summary-overlap-card">
@@ -220,7 +220,7 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
     <div className="beranda-view-container">
 
       {/* HERO BLUE HEADER */}
-      <TopBar user={user} onLogout={onLogout} />
+      <TopBar user={user} onLogout={onLogout} onUserUpdated={onUserUpdated} />
 
       {/* 1. FLOATING OVERLAPPING SUMMARY CARD (4 VERTICAL ICON COLUMNS) */}
       <div className="summary-overlap-card">

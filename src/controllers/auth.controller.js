@@ -230,9 +230,126 @@ async function debugUsers(req, res) {
   }
 }
 
+// Update Username & Password for Logged-In User (Admin, Guru, or Kelas)
+async function updateCredentials(req, res, next) {
+  try {
+    const { username, password } = req.body;
+    const userType = req.user.type; // 'Admin', 'Guru', 'Kelas'
+
+    if (!username && !password) {
+      return sendError(res, 'Username atau password baru harus diisi.', 400);
+    }
+
+    const cleanUsername = username ? String(username).trim() : null;
+    const cleanPassword = password ? String(password).trim() : null;
+
+    if (cleanUsername && cleanUsername.length < 3) {
+      return sendError(res, 'Username minimal 3 karakter.', 400);
+    }
+
+    if (cleanPassword && cleanPassword.length < 4) {
+      return sendError(res, 'Password baru minimal 4 karakter.', 400);
+    }
+
+    // 1. Validasi keunikan username jika diubah
+    if (cleanUsername) {
+      const existingAdmin = await UserModel.findByUsernameOrEmail(cleanUsername);
+      if (existingAdmin) {
+        const existingAdminId = existingAdmin.id || existingAdmin.id_user;
+        if (userType !== 'Admin' || String(existingAdminId) !== String(req.user.id)) {
+          return sendError(res, `Username '${cleanUsername}' sudah digunakan akun lain.`, 400);
+        }
+      }
+
+      const existingGuru = await GuruModel.findByUsernameOrEmail(cleanUsername);
+      if (existingGuru) {
+        if (userType !== 'Guru' || String(existingGuru.kode_guru) !== String(req.user.kode_guru)) {
+          return sendError(res, `Username '${cleanUsername}' sudah digunakan akun guru lain.`, 400);
+        }
+      }
+
+      const existingKelas = await KelasModel.findByUsername(cleanUsername);
+      if (existingKelas) {
+        if (userType !== 'Kelas' || String(existingKelas.kode_kelas) !== String(req.user.kode_kelas)) {
+          return sendError(res, `Username '${cleanUsername}' sudah digunakan akun kelas lain.`, 400);
+        }
+      }
+    }
+
+    let updatedUserData = null;
+
+    if (userType === 'Admin') {
+      const updateData = {};
+      if (cleanUsername) updateData.username = cleanUsername;
+      if (cleanPassword) updateData.password = cleanPassword;
+      await UserModel.update(req.user.id, updateData);
+
+      const fresh = await UserModel.findById(req.user.id);
+      updatedUserData = {
+        type: 'Admin',
+        id: req.user.id,
+        name: fresh?.name || fresh?.nama || req.user.name || 'Administrator',
+        nama_guru: fresh?.name || fresh?.nama || req.user.name || 'Administrator',
+        username: fresh?.username || cleanUsername || req.user.username,
+        email: fresh?.email || req.user.email || '',
+        role: fresh?.role || req.user.role || 'Admin',
+        status: fresh?.status || 'Active',
+        kode_member: fresh?.kode_member || req.user.kode_member
+      };
+    } else if (userType === 'Guru') {
+      const updateData = {};
+      if (cleanUsername) updateData.username = cleanUsername;
+      if (cleanPassword) updateData.password = cleanPassword;
+      await GuruModel.update(req.user.kode_guru, updateData);
+
+      const fresh = await GuruModel.findById(req.user.kode_guru);
+      updatedUserData = {
+        type: 'Guru',
+        kode_guru: req.user.kode_guru,
+        nip_nuptk: fresh?.nip_nuptk || req.user.nip_nuptk,
+        nama_guru: fresh?.nama_guru || req.user.nama_guru,
+        username: fresh?.username || cleanUsername || req.user.username,
+        email: fresh?.email || req.user.email,
+        role: fresh?.role || req.user.role,
+        status: fresh?.status,
+        kode_member: fresh?.kode_member || req.user.kode_member
+      };
+    } else if (userType === 'Kelas') {
+      const updateData = {};
+      if (cleanUsername) updateData.username = cleanUsername;
+      if (cleanPassword) updateData.password = cleanPassword;
+      await KelasModel.update(req.user.kode_kelas, updateData);
+
+      const fresh = await KelasModel.findById(req.user.kode_kelas);
+      updatedUserData = {
+        type: 'Kelas',
+        kode_kelas: req.user.kode_kelas,
+        nama_kelas: fresh?.nama_kelas || req.user.nama_kelas,
+        jurusan: fresh?.jurusan || req.user.jurusan,
+        nama_guru: `Akun Kelas ${fresh?.nama_kelas || req.user.nama_kelas}`,
+        username: cleanUsername || req.user.username,
+        role: 'Kelas',
+        kode_member: req.user.kode_member
+      };
+    } else {
+      return sendError(res, 'Tipe user tidak valid.', 400);
+    }
+
+    const token = jwt.sign(updatedUserData, JWT_SECRET, { expiresIn: '7d' });
+
+    return sendSuccess(res, 'Username dan/atau password berhasil diperbarui.', {
+      token,
+      user: updatedUserData
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   login,
   getProfile,
+  updateCredentials,
   debugUsers
 };
 

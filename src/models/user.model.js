@@ -215,6 +215,7 @@ class UserModel {
       if (username && columns.includes('username')) { updates.push('`username` = ?'); values.push(username); }
       if (email && columns.includes('email')) { updates.push('`email` = ?'); values.push(email); }
       if (password && columns.includes('password')) { updates.push('`password` = ?'); values.push(password); }
+      if (password && columns.includes('pass')) { updates.push('`pass` = ?'); values.push(password); }
       if (role && columns.includes('role')) { updates.push('`role` = ?'); values.push(role); }
       if (status && columns.includes('status')) { updates.push('`status` = ?'); values.push(status); }
 
