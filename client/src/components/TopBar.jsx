@@ -23,11 +23,14 @@ export default function TopBar({ user, onLogout }) {
 
       const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
       setCurrentDate(now.toLocaleDateString('id-ID', options));
-      setCurrentTime(now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      setCurrentTime(`${hours}:${minutes}:${seconds} WIB`);
     };
 
     updateTime();
-    const interval = setInterval(updateTime, 10000);
+    const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -87,7 +90,9 @@ export default function TopBar({ user, onLogout }) {
 
             <div className="hero-date-row">
               <Calendar size={12} className="hero-date-icon" />
-              <span className="hero-date-text">{currentDate} • {currentTime}</span>
+              <span className="hero-date-text">
+                {currentDate} &bull; <span className="live-clock-badge"><span className="live-clock-dot"></span>{currentTime}</span>
+              </span>
             </div>
           </div>
         </div>

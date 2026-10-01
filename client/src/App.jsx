@@ -22,6 +22,7 @@ import KalenderView from './views/KalenderView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
 import InstallPwaModal from './components/InstallPwaModal';
 import BirthdayModal from './components/BirthdayModal';
+import SplashScreen from './components/SplashScreen';
 import api from './api/client';
 
 const getInitialTab = () => {
@@ -39,6 +40,7 @@ export default function App() {
   const [activeTab, setActiveTabState] = useState(getInitialTab);
   const [presensiModalType, setPresensiModalType] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
 
   const setActiveTab = (tab) => {
     setActiveTabState(tab);
@@ -159,12 +161,8 @@ export default function App() {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="app-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: '#0066ff', fontWeight: 600 }}>Memuat E-Sekolah...</p>
-      </div>
-    );
+  if (loading || showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} duration={2000} />;
   }
 
   if (!currentUser) {
