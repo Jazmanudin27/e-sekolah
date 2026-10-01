@@ -19,7 +19,8 @@ import RekapGuruView from './views/RekapGuruView';
 import GuruView from './views/GuruView';
 import MapelView from './views/MapelView';
 import KalenderView from './views/KalenderView';
-import PenilaianView from './views/PenilaianView';
+import PenilaianInputView from './views/PenilaianInputView';
+import PenilaianLaporanView from './views/PenilaianLaporanView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
 import InstallPwaModal from './components/InstallPwaModal';
 import BirthdayModal from './components/BirthdayModal';
@@ -318,7 +319,8 @@ export default function App() {
         {activeTab === 'rekapMapel' && <RekapMapelView />}
         {activeTab === 'rekapGuru' && <RekapGuruView />}
         {activeTab === 'kalender' && <KalenderView />}
-        {activeTab === 'penilaian' && <PenilaianView onBack={() => setActiveTab('beranda')} />}
+        {(activeTab === 'penilaianInput' || activeTab === 'penilaian') && <PenilaianInputView onBack={() => setActiveTab('beranda')} />}
+        {activeTab === 'penilaianLaporan' && <PenilaianLaporanView onBack={() => setActiveTab('beranda')} />}
       </main>
 
       {/* Bottom Navigation */}

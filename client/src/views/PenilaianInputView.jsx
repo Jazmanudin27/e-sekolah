@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  FileSpreadsheet, Plus, Save, Upload, Download, CheckCircle2, AlertCircle,
-  BookOpen, Building2, Calendar, ChevronRight, Award, Trash2, Edit3, HelpCircle
+  FileSpreadsheet, Plus, Save, AlertCircle, Trash2, CheckCircle2, Edit3, HelpCircle
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../api/client';
 import SubHeader from '../components/SubHeader';
 
-export default function PenilaianView({ onBack }) {
+export default function PenilaianInputView({ onBack }) {
   const [kelasList, setKelasList] = useState([]);
   const [mapelList, setMapelList] = useState([]);
   const [kategoriList, setKategoriList] = useState([]);
@@ -23,7 +22,7 @@ export default function PenilaianView({ onBack }) {
   // Spreadsheet Matrix Data
   const [students, setStudents] = useState([]);
   const [komponenList, setKomponenList] = useState([]);
-  const [nilaiMap, setNilaiMap] = useState({}); // { [siswa_id]: { [komponen_id]: nilai } }
+  const [nilaiMap, setNilaiMap] = useState({});
   const [bobot, setBobot] = useState({ bobot_ph: 25, bobot_praktik: 25, bobot_uts: 25, bobot_uas: 25, kktp_kkm: 75 });
 
   // Modal State
@@ -176,7 +175,7 @@ export default function PenilaianView({ onBack }) {
 
       Swal.fire({
         title: 'Berhasil Disimpan!',
-        text: 'Seluruh nilai siswa berhasil diperbarui',
+        text: 'Seluruh nilai siswa berhasil diperbarui ke database',
         icon: 'success',
         confirmButtonColor: '#0066ff'
       });
@@ -189,11 +188,9 @@ export default function PenilaianView({ onBack }) {
     }
   };
 
-  // Helper to calculate student averages
   const calculateStudentFinal = (siswaId) => {
     const sNilai = nilaiMap[siswaId] || {};
     
-    // Group values by kategori
     const phVals = [];
     const praktikVals = [];
     let utsVal = null;
@@ -222,7 +219,6 @@ export default function PenilaianView({ onBack }) {
     const scoreUTS = utsVal !== null ? utsVal : 0;
     const scoreUAS = uasVal !== null ? uasVal : 0;
 
-    // Weighted Formula
     const bPH = bobot.bobot_ph || 25;
     const bPraktik = bobot.bobot_praktik || 25;
     const bUTS = bobot.bobot_uts || 25;
@@ -237,8 +233,6 @@ export default function PenilaianView({ onBack }) {
     else if (finalScore >= 68) predikat = 'C';
 
     return {
-      avgPH: avgPH.toFixed(1),
-      avgPraktik: avgPraktik.toFixed(1),
       finalScore: finalScore.toFixed(1),
       predikat,
       isPass: finalScore >= (bobot.kktp_kkm || 75)
@@ -247,10 +241,10 @@ export default function PenilaianView({ onBack }) {
 
   return (
     <div className="penilaian-view-container" style={{ paddingBottom: 40 }}>
-      <SubHeader title="Modul Penilaian & E-Rapor" subtitle="Input nilai massal, pengolahan bobot dinamis, dan predikat" onBack={onBack} />
+      <SubHeader title="✏️ Halaman Input Penilaian" subtitle="Lembar pengisian angka nilai siswa per kelas dan mata pelajaran" onBack={onBack} />
 
       {/* FILTER & SELECTOR BAR */}
-      <div style={{ maxWidth: 900, margin: '16px auto', padding: '0 16px' }}>
+      <div style={{ maxWidth: 960, margin: '16px auto', padding: '0 16px' }}>
         <div style={{ background: '#ffffff', borderRadius: 20, padding: '16px 18px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>KELAS</label>
@@ -309,7 +303,7 @@ export default function PenilaianView({ onBack }) {
       </div>
 
       {/* ACTION TOOLBAR */}
-      <div style={{ maxWidth: 900, margin: '0 auto 16px auto', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+      <div style={{ maxWidth: 960, margin: '0 auto 16px auto', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
         <button
           onClick={() => setShowAddModal(true)}
           style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: 12, fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', boxShadow: '0 4px 14px rgba(2, 132, 199, 0.3)' }}
@@ -321,7 +315,7 @@ export default function PenilaianView({ onBack }) {
           <button
             onClick={handleSaveAll}
             disabled={saving || loading}
-            style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 12, fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', boxShadow: '0 4px 14px rgba(34, 197, 94, 0.3)' }}
+            style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: '#fff', border: 'none', padding: '10px 22px', borderRadius: 12, fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', boxShadow: '0 4px 14px rgba(34, 197, 94, 0.3)' }}
           >
             <Save size={16} /> {saving ? 'Menyimpan...' : 'Simpan Semua Nilai'}
           </button>
@@ -329,7 +323,7 @@ export default function PenilaianView({ onBack }) {
       </div>
 
       {/* SPREADSHEET MATRIX TABLE */}
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 16px' }}>
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 16px' }}>
         <div style={{ background: '#ffffff', borderRadius: 20, boxShadow: '0 6px 24px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
           {loading ? (
             <div style={{ padding: '40px 0', textAlign: 'center', color: '#64748b' }}>
@@ -349,7 +343,7 @@ export default function PenilaianView({ onBack }) {
                     <th style={{ padding: '12px 14px', textAlign: 'left', minWidth: 170 }}>Nama Siswa</th>
                     
                     {/* DYNAMIC KOMPONEN COLUMNS */}
-                    {komponenList.map((k, idx) => (
+                    {komponenList.map((k) => (
                       <th key={k.id} style={{ padding: '10px 10px', textAlign: 'center', minWidth: 95, borderLeft: '1px solid #e2e8f0', background: k.kode_kategori === 'PH' ? '#eff6ff' : k.kode_kategori === 'PRAKTIK' ? '#f0fdf4' : k.kode_kategori === 'UTS' ? '#fffbeb' : '#fef2f2' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
                           <span>{k.nama_komponen}</span>
