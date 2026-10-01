@@ -20,6 +20,7 @@ const kalenderRoutes = require('./kalender.routes');
 const penilaianRoutes = require('./penilaian.routes');
 const ekskulRoutes = require('./ekskul.routes');
 const perpustakaanRoutes = require('./perpustakaan.routes');
+const saprasRoutes = require('./sapras.routes');
 
 // System Health Check
 router.get('/health', (req, res) => {
@@ -51,5 +52,6 @@ router.use('/kalender', kalenderRoutes);
 router.use('/penilaian', penilaianRoutes);
 router.use('/ekskul', ekskulRoutes);
 router.use('/perpustakaan', perpustakaanRoutes);
+router.use('/sapras', saprasRoutes);
 
 module.exports = router;

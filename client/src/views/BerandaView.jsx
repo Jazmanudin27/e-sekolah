@@ -417,6 +417,13 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
             </div>
             <span>Perpustakaan</span>
           </button>
+
+          <button className="menu-blue-card menu-item-sapras" onClick={() => onSwitchTab('sapras')}>
+            <div className="menu-icon-circle">
+              <Building2 size={35} strokeWidth={2.5} color="#ffffff" />
+            </div>
+            <span>Sapras</span>
+          </button>
         </div>
       </div>
 

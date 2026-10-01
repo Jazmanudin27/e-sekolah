@@ -23,6 +23,7 @@ import KalenderView from './views/KalenderView';
 import PenilaianInputView from './views/PenilaianInputView';
 import PenilaianLaporanView from './views/PenilaianLaporanView';
 import PerpustakaanView from './views/PerpustakaanView';
+import SaprasView from './views/SaprasView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
 import InstallPwaModal from './components/InstallPwaModal';
 import BirthdayModal from './components/BirthdayModal';
@@ -375,6 +376,14 @@ export default function App() {
         />
       )}
 
+      {activeTab === 'sapras' && (
+        <SubHeader
+          title="Sarana & Prasarana"
+          subtitle="Laporan Fasilitas, Inventaris & Lahan Sekolah"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
       {/* Main Content Area */}
       <main className="main-content-area">
         {activeTab === 'beranda' && (
@@ -403,6 +412,12 @@ export default function App() {
             user={currentUser}
             showToast={showToast}
             tambahBukuTrigger={tambahBukuTrigger}
+          />
+        )}
+        {activeTab === 'sapras' && (
+          <SaprasView
+            user={currentUser}
+            showToast={showToast}
           />
         )}
         {(activeTab === 'penilaianInput' || activeTab === 'penilaian') && <PenilaianInputView onBack={() => setActiveTab('beranda')} />}

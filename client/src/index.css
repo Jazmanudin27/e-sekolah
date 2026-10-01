@@ -828,7 +828,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 3px;
+  gap: 4px;
   color: #1e293b;
   border: none;
   background: transparent;
@@ -902,6 +902,10 @@ body {
 
 .menu-blue-card:nth-child(15) {
   animation-delay: 0.52s;
+}
+
+.menu-blue-card:nth-child(16) {
+  animation-delay: 0.55s;
 }
 
 .menu-blue-card:hover {
@@ -1030,6 +1034,11 @@ body {
 .menu-blue-card:nth-child(15) .menu-icon-circle::after,
 .menu-blue-card:nth-child(15) .menu-icon-circle svg {
   animation-delay: 4.3s;
+}
+
+.menu-blue-card:nth-child(16) .menu-icon-circle::after,
+.menu-blue-card:nth-child(16) .menu-icon-circle svg {
+  animation-delay: 4.6s;
 }
 
 .menu-blue-card span {
@@ -1210,6 +1219,16 @@ body {
 
 .menu-item-perpus:hover .menu-icon-circle {
   background: linear-gradient(135deg, #38bdf8, #075985);
+}
+
+/* 16. Sapras -> Amber Rust Warm / Vibrant Orange Tangerine */
+.menu-item-sapras .menu-icon-circle {
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  box-shadow: 0 8px 18px rgba(234, 88, 12, 0.38);
+}
+
+.menu-item-sapras:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #f97316, #9a3412);
 }
 
 /* Fallback categories */
@@ -2102,5 +2121,44 @@ body {
   50% {
     opacity: 0.35;
     transform: scale(0.7);
+  }
+}
+
+/* PRINT STYLING FOR SAPRAS REPORT */
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+
+  .mobile-sub-header,
+  .bottom-nav,
+  .main-nav,
+  .topbar,
+  button,
+  input,
+  .sapras-view-container > div:nth-child(2),
+  .sapras-view-container > div:nth-child(3) {
+    display: none !important;
+  }
+
+  .sapras-view-container {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .sapras-print-header {
+    display: block !important;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  table {
+    width: 100% !important;
+    border: 1px solid #333 !important;
+  }
+
+  th, td {
+    border: 1px solid #333 !important;
+    color: #000 !important;
   }
 }

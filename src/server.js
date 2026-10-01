@@ -59,6 +59,7 @@ app.use(errorHandler);
 const SekolahModel = require('./models/sekolah.model');
 const PenilaianModel = require('./models/penilaian.model');
 const PerpustakaanModel = require('./models/perpustakaan.model');
+const SaprasModel = require('./models/sapras.model');
 const UserModel = require('./models/user.model');
 
 // Start Application Server
@@ -72,8 +73,9 @@ app.listen(PORT, async () => {
     await SekolahModel.ensureColumns();
     await PenilaianModel.ensureTables();
     await PerpustakaanModel.ensureTables();
+    await SaprasModel.ensureTables();
     await UserModel.ensureDefaultUsers();
-    console.log('[ServerInit] Verified & initialized Perpustakaan tables & admin accounts successfully.');
+    console.log('[ServerInit] Verified & initialized Perpustakaan, Sapras tables & admin accounts successfully.');
   } catch (err) {
     console.warn('[ServerInit] Initialization warning:', err.message);
   }
