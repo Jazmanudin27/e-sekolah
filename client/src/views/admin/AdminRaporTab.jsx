@@ -329,7 +329,7 @@ export default function AdminRaporTab() {
   };
 
   return (
-    <div className="admin-rapor-container" style={{ padding: '20px 24px', background: '#f8fafc', minHeight: '100vh' }}>
+    <div className="admin-rapor-container" style={{ padding: '24px 28px 40px', background: '#f8fafc', minHeight: '100vh', boxSizing: 'border-box' }}>
       {/* STYLE UNTUK CETAK PDF */}
       <style>{`
         @media print {
