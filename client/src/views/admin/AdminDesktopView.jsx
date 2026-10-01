@@ -210,6 +210,18 @@ export default function AdminDesktopView({ user, onLogout }) {
             <span className="menu-label">Dashboard</span>
           </button>
 
+          {/* 1.1 E-Rapor Siswa */}
+          <button
+            type="button"
+            className={`portal-menu-item ${activeTab === 'laporanRapor' ? 'active' : ''}`}
+            onClick={() => handleSelectTab('laporanRapor')}
+          >
+            <div className="menu-icon-wrap">
+              <Award size={17} color="#0284c7" />
+            </div>
+            <span className="menu-label" style={{ fontWeight: 800, color: '#0284c7' }}>E-Rapor Siswa</span>
+          </button>
+
           {/* 1.5 Pengumuman Sekolah */}
           <button
             type="button"
@@ -413,7 +425,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           <div className="portal-menu-group">
             <button
               type="button"
-              className={`portal-menu-item has-submenu ${['laporanSiswa', 'laporanGuru', 'laporanKelas'].includes(activeTab) ? 'has-active' : ''}`}
+              className={`portal-menu-item has-submenu ${['laporanRapor', 'laporanSiswa', 'laporanGuru', 'laporanKelas'].includes(activeTab) ? 'has-active' : ''}`}
               onClick={() => toggleSubMenu('laporanMaster')}
             >
               <div className="menu-icon-wrap">
@@ -424,6 +436,13 @@ export default function AdminDesktopView({ user, onLogout }) {
             </button>
             {openMenus.laporanMaster && (
               <div className="portal-submenu-list">
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'laporanRapor' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('laporanRapor')}
+                >
+                  <span>📜 E-Rapor Siswa</span>
+                </button>
                 <button
                   type="button"
                   className={`portal-submenu-item ${activeTab === 'laporanSiswa' ? 'active' : ''}`}
