@@ -250,7 +250,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           <div className="portal-menu-group">
             <button
               type="button"
-              className={`portal-menu-item has-submenu ${['kelas', 'siswa', 'guru', 'mapel', 'jadwal', 'laporanRapor'].includes(activeTab) ? 'has-active' : ''}`}
+              className={`portal-menu-item has-submenu ${['kelas', 'siswa', 'guru', 'mapel', 'jadwal'].includes(activeTab) ? 'has-active' : ''}`}
               onClick={() => toggleSubMenu('dataMaster')}
             >
               <div className="menu-icon-wrap">
@@ -261,13 +261,6 @@ export default function AdminDesktopView({ user, onLogout }) {
             </button>
             {openMenus.dataMaster && (
               <div className="portal-submenu-list">
-                <button
-                  type="button"
-                  className={`portal-submenu-item ${activeTab === 'laporanRapor' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('laporanRapor')}
-                >
-                  <span style={{ fontWeight: 800, color: '#0284c7' }}>📜 E-Rapor Siswa</span>
-                </button>
                 <button
                   type="button"
                   className={`portal-submenu-item ${activeTab === 'kelas' ? 'active' : ''}`}
@@ -416,23 +409,11 @@ export default function AdminDesktopView({ user, onLogout }) {
           {/* ----------------- LAPORAN & REKAP ----------------- */}
           <div className="portal-menu-section-label">LAPORAN & REKAP</div>
 
-          {/* 4.9 E-Rapor Siswa */}
-          <button
-            type="button"
-            className={`portal-menu-item ${activeTab === 'laporanRapor' ? 'active' : ''}`}
-            onClick={() => handleSelectTab('laporanRapor')}
-          >
-            <div className="menu-icon-wrap">
-              <Award size={17} />
-            </div>
-            <span className="menu-label">E-Rapor Siswa</span>
-          </button>
-
           {/* 5. Laporan Master */}
           <div className="portal-menu-group">
             <button
               type="button"
-              className={`portal-menu-item has-submenu ${['laporanRapor', 'laporanSiswa', 'laporanGuru', 'laporanKelas'].includes(activeTab) ? 'has-active' : ''}`}
+              className={`portal-menu-item has-submenu ${['laporanSiswa', 'laporanGuru', 'laporanKelas'].includes(activeTab) ? 'has-active' : ''}`}
               onClick={() => toggleSubMenu('laporanMaster')}
             >
               <div className="menu-icon-wrap">
@@ -443,13 +424,6 @@ export default function AdminDesktopView({ user, onLogout }) {
             </button>
             {openMenus.laporanMaster && (
               <div className="portal-submenu-list">
-                <button
-                  type="button"
-                  className={`portal-submenu-item ${activeTab === 'laporanRapor' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('laporanRapor')}
-                >
-                  <span>📜 E-Rapor Siswa</span>
-                </button>
                 <button
                   type="button"
                   className={`portal-submenu-item ${activeTab === 'laporanSiswa' ? 'active' : ''}`}
