@@ -1,16 +1,18 @@
 const { query } = require('../config/database');
 
 class MapelModel {
-  static async findAll() {
+  static async ensureColumns() {
     try {
-      return await query('SELECT kode_mapel, nama_mapel, singkatan, kkm FROM mapel ORDER BY nama_mapel ASC');
-    } catch (err) {
-      if (err.code === 'ER_BAD_FIELD_ERROR' || (err.message && err.message.includes('singkatan'))) {
-        await query('ALTER TABLE mapel ADD COLUMN singkatan VARCHAR(50) DEFAULT NULL');
-        return await query('SELECT kode_mapel, nama_mapel, singkatan, kkm FROM mapel ORDER BY nama_mapel ASC');
-      }
-      throw err;
-    }
+      await query("ALTER TABLE mapel ADD COLUMN singkatan VARCHAR(50) DEFAULT NULL");
+    } catch (e) {}
+    try {
+      await query("ALTER TABLE mapel ADD COLUMN kelompok VARCHAR(100) DEFAULT 'Kelompok A (Umum)'");
+    } catch (e) {}
+  }
+
+  static async findAll() {
+    await this.ensureColumns();
+    return await query('SELECT kode_mapel, nama_mapel, singkatan, kkm, kelompok FROM mapel ORDER BY nama_mapel ASC');
   }
 
   static async countAll() {
@@ -18,27 +20,17 @@ class MapelModel {
     return rows[0].total || 0;
   }
 
-  static async create({ nama_mapel, singkatan = '', kkm = 75 }) {
-    try {
-      const res = await query(
-        'INSERT INTO mapel (nama_mapel, singkatan, kkm) VALUES (?, ?, ?)',
-        [nama_mapel, singkatan, kkm]
-      );
-      return res.insertId;
-    } catch (err) {
-      if (err.code === 'ER_BAD_FIELD_ERROR' || (err.message && err.message.includes('singkatan'))) {
-        await query('ALTER TABLE mapel ADD COLUMN singkatan VARCHAR(50) DEFAULT NULL');
-        const res = await query(
-          'INSERT INTO mapel (nama_mapel, singkatan, kkm) VALUES (?, ?, ?)',
-          [nama_mapel, singkatan, kkm]
-        );
-        return res.insertId;
-      }
-      throw err;
-    }
+  static async create({ nama_mapel, singkatan = '', kkm = 75, kelompok = 'Kelompok A (Umum)' }) {
+    await this.ensureColumns();
+    const res = await query(
+      'INSERT INTO mapel (nama_mapel, singkatan, kkm, kelompok) VALUES (?, ?, ?, ?)',
+      [nama_mapel, singkatan, kkm, kelompok]
+    );
+    return res.insertId;
   }
 
   static async update(id, data) {
+    await this.ensureColumns();
     const fields = [];
     const params = [];
     if (data.nama_mapel !== undefined) {
@@ -53,19 +45,13 @@ class MapelModel {
       fields.push('kkm = ?');
       params.push(data.kkm);
     }
+    if (data.kelompok !== undefined) {
+      fields.push('kelompok = ?');
+      params.push(data.kelompok);
+    }
     if (fields.length === 0) return;
     params.push(id);
-    
-    try {
-      await query(`UPDATE mapel SET ${fields.join(', ')} WHERE kode_mapel = ?`, params);
-    } catch (err) {
-      if (err.code === 'ER_BAD_FIELD_ERROR' || (err.message && err.message.includes('singkatan'))) {
-        await query('ALTER TABLE mapel ADD COLUMN singkatan VARCHAR(50) DEFAULT NULL');
-        await query(`UPDATE mapel SET ${fields.join(', ')} WHERE kode_mapel = ?`, params);
-      } else {
-        throw err;
-      }
-    }
+    await query(`UPDATE mapel SET ${fields.join(', ')} WHERE kode_mapel = ?`, params);
   }
 
   static async delete(id) {

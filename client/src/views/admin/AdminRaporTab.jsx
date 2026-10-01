@@ -195,9 +195,6 @@ export default function AdminRaporTab() {
       const rawKomponen = resMatrix?.data?.data?.komponen || [];
       const rawNilaiMap = resMatrix?.data?.data?.nilaiMap || {};
 
-      // Seed deterministic varied scores based on student ID so student A != student B
-      const sSeed = String(siswaId || '1').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
       const categorized = {
         'Kelompok A (Umum)': [],
         'Kelompok B (Umum)': [],
@@ -219,9 +216,8 @@ export default function AdminRaporTab() {
         }
         if (!categorized[group]) categorized[group] = [];
 
-        // Find matching component scores from DB
+        // Find matching component scores strictly from DB for this student
         const mapelKomps = rawKomponen.filter(k => (k.nama_mapel || k.nama_komponen || '').toLowerCase() === mName.toLowerCase());
-        let finalScore = 0;
         let scoreItems = [];
 
         mapelKomps.forEach(k => {
@@ -229,15 +225,13 @@ export default function AdminRaporTab() {
           if (val > 0) scoreItems.push({ score: val, nama_komponen: k.nama_komponen });
         });
 
-        if (scoreItems.length > 0) {
-          finalScore = Math.round(scoreItems.reduce((a,b)=>a+b.score, 0)/scoreItems.length);
-        } else {
-          // Dynamic student-specific grade calculation based on student ID & subject index
-          finalScore = 80 + ((sSeed + idx * 7) % 16);
-        }
+        let finalScore = "-";
+        let deskripsi = "Belum ada penilaian.";
 
-        let deskripsi = "";
         if (scoreItems.length > 0) {
+          const calculatedAvg = Math.round(scoreItems.reduce((a,b)=>a+b.score, 0)/scoreItems.length);
+          finalScore = calculatedAvg;
+
           const sorted = [...scoreItems].sort((a,b) => b.score - a.score);
           const highest = sorted[0];
           const lowest = sorted[sorted.length - 1];
@@ -247,10 +241,6 @@ export default function AdminRaporTab() {
             lowText = ` Perlu peningkatan pada materi ${lowest.nama_komponen.toLowerCase()}.`;
           }
           deskripsi = `${highText}${lowText}`;
-        } else {
-          deskripsi = finalScore >= 85
-            ? `Sangat Baik dalam memahami dan menguasai materi ${mName}.`
-            : `Baik dalam memahami dan menerapkan materi ${mName}.`;
         }
 
         categorized[group].push({
@@ -268,7 +258,44 @@ export default function AdminRaporTab() {
     }
   };
 
+  const [showGroupSettingModal, setShowGroupSettingModal] = useState(false);
+  const [allDbMapel, setAllDbMapel] = useState([]);
+  const [updatingGroupMap, setUpdatingGroupMap] = useState({});
+
+  const handleOpenGroupSetting = async () => {
+    try {
+      const res = await api.get('/mapel');
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        setAllDbMapel(res.data.data);
+        const initialGroup = {};
+        res.data.data.forEach(m => {
+          initialGroup[m.kode_mapel] = m.kelompok || 'Kelompok A (Umum)';
+        });
+        setUpdatingGroupMap(initialGroup);
+      }
+    } catch (e) {}
+    setShowGroupSettingModal(true);
+  };
+
+  const handleSaveMapelGroups = async () => {
+    try {
+      for (const m of allDbMapel) {
+        const newGroup = updatingGroupMap[m.kode_mapel];
+        if (newGroup && newGroup !== m.kelompok) {
+          await api.put(`/mapel/${m.kode_mapel}`, { kelompok: newGroup }).catch(() => null);
+        }
+      }
+      setShowGroupSettingModal(false);
+      if (selectedSiswaId) {
+        loadRaporSiswa(selectedSiswaId);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const getPredikatK13 = (score) => {
+    if (typeof score !== 'number') return '-';
     if (score >= 90) return 'A';
     if (score >= 80) return 'B';
     if (score >= 70) return 'C';
@@ -316,6 +343,24 @@ export default function AdminRaporTab() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              onClick={handleOpenGroupSetting}
+              style={{
+                background: '#f1f5f9',
+                color: '#0284c7',
+                border: '1px solid #bae6fd',
+                padding: '9px 14px',
+                borderRadius: 12,
+                fontWeight: 700,
+                fontSize: 12,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                cursor: 'pointer'
+              }}
+            >
+              <Edit3 size={15} /> Setting Kelompok Mapel (A/B/C)
+            </button>
             <button
               onClick={handlePrint}
               style={{
@@ -687,6 +732,60 @@ export default function AdminRaporTab() {
         </div>
 
       </div>
+
+      {/* MODAL SETTING KELOMPOK MAPEL */}
+      {showGroupSettingModal && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-box" style={{ maxWidth: 640 }}>
+            <div className="admin-modal-header">
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Edit3 size={18} color="#0284c7" /> Pengaturan Kelompok Mapel (A, B, C)
+              </h3>
+              <button
+                onClick={() => setShowGroupSettingModal(false)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="admin-modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+              <p style={{ fontSize: 12, color: '#64748b', marginBottom: 14 }}>
+                Atur pengelompokan mata pelajaran di lembar Rapor ke <strong>Kelompok A (Umum)</strong>, <strong>Kelompok B (Umum)</strong>, atau <strong>Kelompok C (Peminatan)</strong>:
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {allDbMapel.map(m => (
+                  <div key={m.kode_mapel} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '10px 14px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: 13 }}>
+                      {m.nama_mapel}
+                    </div>
+                    <select
+                      className="form-control-admin"
+                      style={{ width: 220, fontSize: 12, padding: '5px 8px' }}
+                      value={updatingGroupMap[m.kode_mapel] || 'Kelompok A (Umum)'}
+                      onChange={e => setUpdatingGroupMap({ ...updatingGroupMap, [m.kode_mapel]: e.target.value })}
+                    >
+                      <option value="Kelompok A (Umum)">Kelompok A (Umum)</option>
+                      <option value="Kelompok B (Umum)">Kelompok B (Umum)</option>
+                      <option value="Kelompok C (Peminatan)">Kelompok C (Peminatan)</option>
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="admin-modal-footer">
+              <button type="button" className="btn-outline-admin" onClick={() => setShowGroupSettingModal(false)}>
+                Batal
+              </button>
+              <button type="button" className="btn-primary-admin" onClick={handleSaveMapelGroups}>
+                Simpan Kelompok Mapel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
