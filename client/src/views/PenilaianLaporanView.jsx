@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  FileCheck, Printer, Download, Award, UserCheck, AlertTriangle, FileSpreadsheet,
-  CheckCircle2, Search, BookOpen, ChevronRight, User
-} from 'lucide-react';
-import Swal from 'sweetalert2';
+import { FileCheck, Search, BookOpen, User } from 'lucide-react';
 import api from '../api/client';
 import SubHeader from '../components/SubHeader';
 
@@ -13,13 +9,14 @@ export default function PenilaianLaporanView({ onBack }) {
 
   const [selectedKelas, setSelectedKelas] = useState('');
   const [selectedMapel, setSelectedMapel] = useState('all');
+  const [selectedKomponen, setSelectedKomponen] = useState('all');
   const [tahunAjaran, setTahunAjaran] = useState('2026/2027');
   const [semester, setSemester] = useState('1');
 
   const [loading, setLoading] = useState(false);
   const [students, setStudents] = useState([]);
-  const [selectedSiswaId, setSelectedSiswaId] = useState(null);
-  const [siswaTranskrip, setSiswaTranskrip] = useState([]);
+  const [komponenList, setKomponenList] = useState([]);
+  const [nilaiMap, setNilaiMap] = useState({});
 
   useEffect(() => {
     fetchOptions();
@@ -61,19 +58,22 @@ export default function PenilaianLaporanView({ onBack }) {
       
       if (res.data.success) {
         const rawStudents = res.data.data.students || [];
-        const komponenList = res.data.data.komponen || [];
-        const nilaiMap = res.data.data.nilaiMap || {};
+        const rawKomponen = res.data.data.komponen || [];
+        const rawNilaiMap = res.data.data.nilaiMap || {};
         const bobot = res.data.data.bobot || { kktp_kkm: 75 };
+
+        setKomponenList(rawKomponen);
+        setNilaiMap(rawNilaiMap);
 
         // Process data for report summary
         const processed = rawStudents.map(s => {
-          const sNilai = nilaiMap[s.id] || {};
+          const sNilai = rawNilaiMap[s.id] || {};
           let phSum = 0, phCount = 0;
           let prkSum = 0, prkCount = 0;
           let utsScore = 0;
           let uasScore = 0;
 
-          for (const k of komponenList) {
+          for (const k of rawKomponen) {
             const val = parseFloat(sNilai[k.id]);
             if (isNaN(val)) continue;
 
@@ -100,19 +100,9 @@ export default function PenilaianLaporanView({ onBack }) {
 
           const finalScore = ((avgPH * bPH) + (avgPraktik * bPrk) + (utsScore * bUTS) + (uasScore * bUAS)) / totalBobot;
 
-          let predikat = 'D';
-          if (finalScore >= 88) predikat = 'A';
-          else if (finalScore >= 78) predikat = 'B';
-          else if (finalScore >= 68) predikat = 'C';
-
           return {
             ...s,
-            avgPH: avgPH.toFixed(1),
-            avgPraktik: avgPraktik.toFixed(1),
-            utsScore,
-            uasScore,
             finalScore: finalScore.toFixed(1),
-            predikat,
             isPass: finalScore >= (bobot.kktp_kkm || 75)
           };
         });
@@ -126,39 +116,22 @@ export default function PenilaianLaporanView({ onBack }) {
     }
   };
 
-  const handlePrintRapor = (siswa) => {
-    Swal.fire({
-      title: '📄 Unduh E-Rapor Digital',
-      text: `Mencetak Rapor Digital untuk siswa ${siswa.nama}`,
-      icon: 'info',
-      showCancelButton: true,
-      confirmButtonText: 'Cetak / Unduh PDF',
-      confirmButtonColor: '#0066ff'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.print();
-      }
-    });
-  };
-
-  // Stats calculation
-  const totalSiswa = students.length;
-  const tuntasCount = students.filter(s => s.isPass).length;
-  const remedialCount = totalSiswa - tuntasCount;
-  const avgKelas = totalSiswa > 0 ? (students.reduce((acc, s) => acc + parseFloat(s.finalScore), 0) / totalSiswa).toFixed(1) : 0;
+  const displayedKomponenList = selectedKomponen === 'all'
+    ? komponenList
+    : komponenList.filter(k => String(k.id) === String(selectedKomponen));
 
   return (
     <div className="penilaian-laporan-container" style={{ paddingBottom: 40 }}>
-      <SubHeader title="📊 Laporan Penilaian & E-Rapor" subtitle="Rekapitulasi rapor nilai siswa, analisis ketuntasan, dan cetak PDF" onBack={onBack} />
+      <SubHeader title="📊 Laporan Penilaian" subtitle="Rekapitulasi nilai siswa per komponen dan nilai akhir mata pelajaran" onBack={onBack} />
 
       {/* FILTER BAR */}
       <div style={{ maxWidth: 960, margin: '16px auto', padding: '0 16px' }}>
-        <div style={{ background: '#ffffff', borderRadius: 20, padding: '16px 18px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+        <div style={{ background: '#ffffff', borderRadius: 16, padding: '14px 16px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>KELAS</label>
+            <label style={{ fontSize: 10.5, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>KELAS</label>
             <select
               className="form-control-admin"
-              style={{ cursor: 'pointer', opacity: 1, pointerEvents: 'auto' }}
+              style={{ cursor: 'pointer', opacity: 1, pointerEvents: 'auto', fontSize: 12, padding: '6px 10px' }}
               value={selectedKelas}
               onChange={e => setSelectedKelas(e.target.value)}
             >
@@ -174,14 +147,17 @@ export default function PenilaianLaporanView({ onBack }) {
           </div>
 
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>MATA PELAJARAN</label>
+            <label style={{ fontSize: 10.5, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>MATA PELAJARAN</label>
             <select
               className="form-control-admin"
-              style={{ cursor: 'pointer', opacity: 1, pointerEvents: 'auto' }}
+              style={{ cursor: 'pointer', opacity: 1, pointerEvents: 'auto', fontSize: 12, padding: '6px 10px' }}
               value={selectedMapel}
-              onChange={e => setSelectedMapel(e.target.value)}
+              onChange={e => {
+                setSelectedMapel(e.target.value);
+                setSelectedKomponen('all');
+              }}
             >
-              <option value="all">Semua Mapel (Rapor Keseluruhan)</option>
+              <option value="all">Semua Mapel</option>
               {mapelList.map(m => {
                 const mVal = m.kode_mapel || m.id;
                 return (
@@ -194,85 +170,99 @@ export default function PenilaianLaporanView({ onBack }) {
           </div>
 
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>TAHUN AJARAN</label>
-            <select className="form-control-admin" value={tahunAjaran} onChange={e => setTahunAjaran(e.target.value)}>
+            <label style={{ fontSize: 10.5, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>KOMPONEN PENILAIAN</label>
+            <select
+              className="form-control-admin"
+              style={{ cursor: 'pointer', opacity: 1, pointerEvents: 'auto', fontSize: 12, padding: '6px 10px' }}
+              value={selectedKomponen}
+              onChange={e => setSelectedKomponen(e.target.value)}
+            >
+              <option value="all">Semua Komponen ({komponenList.length})</option>
+              {komponenList.map(k => (
+                <option key={k.id} value={k.id}>
+                  {k.nama_komponen} ({k.nama_kategori})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ fontSize: 10.5, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>TAHUN AJARAN</label>
+            <select className="form-control-admin" style={{ fontSize: 12, padding: '6px 10px' }} value={tahunAjaran} onChange={e => setTahunAjaran(e.target.value)}>
               <option value="2026/2027">2026/2027</option>
               <option value="2025/2026">2025/2026</option>
             </select>
           </div>
 
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>SEMESTER</label>
-            <select className="form-control-admin" value={semester} onChange={e => setSemester(e.target.value)}>
-              <option value="1">Semester 1 (Ganjil)</option>
-              <option value="2">Semester 2 (Genap)</option>
+            <label style={{ fontSize: 10.5, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>SEMESTER</label>
+            <select className="form-control-admin" style={{ fontSize: 12, padding: '6px 10px' }} value={semester} onChange={e => setSemester(e.target.value)}>
+              <option value="1">Sem 1 (Ganjil)</option>
+              <option value="2">Sem 2 (Genap)</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* STATS OVERVIEW CARDS (HORIZONTAL ROW SIDE-BY-SIDE) */}
-      <div style={{ maxWidth: 960, margin: '0 auto 16px auto', padding: '0 16px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-        <div style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#fff', padding: '14px 16px', borderRadius: 16, boxShadow: '0 4px 14px rgba(2, 132, 199, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: 10.5, fontWeight: 700, opacity: 0.9 }}>RATA-RATA KELAS</div>
-            <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2 }}>{avgKelas}</div>
-          </div>
-          <Award size={24} style={{ opacity: 0.8 }} />
-        </div>
-
-        <div style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: '#fff', padding: '14px 16px', borderRadius: 16, boxShadow: '0 4px 14px rgba(34, 197, 94, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: 10.5, fontWeight: 700, opacity: 0.9 }}>SISWA TUNTAS</div>
-            <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2 }}>{tuntasCount} <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.9 }}>/ {totalSiswa} Siswa</span></div>
-          </div>
-          <CheckCircle2 size={24} style={{ opacity: 0.8 }} />
-        </div>
-      </div>
-
-      {/* TABLE LAPORAN RAPOR */}
+      {/* TABLE LAPORAN NILAI */}
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 16px' }}>
-        <div style={{ background: '#ffffff', borderRadius: 20, boxShadow: '0 6px 24px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', margin: 0 }}>
+        <div style={{ background: '#ffffff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h3 style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', margin: 0 }}>
               📄 Rekapitulasi Nilai
             </h3>
           </div>
 
           {loading ? (
-            <div style={{ padding: '40px 0', textAlign: 'center', color: '#64748b' }}>
-              <p style={{ fontSize: 13, fontWeight: 600 }}>Memuat laporan penilaian...</p>
+            <div style={{ padding: '36px 0', textAlign: 'center', color: '#64748b' }}>
+              <p style={{ fontSize: 12.5, fontWeight: 600 }}>Memuat laporan penilaian...</p>
             </div>
           ) : students.length === 0 ? (
-            <div style={{ padding: '40px 0', textAlign: 'center', color: '#94a3b8' }}>
-              <p style={{ fontSize: 13, fontWeight: 600 }}>Tidak ada data penilaian ditemukan.</p>
+            <div style={{ padding: '36px 0', textAlign: 'center', color: '#94a3b8' }}>
+              <p style={{ fontSize: 12.5, fontWeight: 600 }}>Tidak ada data penilaian ditemukan.</p>
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11.5 }}>
                 <thead>
-                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textTransform: 'uppercase', color: '#475569', fontSize: 11, fontWeight: 800 }}>
-                    <th style={{ padding: '12px 14px', textAlign: 'center', width: 45 }}>No</th>
-                    <th style={{ padding: '12px 14px', textAlign: 'left' }}>Nama Siswa</th>
-                    <th style={{ padding: '12px 10px', textAlign: 'center', background: '#eff6ff' }}>Nilai Akhir</th>
-                    <th style={{ padding: '12px 10px', textAlign: 'center' }}>Predikat</th>
+                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textTransform: 'uppercase', color: '#475569', fontSize: 10.5, fontWeight: 800 }}>
+                    <th style={{ padding: '8px 10px', textAlign: 'center', width: 35 }}>No</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'left', minWidth: 150 }}>Nama Siswa</th>
+                    
+                    {/* DYNAMIC KOMPONEN COLUMNS */}
+                    {displayedKomponenList.map((k) => (
+                      <th key={k.id} style={{ padding: '8px 8px', textAlign: 'center', minWidth: 75, borderLeft: '1px solid #e2e8f0', background: k.kode_kategori === 'PH' ? '#eff6ff' : k.kode_kategori === 'PRAKTIK' ? '#f0fdf4' : k.kode_kategori === 'UTS' ? '#fffbeb' : '#fef2f2' }}>
+                        <div>{k.nama_komponen}</div>
+                        <div style={{ fontSize: 8.5, fontWeight: 700, color: '#64748b', textTransform: 'none' }}>{k.nama_kategori}</div>
+                      </th>
+                    ))}
+
+                    {/* NILAI AKHIR COLUMN */}
+                    <th style={{ padding: '8px 10px', textAlign: 'center', minWidth: 75, borderLeft: '2px solid #cbd5e1', background: '#eff6ff', color: '#1e40af' }}>Nilai Akhir</th>
                   </tr>
                 </thead>
                 <tbody>
                   {students.map((s, idx) => (
                     <tr key={s.id} style={{ borderBottom: '1px solid #f1f5f9', background: idx % 2 === 0 ? '#ffffff' : '#fafafa' }}>
-                      <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600, color: '#64748b' }}>{idx + 1}</td>
-                      <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0f172a' }}>
+                      <td style={{ padding: '6px 8px', textAlign: 'center', fontWeight: 600, color: '#64748b' }}>{idx + 1}</td>
+                      <td style={{ padding: '6px 12px', fontWeight: 700, color: '#0f172a' }}>
                         {s.nama}
-                        <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>NIS: {s.nis || '-'}</div>
+                        <span style={{ fontSize: 9.5, color: '#94a3b8', fontWeight: 500, marginLeft: 6 }}>NIS: {s.nis || '-'}</span>
                       </td>
-                      <td style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 800, fontSize: 14, background: '#eff6ff', color: s.isPass ? '#0284c7' : '#dc2626' }}>
+
+                      {/* SCORE PER KOMPONEN */}
+                      {displayedKomponenList.map(k => {
+                        const val = (nilaiMap[s.id] && nilaiMap[s.id][k.id] !== undefined) ? nilaiMap[s.id][k.id] : '-';
+                        return (
+                          <td key={k.id} style={{ padding: '6px 6px', textAlign: 'center', fontWeight: 700, color: val !== '-' ? '#0f172a' : '#cbd5e1', borderLeft: '1px solid #f1f5f9' }}>
+                            {val}
+                          </td>
+                        );
+                      })}
+
+                      {/* NILAI AKHIR */}
+                      <td style={{ padding: '6px 8px', textAlign: 'center', fontWeight: 800, fontSize: 12.5, borderLeft: '2px solid #cbd5e1', background: '#eff6ff', color: s.isPass ? '#0284c7' : '#dc2626' }}>
                         {s.finalScore}
-                      </td>
-                      <td style={{ padding: '12px 10px', textAlign: 'center' }}>
-                        <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 8, background: s.predikat === 'A' ? '#dcfce7' : s.predikat === 'B' ? '#e0f2fe' : '#fef3c7', color: s.predikat === 'A' ? '#15803d' : s.predikat === 'B' ? '#0369a1' : '#b45309' }}>
-                          {s.predikat}
-                        </span>
                       </td>
                     </tr>
                   ))}
