@@ -169,9 +169,9 @@ export default function PerpustakaanView({ user, showToast }) {
   };
 
   return (
-    <div className="mobile-view-container" style={{ paddingBottom: 90, overflowX: 'hidden' }}>
+    <div className="mobile-view-container" style={{ padding: '16px 16px 95px 16px', overflowX: 'hidden', boxSizing: 'border-box' }}>
       {/* ----------------- SEARCH & CATEGORY SELECT FILTER ----------------- */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: 10, marginBottom: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 135px', gap: 10, marginBottom: 16 }}>
         {/* Search Bar */}
         <div style={{ position: 'relative' }}>
           <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
@@ -226,9 +226,9 @@ export default function PerpustakaanView({ user, showToast }) {
         gridTemplateColumns: '1fr 1fr 1fr',
         gap: 6,
         background: '#f1f5f9',
-        padding: 4,
-        borderRadius: 12,
-        marginBottom: 16
+        padding: 5,
+        borderRadius: 14,
+        marginBottom: 20
       }}>
         <button
           onClick={() => setActiveTab('katalog')}
@@ -299,7 +299,7 @@ export default function PerpustakaanView({ user, showToast }) {
               <p style={{ fontSize: 12, color: '#64748b', margin: '4px 0 0 0' }}>Tidak ada buku yang sesuai dengan pencarian atau kategori ini.</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {filteredBuku.map((buku) => {
                 const catColor = getCategoryColor(buku.kategori);
                 const isAvailable = buku.tersedia > 0;
