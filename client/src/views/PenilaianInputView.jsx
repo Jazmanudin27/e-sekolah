@@ -302,24 +302,29 @@ export default function PenilaianInputView({ onBack }) {
         </div>
       </div>
 
-      {/* ACTION TOOLBAR */}
-      <div style={{ maxWidth: 960, margin: '0 auto 16px auto', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+      {/* FULL WIDTH BUTTON: + TAMBAH KATEGORI */}
+      <div style={{ maxWidth: 960, margin: '0 auto 16px auto', padding: '0 16px' }}>
         <button
           onClick={() => setShowAddModal(true)}
-          style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: 12, fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', boxShadow: '0 4px 14px rgba(2, 132, 199, 0.3)' }}
+          style={{
+            width: '100%',
+            background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+            color: '#ffffff',
+            border: 'none',
+            padding: '12px 20px',
+            borderRadius: 14,
+            fontWeight: 800,
+            fontSize: 13,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            cursor: 'pointer',
+            boxShadow: '0 4px 16px rgba(2, 132, 199, 0.3)'
+          }}
         >
-          <Plus size={16} /> Tambah Ujian/Tugas Baru
+          <Plus size={18} /> + Tambah Kategori
         </button>
-
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            onClick={handleSaveAll}
-            disabled={saving || loading}
-            style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: '#fff', border: 'none', padding: '10px 22px', borderRadius: 12, fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', boxShadow: '0 4px 14px rgba(34, 197, 94, 0.3)' }}
-          >
-            <Save size={16} /> {saving ? 'Menyimpan...' : 'Simpan Semua Nilai'}
-          </button>
-        </div>
       </div>
 
       {/* SPREADSHEET MATRIX TABLE */}
@@ -424,6 +429,35 @@ export default function PenilaianInputView({ onBack }) {
           )}
         </div>
       </div>
+
+      {/* FULL WIDTH BUTTON BELOW STUDENT DATA TABLE: SIMPAN SEMUA NILAI */}
+      {students.length > 0 && (
+        <div style={{ maxWidth: 960, margin: '16px auto 0 auto', padding: '0 16px' }}>
+          <button
+            onClick={handleSaveAll}
+            disabled={saving || loading}
+            style={{
+              width: '100%',
+              background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+              color: '#ffffff',
+              border: 'none',
+              padding: '14px 20px',
+              borderRadius: 16,
+              fontWeight: 800,
+              fontSize: 14,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              cursor: saving || loading ? 'not-allowed' : 'pointer',
+              boxShadow: '0 6px 20px rgba(34, 197, 94, 0.35)',
+              opacity: saving ? 0.7 : 1
+            }}
+          >
+            <Save size={18} /> {saving ? 'Menyimpan Semua Nilai...' : 'Simpan Semua Nilai'}
+          </button>
+        </div>
+      )}
 
       {/* MODAL TAMBAH KOMPONEN UJIAN / TUGAS BARU */}
       {showAddModal && (
