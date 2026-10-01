@@ -14,6 +14,7 @@ export default function AdminRaporTab() {
   // Filter States
   const [selectedKelas, setSelectedKelas] = useState('');
   const [selectedSiswaId, setSelectedSiswaId] = useState('');
+  const [kurikulumFormat, setKurikulumFormat] = useState('MERDEKA'); // 'MERDEKA' | 'K13'
   const [fase, setFase] = useState('E');
   const [semester, setSemester] = useState('1 (Ganjil)');
   const [tahunPelajaran, setTahunPelajaran] = useState('2025/2026');
@@ -70,16 +71,6 @@ export default function AdminRaporTab() {
   const [nipWaliKelas, setNipWaliKelas] = useState("19800101 200501 2 003");
   const [namaKepsek, setNamaKepsek] = useState("Dr. H. Supriyadi, M.Pd");
   const [nipKepsek, setNipKepsek] = useState("19700202 199503 1 001");
-
-  // Official Kurikulum Merdeka Fase Mapping Table
-  const faseTableData = [
-    { fase: 'Fase A', kelas: 'Kelas 1 – 2', tingkat: 'SD / MI / Sederajat' },
-    { fase: 'Fase B', kelas: 'Kelas 3 – 4', tingkat: 'SD / MI / Sederajat' },
-    { fase: 'Fase C', kelas: 'Kelas 5 – 6', tingkat: 'SD / MI / Sederajat' },
-    { fase: 'Fase D', kelas: 'Kelas 7 – 9', tingkat: 'SMP / MTs / Sederajat' },
-    { fase: 'Fase E', kelas: 'Kelas 10', tingkat: 'SMA / SMK / MA / Sederajat' },
-    { fase: 'Fase F', kelas: 'Kelas 11 – 12', tingkat: 'SMA / SMK / MA / Sederajat' }
-  ];
 
   // Auto-detect Fase based on Class Name
   const autoDetectFase = (className) => {
@@ -225,6 +216,13 @@ export default function AdminRaporTab() {
     }
   };
 
+  const getPredikatK13 = (score) => {
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    return 'D';
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -235,7 +233,7 @@ export default function AdminRaporTab() {
       <style>{`
         @media print {
           body { background: #ffffff !important; color: #000000 !important; font-family: 'Times New Roman', Times, serif !important; }
-          .admin-rapor-controls, .portal-sidebar, .portal-navbar, .portal-brand-header, .fase-guide-card { display: none !important; }
+          .admin-rapor-controls, .portal-sidebar, .portal-navbar, .portal-brand-header { display: none !important; }
           .portal-main-area, .portal-page-body { padding: 0 !important; margin: 0 !important; }
           .rapor-paper {
             width: 100% !important;
@@ -262,28 +260,10 @@ export default function AdminRaporTab() {
               <Award color="#0284c7" size={22} /> E-Rapor Siswa (Laporan Hasil Belajar)
             </h2>
             <p style={{ fontSize: 12, color: '#64748b', margin: '4px 0 0 0' }}>
-              Cetak dan pratinjau lembar Rapor resmi Kurikulum Merdeka / K13
+              Cetak dan pratinjau lembar Rapor resmi Kurikulum Merdeka & K13
             </p>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button
-              onClick={() => setShowFaseGuide(prev => !prev)}
-              style={{
-                background: '#f1f5f9',
-                color: '#334155',
-                border: '1px solid #cbd5e1',
-                padding: '9px 14px',
-                borderRadius: 12,
-                fontWeight: 700,
-                fontSize: 12,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                cursor: 'pointer'
-              }}
-            >
-              <BookOpen size={15} color="#0284c7" /> Tabel Referensi Fase {showFaseGuide ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            </button>
             <button
               onClick={handlePrint}
               style={{
@@ -314,8 +294,21 @@ export default function AdminRaporTab() {
           </div>
         </div>
 
-        {/* FILTERS */}
+        {/* FILTERS & CURRICULUM SETTING */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, background: '#f8fafc', padding: 14, borderRadius: 14, border: '1px solid #e2e8f0' }}>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: '#0284c7', display: 'block', marginBottom: 4 }}>FORMAT KURIKULUM</label>
+            <select
+              className="form-control-admin"
+              style={{ fontSize: 12, padding: '6px 10px', cursor: 'pointer', fontWeight: 700, color: '#0284c7', borderColor: '#38bdf8' }}
+              value={kurikulumFormat}
+              onChange={e => setKurikulumFormat(e.target.value)}
+            >
+              <option value="MERDEKA">Kurikulum Merdeka (Fase A - F)</option>
+              <option value="K13">Kurikulum 2013 (K13 / 2013)</option>
+            </select>
+          </div>
+
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 4 }}>KELAS</label>
             <select
@@ -354,17 +347,19 @@ export default function AdminRaporTab() {
             </select>
           </div>
 
-          <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 4 }}>FASE (KURIKULUM MERDEKA)</label>
-            <select className="form-control-admin" style={{ fontSize: 12, padding: '6px 10px' }} value={fase} onChange={e => setFase(e.target.value)}>
-              <option value="A">Fase A (Kelas 1 - 2 SD / MI)</option>
-              <option value="B">Fase B (Kelas 3 - 4 SD / MI)</option>
-              <option value="C">Fase C (Kelas 5 - 6 SD / MI)</option>
-              <option value="D">Fase D (Kelas 7 - 9 SMP / MTs)</option>
-              <option value="E">Fase E (Kelas 10 SMA / SMK / MA)</option>
-              <option value="F">Fase F (Kelas 11 - 12 SMA / SMK / MA)</option>
-            </select>
-          </div>
+          {kurikulumFormat === 'MERDEKA' && (
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 4 }}>FASE (KURIKULUM MERDEKA)</label>
+              <select className="form-control-admin" style={{ fontSize: 12, padding: '6px 10px' }} value={fase} onChange={e => setFase(e.target.value)}>
+                <option value="A">Fase A (Kelas 1 - 2 SD / MI)</option>
+                <option value="B">Fase B (Kelas 3 - 4 SD / MI)</option>
+                <option value="C">Fase C (Kelas 5 - 6 SD / MI)</option>
+                <option value="D">Fase D (Kelas 7 - 9 SMP / MTs)</option>
+                <option value="E">Fase E (Kelas 10 SMA / SMK / MA)</option>
+                <option value="F">Fase F (Kelas 11 - 12 SMA / SMK / MA)</option>
+              </select>
+            </div>
+          )}
 
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 4 }}>SEMESTER</label>
@@ -462,10 +457,17 @@ export default function AdminRaporTab() {
               <span style={{ width: 130, fontWeight: 600 }}>Kelas</span>
               <span>: {currentSiswa?.kelas || selectedKelas || 'X-1'}</span>
             </div>
-            <div style={{ display: 'flex' }}>
-              <span style={{ width: 130, fontWeight: 600 }}>Fase</span>
-              <span>: {fase}</span>
-            </div>
+            {kurikulumFormat === 'MERDEKA' ? (
+              <div style={{ display: 'flex' }}>
+                <span style={{ width: 130, fontWeight: 600 }}>Fase</span>
+                <span>: {fase}</span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex' }}>
+                <span style={{ width: 130, fontWeight: 600 }}>Kurikulum</span>
+                <span>: Kurikulum 2013 (K13)</span>
+              </div>
+            )}
             <div style={{ display: 'flex' }}>
               <span style={{ width: 130, fontWeight: 600 }}>Semester</span>
               <span>: {semester}</span>
@@ -479,10 +481,10 @@ export default function AdminRaporTab() {
 
         <div style={{ borderBottom: '2px solid #0f172a', marginBottom: 24 }}></div>
 
-        {/* SECTION A: NILAI DAN CAPAIAN PEMBELAJARAN */}
+        {/* SECTION A: NILAI DAN CAPAIAN PEMBELAJARAN / PENGETAHUAN & KETERAMPILAN */}
         <div style={{ marginBottom: 28 }}>
           <h3 style={{ fontSize: 14, fontWeight: 800, marginBottom: 10, textTransform: 'uppercase' }}>
-            A. NILAI DAN CAPAIAN PEMBELAJARAN
+            {kurikulumFormat === 'MERDEKA' ? 'A. NILAI DAN CAPAIAN PEMBELAJARAN' : 'A. NILAI PENGETAHUAN & KETERAMPILAN'}
           </h3>
 
           <table className="rapor-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
@@ -490,8 +492,15 @@ export default function AdminRaporTab() {
               <tr style={{ background: '#f8fafc' }}>
                 <th style={{ border: '1px solid #0f172a', padding: '8px 10px', textAlign: 'center', width: 40 }}>No</th>
                 <th style={{ border: '1px solid #0f172a', padding: '8px 12px', textAlign: 'left', minWidth: 180 }}>Mata Pelajaran</th>
-                <th style={{ border: '1px solid #0f172a', padding: '8px 10px', textAlign: 'center', width: 90 }}>Nilai Akhir</th>
-                <th style={{ border: '1px solid #0f172a', padding: '8px 12px', textAlign: 'left' }}>Capaian Kompetensi (Deskripsi)</th>
+                <th style={{ border: '1px solid #0f172a', padding: '8px 10px', textAlign: 'center', width: 90 }}>
+                  {kurikulumFormat === 'MERDEKA' ? 'Nilai Akhir' : 'Nilai (0-100)'}
+                </th>
+                {kurikulumFormat === 'K13' && (
+                  <th style={{ border: '1px solid #0f172a', padding: '8px 10px', textAlign: 'center', width: 70 }}>Predikat</th>
+                )}
+                <th style={{ border: '1px solid #0f172a', padding: '8px 12px', textAlign: 'left' }}>
+                  {kurikulumFormat === 'MERDEKA' ? 'Capaian Kompetensi (Deskripsi)' : 'Deskripsi Capaian'}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -502,6 +511,11 @@ export default function AdminRaporTab() {
                   <td style={{ border: '1px solid #0f172a', padding: '8px 10px', textAlign: 'center', fontWeight: 800, fontSize: 13, verticalAlign: 'top' }}>
                     {item.nilai_akhir}
                   </td>
+                  {kurikulumFormat === 'K13' && (
+                    <td style={{ border: '1px solid #0f172a', padding: '8px 10px', textAlign: 'center', fontWeight: 700, fontSize: 12, verticalAlign: 'top' }}>
+                      {getPredikatK13(item.nilai_akhir)}
+                    </td>
+                  )}
                   <td style={{ border: '1px solid #0f172a', padding: '8px 12px', verticalAlign: 'top', lineHeight: 1.5 }}>
                     {item.deskripsi}
                   </td>
