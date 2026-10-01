@@ -226,7 +226,7 @@ export default function PerpustakaanView({ user, showToast, tambahBukuTrigger })
   };
 
   return (
-    <div className="mobile-view-container" style={{ padding: '16px 16px 20px 16px', overflowX: 'hidden', boxSizing: 'border-box' }}>
+    <div className="mobile-view-container" style={{ padding: '16px 16px 95px 16px', overflowX: 'hidden', boxSizing: 'border-box' }}>
       {/* ----------------- SEARCH & CATEGORY SELECT FILTER ----------------- */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 135px', gap: 10, marginBottom: 16 }}>
         {/* Search Bar */}
