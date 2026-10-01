@@ -52,7 +52,21 @@ async function saveAbsensiSiswa(req, res, next) {
   }
 }
 
+async function getAbsensiRaporSummary(req, res, next) {
+  try {
+    const { kode_siswa, kode_kelas, tahun_ajaran, semester } = req.query;
+    if (!kode_siswa) {
+      return sendError(res, 'Parameter kode_siswa wajib diisi.', 400);
+    }
+    const data = await AbsensiSiswaModel.getAbsensiRaporSummary({ kode_siswa, kode_kelas, tahun_ajaran, semester });
+    sendSuccess(res, 'Summary absensi rapor berhasil diambil.', data);
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getAbsensiSiswa,
-  saveAbsensiSiswa
+  saveAbsensiSiswa,
+  getAbsensiRaporSummary
 };

@@ -4,6 +4,7 @@ const absensiSiswaController = require('../controllers/absensiSiswa.controller')
 const { authenticateToken } = require('../middleware/auth.middleware');
 
 router.get('/', authenticateToken, absensiSiswaController.getAbsensiSiswa);
+router.get('/rapor-summary', authenticateToken, absensiSiswaController.getAbsensiRaporSummary);
 router.post('/batch', authenticateToken, absensiSiswaController.saveAbsensiSiswa);
 
 module.exports = router;

@@ -49,7 +49,7 @@ export default function AdminRaporTab() {
 
   const [ekstraList, setEkstraList] = useState([]);
 
-  const [absensi, setAbsensi] = useState({ sakit: 3, izin: 4, alpha: 0 });
+  const [absensi, setAbsensi] = useState({ sakit: 0, izin: 0, alpha: 0 });
   const [catatanWali, setCatatanWali] = useState("Tingkatkan terus konsistensi belajar dan kedisiplinan di kelas.");
 
   // Signature Metadata
@@ -274,6 +274,22 @@ export default function AdminRaporTab() {
         })));
       } catch {
         setEkstraList([]);
+      }
+
+      // Fetch dynamic absensi (Ketidakhadiran) for this student
+      try {
+        const resAbsensi = await api.get('/absensi-siswa/rapor-summary', {
+          params: { kode_siswa: siswaId, kode_kelas: selectedKelas, tahun_ajaran: tahunPelajaran, semester: semCode }
+        });
+        if (resAbsensi.data?.data) {
+          setAbsensi({
+            sakit: parseInt(resAbsensi.data.data.sakit || 0, 10),
+            izin: parseInt(resAbsensi.data.data.izin || 0, 10),
+            alpha: parseInt(resAbsensi.data.data.alpha || 0, 10)
+          });
+        }
+      } catch {
+        setAbsensi({ sakit: 0, izin: 0, alpha: 0 });
       }
 
     } catch (e) {
@@ -705,15 +721,48 @@ export default function AdminRaporTab() {
             <tbody>
               <tr>
                 <td style={{ border: '1px solid #0f172a', padding: '6px 12px', width: 180 }}>Sakit</td>
-                <td style={{ border: '1px solid #0f172a', padding: '6px 12px', fontWeight: 700 }}>{absensi.sakit} Hari</td>
+                <td style={{ border: '1px solid #0f172a', padding: '4px 12px', fontWeight: 700 }}>
+                  <span className="no-print">
+                    <input 
+                      type="number" 
+                      min="0"
+                      value={absensi.sakit} 
+                      onChange={(e) => setAbsensi(prev => ({ ...prev, sakit: parseInt(e.target.value, 10) || 0 }))}
+                      style={{ width: 60, padding: '2px 6px', fontWeight: 700, border: '1px solid #cbd5e1', borderRadius: 4 }}
+                    /> Hari
+                  </span>
+                  <span className="print-only">{absensi.sakit} Hari</span>
+                </td>
               </tr>
               <tr>
                 <td style={{ border: '1px solid #0f172a', padding: '6px 12px' }}>Izin</td>
-                <td style={{ border: '1px solid #0f172a', padding: '6px 12px', fontWeight: 700 }}>{absensi.izin} Hari</td>
+                <td style={{ border: '1px solid #0f172a', padding: '4px 12px', fontWeight: 700 }}>
+                  <span className="no-print">
+                    <input 
+                      type="number" 
+                      min="0"
+                      value={absensi.izin} 
+                      onChange={(e) => setAbsensi(prev => ({ ...prev, izin: parseInt(e.target.value, 10) || 0 }))}
+                      style={{ width: 60, padding: '2px 6px', fontWeight: 700, border: '1px solid #cbd5e1', borderRadius: 4 }}
+                    /> Hari
+                  </span>
+                  <span className="print-only">{absensi.izin} Hari</span>
+                </td>
               </tr>
               <tr>
                 <td style={{ border: '1px solid #0f172a', padding: '6px 12px' }}>Tanpa Keterangan</td>
-                <td style={{ border: '1px solid #0f172a', padding: '6px 12px', fontWeight: 700 }}>{absensi.alpha} Hari</td>
+                <td style={{ border: '1px solid #0f172a', padding: '4px 12px', fontWeight: 700 }}>
+                  <span className="no-print">
+                    <input 
+                      type="number" 
+                      min="0"
+                      value={absensi.alpha} 
+                      onChange={(e) => setAbsensi(prev => ({ ...prev, alpha: parseInt(e.target.value, 10) || 0 }))}
+                      style={{ width: 60, padding: '2px 6px', fontWeight: 700, border: '1px solid #cbd5e1', borderRadius: 4 }}
+                    /> Hari
+                  </span>
+                  <span className="print-only">{absensi.alpha} Hari</span>
+                </td>
               </tr>
             </tbody>
           </table>
