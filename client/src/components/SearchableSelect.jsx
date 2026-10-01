@@ -89,7 +89,7 @@ export default function SearchableSelect({
     <div
       ref={containerRef}
       className={`searchable-select-container ${disabled ? 'disabled' : ''} ${className}`}
-      style={{ position: 'relative', width: '100%', ...style }}
+      style={{ position: 'relative', width: '100%', minWidth: 0, ...style }}
     >
       {/* Hidden input for form validation */}
       {required && (

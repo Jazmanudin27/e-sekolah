@@ -594,8 +594,8 @@ export default function PerpustakaanView({ user, showToast }) {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 10, marginBottom: 12 }}>
-                <div className="form-group-admin">
+              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 2fr)', gap: 10, marginBottom: 12 }}>
+                <div className="form-group-admin" style={{ minWidth: 0 }}>
                   <label style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>Tipe *</label>
                   <select
                     className="form-control-admin"
@@ -608,7 +608,7 @@ export default function PerpustakaanView({ user, showToast }) {
                   </select>
                 </div>
 
-                <div className="form-group-admin">
+                <div className="form-group-admin" style={{ minWidth: 0 }}>
                   <label style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>Pilih Peminjam *</label>
                   <SearchableSelect
                     placeholder={`-- Pilih ${pinjamForm.peminjam_type === 'siswa' ? 'Siswa' : 'Guru'} --`}

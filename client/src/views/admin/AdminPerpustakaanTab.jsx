@@ -1290,8 +1290,8 @@ export default function AdminPerpustakaanTab() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12, marginBottom: 14 }}>
-                  <div className="form-group-admin">
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 2fr)', gap: 12, marginBottom: 14 }}>
+                  <div className="form-group-admin" style={{ minWidth: 0 }}>
                     <label>Tipe Peminjam *</label>
                     <select
                       className="form-control-admin"
@@ -1304,7 +1304,7 @@ export default function AdminPerpustakaanTab() {
                       <option value="guru">Guru / Staf</option>
                     </select>
                   </div>
-                  <div className="form-group-admin">
+                  <div className="form-group-admin" style={{ minWidth: 0 }}>
                     <label>Pilih {pinjamForm.peminjam_type === 'siswa' ? 'Siswa' : 'Guru'} * (Ketik nama/NIS/NIP)</label>
                     <SearchableSelect
                       placeholder={`-- Cari nama/NIS/NIP ${pinjamForm.peminjam_type === 'siswa' ? 'Siswa' : 'Guru'} --`}
