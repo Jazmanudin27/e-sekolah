@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Package, Building2, Box, Layers, Plus, Search, Edit2, Trash2,
-  RefreshCw, CheckCircle2, AlertTriangle, XCircle, Printer, X, Check
+  Package, Plus, Search, Edit2, Trash2, RefreshCw, X, Building2, Box, Layers, CheckCircle2, AlertTriangle, XCircle
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
@@ -12,30 +11,19 @@ export default function AdminSaprasTab() {
   const [data, setData] = useState({
     fasilitas: [],
     sarana: [],
-    tanah: [],
-    stats: {
-      totalFasilitas: 25,
-      totalUnitFasilitas: 45,
-      fasilitasKondisi: { baik: 14, cukupBaik: 10, cukup: 1, rusak: 0 },
-      totalJenisSarana: 31,
-      totalUnitSarana: 494,
-      totalBaikSarana: 494,
-      totalRusakSarana: 0,
-      totalLuasTanah: 1032
-    }
+    tanah: []
   });
 
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterKondisi, setFilterKondisi] = useState('ALL');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
+  const itemsPerPage = 10;
 
   // Modal State
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
-  const [modalType, setModalType] = useState('fasilitas'); // 'fasilitas' | 'sarana' | 'tanah'
   const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -69,7 +57,6 @@ export default function AdminSaprasTab() {
     fetchData();
   }, []);
 
-  // Reset pagination on sub-tab or search change
   useEffect(() => {
     setCurrentPage(1);
   }, [activeSubTab, search, filterKondisi]);
@@ -78,9 +65,7 @@ export default function AdminSaprasTab() {
   const filteredFasilitas = useMemo(() => {
     return (data.fasilitas || []).filter(item => {
       const matchSearch = (item.fasilitas || '').toLowerCase().includes(search.toLowerCase());
-      const matchKondisi =
-        filterKondisi === 'ALL' ||
-        (item.keterangan || '').toUpperCase() === filterKondisi.toUpperCase();
+      const matchKondisi = filterKondisi === 'ALL' || (item.keterangan || '').toUpperCase() === filterKondisi.toUpperCase();
       return matchSearch && matchKondisi;
     });
   }, [data.fasilitas, search, filterKondisi]);
@@ -104,25 +89,21 @@ export default function AdminSaprasTab() {
     });
   }, [data.tanah, search]);
 
-  // Current list for active sub tab
   const currentList = activeSubTab === 'fasilitas'
     ? filteredFasilitas
     : activeSubTab === 'sarana'
     ? filteredSarana
     : filteredTanah;
 
-  const paginatedList = currentList.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedList = currentList.slice(startIndex, startIndex + itemsPerPage);
 
-  // Modal Open
+  // Open Modal for Add
   const handleOpenAdd = () => {
-    setModalType(activeSubTab);
     setIsEditing(false);
     setCurrentId(null);
     setFormData({
-      no_urut: '',
+      no_urut: currentList.length + 1,
       fasilitas: '',
       jumlah: 1,
       keterangan: 'BAIK',
@@ -136,8 +117,8 @@ export default function AdminSaprasTab() {
     setShowModal(true);
   };
 
+  // Open Modal for Edit
   const handleOpenEdit = (item) => {
-    setModalType(activeSubTab);
     setIsEditing(true);
     setCurrentId(item.id);
     setFormData({
@@ -160,37 +141,36 @@ export default function AdminSaprasTab() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      if (modalType === 'fasilitas') {
+      if (activeSubTab === 'fasilitas') {
         if (isEditing) {
           await api.put(`/sapras/fasilitas/${currentId}`, formData);
+          Swal.fire('Berhasil!', 'Data fasilitas berhasil diperbarui.', 'success');
         } else {
           await api.post('/sapras/fasilitas', formData);
+          Swal.fire('Berhasil!', 'Data fasilitas baru berhasil ditambahkan.', 'success');
         }
-      } else if (modalType === 'sarana') {
+      } else if (activeSubTab === 'sarana') {
         if (isEditing) {
           await api.put(`/sapras/sarana/${currentId}`, formData);
+          Swal.fire('Berhasil!', 'Data sarana & prasarana berhasil diperbarui.', 'success');
         } else {
           await api.post('/sapras/sarana', formData);
+          Swal.fire('Berhasil!', 'Data sarana & prasarana baru berhasil ditambahkan.', 'success');
         }
-      } else if (modalType === 'tanah') {
+      } else if (activeSubTab === 'tanah') {
         if (isEditing) {
           await api.put(`/sapras/tanah/${currentId}`, formData);
+          Swal.fire('Berhasil!', 'Data penggunaan tanah berhasil diperbarui.', 'success');
         } else {
           await api.post('/sapras/tanah', formData);
+          Swal.fire('Berhasil!', 'Data penggunaan tanah baru berhasil ditambahkan.', 'success');
         }
       }
 
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: `Data ${modalType} berhasil ${isEditing ? 'diperbarui' : 'ditambahkan'}.`,
-        timer: 1500,
-        showConfirmButton: false
-      });
       setShowModal(false);
       fetchData();
     } catch (err) {
-      Swal.fire('Gagal', err.response?.data?.message || err.message, 'error');
+      Swal.fire('Error', err.response?.data?.message || 'Gagal menyimpan data.', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -201,7 +181,7 @@ export default function AdminSaprasTab() {
     const itemName = item.fasilitas || item.jenis_sapras || item.penggunaan_tanah;
     const confirm = await Swal.fire({
       title: 'Hapus Data?',
-      text: `Apakah Anda yakin ingin menghapus data "${itemName}"?`,
+      text: `Apakah Anda yakin ingin menghapus "${itemName}"?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
@@ -219,13 +199,7 @@ export default function AdminSaprasTab() {
         } else if (activeSubTab === 'tanah') {
           await api.delete(`/sapras/tanah/${item.id}`);
         }
-        Swal.fire({
-          icon: 'success',
-          title: 'Terhapus!',
-          text: 'Data berhasil dihapus.',
-          timer: 1200,
-          showConfirmButton: false
-        });
+        Swal.fire('Terhapus!', 'Data berhasil dihapus dari sistem.', 'success');
         fetchData();
       } catch (err) {
         Swal.fire('Gagal Menghapus', err.response?.data?.message || err.message, 'error');
@@ -238,401 +212,386 @@ export default function AdminSaprasTab() {
     const ket = (keterangan || '').toUpperCase();
     if (ket === 'BAIK') {
       return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 12, background: 'rgba(16, 185, 129, 0.12)', color: '#059669', fontSize: 11, fontWeight: 700 }}>
+        <span style={{
+          background: '#ecfdf5',
+          color: '#059669',
+          padding: '4px 10px',
+          borderRadius: 6,
+          fontSize: 11,
+          fontWeight: 800,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4
+        }}>
           <CheckCircle2 size={12} /> BAIK
         </span>
       );
     }
     if (ket === 'CUKUP BAIK') {
       return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 12, background: 'rgba(2, 132, 199, 0.12)', color: '#0284c7', fontSize: 11, fontWeight: 700 }}>
+        <span style={{
+          background: '#e0f2fe',
+          color: '#0284c7',
+          padding: '4px 10px',
+          borderRadius: 6,
+          fontSize: 11,
+          fontWeight: 800,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4
+        }}>
           <CheckCircle2 size={12} /> CUKUP BAIK
         </span>
       );
     }
     if (ket === 'CUKUP') {
       return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 12, background: 'rgba(245, 158, 11, 0.14)', color: '#d97706', fontSize: 11, fontWeight: 700 }}>
+        <span style={{
+          background: '#fef3c7',
+          color: '#d97706',
+          padding: '4px 10px',
+          borderRadius: 6,
+          fontSize: 11,
+          fontWeight: 800,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4
+        }}>
           <AlertTriangle size={12} /> CUKUP
         </span>
       );
     }
     return (
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 12, background: 'rgba(239, 68, 68, 0.12)', color: '#dc2626', fontSize: 11, fontWeight: 700 }}>
+      <span style={{
+        background: '#fef2f2',
+        color: '#dc2626',
+        padding: '4px 10px',
+        borderRadius: 6,
+        fontSize: 11,
+        fontWeight: 800,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4
+      }}>
         <XCircle size={12} /> {ket || 'RUSAK'}
       </span>
     );
   };
 
   return (
-    <div className="admin-tab-container">
-      {/* 1. TOP HEADER & METRICS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 20 }}>
-        <div style={{ background: '#ffffff', borderRadius: 16, padding: '16px 20px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 12, background: '#eff6ff', color: '#0066ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Building2 size={24} />
-          </div>
+    <div>
+      <div className="admin-panel">
+        {/* PANEL HEADER */}
+        <div className="admin-panel-header">
           <div>
-            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Total Fasilitas</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: '#0f172a' }}>{data.fasilitas?.length || 25} <span style={{ fontSize: 13, fontWeight: 500, color: '#64748b' }}>Ruangan</span></div>
+            <div className="admin-panel-title">
+              <Package size={18} color="#0284c7" /> Laporan Sarana & Prasarana Sekolah
+            </div>
+            <div className="admin-panel-subtitle">
+              Total {currentList.length} data {activeSubTab === 'fasilitas' ? 'fasilitas ruangan' : activeSubTab === 'sarana' ? 'sarana & prasarana' : 'penggunaan tanah'} terdaftar dalam sistem
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn-primary-admin" onClick={handleOpenAdd}>
+              <Plus size={16} /> Tambah Data Baru
+            </button>
           </div>
         </div>
 
-        <div style={{ background: '#ffffff', borderRadius: 16, padding: '16px 20px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 12, background: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Box size={24} />
-          </div>
-          <div>
-            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Total Sarana & Prasarana</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: '#0f172a' }}>{data.sarana?.length || 31} <span style={{ fontSize: 13, fontWeight: 500, color: '#64748b' }}>Jenis</span></div>
-          </div>
-        </div>
-
-        <div style={{ background: '#ffffff', borderRadius: 16, padding: '16px 20px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 12, background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Layers size={24} />
-          </div>
-          <div>
-            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Luas Lahan Sekolah</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: '#0f172a' }}>{Number(data.stats?.totalLuasTanah || 1032).toLocaleString('id-ID')} <span style={{ fontSize: 13, fontWeight: 500, color: '#64748b' }}>M²</span></div>
-          </div>
-        </div>
-
-        <div style={{ background: '#ffffff', borderRadius: 16, padding: '16px 20px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 12, background: '#fdf2f8', color: '#db2777', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CheckCircle2 size={24} />
-          </div>
-          <div>
-            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Kondisi Sarana Baik</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: '#059669' }}>{data.stats?.totalBaikSarana || 494} <span style={{ fontSize: 13, fontWeight: 500, color: '#64748b' }}>Unit</span></div>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. SUB-TAB SELECTION & ACTIONS BAR */}
-      <div className="admin-header-actions" style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ display: 'flex', gap: 8, background: '#f1f5f9', padding: 4, borderRadius: 12 }}>
+        {/* SUBTAB SELECTION BUTTONS (PERSIS GAYA ADMIN) */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
           <button
             type="button"
+            className={activeSubTab === 'fasilitas' ? 'btn-primary-admin' : 'btn-outline-admin'}
             onClick={() => { setActiveSubTab('fasilitas'); setFilterKondisi('ALL'); }}
-            style={{
-              padding: '8px 16px',
-              borderRadius: 9,
-              border: 'none',
-              background: activeSubTab === 'fasilitas' ? '#ffffff' : 'transparent',
-              color: activeSubTab === 'fasilitas' ? '#0066ff' : '#64748b',
-              fontWeight: activeSubTab === 'fasilitas' ? 800 : 600,
-              fontSize: 13,
-              cursor: 'pointer',
-              boxShadow: activeSubTab === 'fasilitas' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none'
-            }}
+            style={{ fontSize: 13, padding: '7px 15px' }}
           >
-            🏛️ Fasilitas ({data.fasilitas?.length || 25})
+            <Building2 size={15} /> Fasilitas Ruangan ({data.fasilitas?.length || 25})
           </button>
           <button
             type="button"
+            className={activeSubTab === 'sarana' ? 'btn-primary-admin' : 'btn-outline-admin'}
             onClick={() => { setActiveSubTab('sarana'); setFilterKondisi('ALL'); }}
-            style={{
-              padding: '8px 16px',
-              borderRadius: 9,
-              border: 'none',
-              background: activeSubTab === 'sarana' ? '#ffffff' : 'transparent',
-              color: activeSubTab === 'sarana' ? '#0066ff' : '#64748b',
-              fontWeight: activeSubTab === 'sarana' ? 800 : 600,
-              fontSize: 13,
-              cursor: 'pointer',
-              boxShadow: activeSubTab === 'sarana' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none'
-            }}
+            style={{ fontSize: 13, padding: '7px 15px' }}
           >
-            📦 Sarana & Prasarana ({data.sarana?.length || 31})
+            <Box size={15} /> Sarana & Prasarana ({data.sarana?.length || 31})
           </button>
           <button
             type="button"
+            className={activeSubTab === 'tanah' ? 'btn-primary-admin' : 'btn-outline-admin'}
             onClick={() => { setActiveSubTab('tanah'); setFilterKondisi('ALL'); }}
-            style={{
-              padding: '8px 16px',
-              borderRadius: 9,
-              border: 'none',
-              background: activeSubTab === 'tanah' ? '#ffffff' : 'transparent',
-              color: activeSubTab === 'tanah' ? '#0066ff' : '#64748b',
-              fontWeight: activeSubTab === 'tanah' ? 800 : 600,
-              fontSize: 13,
-              cursor: 'pointer',
-              boxShadow: activeSubTab === 'tanah' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none'
-            }}
+            style={{ fontSize: 13, padding: '7px 15px' }}
           >
-            📐 Penggunaan Tanah ({data.tanah?.length || 3})
+            <Layers size={15} /> Penggunaan Tanah ({data.tanah?.length || 3})
           </button>
         </div>
 
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <button
-            type="button"
-            className="btn-secondary-admin"
-            onClick={() => window.print()}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontWeight: 700 }}
-          >
-            <Printer size={15} /> Cetak Laporan
-          </button>
-
-          <button
-            type="button"
-            className="btn-secondary-admin"
-            onClick={fetchData}
-            title="Refresh Data"
-            style={{ padding: '9px 12px', borderRadius: 10, cursor: 'pointer' }}
-          >
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
-          </button>
-
-          <button
-            type="button"
-            className="btn-primary-admin"
-            onClick={handleOpenAdd}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '9px 16px',
-              borderRadius: 10,
-              background: '#0066ff',
-              color: '#ffffff',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: 700,
-              boxShadow: '0 4px 12px rgba(0, 102, 255, 0.25)'
-            }}
-          >
-            <Plus size={16} strokeWidth={2.5} />
-            <span>Tambah Data {activeSubTab === 'fasilitas' ? 'Fasilitas' : activeSubTab === 'sarana' ? 'Sarana' : 'Tanah'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 3. FILTER BAR */}
-      <div className="admin-filter-bar" style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
-        <div style={{ position: 'relative', width: 280 }}>
-          <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-          <input
-            type="text"
-            className="form-control-admin"
-            placeholder={`Cari nama ${activeSubTab}...`}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ paddingLeft: 34, width: '100%', fontSize: 13 }}
-          />
-        </div>
-
-        {activeSubTab === 'fasilitas' && (
-          <div style={{ display: 'flex', gap: 6 }}>
-            {['ALL', 'BAIK', 'CUKUP BAIK', 'CUKUP'].map((kondisi) => (
-              <button
-                key={kondisi}
-                type="button"
-                onClick={() => setFilterKondisi(kondisi)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: 8,
-                  fontSize: 12,
-                  fontWeight: 700,
-                  border: '1px solid',
-                  borderColor: filterKondisi === kondisi ? '#0066ff' : '#cbd5e1',
-                  background: filterKondisi === kondisi ? '#eff6ff' : '#ffffff',
-                  color: filterKondisi === kondisi ? '#0066ff' : '#64748b',
-                  cursor: 'pointer'
-                }}
-              >
-                {kondisi === 'ALL' ? 'Semua Kondisi' : kondisi}
-              </button>
-            ))}
+        {/* SEARCH & FILTER CONTROLS */}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 18, alignItems: 'center' }}>
+          <div style={{ position: 'relative', flex: 1 }}>
+            <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              type="text"
+              placeholder={`Cari berdasarkan nama ${activeSubTab === 'fasilitas' ? 'ruangan' : activeSubTab === 'sarana' ? 'sarana / perlengkapan' : 'penggunaan tanah'}...`}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="form-control-admin"
+              style={{ paddingLeft: 40 }}
+            />
           </div>
-        )}
-      </div>
 
-      {/* 4. TABLE VIEW BY SUB TAB */}
-      <div className="portal-table-container">
-        {/* SUBTAB 1: FASILITAS */}
-        {activeSubTab === 'fasilitas' && (
-          <table className="portal-table">
-            <thead>
-              <tr>
-                <th style={{ width: 60, textAlign: 'center' }}>No</th>
-                <th>Nama Fasilitas Ruangan / Gedung</th>
-                <th style={{ width: 120, textAlign: 'center' }}>Jumlah Unit</th>
-                <th style={{ width: 160, textAlign: 'center' }}>Kondisi / Keterangan</th>
-                <th style={{ width: 120, textAlign: 'center' }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedList.length === 0 ? (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>
-                    Tidak ada data fasilitas yang sesuai dengan pencarian
-                  </td>
-                </tr>
-              ) : (
-                paginatedList.map((item, index) => (
-                  <tr key={item.id || index}>
-                    <td style={{ textAlign: 'center', fontWeight: 700, color: '#64748b' }}>
-                      {item.no_urut || (currentPage - 1) * itemsPerPage + index + 1}
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, color: '#1e293b' }}>
-                        <Building2 size={16} color="#0066ff" />
-                        <span>{item.fasilitas}</span>
-                      </div>
-                    </td>
-                    <td style={{ textAlign: 'center', fontWeight: 800 }}>
-                      <span style={{ padding: '3px 10px', borderRadius: 8, background: '#f1f5f9' }}>
-                        {item.jumlah}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      {renderKondisiBadge(item.keterangan)}
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <div style={{ display: 'inline-flex', gap: 6 }}>
-                        <button className="btn-action-icon btn-edit" title="Edit Fasilitas" onClick={() => handleOpenEdit(item)}>
-                          <Edit2 size={13} />
-                        </button>
-                        <button className="btn-action-icon btn-delete" title="Hapus Fasilitas" onClick={() => handleDelete(item)}>
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </td>
+          {activeSubTab === 'fasilitas' && (
+            <div style={{ width: 190 }}>
+              <select
+                className="form-control-admin"
+                value={filterKondisi}
+                onChange={(e) => setFilterKondisi(e.target.value)}
+              >
+                <option value="ALL">Semua Kondisi</option>
+                <option value="BAIK">Kondisi: BAIK</option>
+                <option value="CUKUP BAIK">Kondisi: CUKUP BAIK</option>
+                <option value="CUKUP">Kondisi: CUKUP</option>
+              </select>
+            </div>
+          )}
+
+          <button className="btn-outline-admin" onClick={fetchData} title="Refresh Data">
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+          </button>
+        </div>
+
+        {/* DATA TABLE (PERSIS SEPERTI TAB PENGUMUMAN) */}
+        <div className="admin-table-wrapper">
+          <table className="admin-table">
+            {/* SUBTAB 1: FASILITAS */}
+            {activeSubTab === 'fasilitas' && (
+              <>
+                <thead>
+                  <tr>
+                    <th style={{ width: 50, textAlign: 'center' }}>No</th>
+                    <th>Nama Fasilitas Ruangan & Gedung</th>
+                    <th style={{ width: 130, textAlign: 'center' }}>Jumlah Unit</th>
+                    <th style={{ width: 170, textAlign: 'center' }}>Status Kelayakan</th>
+                    <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
-
-        {/* SUBTAB 2: SARANA & PRASARANA */}
-        {activeSubTab === 'sarana' && (
-          <table className="portal-table">
-            <thead>
-              <tr>
-                <th style={{ width: 60, textAlign: 'center' }}>No</th>
-                <th>Jenis Sarana & Prasarana</th>
-                <th style={{ width: 110, textAlign: 'center' }}>Jumlah Total</th>
-                <th style={{ width: 110, textAlign: 'center', color: '#059669' }}>Kondisi Baik</th>
-                <th style={{ width: 110, textAlign: 'center', color: '#dc2626' }}>Kondisi Rusak</th>
-                <th style={{ width: 120, textAlign: 'center' }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedList.length === 0 ? (
-                <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>
-                    Tidak ada data sarana yang sesuai dengan pencarian
-                  </td>
-                </tr>
-              ) : (
-                paginatedList.map((item, index) => (
-                  <tr key={item.id || index}>
-                    <td style={{ textAlign: 'center', fontWeight: 700, color: '#64748b' }}>
-                      {item.no_urut || (currentPage - 1) * itemsPerPage + index + 1}
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, color: '#1e293b' }}>
-                        <Box size={16} color="#16a34a" />
-                        <span>{item.jenis_sapras}</span>
-                      </div>
-                    </td>
-                    <td style={{ textAlign: 'center', fontWeight: 800 }}>
-                      <span style={{ padding: '3px 10px', borderRadius: 8, background: '#f1f5f9' }}>
-                        {item.jumlah}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <span style={{ padding: '3px 10px', borderRadius: 8, background: 'rgba(16, 185, 129, 0.12)', color: '#059669', fontWeight: 800 }}>
-                        {item.baik}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <span style={{ padding: '3px 10px', borderRadius: 8, background: (parseInt(item.rusak, 10) || 0) > 0 ? 'rgba(239, 68, 68, 0.15)' : '#f1f5f9', color: (parseInt(item.rusak, 10) || 0) > 0 ? '#dc2626' : '#94a3b8', fontWeight: 800 }}>
-                        {item.rusak || 0}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <div style={{ display: 'inline-flex', gap: 6 }}>
-                        <button className="btn-action-icon btn-edit" title="Edit Sarana" onClick={() => handleOpenEdit(item)}>
-                          <Edit2 size={13} />
-                        </button>
-                        <button className="btn-action-icon btn-delete" title="Hapus Sarana" onClick={() => handleDelete(item)}>
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
-
-        {/* SUBTAB 3: PENGGUNAAN TANAH */}
-        {activeSubTab === 'tanah' && (
-          <table className="portal-table">
-            <thead>
-              <tr>
-                <th style={{ width: 60, textAlign: 'center' }}>No</th>
-                <th>Penggunaan Tanah</th>
-                <th style={{ width: 180, textAlign: 'center' }}>Luas Lahan</th>
-                <th style={{ width: 140, textAlign: 'center' }}>Persentase</th>
-                <th style={{ width: 120, textAlign: 'center' }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedList.length === 0 ? (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>
-                    Tidak ada data penggunaan tanah
-                  </td>
-                </tr>
-              ) : (
-                paginatedList.map((item, index) => {
-                  const luas = parseFloat(item.luas_tanah) || 0;
-                  const total = parseFloat(data.stats?.totalLuasTanah) || 1032;
-                  const pct = ((luas / total) * 100).toFixed(1);
-
-                  return (
-                    <tr key={item.id || index}>
-                      <td style={{ textAlign: 'center', fontWeight: 700, color: '#64748b' }}>
-                        {item.no_urut || index + 1}
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, color: '#1e293b' }}>
-                          <Layers size={16} color="#d97706" />
-                          <span>{item.penggunaan_tanah}</span>
-                        </div>
-                      </td>
-                      <td style={{ textAlign: 'center', fontWeight: 800, fontSize: 14, color: '#0f172a' }}>
-                        {Number(item.luas_tanah).toLocaleString('id-ID')} {item.satuan || 'M2'}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        <span style={{ padding: '3px 10px', borderRadius: 8, background: '#eff6ff', color: '#0066ff', fontWeight: 800 }}>
-                          {pct}%
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: 6 }}>
-                          <button className="btn-action-icon btn-edit" title="Edit Tanah" onClick={() => handleOpenEdit(item)}>
-                            <Edit2 size={13} />
-                          </button>
-                          <button className="btn-action-icon btn-delete" title="Hapus Tanah" onClick={() => handleDelete(item)}>
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                        Memuat data fasilitas...
                       </td>
                     </tr>
-                  );
-                })
-              )}
-            </tbody>
+                  ) : filteredFasilitas.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                        Tidak ada data fasilitas yang cocok.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedList.map((item, idx) => (
+                      <tr key={item.id || idx}>
+                        <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>
+                          {item.no_urut || startIndex + idx + 1}
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 800, color: '#0f172a', marginBottom: 2 }}>
+                            {item.fasilitas}
+                          </div>
+                          <div style={{ fontSize: 11.5, color: '#64748b' }}>
+                            Fasilitas Fisik Sarana Sekolah
+                          </div>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <span style={{ background: '#f1f5f9', padding: '3px 10px', borderRadius: 6, fontSize: 11.5, fontWeight: 800, color: '#0f172a' }}>
+                            {item.jumlah} Unit
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          {renderKondisiBadge(item.keterangan)}
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <div style={{ display: 'inline-flex', gap: 4 }}>
+                            <button className="btn-action-icon btn-edit" title="Edit Fasilitas" onClick={() => handleOpenEdit(item)}>
+                              <Edit2 size={13} />
+                            </button>
+                            <button className="btn-action-icon btn-delete" title="Hapus Fasilitas" onClick={() => handleDelete(item)}>
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </>
+            )}
+
+            {/* SUBTAB 2: SARANA & PRASARANA */}
+            {activeSubTab === 'sarana' && (
+              <>
+                <thead>
+                  <tr>
+                    <th style={{ width: 50, textAlign: 'center' }}>No</th>
+                    <th>Jenis Sarana & Perlengkapan</th>
+                    <th style={{ width: 120, textAlign: 'center' }}>Jumlah Total</th>
+                    <th style={{ width: 120, textAlign: 'center' }}>Kondisi Baik</th>
+                    <th style={{ width: 120, textAlign: 'center' }}>Kondisi Rusak</th>
+                    <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                        Memuat data sarana & prasarana...
+                      </td>
+                    </tr>
+                  ) : filteredSarana.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                        Tidak ada data sarana yang cocok.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedList.map((item, idx) => (
+                      <tr key={item.id || idx}>
+                        <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>
+                          {item.no_urut || startIndex + idx + 1}
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 800, color: '#0f172a', marginBottom: 2 }}>
+                            {item.jenis_sapras}
+                          </div>
+                          <div style={{ fontSize: 11.5, color: '#64748b' }}>
+                            Inventaris Peralatan & Sarana
+                          </div>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <span style={{ background: '#f1f5f9', padding: '3px 10px', borderRadius: 6, fontSize: 11.5, fontWeight: 800, color: '#0f172a' }}>
+                            {item.jumlah} Unit
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <span style={{
+                            background: '#ecfdf5',
+                            color: '#059669',
+                            padding: '4px 10px',
+                            borderRadius: 6,
+                            fontSize: 11,
+                            fontWeight: 800
+                          }}>
+                            {item.baik}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <span style={{
+                            background: (parseInt(item.rusak, 10) || 0) > 0 ? '#fef2f2' : '#f1f5f9',
+                            color: (parseInt(item.rusak, 10) || 0) > 0 ? '#dc2626' : '#94a3b8',
+                            padding: '4px 10px',
+                            borderRadius: 6,
+                            fontSize: 11,
+                            fontWeight: 800
+                          }}>
+                            {item.rusak || 0}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <div style={{ display: 'inline-flex', gap: 4 }}>
+                            <button className="btn-action-icon btn-edit" title="Edit Sarana" onClick={() => handleOpenEdit(item)}>
+                              <Edit2 size={13} />
+                            </button>
+                            <button className="btn-action-icon btn-delete" title="Hapus Sarana" onClick={() => handleDelete(item)}>
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </>
+            )}
+
+            {/* SUBTAB 3: PENGGUNAAN TANAH */}
+            {activeSubTab === 'tanah' && (
+              <>
+                <thead>
+                  <tr>
+                    <th style={{ width: 50, textAlign: 'center' }}>No</th>
+                    <th>Kategori Penggunaan Tanah</th>
+                    <th style={{ width: 180, textAlign: 'center' }}>Luas Area</th>
+                    <th style={{ width: 140, textAlign: 'center' }}>Persentase Lahan</th>
+                    <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                        Memuat data penggunaan tanah...
+                      </td>
+                    </tr>
+                  ) : filteredTanah.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                        Tidak ada data penggunaan tanah.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedList.map((item, idx) => {
+                      const luas = parseFloat(item.luas_tanah) || 0;
+                      const total = 1032;
+                      const pct = ((luas / total) * 100).toFixed(1);
+
+                      return (
+                        <tr key={item.id || idx}>
+                          <td style={{ fontWeight: 700, color: '#64748b', textAlign: 'center' }}>
+                            {item.no_urut || startIndex + idx + 1}
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 800, color: '#0f172a', marginBottom: 2 }}>
+                              {item.penggunaan_tanah}
+                            </div>
+                            <div style={{ fontSize: 11.5, color: '#64748b' }}>
+                              Aset Fisik Lahan Sekolah
+                            </div>
+                          </td>
+                          <td style={{ textAlign: 'center', fontWeight: 800, fontSize: 13, color: '#0f172a' }}>
+                            {Number(item.luas_tanah).toLocaleString('id-ID')} {item.satuan || 'M2'}
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <span style={{
+                              background: '#e0f2fe',
+                              color: '#0284c7',
+                              padding: '4px 10px',
+                              borderRadius: 6,
+                              fontSize: 11,
+                              fontWeight: 800
+                            }}>
+                              {pct}%
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <div style={{ display: 'inline-flex', gap: 4 }}>
+                              <button className="btn-action-icon btn-edit" title="Edit Tanah" onClick={() => handleOpenEdit(item)}>
+                                <Edit2 size={13} />
+                              </button>
+                              <button className="btn-action-icon btn-delete" title="Hapus Tanah" onClick={() => handleDelete(item)}>
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </>
+            )}
           </table>
-        )}
+        </div>
 
         {/* PAGINATION */}
         <Pagination
@@ -643,14 +602,14 @@ export default function AdminSaprasTab() {
         />
       </div>
 
-      {/* 5. ADD / EDIT MODAL FOR DESKTOP */}
+      {/* ADD / EDIT MODAL (PERSIS SEPERTI MODAL PENGUMUMAN) */}
       {showModal && (
         <div className="admin-modal-overlay">
           <div className="admin-modal-box" style={{ maxWidth: 540 }}>
             <div className="admin-modal-header">
               <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>
                 {isEditing ? 'Edit Data ' : 'Tambah Data '}
-                {modalType === 'fasilitas' ? 'Fasilitas Ruangan' : modalType === 'sarana' ? 'Sarana & Prasarana' : 'Penggunaan Tanah'}
+                {activeSubTab === 'fasilitas' ? 'Fasilitas Ruangan' : activeSubTab === 'sarana' ? 'Sarana & Prasarana' : 'Penggunaan Tanah'}
               </h3>
               <button
                 type="button"
@@ -675,7 +634,7 @@ export default function AdminSaprasTab() {
                     />
                   </div>
 
-                  {modalType === 'fasilitas' && (
+                  {activeSubTab === 'fasilitas' && (
                     <>
                       <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>
                         <label>Nama Fasilitas Ruangan / Gedung *</label>
@@ -702,7 +661,7 @@ export default function AdminSaprasTab() {
                       </div>
 
                       <div className="form-group-admin">
-                        <label>Keterangan / Kondisi</label>
+                        <label>Kondisi / Keterangan</label>
                         <select
                           className="form-control-admin"
                           value={formData.keterangan}
@@ -717,10 +676,10 @@ export default function AdminSaprasTab() {
                     </>
                   )}
 
-                  {modalType === 'sarana' && (
+                  {activeSubTab === 'sarana' && (
                     <>
                       <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>
-                        <label>Jenis Sarana & Prasarana *</label>
+                        <label>Jenis Sarana & Perlengkapan *</label>
                         <input
                           type="text"
                           className="form-control-admin"
@@ -772,7 +731,7 @@ export default function AdminSaprasTab() {
                     </>
                   )}
 
-                  {modalType === 'tanah' && (
+                  {activeSubTab === 'tanah' && (
                     <>
                       <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>
                         <label>Penggunaan Tanah *</label>
