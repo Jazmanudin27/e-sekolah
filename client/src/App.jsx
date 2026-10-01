@@ -21,6 +21,7 @@ import MapelView from './views/MapelView';
 import KalenderView from './views/KalenderView';
 import PenilaianInputView from './views/PenilaianInputView';
 import PenilaianLaporanView from './views/PenilaianLaporanView';
+import PerpustakaanView from './views/PerpustakaanView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
 import InstallPwaModal from './components/InstallPwaModal';
 import BirthdayModal from './components/BirthdayModal';
@@ -321,6 +322,14 @@ export default function App() {
         />
       )}
 
+      {activeTab === 'perpustakaan' && (
+        <SubHeader
+          title="Perpustakaan E-Katalog"
+          subtitle="Katalog koleksi buku dan transaksi peminjaman"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
       {/* Main Content Area */}
       <main className="main-content-area">
         {activeTab === 'beranda' && (
@@ -344,6 +353,7 @@ export default function App() {
         {activeTab === 'rekapMapel' && <RekapMapelView />}
         {activeTab === 'rekapGuru' && <RekapGuruView />}
         {activeTab === 'kalender' && <KalenderView />}
+        {activeTab === 'perpustakaan' && <PerpustakaanView user={currentUser} showToast={showToast} />}
         {(activeTab === 'penilaianInput' || activeTab === 'penilaian') && <PenilaianInputView onBack={() => setActiveTab('beranda')} />}
         {activeTab === 'penilaianLaporan' && <PenilaianLaporanView onBack={() => setActiveTab('beranda')} />}
       </main>

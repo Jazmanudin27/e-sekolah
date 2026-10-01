@@ -410,6 +410,13 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
             </div>
             <span>Rapor Nilai</span>
           </button>
+
+          <button className="menu-blue-card menu-cat-master" onClick={() => onSwitchTab('perpustakaan')}>
+            <div className="menu-icon-circle" style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)' }}>
+              <BookOpen size={25} strokeWidth={2.3} color="#ffffff" />
+            </div>
+            <span>Perpustakaan</span>
+          </button>
         </div>
       </div>
 
