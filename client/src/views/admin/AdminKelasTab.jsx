@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Building2, Plus, Search, Edit2, Trash2, RefreshCw, X, Key, UserCheck
+  Building2, Plus, Search, Edit2, Trash2, RefreshCw, X, Key, UserCheck, BookOpen, CheckSquare
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
@@ -28,6 +28,14 @@ export default function AdminKelasTab() {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  // Setting Mapel Modal State
+  const [showMapelModal, setShowMapelModal] = useState(false);
+  const [mapelModalKelas, setMapelModalKelas] = useState(null);
+  const [allMapelList, setAllMapelList] = useState([]);
+  const [selectedMapelIds, setSelectedMapelIds] = useState([]);
+  const [savingMapel, setSavingMapel] = useState(false);
+  const [mapelCountMap, setMapelCountMap] = useState({});
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -45,6 +53,15 @@ export default function AdminKelasTab() {
       }
       if (resKelas.data?.success && Array.isArray(resKelas.data.data)) {
         setKelasList(resKelas.data.data);
+        // Fetch mapel count for each kelas
+        const countMap = {};
+        await Promise.all(resKelas.data.data.map(async (k) => {
+          try {
+            const res = await api.get(`/kelas/${k.kode_kelas}/mapel`);
+            countMap[k.kode_kelas] = res.data?.data?.length || 0;
+          } catch { countMap[k.kode_kelas] = 0; }
+        }));
+        setMapelCountMap(countMap);
       } else {
         setKelasList([]);
       }
@@ -53,6 +70,56 @@ export default function AdminKelasTab() {
       setKelasList([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Setting Mapel Handlers
+  const handleOpenMapelSetting = async (kelas) => {
+    setMapelModalKelas(kelas);
+    try {
+      const [resAllMapel, resKelasMapel] = await Promise.all([
+        api.get('/mapel'),
+        api.get(`/kelas/${kelas.kode_kelas}/mapel`)
+      ]);
+      const all = resAllMapel.data?.data || [];
+      const assigned = resKelasMapel.data?.data || [];
+      setAllMapelList(all);
+      setSelectedMapelIds(assigned.map(m => m.mapel_id));
+    } catch {
+      setAllMapelList([]);
+      setSelectedMapelIds([]);
+    }
+    setShowMapelModal(true);
+  };
+
+  const toggleMapelSelection = (mapelId) => {
+    setSelectedMapelIds(prev =>
+      prev.includes(mapelId)
+        ? prev.filter(id => id !== mapelId)
+        : [...prev, mapelId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedMapelIds.length === allMapelList.length) {
+      setSelectedMapelIds([]);
+    } else {
+      setSelectedMapelIds(allMapelList.map(m => m.kode_mapel));
+    }
+  };
+
+  const handleSaveMapelSetting = async () => {
+    if (!mapelModalKelas) return;
+    setSavingMapel(true);
+    try {
+      await api.put(`/kelas/${mapelModalKelas.kode_kelas}/mapel`, { mapel_ids: selectedMapelIds });
+      Swal.fire('Berhasil!', `Setting mapel untuk kelas "${mapelModalKelas.nama_kelas}" berhasil disimpan.`, 'success');
+      setShowMapelModal(false);
+      fetchData();
+    } catch (err) {
+      Swal.fire('Gagal', err.response?.data?.message || 'Gagal menyimpan setting mapel.', 'error');
+    } finally {
+      setSavingMapel(false);
     }
   };
 
@@ -198,19 +265,20 @@ export default function AdminKelasTab() {
                 <th>Jurusan / Peminatan</th>
                 <th>Wali Kelas</th>
                 <th>Username Akun</th>
+                <th style={{ width: 90, textAlign: 'center' }}>Mapel</th>
                 <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                     Memuat data kelas...
                   </td>
                 </tr>
               ) : filteredList.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                     Tidak ada data kelas yang cocok.
                   </td>
                 </tr>
@@ -233,6 +301,28 @@ export default function AdminKelasTab() {
                       <code style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: 4, fontSize: 12, color: '#0f172a', fontWeight: 700 }}>
                         {k.username || k.nama_kelas.toLowerCase().replace(/\s+/g, '')}
                       </code>
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <button
+                        onClick={() => handleOpenMapelSetting(k)}
+                        title="Setting Mapel"
+                        style={{
+                          background: mapelCountMap[k.kode_kelas] > 0 ? '#ecfdf5' : '#fef2f2',
+                          color: mapelCountMap[k.kode_kelas] > 0 ? '#059669' : '#dc2626',
+                          border: mapelCountMap[k.kode_kelas] > 0 ? '1px solid #a7f3d0' : '1px solid #fecaca',
+                          padding: '4px 10px',
+                          borderRadius: 8,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4
+                        }}
+                      >
+                        <BookOpen size={12} />
+                        {mapelCountMap[k.kode_kelas] > 0 ? `${mapelCountMap[k.kode_kelas]} Mapel` : 'Belum diatur'}
+                      </button>
                     </td>
                     <td style={{ textAlign: 'center' }}>
                       <div style={{ display: 'inline-flex', gap: 4 }}>
@@ -352,6 +442,113 @@ export default function AdminKelasTab() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* SETTING MAPEL PER KELAS MODAL */}
+      {showMapelModal && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-box" style={{ maxWidth: 640 }}>
+            <div className="admin-modal-header">
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <BookOpen size={18} color="#0284c7" /> Setting Mapel — {mapelModalKelas?.nama_kelas}
+              </h3>
+              <button
+                onClick={() => setShowMapelModal(false)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="admin-modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+              <p style={{ fontSize: 12, color: '#64748b', marginBottom: 10 }}>
+                Pilih mata pelajaran yang <strong>aktif</strong> untuk kelas <strong>{mapelModalKelas?.nama_kelas}</strong>.
+                Hanya mapel yang dicentang yang akan tampil di Rapor dan Penilaian.
+              </p>
+
+              {/* Select All Toggle */}
+              <div
+                onClick={handleSelectAll}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
+                  background: '#f0f9ff', padding: '10px 14px', borderRadius: 10, border: '1px solid #bae6fd', marginBottom: 12
+                }}
+              >
+                <div style={{
+                  width: 20, height: 20, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: selectedMapelIds.length === allMapelList.length && allMapelList.length > 0 ? '#0284c7' : '#ffffff',
+                  border: selectedMapelIds.length === allMapelList.length && allMapelList.length > 0 ? '2px solid #0284c7' : '2px solid #cbd5e1',
+                  transition: 'all 0.15s'
+                }}>
+                  {selectedMapelIds.length === allMapelList.length && allMapelList.length > 0 && (
+                    <CheckSquare size={14} color="#fff" />
+                  )}
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#0284c7' }}>
+                  Pilih Semua ({allMapelList.length} Mapel)
+                </span>
+                <span style={{ fontSize: 11, color: '#64748b', marginLeft: 'auto' }}>
+                  {selectedMapelIds.length} terpilih
+                </span>
+              </div>
+
+              {/* Mapel Checkbox List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {allMapelList.map((m, idx) => {
+                  const isChecked = selectedMapelIds.includes(m.kode_mapel);
+                  return (
+                    <div
+                      key={m.kode_mapel}
+                      onClick={() => toggleMapelSelection(m.kode_mapel)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
+                        background: isChecked ? '#f0fdf4' : '#f8fafc',
+                        padding: '10px 14px', borderRadius: 10,
+                        border: isChecked ? '1px solid #86efac' : '1px solid #e2e8f0',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{
+                        width: 20, height: 20, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        background: isChecked ? '#16a34a' : '#ffffff',
+                        border: isChecked ? '2px solid #16a34a' : '2px solid #cbd5e1',
+                        transition: 'all 0.15s'
+                      }}>
+                        {isChecked && <CheckSquare size={14} color="#fff" />}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 700, color: '#0f172a', fontSize: 13 }}>
+                          {idx + 1}. {m.nama_mapel}
+                        </div>
+                        {m.kelompok && (
+                          <div style={{ fontSize: 11, color: '#64748b' }}>{m.kelompok} • KKM: {m.kkm || 75}</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {allMapelList.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '30px 0', color: '#94a3b8', fontSize: 13 }}>
+                  Belum ada data mata pelajaran. Tambahkan terlebih dahulu di menu Mapel.
+                </div>
+              )}
+            </div>
+
+            <div className="admin-modal-footer">
+              <div style={{ fontSize: 12, color: '#64748b', marginRight: 'auto' }}>
+                <strong>{selectedMapelIds.length}</strong> dari {allMapelList.length} mapel dipilih
+              </div>
+              <button type="button" className="btn-outline-admin" onClick={() => setShowMapelModal(false)}>
+                Batal
+              </button>
+              <button type="button" className="btn-primary-admin" onClick={handleSaveMapelSetting} disabled={savingMapel}>
+                {savingMapel ? 'Menyimpan...' : 'Simpan Setting Mapel'}
+              </button>
+            </div>
           </div>
         </div>
       )}

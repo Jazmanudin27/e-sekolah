@@ -168,12 +168,21 @@ export default function AdminRaporTab() {
 
     try {
       const semCode = semester.includes('1') ? '1' : '2';
-      const [resMatrix, resMapel] = await Promise.all([
+      const [resMatrix, resMapel, resKelasMapel] = await Promise.all([
         api.get(`/penilaian/matrix?kelas_id=${selectedKelas}&tahun_ajaran=${tahunPelajaran}&semester=${semCode}`).catch(() => null),
-        api.get('/mapel').catch(() => null)
+        api.get('/mapel').catch(() => null),
+        api.get(`/kelas/${selectedKelas}/mapel`).catch(() => null)
       ]);
 
       let dbMapel = resMapel?.data?.data || [];
+      const kelasMapelList = resKelasMapel?.data?.data || [];
+
+      // If kelas has mapel mapping, filter to only show assigned mapel
+      if (kelasMapelList.length > 0) {
+        const assignedIds = new Set(kelasMapelList.map(km => km.mapel_id));
+        dbMapel = dbMapel.filter(m => assignedIds.has(m.kode_mapel));
+      }
+
       if (!Array.isArray(dbMapel) || dbMapel.length === 0) {
         dbMapel = [
           { nama_mapel: "Pendidikan Agama Islam", kelompok: "Kelompok A (Umum)" },
