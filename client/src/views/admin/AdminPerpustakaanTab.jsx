@@ -72,6 +72,7 @@ export default function AdminPerpustakaanTab() {
   });
   const [siswaOptions, setSiswaOptions] = useState([]);
   const [guruOptions, setGuruOptions] = useState([]);
+  const [kelasList, setKelasList] = useState([]);
   const [submittingPinjam, setSubmittingPinjam] = useState(false);
 
   // Modal Pengembalian
@@ -135,15 +136,26 @@ export default function AdminPerpustakaanTab() {
 
   const fetchPeminjamOptions = async () => {
     try {
-      const [resSiswa, resGuru] = await Promise.all([
+      const [resSiswa, resGuru, resKelas] = await Promise.all([
         api.get('/siswa'),
-        api.get('/guru')
+        api.get('/guru'),
+        api.get('/kelas')
       ]);
       setSiswaOptions(resSiswa.data?.data || []);
       setGuruOptions(resGuru.data?.data || []);
+      setKelasList(resKelas.data?.data || []);
     } catch (err) {
       console.error('Error fetchPeminjamOptions:', err);
     }
+  };
+
+  const getNamaKelas = (s) => {
+    if (!s) return '-';
+    if (s.nama_kelas) return s.nama_kelas;
+    const kFound = kelasList.find(k => String(k.kode_kelas) === String(s.kode_kelas) || String(k.id) === String(s.kode_kelas));
+    if (kFound && kFound.nama_kelas) return kFound.nama_kelas;
+    if (s.kelas) return s.kelas;
+    return s.kode_kelas ? `Kelas ${s.kode_kelas}` : '-';
   };
 
   // ============ HANDLERS BUKU ============
@@ -265,7 +277,7 @@ export default function AdminPerpustakaanTab() {
           ...prev,
           peminjam_id: siswa.kode_siswa || siswa.id,
           nama_peminjam: siswa.nama_siswa || siswa.nama,
-          kelas_atau_jabatan: siswa.kelas || siswa.kode_kelas || 'Siswa'
+          kelas_atau_jabatan: getNamaKelas(siswa)
         }));
       }
     } else {
@@ -1301,8 +1313,8 @@ export default function AdminPerpustakaanTab() {
                       options={pinjamForm.peminjam_type === 'siswa' ? (
                         siswaOptions.map(s => ({
                           value: s.kode_siswa || s.id,
-                          label: `${s.nama_siswa || s.nama} (NIS: ${s.nis || '-'})`,
-                          sublabel: `Kelas: ${s.kelas || s.kode_kelas || '-'}`
+                          label: `${s.nama_siswa || s.nama} (NIS: ${s.nis || s.nis_nisn || '-'})`,
+                          sublabel: `Kelas: ${getNamaKelas(s)}`
                         }))
                       ) : (
                         guruOptions.map(g => ({
