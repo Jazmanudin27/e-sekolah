@@ -362,9 +362,7 @@ export default function PenilaianView({ onBack }) {
                     ))}
 
                     {/* REKAP CALCULATED COLUMNS */}
-                    <th style={{ padding: '12px 10px', textAlign: 'center', minWidth: 80, borderLeft: '2px solid #cbd5e1', background: '#f1f5f9' }}>Nilai Akhir</th>
-                    <th style={{ padding: '12px 10px', textAlign: 'center', minWidth: 70, background: '#f1f5f9' }}>Predikat</th>
-                    <th style={{ padding: '12px 10px', textAlign: 'center', minWidth: 80, background: '#f1f5f9' }}>Status</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'center', minWidth: 100, borderLeft: '2px solid #cbd5e1', background: '#f1f5f9' }}>Nilai Akhir</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -407,18 +405,20 @@ export default function PenilaianView({ onBack }) {
                           );
                         })}
 
-                        {/* REKAP CALCULATED VALUES */}
-                        <td style={{ padding: '10px 8px', textAlign: 'center', fontWeight: 800, fontSize: 13, borderLeft: '2px solid #cbd5e1', color: stats.isPass ? '#059669' : '#dc2626' }}>
-                          {stats.finalScore}
-                        </td>
-                        <td style={{ padding: '10px 8px', textAlign: 'center' }}>
-                          <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: stats.predikat === 'A' ? '#dcfce7' : stats.predikat === 'B' ? '#e0f2fe' : '#fef3c7', color: stats.predikat === 'A' ? '#15803d' : stats.predikat === 'B' ? '#0369a1' : '#b45309' }}>
-                            {stats.predikat}
-                          </span>
-                        </td>
-                        <td style={{ padding: '10px 8px', textAlign: 'center' }}>
-                          <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 12, background: stats.isPass ? '#ecfdf5' : '#fef2f2', color: stats.isPass ? '#047857' : '#b91c1c', border: `1px solid ${stats.isPass ? '#a7f3d0' : '#fecaca'}` }}>
-                            {stats.isPass ? 'TUNTAS' : 'REMEDIAL'}
+                        {/* REKAP CALCULATED NILAI AKHIR (GREEN IF TUNTAS, RED IF REMEDIAL) */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', borderLeft: '2px solid #cbd5e1' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '4px 12px',
+                            borderRadius: 10,
+                            fontWeight: 800,
+                            fontSize: 12.5,
+                            background: stats.isPass ? '#dcfce7' : '#fee2e2',
+                            color: stats.isPass ? '#15803d' : '#b91c1c',
+                            border: `1px solid ${stats.isPass ? '#86efac' : '#fca5a5'}`,
+                            boxShadow: stats.isPass ? '0 2px 6px rgba(34, 197, 94, 0.15)' : '0 2px 6px rgba(239, 68, 68, 0.15)'
+                          }}>
+                            {stats.finalScore}
                           </span>
                         </td>
                       </tr>
