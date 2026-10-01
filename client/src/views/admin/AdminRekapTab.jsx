@@ -184,7 +184,7 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
         <div className="admin-panel-header">
           <div>
             <div className="admin-panel-title">
-              <FileBarChart size={18} color="#0284c7" /> Pusat Laporan & Rekapitulasi Presensi
+              <FileBarChart size={18} color="#0284c7" /> Rekapitulasi Presensi & Absensi
             </div>
             <div className="admin-panel-subtitle">
               Laporan lengkap kehadiran guru, absensi harian siswa, dan absensi per mata pelajaran

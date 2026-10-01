@@ -32,11 +32,12 @@ import AdminRaporTab from './AdminRaporTab';
 import AdminEkskulTab from './AdminEkskulTab';
 import AdminPerpustakaanTab from './AdminPerpustakaanTab';
 import AdminSaprasTab from './AdminSaprasTab';
+import AdminPresensiAbsensiTab from './AdminPresensiAbsensiTab';
 
 const VALID_ADMIN_TABS = [
   'dashboard', 'pengumuman', 'kalender', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal', 'ekskul',
-  'izin', 'presensiGuru', 'absensiSiswa', 'absensiMapel',
-  'rekapGuru', 'rekapSiswa', 'rekapMapel',
+  'izin', 'presensiAbsensi', 'presensiGuru', 'absensiSiswa', 'absensiMapel',
+  'rekapPresensi', 'rekapGuru', 'rekapSiswa', 'rekapMapel',
   'laporanRapor', 'laporanSiswa', 'laporanGuru', 'laporanKelas',
   'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel',
   'laporanSurat', 'perpustakaan', 'sapras',
@@ -366,85 +367,29 @@ export default function AdminDesktopView({ user, onLogout }) {
             )}
           </div>
 
-          {/* 4. Presensi & Absensi (Expandable) */}
-          <div className="portal-menu-group">
-            <button
-              type="button"
-              className={`portal-menu-item has-submenu ${['presensiGuru', 'absensiSiswa', 'absensiMapel'].includes(activeTab) ? 'has-active' : ''}`}
-              onClick={() => toggleSubMenu('presensiAbsensi')}
-            >
-              <div className="menu-icon-wrap">
-                <CheckSquare size={17} />
-              </div>
-              <span className="menu-label">Presensi & Absensi</span>
-              {openMenus.presensiAbsensi ? <ChevronDown size={14} className="submenu-arrow" /> : <ChevronRight size={14} className="submenu-arrow" />}
-            </button>
-            {openMenus.presensiAbsensi && (
-              <div className="portal-submenu-list">
-                <button
-                  type="button"
-                  className={`portal-submenu-item ${activeTab === 'presensiGuru' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('presensiGuru')}
-                >
-                  <span>Presensi Guru</span>
-                </button>
-                <button
-                  type="button"
-                  className={`portal-submenu-item ${activeTab === 'absensiSiswa' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('absensiSiswa')}
-                >
-                  <span>Absensi Siswa</span>
-                </button>
-                <button
-                  type="button"
-                  className={`portal-submenu-item ${activeTab === 'absensiMapel' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('absensiMapel')}
-                >
-                  <span>Absensi Mapel</span>
-                </button>
-              </div>
-            )}
-          </div>
+          {/* 4. Presensi & Absensi (Tanpa dropdown, dengan sub-tab internal) */}
+          <button
+            type="button"
+            className={`portal-menu-item ${['presensiAbsensi', 'presensiGuru', 'absensiSiswa', 'absensiMapel'].includes(activeTab) ? 'active' : ''}`}
+            onClick={() => handleSelectTab('presensiAbsensi')}
+          >
+            <div className="menu-icon-wrap">
+              <CheckSquare size={17} />
+            </div>
+            <span className="menu-label">Presensi & Absensi</span>
+          </button>
 
-          {/* Rekapitulasi Presensi (Expandable) */}
-          <div className="portal-menu-group">
-            <button
-              type="button"
-              className={`portal-menu-item has-submenu ${['rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(activeTab) ? 'has-active' : ''}`}
-              onClick={() => toggleSubMenu('rekapPresensi')}
-            >
-              <div className="menu-icon-wrap">
-                <BarChart3 size={17} />
-              </div>
-              <span className="menu-label">Rekap Presensi</span>
-              {openMenus.rekapPresensi ? <ChevronDown size={14} className="submenu-arrow" /> : <ChevronRight size={14} className="submenu-arrow" />}
-            </button>
-            {openMenus.rekapPresensi && (
-              <div className="portal-submenu-list">
-                <button
-                  type="button"
-                  className={`portal-submenu-item ${activeTab === 'rekapGuru' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('rekapGuru')}
-                >
-                  <span>Rekap Presensi Guru</span>
-                </button>
-                <button
-                  type="button"
-                  className={`portal-submenu-item ${activeTab === 'rekapSiswa' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('rekapSiswa')}
-                >
-                  <span>Rekap Absensi Siswa</span>
-                </button>
-                <button
-                  type="button"
-                  className={`portal-submenu-item ${activeTab === 'rekapMapel' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('rekapMapel')}
-                >
-                  <span>Rekap Absensi Mapel</span>
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Rekapitulasi Presensi & Absensi (Tanpa dropdown, dengan sub-tab internal) */}
+          <button
+            type="button"
+            className={`portal-menu-item ${['rekapPresensi', 'rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(activeTab) ? 'active' : ''}`}
+            onClick={() => handleSelectTab('rekapPresensi')}
+          >
+            <div className="menu-icon-wrap">
+              <BarChart3 size={17} />
+            </div>
+            <span className="menu-label">Rekap Presensi & Absensi</span>
+          </button>
 
           {/* ----------------- LAPORAN & REKAP ----------------- */}
           <div className="portal-menu-section-label">LAPORAN & REKAP</div>
@@ -739,18 +684,34 @@ export default function AdminDesktopView({ user, onLogout }) {
 
               {/* 3. SURAT MENYURAT / PRESENSI */}
               {activeTab === 'izin' && <AdminIzinTab />}
-              {activeTab === 'presensiGuru' && <AdminPresensiGuruTab />}
-              {activeTab === 'absensiSiswa' && <AdminAbsensiSiswaTab />}
-              {activeTab === 'absensiMapel' && <AdminAbsensiMapelTab />}
+              {['presensiAbsensi', 'presensiGuru', 'absensiSiswa', 'absensiMapel'].includes(activeTab) && (
+                <AdminPresensiAbsensiTab
+                  initialSubTab={
+                    activeTab === 'absensiSiswa'
+                      ? 'siswa'
+                      : activeTab === 'absensiMapel'
+                      ? 'mapel'
+                      : 'guru'
+                  }
+                />
+              )}
 
               {/* 4. LAPORAN & REKAP */}
               {activeTab === 'laporanRapor' && <AdminRaporTab />}
               {['laporanSiswa', 'laporanGuru', 'laporanKelas', 'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat'].includes(activeTab) && (
                 <AdminLaporanGeneratorTab reportType={activeTab} />
               )}
-              {activeTab === 'rekapGuru' && <AdminRekapTab initialSubTab="guru" />}
-              {activeTab === 'rekapSiswa' && <AdminRekapTab initialSubTab="siswa" />}
-              {activeTab === 'rekapMapel' && <AdminRekapTab initialSubTab="mapel" />}
+              {['rekapPresensi', 'rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(activeTab) && (
+                <AdminRekapTab
+                  initialSubTab={
+                    activeTab === 'rekapSiswa'
+                      ? 'siswa'
+                      : activeTab === 'rekapMapel'
+                      ? 'mapel'
+                      : 'guru'
+                  }
+                />
+              )}
 
               {/* 5. SISTEM & AKUN */}
               {activeTab === 'perpustakaan' && <AdminPerpustakaanTab />}
