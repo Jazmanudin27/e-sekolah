@@ -664,63 +664,66 @@ export default function AdminDesktopView({ user, onLogout }) {
         {/* ========================================================
             PAGE CONTENT INNER
             ======================================================== */}
-        <main className="portal-page-body">
-          {isPerpusAdmin ? (
-            <AdminPerpustakaanTab />
-          ) : (
-            <>
-              {/* 1. DASHBOARD & PENGUMUMAN */}
-              {activeTab === 'dashboard' && <AdminDashboardTab onSwitchTab={handleSelectTab} />}
-              {activeTab === 'pengumuman' && <AdminPengumumanTab />}
-              {activeTab === 'kalender' && <AdminKalenderTab />}
+        {activeTab === 'laporanRapor' ? (
+          <AdminRaporTab />
+        ) : (
+          <main className="portal-page-body">
+            {isPerpusAdmin ? (
+              <AdminPerpustakaanTab />
+            ) : (
+              <>
+                {/* 1. DASHBOARD & PENGUMUMAN */}
+                {activeTab === 'dashboard' && <AdminDashboardTab onSwitchTab={handleSelectTab} />}
+                {activeTab === 'pengumuman' && <AdminPengumumanTab />}
+                {activeTab === 'kalender' && <AdminKalenderTab />}
 
-              {/* 2. DATA MASTER */}
-              {activeTab === 'kelas' && <AdminKelasTab />}
-              {activeTab === 'siswa' && <AdminSiswaTab />}
-              {activeTab === 'guru' && <AdminGuruTab />}
-              {activeTab === 'mapel' && <AdminMapelTab />}
-              {activeTab === 'jadwal' && <AdminJadwalTab />}
-              {activeTab === 'ekskul' && <AdminEkskulTab />}
+                {/* 2. DATA MASTER */}
+                {activeTab === 'kelas' && <AdminKelasTab />}
+                {activeTab === 'siswa' && <AdminSiswaTab />}
+                {activeTab === 'guru' && <AdminGuruTab />}
+                {activeTab === 'mapel' && <AdminMapelTab />}
+                {activeTab === 'jadwal' && <AdminJadwalTab />}
+                {activeTab === 'ekskul' && <AdminEkskulTab />}
 
-              {/* 3. SURAT MENYURAT / PRESENSI */}
-              {activeTab === 'izin' && <AdminIzinTab />}
-              {['presensiAbsensi', 'presensiGuru', 'absensiSiswa', 'absensiMapel'].includes(activeTab) && (
-                <AdminPresensiAbsensiTab
-                  initialSubTab={
-                    activeTab === 'absensiSiswa'
-                      ? 'siswa'
-                      : activeTab === 'absensiMapel'
-                      ? 'mapel'
-                      : 'guru'
-                  }
-                />
-              )}
+                {/* 3. SURAT MENYURAT / PRESENSI */}
+                {activeTab === 'izin' && <AdminIzinTab />}
+                {['presensiAbsensi', 'presensiGuru', 'absensiSiswa', 'absensiMapel'].includes(activeTab) && (
+                  <AdminPresensiAbsensiTab
+                    initialSubTab={
+                      activeTab === 'absensiSiswa'
+                        ? 'siswa'
+                        : activeTab === 'absensiMapel'
+                        ? 'mapel'
+                        : 'guru'
+                    }
+                  />
+                )}
 
-              {/* 4. LAPORAN & REKAP */}
-              {activeTab === 'laporanRapor' && <AdminRaporTab />}
-              {['laporanSiswa', 'laporanGuru', 'laporanKelas', 'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat'].includes(activeTab) && (
-                <AdminLaporanGeneratorTab reportType={activeTab} />
-              )}
-              {['rekapPresensi', 'rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(activeTab) && (
-                <AdminRekapTab
-                  initialSubTab={
-                    activeTab === 'rekapSiswa'
-                      ? 'siswa'
-                      : activeTab === 'rekapMapel'
-                      ? 'mapel'
-                      : 'guru'
-                  }
-                />
-              )}
+                {/* 4. LAPORAN & REKAP */}
+                {['laporanSiswa', 'laporanGuru', 'laporanKelas', 'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat'].includes(activeTab) && (
+                  <AdminLaporanGeneratorTab reportType={activeTab} />
+                )}
+                {['rekapPresensi', 'rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(activeTab) && (
+                  <AdminRekapTab
+                    initialSubTab={
+                      activeTab === 'rekapSiswa'
+                        ? 'siswa'
+                        : activeTab === 'rekapMapel'
+                        ? 'mapel'
+                        : 'guru'
+                    }
+                  />
+                )}
 
-              {/* 5. SISTEM & AKUN */}
-              {activeTab === 'perpustakaan' && <AdminPerpustakaanTab />}
-              {activeTab === 'sapras' && <AdminSaprasTab />}
-              {activeTab === 'users' && <AdminUsersTab />}
-              {activeTab === 'settings' && <AdminSettingsTab />}
-            </>
-          )}
-        </main>
+                {/* 5. SISTEM & AKUN */}
+                {activeTab === 'perpustakaan' && <AdminPerpustakaanTab />}
+                {activeTab === 'sapras' && <AdminSaprasTab />}
+                {activeTab === 'users' && <AdminUsersTab />}
+                {activeTab === 'settings' && <AdminSettingsTab />}
+              </>
+            )}
+          </main>
+        )}
       </div>
     </div>
   );
