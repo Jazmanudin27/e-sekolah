@@ -30,6 +30,7 @@ import AdminPengumumanTab from './AdminPengumumanTab';
 import AdminKalenderTab from './AdminKalenderTab';
 import AdminRaporTab from './AdminRaporTab';
 import AdminEkskulTab from './AdminEkskulTab';
+import AdminPerpustakaanTab from './AdminPerpustakaanTab';
 
 const VALID_ADMIN_TABS = [
   'dashboard', 'pengumuman', 'kalender', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal', 'ekskul',
@@ -37,7 +38,7 @@ const VALID_ADMIN_TABS = [
   'rekapGuru', 'rekapSiswa', 'rekapMapel',
   'laporanRapor', 'laporanSiswa', 'laporanGuru', 'laporanKelas',
   'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel',
-  'laporanSurat',
+  'laporanSurat', 'perpustakaan',
   'users', 'settings'
 ];
 
@@ -58,7 +59,7 @@ const getInitialOpenMenus = (tab) => ({
   laporanMaster: false,
   laporanAbsensi: ['rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(tab),
   laporanSurat: false,
-  perpustakaan: false,
+  perpustakaan: ['perpustakaan'].includes(tab),
   pengaturan: ['settings', 'users'].includes(tab)
 });
 
@@ -539,7 +540,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           <div className="portal-menu-group">
             <button
               type="button"
-              className="portal-menu-item has-submenu"
+              className={`portal-menu-item has-submenu ${['perpustakaan'].includes(activeTab) ? 'has-active' : ''}`}
               onClick={() => toggleSubMenu('perpustakaan')}
             >
               <div className="menu-icon-wrap">
@@ -552,10 +553,10 @@ export default function AdminDesktopView({ user, onLogout }) {
               <div className="portal-submenu-list">
                 <button
                   type="button"
-                  className="portal-submenu-item"
-                  onClick={() => Swal.fire('Info', 'Modul Perpustakaan E-Katalog sedang dalam sinkronisasi.', 'info')}
+                  className={`portal-submenu-item ${activeTab === 'perpustakaan' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('perpustakaan')}
                 >
-                  <span>Katalog Buku</span>
+                  <span>Katalog & Peminjaman</span>
                 </button>
               </div>
             )}
@@ -715,6 +716,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           {activeTab === 'rekapMapel' && <AdminRekapTab initialSubTab="mapel" />}
 
           {/* 5. SISTEM & AKUN */}
+          {activeTab === 'perpustakaan' && <AdminPerpustakaanTab />}
           {activeTab === 'users' && <AdminUsersTab />}
           {activeTab === 'settings' && <AdminSettingsTab />}
         </main>
