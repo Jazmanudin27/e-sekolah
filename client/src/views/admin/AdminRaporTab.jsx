@@ -134,15 +134,21 @@ export default function AdminRaporTab() {
 
   const fetchSiswaByKelas = async (kodeKelas) => {
     try {
-      const res = await api.get('/siswa', { params: { kelas_id: kodeKelas } });
+      const res = await api.get('/siswa', { params: { kode_kelas: kodeKelas, kelas_id: kodeKelas } });
       if (res.data?.success && Array.isArray(res.data.data)) {
         setSiswaList(res.data.data);
         if (res.data.data.length > 0) {
-          setSelectedSiswaId(res.data.data[0].kode_siswa || res.data.data[0].id);
+          const firstS = res.data.data[0];
+          setSelectedSiswaId(firstS.kode_siswa || firstS.id);
+        } else {
+          setSiswaList([]);
+          setSelectedSiswaId('');
         }
       }
     } catch (err) {
       console.error(err);
+      setSiswaList([]);
+      setSelectedSiswaId('');
     }
   };
 

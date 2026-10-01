@@ -20,8 +20,11 @@ class SiswaModel {
       }
 
       if (kode_kelas) {
-        sql += ' AND s.kode_kelas = ?';
-        params.push(kode_kelas);
+        sql += ` AND (
+          CONVERT(s.kode_kelas USING utf8mb4) = CONVERT(? USING utf8mb4)
+          OR s.kode_kelas IN (SELECT kode_kelas FROM kelas WHERE id = ? OR kode_kelas = ? OR nama_kelas = ?)
+        )`;
+        params.push(kode_kelas, kode_kelas, kode_kelas, kode_kelas);
       }
 
       sql += ' ORDER BY k.nama_kelas ASC, s.nama_siswa ASC';

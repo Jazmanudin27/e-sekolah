@@ -3,11 +3,11 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 
 async function getSiswaByKelas(req, res, next) {
   try {
-    const { kode_kelas } = req.query;
+    const targetKelas = req.query.kode_kelas || req.query.kelas_id;
     const kode_member = req.user?.kode_member || req.query?.kode_member;
     const effectiveKodeKelas = (req.user && req.user.type === 'Kelas' && req.user.kode_kelas) 
       ? req.user.kode_kelas 
-      : kode_kelas;
+      : targetKelas;
 
     const students = await SiswaModel.findAll(effectiveKodeKelas || null, kode_member || null);
     sendSuccess(res, 'Data siswa berhasil diambil dari database.', students, 200, { count: students.length });
