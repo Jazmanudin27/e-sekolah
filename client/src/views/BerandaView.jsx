@@ -3,7 +3,7 @@ import {
   CheckSquare, Building2, FileText, Clock, Fingerprint,
   Users, GraduationCap, History, UserCheck, BookOpen,
   FileBarChart, PieChart, Award, Calendar, CalendarDays, X, AlertCircle, CheckCircle2,
-  Send, Library
+  Send, Library, FileSpreadsheet
 } from 'lucide-react';
 import api from '../api/client';
 import TopBar from '../components/TopBar';
@@ -395,6 +395,13 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
               <Award size={25} strokeWidth={2.3} />
             </div>
             <span>Rekap Guru</span>
+          </button>
+
+          <button className="menu-blue-card menu-cat-rekap" onClick={() => onSwitchTab('penilaian')}>
+            <div className="menu-icon-circle">
+              <FileSpreadsheet size={25} strokeWidth={2.3} />
+            </div>
+            <span>Penilaian</span>
           </button>
         </div>
       </div>

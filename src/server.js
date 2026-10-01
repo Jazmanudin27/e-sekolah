@@ -57,6 +57,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const SekolahModel = require('./models/sekolah.model');
+const PenilaianModel = require('./models/penilaian.model');
 
 // Start Application Server
 app.listen(PORT, async () => {
@@ -67,8 +68,9 @@ app.listen(PORT, async () => {
   
   try {
     await SekolahModel.ensureColumns();
-    console.log('[SekolahModel] Verified & updated member table columns successfully.');
+    await PenilaianModel.ensureTables();
+    console.log('[PenilaianModel] Verified & initialized assessment tables successfully.');
   } catch (err) {
-    console.warn('[SekolahModel] Column verification warning:', err.message);
+    console.warn('[SekolahModel/PenilaianModel] Initialization warning:', err.message);
   }
 });
