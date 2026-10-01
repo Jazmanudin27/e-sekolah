@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import {
-  GraduationCap, Plus, Search, Edit2, Trash2, RefreshCw, X, Filter, Award
+  GraduationCap, Plus, Search, Edit2, Trash2, RefreshCw, X, Filter, Award, TrendingUp
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
 
-export default function AdminSiswaTab() {
+export default function AdminSiswaTab({ onSwitchTab }) {
   const [siswaList, setSiswaList] = useState([]);
   const [kelasList, setKelasList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterKelas, setFilterKelas] = useState('ALL');
+  const [filterStatus, setFilterStatus] = useState('Aktif');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -24,7 +25,8 @@ export default function AdminSiswaTab() {
     nis_nisn: '',
     nama_siswa: '',
     jk: 'L',
-    kode_kelas: ''
+    kode_kelas: '',
+    status: 'Aktif'
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -36,7 +38,7 @@ export default function AdminSiswaTab() {
     setLoading(true);
     try {
       const [resSiswa, resKelas] = await Promise.all([
-        api.get('/siswa'),
+        api.get('/siswa?status=ALL'),
         api.get('/kelas')
       ]);
 
@@ -63,7 +65,8 @@ export default function AdminSiswaTab() {
       nis_nisn: '',
       nama_siswa: '',
       jk: 'L',
-      kode_kelas: kelasList[0]?.kode_kelas || ''
+      kode_kelas: kelasList[0]?.kode_kelas || '',
+      status: 'Aktif'
     });
     setShowModal(true);
   };
@@ -75,7 +78,8 @@ export default function AdminSiswaTab() {
       nis_nisn: siswa.nis_nisn || siswa.nis || '',
       nama_siswa: siswa.nama_siswa || '',
       jk: siswa.jk || 'L',
-      kode_kelas: siswa.kode_kelas || ''
+      kode_kelas: siswa.kode_kelas || '',
+      status: siswa.status || 'Aktif'
     });
     setShowModal(true);
   };
@@ -132,14 +136,16 @@ export default function AdminSiswaTab() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, filterKelas]);
+  }, [search, filterKelas, filterStatus]);
 
   const filteredList = siswaList
     .filter(s => {
       const matchSearch = (s.nama_siswa || '').toLowerCase().includes(search.toLowerCase()) ||
                           (s.nis_nisn || '').toLowerCase().includes(search.toLowerCase());
       const matchKelas = filterKelas === 'ALL' || String(s.kode_kelas) === String(filterKelas) || s.nama_kelas === filterKelas;
-      return matchSearch && matchKelas;
+      const currentStatus = s.status || 'Aktif';
+      const matchStatus = filterStatus === 'ALL' || currentStatus === filterStatus;
+      return matchSearch && matchKelas && matchStatus;
     })
     .sort((a, b) => (a.nama_siswa || '').localeCompare(b.nama_siswa || '', 'id', { sensitivity: 'base' }));
 
@@ -160,6 +166,17 @@ export default function AdminSiswaTab() {
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
+            {onSwitchTab && (
+              <button
+                type="button"
+                className="btn-outline-admin"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
+                onClick={() => onSwitchTab('kenaikanAlumni')}
+                title="Kelola Kenaikan Kelas & Alumni"
+              >
+                <TrendingUp size={16} color="#0284c7" /> Kenaikan & Kelulusan
+              </button>
+            )}
             <button className="btn-primary-admin" onClick={handleOpenAdd}>
               <Plus size={16} /> Tambah Siswa Baru
             </button>
@@ -167,8 +184,8 @@ export default function AdminSiswaTab() {
         </div>
 
         {/* SEARCH & FILTER CONTROLS */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 18, alignItems: 'center' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 18, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: 240 }}>
             <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
             <input
               type="text"
@@ -180,7 +197,20 @@ export default function AdminSiswaTab() {
             />
           </div>
 
-          <div style={{ width: 220 }}>
+          <div style={{ width: 170 }}>
+            <SearchableSelect
+              options={[
+                { value: 'ALL', label: 'Semua Status' },
+                { value: 'Aktif', label: 'Siswa Aktif' },
+                { value: 'Alumni', label: 'Alumni (Lulus)' }
+              ]}
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              placeholder="Status"
+            />
+          </div>
+
+          <div style={{ width: 200 }}>
             <SearchableSelect
               options={[
                 { value: 'ALL', label: 'Semua Kelas' },
@@ -210,8 +240,8 @@ export default function AdminSiswaTab() {
                 <th>Nama Lengkap Siswa</th>
                 <th>L/P</th>
                 <th>Kelas</th>
-                <th>Jurusan</th>
-                <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
+                <th>Status</th>
+                <th style={{ width: 120, textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -245,7 +275,17 @@ export default function AdminSiswaTab() {
                         {s.nama_kelas || `Kelas ${s.kode_kelas}`}
                       </span>
                     </td>
-                    <td style={{ color: '#64748b', textAlign: 'center' }}>{s.jurusan && s.jurusan !== '-' ? s.jurusan : ''}</td>
+                    <td style={{ textAlign: 'center' }}>
+                      {s.status === 'Alumni' ? (
+                        <span style={{ background: '#fef3c7', color: '#92400e', padding: '3px 8px', borderRadius: 12, fontSize: 11, fontWeight: 700 }}>
+                          Alumni ({s.tahun_lulus || 'Lulus'})
+                        </span>
+                      ) : (
+                        <span style={{ background: '#dcfce7', color: '#16a34a', padding: '3px 8px', borderRadius: 12, fontSize: 11, fontWeight: 700 }}>
+                          Aktif
+                        </span>
+                      )}
+                    </td>
                     <td style={{ textAlign: 'center' }}>
                       <div style={{ display: 'inline-flex', gap: 4 }}>
                         <button
@@ -258,10 +298,18 @@ export default function AdminSiswaTab() {
                         >
                           <Award size={13} />
                         </button>
-                        <button className="btn-action-icon btn-edit" title="Edit Siswa" onClick={() => handleOpenEdit(s)}>
+                        <button
+                          className="btn-action-icon btn-edit"
+                          onClick={() => handleOpenEdit(s)}
+                          title="Edit Siswa"
+                        >
                           <Edit2 size={13} />
                         </button>
-                        <button className="btn-action-icon btn-delete" title="Hapus Siswa" onClick={() => handleDelete(s)}>
+                        <button
+                          className="btn-action-icon btn-delete"
+                          onClick={() => handleDelete(s)}
+                          title="Hapus Siswa"
+                        >
                           <Trash2 size={13} />
                         </button>
                       </div>
@@ -346,6 +394,18 @@ export default function AdminSiswaTab() {
                         value: k.kode_kelas,
                         label: `${k.nama_kelas} ${k.jurusan && k.jurusan !== '-' ? `(${k.jurusan})` : ''}`
                       }))}
+                    />
+                  </div>
+
+                  <div className="form-group-admin" style={{ gridColumn: 'span 2' }}>
+                    <label>Status Siswa</label>
+                    <SearchableSelect
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      options={[
+                        { value: 'Aktif', label: 'Aktif' },
+                        { value: 'Alumni', label: 'Alumni (Lulus)' }
+                      ]}
                     />
                   </div>
                 </div>

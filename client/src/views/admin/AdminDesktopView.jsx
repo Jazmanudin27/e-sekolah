@@ -34,9 +34,10 @@ import AdminEkskulTab from './AdminEkskulTab';
 import AdminPerpustakaanTab from './AdminPerpustakaanTab';
 import AdminSaprasTab from './AdminSaprasTab';
 import AdminPresensiAbsensiTab from './AdminPresensiAbsensiTab';
+import AdminKenaikanAlumniTab from './AdminKenaikanAlumniTab';
 
 const VALID_ADMIN_TABS = [
-  'dashboard', 'pengumuman', 'kalender', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal', 'ekskul',
+  'dashboard', 'pengumuman', 'kalender', 'kelas', 'siswa', 'kenaikanAlumni', 'guru', 'mapel', 'jadwal', 'ekskul',
   'izin', 'presensiAbsensi', 'presensiGuru', 'absensiSiswa', 'absensiMapel',
   'rekapPresensi', 'rekapGuru', 'rekapSiswa', 'rekapMapel',
   'laporanRapor', 'laporanSiswa', 'laporanGuru', 'laporanKelas',
@@ -177,7 +178,7 @@ export default function AdminDesktopView({ user, onLogout }) {
       // Ensure parent menu of selected child is open
       setOpenMenus(prev => ({
         ...prev,
-        dataMaster: ['kelas', 'siswa', 'guru', 'mapel', 'jadwal'].includes(tabId) ? true : prev.dataMaster,
+        dataMaster: ['kelas', 'siswa', 'kenaikanAlumni', 'guru', 'mapel', 'jadwal', 'ekskul'].includes(tabId) ? true : prev.dataMaster,
         suratMenyurat: ['izin'].includes(tabId) ? true : prev.suratMenyurat,
         presensiAbsensi: ['presensiGuru', 'absensiSiswa', 'absensiMapel'].includes(tabId) ? true : prev.presensiAbsensi,
         laporanAbsensi: ['rekapGuru', 'rekapSiswa', 'rekapMapel'].includes(tabId) ? true : prev.laporanAbsensi,
@@ -338,6 +339,13 @@ export default function AdminDesktopView({ user, onLogout }) {
                   onClick={() => handleSelectTab('siswa')}
                 >
                   <span>Data Siswa</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'kenaikanAlumni' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('kenaikanAlumni')}
+                >
+                  <span>Kenaikan & Kelulusan</span>
                 </button>
                 <button
                   type="button"
@@ -720,7 +728,8 @@ export default function AdminDesktopView({ user, onLogout }) {
 
                 {/* 2. DATA MASTER */}
                 {activeTab === 'kelas' && <AdminKelasTab />}
-                {activeTab === 'siswa' && <AdminSiswaTab />}
+                {activeTab === 'siswa' && <AdminSiswaTab onSwitchTab={handleSelectTab} />}
+                {activeTab === 'kenaikanAlumni' && <AdminKenaikanAlumniTab />}
                 {activeTab === 'guru' && <AdminGuruTab />}
                 {activeTab === 'mapel' && <AdminMapelTab />}
                 {activeTab === 'jadwal' && <AdminJadwalTab />}

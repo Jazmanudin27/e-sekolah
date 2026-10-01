@@ -1,7 +1,7 @@
 const { query } = require('../config/database');
 
 class SiswaModel {
-  static async findAll(kode_kelas = null, kode_member = null) {
+  static async findAll(kode_kelas = null, kode_member = null, status = null) {
     try {
       let sql = `
         SELECT 
@@ -27,12 +27,21 @@ class SiswaModel {
         params.push(kode_kelas, kode_kelas, kode_kelas, kode_kelas);
       }
 
+      if (status && status !== 'ALL') {
+        sql += ' AND s.status = ?';
+        params.push(status);
+      } else if (!status && kode_kelas) {
+        // Default saat memfilter per kelas untuk presensi/rapor: hanya tampilkan siswa aktif
+        sql += " AND (s.status = 'Aktif' OR s.status IS NULL OR s.status = '')";
+      }
+
       sql += ' ORDER BY k.nama_kelas ASC, s.nama_siswa ASC';
 
       const rows = await query(sql, params);
       if (rows && rows.length > 0) {
         return rows.map(r => ({
           ...r,
+          status: r.status || 'Aktif',
           nis_nisn: r.nis_nisn || r.nis || r.nisn || r.nis_siswa || r.nisn_siswa || `NIS-${r.kode_siswa}`
         }));
       }
@@ -52,11 +61,16 @@ class SiswaModel {
         sql += ' AND kode_kelas = ?';
         params.push(kode_kelas);
       }
+      if (status && status !== 'ALL') {
+        sql += ' AND status = ?';
+        params.push(status);
+      }
       sql += ' ORDER BY nama_siswa ASC';
       const rows = await query(sql, params);
       if (rows && rows.length > 0) {
         return rows.map(r => ({
           ...r,
+          status: r.status || 'Aktif',
           nis_nisn: r.nis_nisn || r.nis || r.nisn || r.nis_siswa || r.nisn_siswa || `NIS-${r.kode_siswa}`
         }));
       }
@@ -112,6 +126,18 @@ class SiswaModel {
     if (data.kode_kelas !== undefined) {
       fields.push('kode_kelas = ?');
       params.push(data.kode_kelas);
+    }
+    if (data.status !== undefined) {
+      fields.push('status = ?');
+      params.push(data.status);
+    }
+    if (data.tahun_lulus !== undefined) {
+      fields.push('tahun_lulus = ?');
+      params.push(data.tahun_lulus);
+    }
+    if (data.catatan_alumni !== undefined) {
+      fields.push('catatan_alumni = ?');
+      params.push(data.catatan_alumni);
     }
     if (fields.length === 0) return;
     params.push(id);

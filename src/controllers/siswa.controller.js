@@ -9,7 +9,8 @@ async function getSiswaByKelas(req, res, next) {
       ? req.user.kode_kelas 
       : targetKelas;
 
-    const students = await SiswaModel.findAll(effectiveKodeKelas || null, kode_member || null);
+    const status = req.query.status || null;
+    const students = await SiswaModel.findAll(effectiveKodeKelas || null, kode_member || null, status);
     sendSuccess(res, 'Data siswa berhasil diambil dari database.', students, 200, { count: students.length });
   } catch (error) {
     next(error);
