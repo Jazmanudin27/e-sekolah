@@ -169,108 +169,55 @@ export default function PerpustakaanView({ user, showToast }) {
   };
 
   return (
-    <div className="mobile-view-container" style={{ paddingBottom: 90 }}>
-      {/* ----------------- MOBILE TOP BANNER ----------------- */}
-      <div style={{
-        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-        margin: '-16px -16px 16px -16px',
-        padding: '20px 20px 24px 20px',
-        color: '#ffffff',
-        borderBottomLeftRadius: 24,
-        borderBottomRightRadius: 24,
-        boxShadow: '0 8px 20px rgba(2, 132, 199, 0.2)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ background: 'rgba(255,255,255,0.2)', padding: 8, borderRadius: 12, backdropFilter: 'blur(4px)' }}>
-              <BookOpen size={22} color="#ffffff" />
-            </div>
-            <div>
-              <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>
-                Perpustakaan E-Katalog
-              </h2>
-              <p style={{ fontSize: 11.5, color: '#e0f2fe', margin: '2px 0 0 0', opacity: 0.9 }}>
-                Katalog buku & transaksi peminjaman online
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => handleOpenPinjamModal()}
-            style={{
-              background: '#ffffff',
-              color: '#0284c7',
-              border: 'none',
-              padding: '7px 12px',
-              borderRadius: 10,
-              fontWeight: 800,
-              fontSize: 11.5,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}
-          >
-            <Plus size={14} /> Pinjam
-          </button>
-        </div>
-
+    <div className="mobile-view-container" style={{ paddingBottom: 90, overflowX: 'hidden' }}>
+      {/* ----------------- SEARCH & CATEGORY SELECT FILTER ----------------- */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: 10, marginBottom: 14 }}>
         {/* Search Bar */}
         <div style={{ position: 'relative' }}>
-          <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+          <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
           <input
             type="text"
-            placeholder="Cari judul buku, pengarang, ISBN..."
+            placeholder="Cari judul, pengarang..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
               width: '100%',
-              padding: '10px 14px 10px 40px',
+              padding: '9px 12px 9px 36px',
               borderRadius: 12,
-              border: 'none',
-              fontSize: 13,
+              border: '1px solid #cbd5e1',
+              fontSize: 12.5,
               background: '#ffffff',
               color: '#0f172a',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              outline: 'none'
+              outline: 'none',
+              boxSizing: 'border-box'
             }}
           />
         </div>
-      </div>
 
-      {/* ----------------- CATEGORIES SCROLL CHIPS ----------------- */}
-      <div style={{
-        display: 'flex',
-        gap: 8,
-        overflowX: 'auto',
-        paddingBottom: 8,
-        marginBottom: 16,
-        scrollbarWidth: 'none'
-      }}>
-        {categories.map((cat) => {
-          const isSelected = selectedCategory === cat;
-          return (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              style={{
-                background: isSelected ? '#0284c7' : '#ffffff',
-                color: isSelected ? '#ffffff' : '#64748b',
-                border: isSelected ? '1px solid #0284c7' : '1px solid #e2e8f0',
-                padding: '6px 14px',
-                borderRadius: 20,
-                fontSize: 12,
-                fontWeight: 700,
-                whiteSpace: 'nowrap',
-                cursor: 'pointer',
-                transition: 'all 0.15s'
-              }}
-            >
-              {cat}
-            </button>
-          );
-        })}
+        {/* Category Select Dropdown */}
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '9px 10px',
+            borderRadius: 12,
+            border: '1px solid #cbd5e1',
+            fontSize: 12,
+            fontWeight: 700,
+            background: '#ffffff',
+            color: '#0284c7',
+            outline: 'none',
+            cursor: 'pointer',
+            boxSizing: 'border-box'
+          }}
+        >
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat === 'Semua' ? 'Semua Kategori' : cat}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* ----------------- SUB-TAB NAVIGATION ----------------- */}
