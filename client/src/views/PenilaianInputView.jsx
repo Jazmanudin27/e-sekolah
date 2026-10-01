@@ -359,16 +359,10 @@ export default function PenilaianInputView({ onBack }) {
                         <div style={{ fontSize: 9, fontWeight: 700, color: '#64748b', marginTop: 2 }}>{k.nama_kategori}</div>
                       </th>
                     ))}
-
-                    {/* REKAP CALCULATED COLUMNS */}
-                    <th style={{ padding: '12px 10px', textAlign: 'center', minWidth: 80, borderLeft: '2px solid #cbd5e1', background: '#f1f5f9' }}>Nilai Akhir</th>
-                    <th style={{ padding: '12px 10px', textAlign: 'center', minWidth: 70, background: '#f1f5f9' }}>Predikat</th>
-                    <th style={{ padding: '12px 10px', textAlign: 'center', minWidth: 80, background: '#f1f5f9' }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {students.map((s, index) => {
-                    const stats = calculateStudentFinal(s.id);
                     return (
                       <tr key={s.id} style={{ borderBottom: '1px solid #f1f5f9', background: index % 2 === 0 ? '#ffffff' : '#fafafa' }}>
                         <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600, color: '#64748b' }}>{index + 1}</td>
@@ -405,21 +399,6 @@ export default function PenilaianInputView({ onBack }) {
                             </td>
                           );
                         })}
-
-                        {/* REKAP CALCULATED VALUES */}
-                        <td style={{ padding: '10px 8px', textAlign: 'center', fontWeight: 800, fontSize: 13, borderLeft: '2px solid #cbd5e1', color: stats.isPass ? '#059669' : '#dc2626' }}>
-                          {stats.finalScore}
-                        </td>
-                        <td style={{ padding: '10px 8px', textAlign: 'center' }}>
-                          <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: stats.predikat === 'A' ? '#dcfce7' : stats.predikat === 'B' ? '#e0f2fe' : '#fef3c7', color: stats.predikat === 'A' ? '#15803d' : stats.predikat === 'B' ? '#0369a1' : '#b45309' }}>
-                            {stats.predikat}
-                          </span>
-                        </td>
-                        <td style={{ padding: '10px 8px', textAlign: 'center' }}>
-                          <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 12, background: stats.isPass ? '#ecfdf5' : '#fef2f2', color: stats.isPass ? '#047857' : '#b91c1c', border: `1px solid ${stats.isPass ? '#a7f3d0' : '#fecaca'}` }}>
-                            {stats.isPass ? 'TUNTAS' : 'REMEDIAL'}
-                          </span>
-                        </td>
                       </tr>
                     );
                   })}
