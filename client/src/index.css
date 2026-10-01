@@ -613,7 +613,7 @@ body {
 .grid-8-menu {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  row-gap: 18px;
+  row-gap: 20px;
   column-gap: 8px;
 }
 
@@ -624,7 +624,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 6px;
+  gap: 7px;
   color: #1e293b;
   border: none;
   background: transparent;
@@ -640,29 +640,29 @@ body {
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.menu-blue-card:nth-child(1)  { animation-delay: 0.12s; }
-.menu-blue-card:nth-child(2)  { animation-delay: 0.15s; }
-.menu-blue-card:nth-child(3)  { animation-delay: 0.18s; }
-.menu-blue-card:nth-child(4)  { animation-delay: 0.21s; }
-.menu-blue-card:nth-child(5)  { animation-delay: 0.24s; }
-.menu-blue-card:nth-child(6)  { animation-delay: 0.27s; }
-.menu-blue-card:nth-child(7)  { animation-delay: 0.30s; }
-.menu-blue-card:nth-child(8)  { animation-delay: 0.33s; }
-.menu-blue-card:nth-child(9)  { animation-delay: 0.36s; }
-.menu-blue-card:nth-child(10) { animation-delay: 0.39s; }
-.menu-blue-card:nth-child(11) { animation-delay: 0.42s; }
-.menu-blue-card:nth-child(12) { animation-delay: 0.45s; }
-.menu-blue-card:nth-child(13) { animation-delay: 0.48s; }
-.menu-blue-card:nth-child(14) { animation-delay: 0.51s; }
-.menu-blue-card:nth-child(15) { animation-delay: 0.54s; }
+.menu-blue-card:nth-child(1)  { animation-delay: 0.10s; }
+.menu-blue-card:nth-child(2)  { animation-delay: 0.13s; }
+.menu-blue-card:nth-child(3)  { animation-delay: 0.16s; }
+.menu-blue-card:nth-child(4)  { animation-delay: 0.19s; }
+.menu-blue-card:nth-child(5)  { animation-delay: 0.22s; }
+.menu-blue-card:nth-child(6)  { animation-delay: 0.25s; }
+.menu-blue-card:nth-child(7)  { animation-delay: 0.28s; }
+.menu-blue-card:nth-child(8)  { animation-delay: 0.31s; }
+.menu-blue-card:nth-child(9)  { animation-delay: 0.34s; }
+.menu-blue-card:nth-child(10) { animation-delay: 0.37s; }
+.menu-blue-card:nth-child(11) { animation-delay: 0.40s; }
+.menu-blue-card:nth-child(12) { animation-delay: 0.43s; }
+.menu-blue-card:nth-child(13) { animation-delay: 0.46s; }
+.menu-blue-card:nth-child(14) { animation-delay: 0.49s; }
+.menu-blue-card:nth-child(15) { animation-delay: 0.52s; }
 
 .menu-blue-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
 }
 
 .menu-blue-card:hover .menu-icon-circle {
   transform: scale(1.08);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
 }
 
 .menu-blue-card:active {
@@ -671,30 +671,83 @@ body {
 }
 
 .menu-icon-circle {
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
+  width: 62px;
+  height: 62px;
+  border-radius: 19px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   color: #ffffff;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.16);
   transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
 }
 
-.menu-icon-circle svg {
-  width: 28px;
-  height: 28px;
+/* Continuous Light Shimmer Sweep like Absen Masuk & Pulang */
+.menu-icon-circle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 70%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.42) 50%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+  animation: scanShimmerSweep 4.5s infinite ease-in-out;
 }
+
+/* Continuous Gentle Pulse on Icon SVG like Absen Masuk & Pulang */
+.menu-icon-circle svg {
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.25));
+  animation: pulseFingerprintIcon 3s infinite ease-in-out;
+  position: relative;
+  z-index: 1;
+}
+
+/* Stagger Shimmer & Pulse Animation Across Icons */
+.menu-blue-card:nth-child(1) .menu-icon-circle::after,
+.menu-blue-card:nth-child(1) .menu-icon-circle svg { animation-delay: 0.1s; }
+.menu-blue-card:nth-child(2) .menu-icon-circle::after,
+.menu-blue-card:nth-child(2) .menu-icon-circle svg { animation-delay: 0.4s; }
+.menu-blue-card:nth-child(3) .menu-icon-circle::after,
+.menu-blue-card:nth-child(3) .menu-icon-circle svg { animation-delay: 0.7s; }
+.menu-blue-card:nth-child(4) .menu-icon-circle::after,
+.menu-blue-card:nth-child(4) .menu-icon-circle svg { animation-delay: 1.0s; }
+.menu-blue-card:nth-child(5) .menu-icon-circle::after,
+.menu-blue-card:nth-child(5) .menu-icon-circle svg { animation-delay: 1.3s; }
+.menu-blue-card:nth-child(6) .menu-icon-circle::after,
+.menu-blue-card:nth-child(6) .menu-icon-circle svg { animation-delay: 1.6s; }
+.menu-blue-card:nth-child(7) .menu-icon-circle::after,
+.menu-blue-card:nth-child(7) .menu-icon-circle svg { animation-delay: 1.9s; }
+.menu-blue-card:nth-child(8) .menu-icon-circle::after,
+.menu-blue-card:nth-child(8) .menu-icon-circle svg { animation-delay: 2.2s; }
+.menu-blue-card:nth-child(9) .menu-icon-circle::after,
+.menu-blue-card:nth-child(9) .menu-icon-circle svg { animation-delay: 2.5s; }
+.menu-blue-card:nth-child(10) .menu-icon-circle::after,
+.menu-blue-card:nth-child(10) .menu-icon-circle svg { animation-delay: 2.8s; }
+.menu-blue-card:nth-child(11) .menu-icon-circle::after,
+.menu-blue-card:nth-child(11) .menu-icon-circle svg { animation-delay: 3.1s; }
+.menu-blue-card:nth-child(12) .menu-icon-circle::after,
+.menu-blue-card:nth-child(12) .menu-icon-circle svg { animation-delay: 3.4s; }
+.menu-blue-card:nth-child(13) .menu-icon-circle::after,
+.menu-blue-card:nth-child(13) .menu-icon-circle svg { animation-delay: 3.7s; }
+.menu-blue-card:nth-child(14) .menu-icon-circle::after,
+.menu-blue-card:nth-child(14) .menu-icon-circle svg { animation-delay: 4.0s; }
+.menu-blue-card:nth-child(15) .menu-icon-circle::after,
+.menu-blue-card:nth-child(15) .menu-icon-circle svg { animation-delay: 4.3s; }
 
 .menu-blue-card span {
   font-size: 11.5px;
   font-weight: 700;
   text-align: center;
   line-height: 1.25;
-  color: #475569;
+  color: #334155;
   letter-spacing: -0.2px;
+  margin-top: 2px;
   white-space: normal;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -702,7 +755,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
-  padding: 0 2px;
+  padding: 0 1px;
 }
 
 /* MODAL BOTTOM SHEET ANIMATION CLASSES */
@@ -714,57 +767,151 @@ body {
   animation: berandaModalCardSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* WARNA KATEGORI MENU MOBILE (A, B, C, D, E) DITERAPKAN PADA ICON */
+/* ==========================================================================
+   WARNA-WARNI KHUSUS TIAP MENU (GRADIASI VIBRANT BERBEDA-BEDA TIAP MENU)
+   ========================================================================== */
 
-/* Kategori A: Data Master (Siswa, Guru, Mapel) -> Vibrant Royal Indigo Blue */
-.menu-cat-master .menu-icon-circle {
-  background: linear-gradient(135deg, #2563eb, #1e40af);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.32);
+/* 1. Siswa -> Royal Sapphire Blue */
+.menu-item-siswa .menu-icon-circle {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.38);
 }
-.menu-cat-master:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.44);
+.menu-item-siswa:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
 }
 
-/* Kategori B: Histori & Izin (History, Izin) -> Warm Sunset Amber Orange */
-.menu-cat-history .menu-icon-circle {
+/* 2. Guru -> Emerald Forest Green */
+.menu-item-guru .menu-icon-circle {
+  background: linear-gradient(135deg, #059669, #047857);
+  box-shadow: 0 8px 18px rgba(5, 150, 105, 0.38);
+}
+.menu-item-guru:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #10b981, #065f46);
+}
+
+/* 3. Mapel -> Amber Tangerine */
+.menu-item-mapel .menu-icon-circle {
   background: linear-gradient(135deg, #f59e0b, #d97706);
-  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.32);
+  box-shadow: 0 8px 18px rgba(245, 158, 11, 0.38);
 }
-.menu-cat-history:hover .menu-icon-circle {
+.menu-item-mapel:hover .menu-icon-circle {
   background: linear-gradient(135deg, #fbbf24, #b45309);
-  box-shadow: 0 10px 22px rgba(245, 158, 11, 0.44);
 }
 
-/* Kategori C: Jadwal & Kalender (Jadwal, Kalender) -> Emerald Fresh Green */
-.menu-cat-calendar .menu-icon-circle {
-  background: linear-gradient(135deg, #10b981, #047857);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.32);
+/* 4. History -> Crimson Rose */
+.menu-item-history .menu-icon-circle {
+  background: linear-gradient(135deg, #e11d48, #be123c);
+  box-shadow: 0 8px 18px rgba(225, 29, 72, 0.38);
 }
-.menu-cat-calendar:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #34d399, #065f46);
-  box-shadow: 0 10px 22px rgba(16, 185, 129, 0.44);
-}
-
-/* Kategori D: Absensi (Absen Siswa, Absen Mapel, Input Nilai) -> Deep Velvet Purple */
-.menu-cat-absensi .menu-icon-circle {
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.32);
-}
-.menu-cat-absensi:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #a78bfa, #5b21b6);
-  box-shadow: 0 10px 22px rgba(139, 92, 246, 0.44);
+.menu-item-history:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #f43f5e, #9f1239);
 }
 
-/* Kategori E: Rekap Laporan (Rekap Siswa, Rekap Mapel, Rekap Guru, Rapor Nilai) -> Deep Cyan Blue */
-.menu-cat-rekap .menu-icon-circle {
+/* 5. Jadwal -> Royal Violet Purple */
+.menu-item-jadwal .menu-icon-circle {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  box-shadow: 0 8px 18px rgba(124, 58, 237, 0.38);
+}
+.menu-item-jadwal:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #8b5cf6, #5b21b6);
+}
+
+/* 6. Kalender -> Aquamarine / Dark Teal */
+.menu-item-kalender .menu-icon-circle {
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+  box-shadow: 0 8px 18px rgba(13, 148, 136, 0.38);
+}
+.menu-item-kalender:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #14b8a6, #115e59);
+}
+
+/* 7. Izin -> Coral Orange Sunset */
+.menu-item-izin .menu-icon-circle {
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  box-shadow: 0 8px 18px rgba(234, 88, 12, 0.38);
+}
+.menu-item-izin:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #f97316, #9a3412);
+}
+
+/* 8. Absen Siswa -> Vibrant Hot Pink / Magenta */
+.menu-item-absen-siswa .menu-icon-circle {
+  background: linear-gradient(135deg, #ec4899, #db2777);
+  box-shadow: 0 8px 18px rgba(236, 72, 153, 0.38);
+}
+.menu-item-absen-siswa:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #f472b6, #be185d);
+}
+
+/* 9. Absen Mapel -> Indigo Iris */
+.menu-item-absen-mapel .menu-icon-circle {
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.38);
+}
+.menu-item-absen-mapel:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #6366f1, #3730a3);
+}
+
+/* 10. Rekap Siswa -> Golden Honey */
+.menu-item-rekap-siswa .menu-icon-circle {
+  background: linear-gradient(135deg, #ca8a04, #a16207);
+  box-shadow: 0 8px 18px rgba(202, 138, 4, 0.38);
+}
+.menu-item-rekap-siswa:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #eab308, #854d0e);
+}
+
+/* 11. Rekap Mapel -> Bright Cyan Lagoon */
+.menu-item-rekap-mapel .menu-icon-circle {
+  background: linear-gradient(135deg, #0891b2, #0e7490);
+  box-shadow: 0 8px 18px rgba(8, 145, 178, 0.38);
+}
+.menu-item-rekap-mapel:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #06b6d4, #155e75);
+}
+
+/* 12. Rekap Guru -> Crimson Red Ruby */
+.menu-item-rekap-guru .menu-icon-circle {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.38);
+}
+.menu-item-rekap-guru:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #ef4444, #991b1b);
+}
+
+/* 13. Input Nilai -> Electric Amethyst Purple */
+.menu-item-nilai-input .menu-icon-circle {
+  background: linear-gradient(135deg, #9333ea, #7e22ce);
+  box-shadow: 0 8px 18px rgba(147, 51, 234, 0.38);
+}
+.menu-item-nilai-input:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #a855f7, #6b21a8);
+}
+
+/* 14. Rapor Nilai -> Lime Olive Fresh */
+.menu-item-nilai-laporan .menu-icon-circle {
+  background: linear-gradient(135deg, #65a30d, #4d7c0f);
+  box-shadow: 0 8px 18px rgba(101, 163, 13, 0.38);
+}
+.menu-item-nilai-laporan:hover .menu-icon-circle {
+  background: linear-gradient(135deg, #84cc16, #3f6212);
+}
+
+/* 15. Perpustakaan -> Cerulean Blue Oceanic */
+.menu-item-perpus .menu-icon-circle {
   background: linear-gradient(135deg, #0284c7, #0369a1);
-  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.32);
+  box-shadow: 0 8px 18px rgba(2, 132, 199, 0.38);
 }
-.menu-cat-rekap:hover .menu-icon-circle {
+.menu-item-perpus:hover .menu-icon-circle {
   background: linear-gradient(135deg, #38bdf8, #075985);
-  box-shadow: 0 10px 22px rgba(2, 132, 199, 0.44);
 }
+
+/* Fallback categories */
+.menu-cat-master .menu-icon-circle { background: linear-gradient(135deg, #2563eb, #1e40af); }
+.menu-cat-history .menu-icon-circle { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.menu-cat-calendar .menu-icon-circle { background: linear-gradient(135deg, #10b981, #047857); }
+.menu-cat-absensi .menu-icon-circle { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.menu-cat-rekap .menu-icon-circle { background: linear-gradient(135deg, #0284c7, #0369a1); }
 
 /* HISTORI SECTION */
 .history-section-wrapper {
