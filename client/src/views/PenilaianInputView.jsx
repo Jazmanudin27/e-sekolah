@@ -240,51 +240,30 @@ export default function PenilaianInputView({ onBack }) {
 
   const calculateStudentFinal = (siswaId) => {
     const sNilai = nilaiMap[siswaId] || {};
-    
-    const phVals = [];
-    const praktikVals = [];
-    let utsVal = null;
-    let uasVal = null;
+    const filledScores = [];
 
     for (const k of komponenList) {
-      const val = parseFloat(sNilai[k.id]);
-      if (isNaN(val)) continue;
-
-      const katCode = (k.kode_kategori || '').toUpperCase();
-      if (katCode === 'PH' || katCode === 'TUGAS' || k.kelompok === 'FORMATIF') {
-        phVals.push(val);
-      } else if (katCode === 'PRAKTIK' || katCode === 'P5' || k.kelompok === 'KETERAMPILAN' || k.kelompok === 'PROYEK') {
-        praktikVals.push(val);
-      } else if (katCode === 'UTS') {
-        utsVal = val;
-      } else if (katCode === 'UAS') {
-        uasVal = val;
-      } else {
-        phVals.push(val);
+      const rawVal = sNilai[k.id];
+      if (rawVal !== undefined && rawVal !== null && rawVal !== '') {
+        const val = parseFloat(rawVal);
+        if (!isNaN(val)) {
+          filledScores.push(val);
+        }
       }
     }
 
-    const avgPH = phVals.length > 0 ? (phVals.reduce((a, b) => a + b, 0) / phVals.length) : 0;
-    const avgPraktik = praktikVals.length > 0 ? (praktikVals.reduce((a, b) => a + b, 0) / praktikVals.length) : 0;
-    const scoreUTS = utsVal !== null ? utsVal : 0;
-    const scoreUAS = uasVal !== null ? uasVal : 0;
+    if (filledScores.length === 0) {
+      return {
+        finalScore: '0.0',
+        isPass: false
+      };
+    }
 
-    const bPH = bobot.bobot_ph || 25;
-    const bPraktik = bobot.bobot_praktik || 25;
-    const bUTS = bobot.bobot_uts || 25;
-    const bUAS = bobot.bobot_uas || 25;
-    const totalBobot = bPH + bPraktik + bUTS + bUAS || 100;
-
-    const finalScore = ((avgPH * bPH) + (avgPraktik * bPraktik) + (scoreUTS * bUTS) + (scoreUAS * bUAS)) / totalBobot;
-    
-    let predikat = 'D';
-    if (finalScore >= 88) predikat = 'A';
-    else if (finalScore >= 78) predikat = 'B';
-    else if (finalScore >= 68) predikat = 'C';
+    const sum = filledScores.reduce((a, b) => a + b, 0);
+    const finalScore = sum / filledScores.length;
 
     return {
       finalScore: finalScore.toFixed(1),
-      predikat,
       isPass: finalScore >= (bobot.kktp_kkm || 75)
     };
   };

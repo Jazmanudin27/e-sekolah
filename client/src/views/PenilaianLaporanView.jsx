@@ -65,40 +65,26 @@ export default function PenilaianLaporanView({ onBack }) {
         setKomponenList(rawKomponen);
         setNilaiMap(rawNilaiMap);
 
-        // Process data for report summary
+        // Process data for report summary (Average of filled scores)
         const processed = rawStudents.map(s => {
           const sNilai = rawNilaiMap[s.id] || {};
-          let phSum = 0, phCount = 0;
-          let prkSum = 0, prkCount = 0;
-          let utsScore = 0;
-          let uasScore = 0;
+          const filledScores = [];
 
           for (const k of rawKomponen) {
-            const val = parseFloat(sNilai[k.id]);
-            if (isNaN(val)) continue;
-
-            const code = (k.kode_kategori || '').toUpperCase();
-            if (code === 'PH' || code === 'TUGAS' || k.kelompok === 'FORMATIF') {
-              phSum += val; phCount++;
-            } else if (code === 'PRAKTIK' || code === 'P5' || k.kelompok === 'KETERAMPILAN') {
-              prkSum += val; prkCount++;
-            } else if (code === 'UTS') {
-              utsScore = val;
-            } else if (code === 'UAS') {
-              uasScore = val;
+            const rawVal = sNilai[k.id];
+            if (rawVal !== undefined && rawVal !== null && rawVal !== '') {
+              const val = parseFloat(rawVal);
+              if (!isNaN(val)) {
+                filledScores.push(val);
+              }
             }
           }
 
-          const avgPH = phCount > 0 ? (phSum / phCount) : 0;
-          const avgPraktik = prkCount > 0 ? (prkSum / prkCount) : 0;
-
-          const bPH = bobot.bobot_ph || 25;
-          const bPrk = bobot.bobot_praktik || 25;
-          const bUTS = bobot.bobot_uts || 25;
-          const bUAS = bobot.bobot_uas || 25;
-          const totalBobot = bPH + bPrk + bUTS + bUAS || 100;
-
-          const finalScore = ((avgPH * bPH) + (avgPraktik * bPrk) + (utsScore * bUTS) + (uasScore * bUAS)) / totalBobot;
+          let finalScore = 0;
+          if (filledScores.length > 0) {
+            const sum = filledScores.reduce((a, b) => a + b, 0);
+            finalScore = sum / filledScores.length;
+          }
 
           return {
             ...s,
