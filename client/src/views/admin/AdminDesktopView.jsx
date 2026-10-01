@@ -4,7 +4,7 @@ import {
   ClipboardList, Send, Calendar, BookOpen, Package, Settings,
   ChevronDown, ChevronRight, Menu, X, Bell, Clock, LogOut,
   Building2, GraduationCap, Users, ShieldCheck, UserCheck, BookOpenCheck,
-  Fingerprint, Award, FileSpreadsheet, BarChart3, Shield, Megaphone
+  Fingerprint, Award, FileSpreadsheet, BarChart3, Shield, Megaphone, Trophy
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import ArtanitaLogo from '../../components/ArtanitaLogo';
@@ -29,9 +29,10 @@ import AdminLaporanGeneratorTab from './AdminLaporanGeneratorTab';
 import AdminPengumumanTab from './AdminPengumumanTab';
 import AdminKalenderTab from './AdminKalenderTab';
 import AdminRaporTab from './AdminRaporTab';
+import AdminEkskulTab from './AdminEkskulTab';
 
 const VALID_ADMIN_TABS = [
-  'dashboard', 'pengumuman', 'kalender', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal',
+  'dashboard', 'pengumuman', 'kalender', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal', 'ekskul',
   'izin', 'presensiGuru', 'absensiSiswa', 'absensiMapel',
   'rekapGuru', 'rekapSiswa', 'rekapMapel',
   'laporanRapor', 'laporanSiswa', 'laporanGuru', 'laporanKelas',
@@ -51,7 +52,7 @@ const getInitialTab = () => {
 };
 
 const getInitialOpenMenus = (tab) => ({
-  dataMaster: ['kelas', 'siswa', 'guru', 'mapel', 'jadwal'].includes(tab),
+  dataMaster: ['kelas', 'siswa', 'guru', 'mapel', 'jadwal', 'ekskul'].includes(tab),
   suratMenyurat: ['izin'].includes(tab),
   presensiAbsensi: ['presensiGuru', 'absensiSiswa', 'absensiMapel'].includes(tab),
   laporanMaster: false,
@@ -250,7 +251,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           <div className="portal-menu-group">
             <button
               type="button"
-              className={`portal-menu-item has-submenu ${['kelas', 'siswa', 'guru', 'mapel', 'jadwal'].includes(activeTab) ? 'has-active' : ''}`}
+              className={`portal-menu-item has-submenu ${['kelas', 'siswa', 'guru', 'mapel', 'jadwal', 'ekskul'].includes(activeTab) ? 'has-active' : ''}`}
               onClick={() => toggleSubMenu('dataMaster')}
             >
               <div className="menu-icon-wrap">
@@ -295,6 +296,13 @@ export default function AdminDesktopView({ user, onLogout }) {
                   onClick={() => handleSelectTab('jadwal')}
                 >
                   <span>Jadwal Pelajaran</span>
+                </button>
+                <button
+                  type="button"
+                  className={`portal-submenu-item ${activeTab === 'ekskul' ? 'active' : ''}`}
+                  onClick={() => handleSelectTab('ekskul')}
+                >
+                  <span>Ekstrakurikuler</span>
                 </button>
               </div>
             )}
@@ -689,6 +697,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           {activeTab === 'guru' && <AdminGuruTab />}
           {activeTab === 'mapel' && <AdminMapelTab />}
           {activeTab === 'jadwal' && <AdminJadwalTab />}
+          {activeTab === 'ekskul' && <AdminEkskulTab />}
 
           {/* 3. SURAT MENYURAT / PRESENSI */}
           {activeTab === 'izin' && <AdminIzinTab />}

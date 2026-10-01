@@ -47,9 +47,7 @@ export default function AdminRaporTab() {
     ]
   });
 
-  const [ekstraList, setEkstraList] = useState([
-    { id: 1, kegiatan: "Praja Muda Karana", predikat: "Baik", keterangan: "Peserta Didik telah mampu memahami dan mengamalkan nilai-nilai dasar pramuka." }
-  ]);
+  const [ekstraList, setEkstraList] = useState([]);
 
   const [absensi, setAbsensi] = useState({ sakit: 3, izin: 4, alpha: 0 });
   const [catatanWali, setCatatanWali] = useState("Tingkatkan terus konsistensi belajar dan kedisiplinan di kelas.");
@@ -261,6 +259,22 @@ export default function AdminRaporTab() {
       });
 
       setNilaiGrouped(categorized);
+
+      // Fetch ekskul data for this student
+      try {
+        const resEkskul = await api.get('/ekskul/rapor/siswa', {
+          params: { siswa_id: siswaId, kelas_id: selectedKelas, tahun_ajaran: tahunPelajaran, semester: semCode }
+        });
+        const ekskulData = resEkskul.data?.data || [];
+        setEkstraList(ekskulData.map((ek, i) => ({
+          id: i + 1,
+          kegiatan: ek.nama_ekskul,
+          predikat: ek.predikat || 'Baik',
+          keterangan: ek.keterangan || '-'
+        })));
+      } catch {
+        setEkstraList([]);
+      }
 
     } catch (e) {
       console.warn('Error loading rapor:', e);
