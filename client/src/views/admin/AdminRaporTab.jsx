@@ -190,20 +190,43 @@ export default function AdminRaporTab() {
           const mName = k.nama_mapel || k.nama_kategori || k.nama_komponen;
           if (!mapelMap[mName]) mapelMap[mName] = [];
           const score = (rawNilaiMap[siswaId] && rawNilaiMap[siswaId][k.id] !== undefined) ? parseFloat(rawNilaiMap[siswaId][k.id]) : 0;
-          if (score > 0) mapelMap[mName].push(score);
+          if (score > 0) {
+            mapelMap[mName].push({
+              score,
+              nama_komponen: k.nama_komponen || 'materi'
+            });
+          }
         });
 
         const newNilai = Object.keys(mapelMap).map((mName, idx) => {
-          const scores = mapelMap[mName];
+          const items = mapelMap[mName];
+          const scores = items.map(i => i.score);
           const avg = scores.length > 0 ? (scores.reduce((a,b)=>a+b, 0)/scores.length) : 80;
           const rounded = parseFloat(avg.toFixed(0));
+
+          let deskripsi = "";
+          if (items.length > 0) {
+            const sorted = [...items].sort((a,b) => b.score - a.score);
+            const highest = sorted[0];
+            const lowest = sorted[sorted.length - 1];
+
+            const highText = `Menunjukkan penguasaan yang sangat baik dalam ${highest.nama_komponen.toLowerCase()}.`;
+            let lowText = "";
+            if (lowest && lowest.score < 80 && lowest !== highest) {
+              lowText = ` Perlu bimbingan dan peningkatan lebih lanjut pada materi ${lowest.nama_komponen.toLowerCase()}.`;
+            }
+            deskripsi = `${highText}${lowText}`;
+          } else {
+            deskripsi = rounded >= 85
+              ? `Menunjukkan penguasaan yang sangat baik dalam menganalisis dan memahami materi ${mName}.`
+              : `Menunjukkan penguasaan baik pada materi ${mName}. Perlu bimbingan dan peningkatan konsistensi.`;
+          }
+
           return {
             id: idx + 1,
             nama_mapel: mName,
             nilai_akhir: rounded,
-            deskripsi: rounded >= 85
-              ? `Menunjukkan penguasaan yang sangat baik dalam menganalisis dan memahami materi ${mName}.`
-              : `Menunjukkan penguasaan baik pada materi ${mName}. Perlu bimbingan dan peningkatan konsistensi.`
+            deskripsi
           };
         });
 
