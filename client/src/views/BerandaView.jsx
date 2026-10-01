@@ -161,28 +161,28 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
           <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
             <button className="menu-blue-card menu-cat-absensi" onClick={() => onSwitchTab('absensiSiswa')}>
               <div className="menu-icon-circle">
-                <UserCheck size={25} strokeWidth={2.3} />
+                <UserCheck size={28} strokeWidth={2.3} />
               </div>
               <span>Absen Siswa</span>
             </button>
 
             <button className="menu-blue-card menu-cat-calendar" onClick={() => onSwitchTab('jadwal')}>
               <div className="menu-icon-circle">
-                <Calendar size={25} strokeWidth={2.3} />
+                <Calendar size={28} strokeWidth={2.3} />
               </div>
               <span>Jadwal</span>
             </button>
 
             <button className="menu-blue-card menu-cat-rekap" onClick={() => onSwitchTab('rekapSiswa')}>
               <div className="menu-icon-circle">
-                <FileBarChart size={25} strokeWidth={2.3} />
+                <FileBarChart size={28} strokeWidth={2.3} />
               </div>
               <span>Rekap Siswa</span>
             </button>
 
             <button className="menu-blue-card menu-cat-calendar" onClick={() => onSwitchTab('kalender')}>
               <div className="menu-icon-circle">
-                <CalendarDays size={25} strokeWidth={2.3} />
+                <CalendarDays size={28} strokeWidth={2.3} />
               </div>
               <span>Kalender</span>
             </button>
@@ -315,105 +315,105 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
         <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
           <button className="menu-blue-card menu-cat-master" onClick={() => onSwitchTab('siswa')}>
             <div className="menu-icon-circle">
-              <GraduationCap size={25} strokeWidth={2.3} />
+              <GraduationCap size={28} strokeWidth={2.3} />
             </div>
             <span>Siswa</span>
           </button>
 
           <button className="menu-blue-card menu-cat-master" onClick={() => onSwitchTab('guru')}>
             <div className="menu-icon-circle">
-              <Users size={25} strokeWidth={2.3} />
+              <Users size={28} strokeWidth={2.3} />
             </div>
             <span>Guru</span>
           </button>
 
           <button className="menu-blue-card menu-cat-master" onClick={() => onSwitchTab('mapel')}>
             <div className="menu-icon-circle">
-              <Library size={25} strokeWidth={2.3} />
+              <Library size={28} strokeWidth={2.3} />
             </div>
             <span>Mapel</span>
           </button>
 
           <button className="menu-blue-card menu-cat-history" onClick={() => onSwitchTab('riwayat')}>
             <div className="menu-icon-circle">
-              <History size={25} strokeWidth={2.3} />
+              <History size={28} strokeWidth={2.3} />
             </div>
             <span>History</span>
           </button>
 
           <button className="menu-blue-card menu-cat-calendar" onClick={() => onSwitchTab('jadwal')}>
             <div className="menu-icon-circle">
-              <Calendar size={25} strokeWidth={2.3} />
+              <Calendar size={28} strokeWidth={2.3} />
             </div>
             <span>Jadwal</span>
           </button>
 
           <button className="menu-blue-card menu-cat-calendar" onClick={() => onSwitchTab('kalender')}>
             <div className="menu-icon-circle">
-              <CalendarDays size={25} strokeWidth={2.3} />
+              <CalendarDays size={28} strokeWidth={2.3} />
             </div>
             <span>Kalender</span>
           </button>
 
           <button className="menu-blue-card menu-cat-history" onClick={() => onSwitchTab('izin')}>
             <div className="menu-icon-circle">
-              <Send size={25} strokeWidth={2.3} />
+              <Send size={28} strokeWidth={2.3} />
             </div>
             <span>Izin</span>
           </button>
 
           <button className="menu-blue-card menu-cat-absensi" onClick={() => onSwitchTab('absensiSiswa')}>
             <div className="menu-icon-circle">
-              <UserCheck size={25} strokeWidth={2.3} />
+              <UserCheck size={28} strokeWidth={2.3} />
             </div>
             <span>Absen Siswa</span>
           </button>
 
           <button className="menu-blue-card menu-cat-absensi" onClick={() => onSwitchTab('absensiMapel')}>
             <div className="menu-icon-circle">
-              <BookOpen size={25} strokeWidth={2.3} />
+              <BookOpen size={28} strokeWidth={2.3} />
             </div>
             <span>Absen Mapel</span>
           </button>
 
           <button className="menu-blue-card menu-cat-rekap" onClick={() => onSwitchTab('rekapSiswa')}>
             <div className="menu-icon-circle">
-              <FileBarChart size={25} strokeWidth={2.3} />
+              <FileBarChart size={28} strokeWidth={2.3} />
             </div>
             <span>Rekap Siswa</span>
           </button>
 
           <button className="menu-blue-card menu-cat-rekap" onClick={() => onSwitchTab('rekapMapel')}>
             <div className="menu-icon-circle">
-              <PieChart size={25} strokeWidth={2.3} />
+              <PieChart size={28} strokeWidth={2.3} />
             </div>
             <span>Rekap Mapel</span>
           </button>
 
           <button className="menu-blue-card menu-cat-rekap" onClick={() => onSwitchTab('rekapGuru')}>
             <div className="menu-icon-circle">
-              <Award size={25} strokeWidth={2.3} />
+              <Award size={28} strokeWidth={2.3} />
             </div>
             <span>Rekap Guru</span>
           </button>
 
           <button className="menu-blue-card menu-cat-absensi" onClick={() => onSwitchTab('penilaianInput')}>
             <div className="menu-icon-circle">
-              <FileSpreadsheet size={25} strokeWidth={2.3} />
+              <FileSpreadsheet size={28} strokeWidth={2.3} />
             </div>
             <span>Input Nilai</span>
           </button>
 
           <button className="menu-blue-card menu-cat-rekap" onClick={() => onSwitchTab('penilaianLaporan')}>
             <div className="menu-icon-circle">
-              <FileCheck size={25} strokeWidth={2.3} />
+              <FileCheck size={28} strokeWidth={2.3} />
             </div>
             <span>Rapor Nilai</span>
           </button>
 
           <button className="menu-blue-card menu-cat-master" onClick={() => onSwitchTab('perpustakaan')}>
             <div className="menu-icon-circle" style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)' }}>
-              <BookOpen size={25} strokeWidth={2.3} color="#ffffff" />
+              <BookOpen size={28} strokeWidth={2.3} color="#ffffff" />
             </div>
             <span>Perpustakaan</span>
           </button>
