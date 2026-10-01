@@ -64,14 +64,26 @@ const getInitialOpenMenus = (tab) => ({
 });
 
 export default function AdminDesktopView({ user, onLogout }) {
-  const [activeTab, setActiveTab] = useState(getInitialTab);
+  const roleStr = String(user?.role || user?.username || '').toLowerCase();
+  const isPerpusAdmin = roleStr.includes('perpus') || roleStr.includes('pustakawan');
+
+  const [activeTab, setActiveTab] = useState(() => isPerpusAdmin ? 'perpustakaan' : getInitialTab());
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
-  // Accordion open states (closed by default on dashboard, only opens if active tab belongs to the group)
+  // Accordion open states
   const [openMenus, setOpenMenus] = useState(() => getInitialOpenMenus(getInitialTab()));
+
+  useEffect(() => {
+    if (isPerpusAdmin) {
+      if (activeTab !== 'perpustakaan') {
+        setActiveTab('perpustakaan');
+      }
+      setOpenMenus(prev => ({ ...prev, perpustakaan: true }));
+    }
+  }, [isPerpusAdmin, activeTab]);
 
   // Listen to hash change (e.g. browser back/forward buttons)
   useEffect(() => {
@@ -191,14 +203,32 @@ export default function AdminDesktopView({ user, onLogout }) {
           <ArtanitaLogo size={36} />
           <div className="school-info">
             <div className="school-name">{sekolahInfo?.nama_sekolah || 'SMK ARTANITA'}</div>
-            <div className="school-badge-admin">ADMIN</div>
+            <div className="school-badge-admin">
+              {isPerpusAdmin ? 'PUSTAKAWAN' : (user?.role?.toUpperCase() || 'ADMIN')}
+            </div>
           </div>
         </div>
 
         {/* SIDEBAR NAVIGATION ITEMS */}
         <div className="portal-sidebar-menu">
-          {/* ----------------- MAIN MENU ----------------- */}
-          <div className="portal-menu-section-label">MAIN MENU</div>
+          {isPerpusAdmin ? (
+            <>
+              <div className="portal-menu-section-label">LAYANAN PERPUSTAKAAN</div>
+              <button
+                type="button"
+                className={`portal-menu-item ${activeTab === 'perpustakaan' ? 'active' : ''}`}
+                onClick={() => handleSelectTab('perpustakaan')}
+              >
+                <div className="menu-icon-wrap">
+                  <BookOpen size={17} />
+                </div>
+                <span className="menu-label">Katalog & Peminjaman Buku</span>
+              </button>
+            </>
+          ) : (
+            <>
+              {/* ----------------- MAIN MENU ----------------- */}
+              <div className="portal-menu-section-label">MAIN MENU</div>
 
           {/* 1. Dashboard */}
           <button
@@ -609,6 +639,8 @@ export default function AdminDesktopView({ user, onLogout }) {
               </div>
             )}
           </div>
+            </>
+          )}
         </div>
       </aside>
 
@@ -687,38 +719,44 @@ export default function AdminDesktopView({ user, onLogout }) {
             PAGE CONTENT INNER
             ======================================================== */}
         <main className="portal-page-body">
-          {/* 1. DASHBOARD & PENGUMUMAN */}
-          {activeTab === 'dashboard' && <AdminDashboardTab onSwitchTab={handleSelectTab} />}
-          {activeTab === 'pengumuman' && <AdminPengumumanTab />}
-          {activeTab === 'kalender' && <AdminKalenderTab />}
+          {isPerpusAdmin ? (
+            <AdminPerpustakaanTab />
+          ) : (
+            <>
+              {/* 1. DASHBOARD & PENGUMUMAN */}
+              {activeTab === 'dashboard' && <AdminDashboardTab onSwitchTab={handleSelectTab} />}
+              {activeTab === 'pengumuman' && <AdminPengumumanTab />}
+              {activeTab === 'kalender' && <AdminKalenderTab />}
 
-          {/* 2. DATA MASTER */}
-          {activeTab === 'kelas' && <AdminKelasTab />}
-          {activeTab === 'siswa' && <AdminSiswaTab />}
-          {activeTab === 'guru' && <AdminGuruTab />}
-          {activeTab === 'mapel' && <AdminMapelTab />}
-          {activeTab === 'jadwal' && <AdminJadwalTab />}
-          {activeTab === 'ekskul' && <AdminEkskulTab />}
+              {/* 2. DATA MASTER */}
+              {activeTab === 'kelas' && <AdminKelasTab />}
+              {activeTab === 'siswa' && <AdminSiswaTab />}
+              {activeTab === 'guru' && <AdminGuruTab />}
+              {activeTab === 'mapel' && <AdminMapelTab />}
+              {activeTab === 'jadwal' && <AdminJadwalTab />}
+              {activeTab === 'ekskul' && <AdminEkskulTab />}
 
-          {/* 3. SURAT MENYURAT / PRESENSI */}
-          {activeTab === 'izin' && <AdminIzinTab />}
-          {activeTab === 'presensiGuru' && <AdminPresensiGuruTab />}
-          {activeTab === 'absensiSiswa' && <AdminAbsensiSiswaTab />}
-          {activeTab === 'absensiMapel' && <AdminAbsensiMapelTab />}
+              {/* 3. SURAT MENYURAT / PRESENSI */}
+              {activeTab === 'izin' && <AdminIzinTab />}
+              {activeTab === 'presensiGuru' && <AdminPresensiGuruTab />}
+              {activeTab === 'absensiSiswa' && <AdminAbsensiSiswaTab />}
+              {activeTab === 'absensiMapel' && <AdminAbsensiMapelTab />}
 
-          {/* 4. LAPORAN & REKAP */}
-          {activeTab === 'laporanRapor' && <AdminRaporTab />}
-          {['laporanSiswa', 'laporanGuru', 'laporanKelas', 'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat'].includes(activeTab) && (
-            <AdminLaporanGeneratorTab reportType={activeTab} />
+              {/* 4. LAPORAN & REKAP */}
+              {activeTab === 'laporanRapor' && <AdminRaporTab />}
+              {['laporanSiswa', 'laporanGuru', 'laporanKelas', 'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat'].includes(activeTab) && (
+                <AdminLaporanGeneratorTab reportType={activeTab} />
+              )}
+              {activeTab === 'rekapGuru' && <AdminRekapTab initialSubTab="guru" />}
+              {activeTab === 'rekapSiswa' && <AdminRekapTab initialSubTab="siswa" />}
+              {activeTab === 'rekapMapel' && <AdminRekapTab initialSubTab="mapel" />}
+
+              {/* 5. SISTEM & AKUN */}
+              {activeTab === 'perpustakaan' && <AdminPerpustakaanTab />}
+              {activeTab === 'users' && <AdminUsersTab />}
+              {activeTab === 'settings' && <AdminSettingsTab />}
+            </>
           )}
-          {activeTab === 'rekapGuru' && <AdminRekapTab initialSubTab="guru" />}
-          {activeTab === 'rekapSiswa' && <AdminRekapTab initialSubTab="siswa" />}
-          {activeTab === 'rekapMapel' && <AdminRekapTab initialSubTab="mapel" />}
-
-          {/* 5. SISTEM & AKUN */}
-          {activeTab === 'perpustakaan' && <AdminPerpustakaanTab />}
-          {activeTab === 'users' && <AdminUsersTab />}
-          {activeTab === 'settings' && <AdminSettingsTab />}
         </main>
       </div>
     </div>
