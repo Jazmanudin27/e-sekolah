@@ -59,26 +59,6 @@ export default function AdminRaporTab() {
   const [namaKepsek, setNamaKepsek] = useState("Dr. H. Supriyadi, M.Pd");
   const [nipKepsek, setNipKepsek] = useState("19700202 199503 1 001");
 
-  // Auto-detect Fase based on Class Name
-  const autoDetectFase = (className) => {
-    if (!className) return 'E';
-    const cUpper = String(className).toUpperCase();
-    if (cUpper.includes('XI') || cUpper.includes('XII') || cUpper.includes('11') || cUpper.includes('12')) {
-      return 'F';
-    } else if (cUpper.includes('X') || cUpper.includes('10')) {
-      return 'E';
-    } else if (cUpper.includes('7') || cUpper.includes('8') || cUpper.includes('9') || cUpper.includes('VII') || cUpper.includes('VIII') || cUpper.includes('IX')) {
-      return 'D';
-    } else if (cUpper.includes('5') || cUpper.includes('6') || cUpper.includes('V') || cUpper.includes('VI')) {
-      return 'C';
-    } else if (cUpper.includes('3') || cUpper.includes('4') || cUpper.includes('III') || cUpper.includes('IV')) {
-      return 'B';
-    } else if (cUpper.includes('1') || cUpper.includes('2') || cUpper.includes('I') || cUpper.includes('II')) {
-      return 'A';
-    }
-    return 'E';
-  };
-
   useEffect(() => {
     fetchInitialData();
   }, []);
@@ -86,8 +66,6 @@ export default function AdminRaporTab() {
   useEffect(() => {
     if (selectedKelas) {
       fetchSiswaByKelas(selectedKelas);
-      const detected = autoDetectFase(selectedKelas);
-      setFase(detected);
     }
   }, [selectedKelas]);
 
@@ -110,7 +88,6 @@ export default function AdminRaporTab() {
       if (kArr.length > 0) {
         const firstK = kArr[0].kode_kelas || kArr[0].id || kArr[0].nama_kelas;
         setSelectedKelas(firstK);
-        setFase(autoDetectFase(kArr[0].nama_kelas || firstK));
       }
 
       if (resSekolah.data?.data) {
