@@ -329,7 +329,7 @@ export default function AdminRaporTab() {
   };
 
   return (
-    <div className="admin-rapor-container" style={{ padding: '24px 28px 40px', background: '#f8fafc', minHeight: '100vh', boxSizing: 'border-box' }}>
+    <div className="admin-rapor-container" style={{ padding: '24px 28px 40px', width: '100%', boxSizing: 'border-box' }}>
       {/* STYLE UNTUK CETAK PDF */}
       <style>{`
         @media print {
@@ -354,7 +354,7 @@ export default function AdminRaporTab() {
       `}</style>
 
       {/* CONTROL BAR (SCREEN ONLY) */}
-      <div className="admin-rapor-controls" style={{ background: '#ffffff', padding: '20px 24px', borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', marginBottom: 20, maxWidth: 960, margin: '0 auto 20px auto' }}>
+      <div className="admin-rapor-controls admin-panel" style={{ background: '#ffffff', padding: '20px 24px', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', marginBottom: 24, width: '100%', boxSizing: 'border-box' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -511,7 +511,7 @@ export default function AdminRaporTab() {
 
       {/* COLLAPSIBLE OFFICIAL FASE GUIDE CARD */}
       {showFaseGuide && (
-        <div className="fase-guide-card" style={{ background: '#ffffff', borderRadius: 16, padding: '20px 24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', marginBottom: 20, border: '1px solid #e2e8f0', maxWidth: 960, margin: '0 auto 20px auto' }}>
+        <div className="fase-guide-card admin-panel" style={{ background: '#ffffff', borderRadius: 16, padding: '20px 24px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', marginBottom: 20, border: '1px solid #e2e8f0', width: '100%', boxSizing: 'border-box' }}>
           <h4 style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
             <BookOpen size={16} color="#0284c7" /> Tabel Acuan Fase Kurikulum Merdeka (Resmi Disdik)
           </h4>
