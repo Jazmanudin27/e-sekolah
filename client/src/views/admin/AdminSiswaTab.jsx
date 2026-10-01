@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  GraduationCap, Plus, Search, Edit2, Trash2, RefreshCw, X, Filter
+  GraduationCap, Plus, Search, Edit2, Trash2, RefreshCw, X, Filter, Award
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
@@ -248,6 +248,16 @@ export default function AdminSiswaTab() {
                     <td style={{ color: '#64748b', textAlign: 'center' }}>{s.jurusan && s.jurusan !== '-' ? s.jurusan : ''}</td>
                     <td style={{ textAlign: 'center' }}>
                       <div style={{ display: 'inline-flex', gap: 4 }}>
+                        <button
+                          className="btn-action-icon"
+                          style={{ background: '#0284c7', color: '#ffffff', border: 'none', borderRadius: 6, padding: '5px 8px', cursor: 'pointer' }}
+                          title="Lihat & Cetak E-Rapor Siswa"
+                          onClick={() => {
+                            window.location.hash = 'laporanRapor';
+                          }}
+                        >
+                          <Award size={13} />
+                        </button>
                         <button className="btn-action-icon btn-edit" title="Edit Siswa" onClick={() => handleOpenEdit(s)}>
                           <Edit2 size={13} />
                         </button>
