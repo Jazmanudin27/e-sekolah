@@ -212,7 +212,7 @@ export default function PenilaianLaporanView({ onBack }) {
       </div>
 
       {/* STATS OVERVIEW CARDS (HORIZONTAL ROW SIDE-BY-SIDE) */}
-      <div style={{ maxWidth: 960, margin: '0 auto 16px auto', padding: '0 16px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+      <div style={{ maxWidth: 960, margin: '0 auto 16px auto', padding: '0 16px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
         <div style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#fff', padding: '14px 16px', borderRadius: 16, boxShadow: '0 4px 14px rgba(2, 132, 199, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <div style={{ fontSize: 10.5, fontWeight: 700, opacity: 0.9 }}>RATA-RATA KELAS</div>
@@ -224,17 +224,9 @@ export default function PenilaianLaporanView({ onBack }) {
         <div style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: '#fff', padding: '14px 16px', borderRadius: 16, boxShadow: '0 4px 14px rgba(34, 197, 94, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <div style={{ fontSize: 10.5, fontWeight: 700, opacity: 0.9 }}>SISWA TUNTAS</div>
-            <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2 }}>{tuntasCount} <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.9 }}>/ {totalSiswa}</span></div>
+            <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2 }}>{tuntasCount} <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.9 }}>/ {totalSiswa} Siswa</span></div>
           </div>
           <CheckCircle2 size={24} style={{ opacity: 0.8 }} />
-        </div>
-
-        <div style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', padding: '14px 16px', borderRadius: 16, boxShadow: '0 4px 14px rgba(239, 68, 68, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: 10.5, fontWeight: 700, opacity: 0.9 }}>PERLU REMEDIAL</div>
-            <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2 }}>{remedialCount} <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.9 }}>Siswa</span></div>
-          </div>
-          <AlertTriangle size={24} style={{ opacity: 0.8 }} />
         </div>
       </div>
 
@@ -243,14 +235,8 @@ export default function PenilaianLaporanView({ onBack }) {
         <div style={{ background: '#ffffff', borderRadius: 20, boxShadow: '0 6px 24px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
           <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', margin: 0 }}>
-              📄 Rekapitulasi Rapor Siswa ({totalSiswa} Siswa)
+              📄 Rekapitulasi Nilai
             </h3>
-            <button
-              onClick={() => window.print()}
-              style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '6px 14px', borderRadius: 10, fontSize: 12, fontWeight: 700, color: '#475569', display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
-            >
-              <Printer size={15} /> Cetak Rekap PDF
-            </button>
           </div>
 
           {loading ? (
@@ -270,7 +256,6 @@ export default function PenilaianLaporanView({ onBack }) {
                     <th style={{ padding: '12px 14px', textAlign: 'left' }}>Nama Siswa</th>
                     <th style={{ padding: '12px 10px', textAlign: 'center', background: '#eff6ff' }}>Nilai Akhir</th>
                     <th style={{ padding: '12px 10px', textAlign: 'center' }}>Predikat</th>
-                    <th style={{ padding: '12px 10px', textAlign: 'center' }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -287,11 +272,6 @@ export default function PenilaianLaporanView({ onBack }) {
                       <td style={{ padding: '12px 10px', textAlign: 'center' }}>
                         <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 8, background: s.predikat === 'A' ? '#dcfce7' : s.predikat === 'B' ? '#e0f2fe' : '#fef3c7', color: s.predikat === 'A' ? '#15803d' : s.predikat === 'B' ? '#0369a1' : '#b45309' }}>
                           {s.predikat}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px 10px', textAlign: 'center' }}>
-                        <span style={{ fontSize: 10.5, fontWeight: 800, padding: '4px 10px', borderRadius: 12, background: s.isPass ? '#ecfdf5' : '#fef2f2', color: s.isPass ? '#047857' : '#b91c1c', border: `1px solid ${s.isPass ? '#a7f3d0' : '#fecaca'}` }}>
-                          {s.isPass ? 'TUNTAS' : 'REMEDIAL'}
                         </span>
                       </td>
                     </tr>
