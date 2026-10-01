@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Printer, Award, FileText, CheckCircle2, UserCheck, AlertCircle, RefreshCw, Calendar, Edit3
+  Printer, Award, FileText, CheckCircle2, UserCheck, AlertCircle, RefreshCw, Calendar, Edit3, HelpCircle, BookOpen, ShieldCheck, ChevronDown, ChevronUp
 } from 'lucide-react';
 import api from '../../api/client';
 
@@ -9,6 +9,7 @@ export default function AdminRaporTab() {
   const [kelasList, setKelasList] = useState([]);
   const [siswaList, setSiswaList] = useState([]);
   const [sekolahInfo, setSekolahInfo] = useState(null);
+  const [showFaseGuide, setShowFaseGuide] = useState(false);
 
   // Filter States
   const [selectedKelas, setSelectedKelas] = useState('');
@@ -70,6 +71,36 @@ export default function AdminRaporTab() {
   const [namaKepsek, setNamaKepsek] = useState("Dr. H. Supriyadi, M.Pd");
   const [nipKepsek, setNipKepsek] = useState("19700202 199503 1 001");
 
+  // Official Kurikulum Merdeka Fase Mapping Table
+  const faseTableData = [
+    { fase: 'Fase A', kelas: 'Kelas 1 – 2', tingkat: 'SD / MI / Sederajat' },
+    { fase: 'Fase B', kelas: 'Kelas 3 – 4', tingkat: 'SD / MI / Sederajat' },
+    { fase: 'Fase C', kelas: 'Kelas 5 – 6', tingkat: 'SD / MI / Sederajat' },
+    { fase: 'Fase D', kelas: 'Kelas 7 – 9', tingkat: 'SMP / MTs / Sederajat' },
+    { fase: 'Fase E', kelas: 'Kelas 10', tingkat: 'SMA / SMK / MA / Sederajat' },
+    { fase: 'Fase F', kelas: 'Kelas 11 – 12', tingkat: 'SMA / SMK / MA / Sederajat' }
+  ];
+
+  // Auto-detect Fase based on Class Name
+  const autoDetectFase = (className) => {
+    if (!className) return 'E';
+    const cUpper = String(className).toUpperCase();
+    if (cUpper.includes('XI') || cUpper.includes('XII') || cUpper.includes('11') || cUpper.includes('12')) {
+      return 'F';
+    } else if (cUpper.includes('X') || cUpper.includes('10')) {
+      return 'E';
+    } else if (cUpper.includes('7') || cUpper.includes('8') || cUpper.includes('9') || cUpper.includes('VII') || cUpper.includes('VIII') || cUpper.includes('IX')) {
+      return 'D';
+    } else if (cUpper.includes('5') || cUpper.includes('6') || cUpper.includes('V') || cUpper.includes('VI')) {
+      return 'C';
+    } else if (cUpper.includes('3') || cUpper.includes('4') || cUpper.includes('III') || cUpper.includes('IV')) {
+      return 'B';
+    } else if (cUpper.includes('1') || cUpper.includes('2') || cUpper.includes('I') || cUpper.includes('II')) {
+      return 'A';
+    }
+    return 'E';
+  };
+
   useEffect(() => {
     fetchInitialData();
   }, []);
@@ -77,6 +108,8 @@ export default function AdminRaporTab() {
   useEffect(() => {
     if (selectedKelas) {
       fetchSiswaByKelas(selectedKelas);
+      const detected = autoDetectFase(selectedKelas);
+      setFase(detected);
     }
   }, [selectedKelas]);
 
@@ -97,7 +130,9 @@ export default function AdminRaporTab() {
       const kArr = resK.data?.data || [];
       setKelasList(kArr);
       if (kArr.length > 0) {
-        setSelectedKelas(kArr[0].kode_kelas || kArr[0].id);
+        const firstK = kArr[0].kode_kelas || kArr[0].id || kArr[0].nama_kelas;
+        setSelectedKelas(firstK);
+        setFase(autoDetectFase(kArr[0].nama_kelas || firstK));
       }
 
       if (resSekolah.data?.data) {
@@ -138,7 +173,7 @@ export default function AdminRaporTab() {
     if (sFound) {
       setCurrentSiswa({
         nama: sFound.nama_siswa || sFound.nama || 'Ahmad Fauzi',
-        nis: sFound.nis || '22231001',
+        nis: sFound.nis || sFound.nis_nisn || '22231001',
         nisn: sFound.nisn || '0071234567',
         kelas: sFound.nama_kelas || sFound.kelas || selectedKelas || 'X-1'
       });
@@ -151,9 +186,10 @@ export default function AdminRaporTab() {
       });
     }
 
-    // Try fetching real grades for this class and mapel
+    // Load real grades for this student from DB scoped by class, year, and semester
     try {
-      const res = await api.get(`/penilaian/matrix?kelas_id=${selectedKelas}&tahun_ajaran=${tahunPelajaran}&semester=${semester === '1 (Ganjil)' ? '1' : '2'}`);
+      const semCode = semester.includes('1') ? '1' : '2';
+      const res = await api.get(`/penilaian/matrix?kelas_id=${selectedKelas}&tahun_ajaran=${tahunPelajaran}&semester=${semCode}`);
       if (res.data?.success && res.data?.data?.komponen && res.data?.data?.students) {
         const rawKomponen = res.data.data.komponen || [];
         const rawNilaiMap = res.data.data.nilaiMap || {};
@@ -199,7 +235,7 @@ export default function AdminRaporTab() {
       <style>{`
         @media print {
           body { background: #ffffff !important; color: #000000 !important; font-family: 'Times New Roman', Times, serif !important; }
-          .admin-rapor-controls, .portal-sidebar, .portal-navbar, .portal-brand-header { display: none !important; }
+          .admin-rapor-controls, .portal-sidebar, .portal-navbar, .portal-brand-header, .fase-guide-card { display: none !important; }
           .portal-main-area, .portal-page-body { padding: 0 !important; margin: 0 !important; }
           .rapor-paper {
             width: 100% !important;
@@ -219,7 +255,7 @@ export default function AdminRaporTab() {
       `}</style>
 
       {/* CONTROL BAR (SCREEN ONLY) */}
-      <div className="admin-rapor-controls" style={{ background: '#ffffff', padding: 20, borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', marginBottom: 24 }}>
+      <div className="admin-rapor-controls" style={{ background: '#ffffff', padding: 20, borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -229,25 +265,53 @@ export default function AdminRaporTab() {
               Cetak dan pratinjau lembar Rapor resmi Kurikulum Merdeka / K13
             </p>
           </div>
-          <button
-            onClick={handlePrint}
-            style={{
-              background: 'linear-gradient(135deg, #0284c7, #0369a1)',
-              color: '#ffffff',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: 12,
-              fontWeight: 700,
-              fontSize: 13,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              cursor: 'pointer',
-              boxShadow: '0 4px 14px rgba(2, 132, 199, 0.3)'
-            }}
-          >
-            <Printer size={16} /> Cetak / Download PDF Rapor
-          </button>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              onClick={() => setShowFaseGuide(prev => !prev)}
+              style={{
+                background: '#f1f5f9',
+                color: '#334155',
+                border: '1px solid #cbd5e1',
+                padding: '9px 14px',
+                borderRadius: 12,
+                fontWeight: 700,
+                fontSize: 12,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                cursor: 'pointer'
+              }}
+            >
+              <BookOpen size={15} color="#0284c7" /> Tabel Referensi Fase {showFaseGuide ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
+            <button
+              onClick={handlePrint}
+              style={{
+                background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                color: '#ffffff',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: 12,
+                fontWeight: 700,
+                fontSize: 13,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(2, 132, 199, 0.3)'
+              }}
+            >
+              <Printer size={16} /> Cetak / Download PDF Rapor
+            </button>
+          </div>
+        </div>
+
+        {/* DATA RETENTION GUARANTEE NOTICE */}
+        <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, padding: '10px 14px', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <ShieldCheck size={20} color="#059669" style={{ flexShrink: 0 }} />
+          <div style={{ fontSize: 11.5, color: '#065f46', lineHeight: 1.5 }}>
+            <strong>Jaminan Historis Riwayat Rapor (Bebas Hilang Saat Kenaikan Kelas):</strong> Seluruh angka nilai dan rapor tersimpan aman per <em>(Tahun Pelajaran + Semester + Kelas)</em>. Ketika siswa naik dari Kelas X ke XI atau XII, riwayat rapor Kelas X tetap utuh dan dapat dibuka kembali kapan saja dengan memilih Tahun Pelajaran & Kelas terkait.
+          </div>
         </div>
 
         {/* FILTERS */}
@@ -261,7 +325,7 @@ export default function AdminRaporTab() {
               onChange={e => setSelectedKelas(e.target.value)}
             >
               {kelasList.map(k => {
-                const kVal = k.kode_kelas || k.id;
+                const kVal = k.kode_kelas || k.id || k.nama_kelas;
                 return (
                   <option key={kVal} value={kVal}>
                     {k.nama_kelas || k.nama || kVal}
@@ -283,7 +347,7 @@ export default function AdminRaporTab() {
                 const sVal = s.kode_siswa || s.id;
                 return (
                   <option key={sVal} value={sVal}>
-                    {s.nama_siswa || s.nama} (NIS: {s.nis || '-'})
+                    {s.nama_siswa || s.nama} (NIS: {s.nis || s.nis_nisn || '-'})
                   </option>
                 );
               })}
@@ -291,12 +355,14 @@ export default function AdminRaporTab() {
           </div>
 
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 4 }}>FASE</label>
+            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', display: 'block', marginBottom: 4 }}>FASE (KURIKULUM MERDEKA)</label>
             <select className="form-control-admin" style={{ fontSize: 12, padding: '6px 10px' }} value={fase} onChange={e => setFase(e.target.value)}>
-              <option value="E">Fase E (Kelas X)</option>
-              <option value="F">Fase F (Kelas XI / XII)</option>
-              <option value="D">Fase D (SMP/MTs)</option>
-              <option value="A">Fase A / B / C (SD/MI)</option>
+              <option value="A">Fase A (Kelas 1 - 2 SD / MI)</option>
+              <option value="B">Fase B (Kelas 3 - 4 SD / MI)</option>
+              <option value="C">Fase C (Kelas 5 - 6 SD / MI)</option>
+              <option value="D">Fase D (Kelas 7 - 9 SMP / MTs)</option>
+              <option value="E">Fase E (Kelas 10 SMA / SMK / MA)</option>
+              <option value="F">Fase F (Kelas 11 - 12 SMA / SMK / MA)</option>
             </select>
           </div>
 
@@ -328,6 +394,35 @@ export default function AdminRaporTab() {
           </div>
         </div>
       </div>
+
+      {/* COLLAPSIBLE OFFICIAL FASE GUIDE CARD */}
+      {showFaseGuide && (
+        <div className="fase-guide-card" style={{ background: '#ffffff', borderRadius: 16, padding: 18, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', marginBottom: 20, border: '1px solid #e2e8f0' }}>
+          <h4 style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <BookOpen size={16} color="#0284c7" /> Tabel Acuan Fase Kurikulum Merdeka (Resmi Disdik)
+          </h4>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11.5 }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', color: '#475569', textAlign: 'left', fontWeight: 800 }}>
+                  <th style={{ padding: '8px 12px', border: '1px solid #e2e8f0', width: 100 }}>Fase</th>
+                  <th style={{ padding: '8px 12px', border: '1px solid #e2e8f0', width: 160 }}>Jenjang Kelas</th>
+                  <th style={{ padding: '8px 12px', border: '1px solid #e2e8f0' }}>Tingkat Sekolah / Sederajat</th>
+                </tr>
+              </thead>
+              <tbody>
+                {faseTableData.map(row => (
+                  <tr key={row.fase} style={{ background: fase === row.fase.replace('Fase ', '') ? '#eff6ff' : '#ffffff' }}>
+                    <td style={{ padding: '6px 12px', border: '1px solid #e2e8f0', fontWeight: 800, color: '#0284c7' }}>{row.fase}</td>
+                    <td style={{ padding: '6px 12px', border: '1px solid #e2e8f0', fontWeight: 700 }}>{row.kelas}</td>
+                    <td style={{ padding: '6px 12px', border: '1px solid #e2e8f0', color: '#334155' }}>{row.tingkat}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* RAPOR PAPER CONTAINER */}
       <div className="rapor-paper" style={{ background: '#ffffff', margin: '0 auto', maxWidth: 920, padding: '40px 48px', borderRadius: 16, boxShadow: '0 8px 30px rgba(0,0,0,0.08)', fontFamily: 'serif', color: '#0f172a' }}>
