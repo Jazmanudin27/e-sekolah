@@ -265,7 +265,7 @@ export default function AdminKelasTab() {
                 <th>Jurusan / Peminatan</th>
                 <th>Wali Kelas</th>
                 <th>Username Akun</th>
-                <th style={{ width: 90, textAlign: 'center' }}>Mapel</th>
+                <th style={{ width: 140, textAlign: 'center' }}>Mapel</th>
                 <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
