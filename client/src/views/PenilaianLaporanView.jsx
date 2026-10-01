@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FileCheck, Search, BookOpen, User, FileText, Printer } from 'lucide-react';
+import { FileCheck, Search, BookOpen, User } from 'lucide-react';
 import api from '../api/client';
 import SubHeader from '../components/SubHeader';
-import RaporModal from '../components/RaporModal';
 
 export default function PenilaianLaporanView({ onBack }) {
   const [kelasList, setKelasList] = useState([]);
@@ -12,13 +11,12 @@ export default function PenilaianLaporanView({ onBack }) {
   const [selectedMapel, setSelectedMapel] = useState('all');
   const [selectedKomponen, setSelectedKomponen] = useState('all');
   const [tahunAjaran, setTahunAjaran] = useState('2026/2027');
-  const [semester, setSemester] = useState('1 (Ganjil)');
+  const [semester, setSemester] = useState('1');
 
   const [loading, setLoading] = useState(false);
   const [students, setStudents] = useState([]);
   const [komponenList, setKomponenList] = useState([]);
   const [nilaiMap, setNilaiMap] = useState({});
-  const [raporSiswa, setRaporSiswa] = useState(null);
 
   useEffect(() => {
     fetchOptions();
@@ -108,12 +106,9 @@ export default function PenilaianLaporanView({ onBack }) {
     ? komponenList
     : komponenList.filter(k => String(k.id) === String(selectedKomponen));
 
-  const selectedKelasObj = kelasList.find(k => (k.kode_kelas || k.id) === selectedKelas);
-  const kelasNama = selectedKelasObj ? (selectedKelasObj.nama_kelas || selectedKelasObj.nama || selectedKelas) : 'X-1';
-
   return (
     <div className="penilaian-laporan-container" style={{ paddingBottom: 40 }}>
-      <SubHeader title="📊 Laporan Penilaian" subtitle="Rekapitulasi nilai siswa per komponen dan cetak Rapor Kurikulum Merdeka" onBack={onBack} />
+      <SubHeader title="📊 Laporan Penilaian" subtitle="Rekapitulasi nilai siswa per komponen dan nilai akhir mata pelajaran" onBack={onBack} />
 
       {/* FILTER BAR */}
       <div style={{ maxWidth: 960, margin: '16px auto', padding: '0 16px' }}>
@@ -188,8 +183,8 @@ export default function PenilaianLaporanView({ onBack }) {
           <div>
             <label style={{ fontSize: 10.5, fontWeight: 700, color: '#64748b', marginBottom: 4, display: 'block' }}>SEMESTER</label>
             <select className="form-control-admin" style={{ fontSize: 12, padding: '6px 10px' }} value={semester} onChange={e => setSemester(e.target.value)}>
-              <option value="1 (Ganjil)">Sem 1 (Ganjil)</option>
-              <option value="2 (Genap)">Sem 2 (Genap)</option>
+              <option value="1">Sem 1 (Ganjil)</option>
+              <option value="2">Sem 2 (Genap)</option>
             </select>
           </div>
         </div>
@@ -202,27 +197,6 @@ export default function PenilaianLaporanView({ onBack }) {
             <h3 style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', margin: 0 }}>
               📄 Rekapitulasi Nilai
             </h3>
-            {students.length > 0 && (
-              <button
-                onClick={() => setRaporSiswa(students[0])}
-                style={{
-                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
-                  color: '#ffffff',
-                  border: 'none',
-                  padding: '6px 14px',
-                  borderRadius: 10,
-                  fontSize: 11.5,
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 10px rgba(2, 132, 199, 0.25)'
-                }}
-              >
-                <FileText size={14} /> Format Cetak Rapor Digital
-              </button>
-            )}
           </div>
 
           {loading ? (
@@ -251,7 +225,6 @@ export default function PenilaianLaporanView({ onBack }) {
 
                     {/* NILAI AKHIR COLUMN */}
                     <th style={{ padding: '8px 10px', textAlign: 'center', minWidth: 75, borderLeft: '2px solid #cbd5e1', background: '#eff6ff', color: '#1e40af' }}>Nilai Akhir</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'center', width: 100 }}>Rapor</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -277,29 +250,6 @@ export default function PenilaianLaporanView({ onBack }) {
                       <td style={{ padding: '6px 8px', textAlign: 'center', fontWeight: 800, fontSize: 12.5, borderLeft: '2px solid #cbd5e1', background: '#eff6ff', color: s.isPass ? '#0284c7' : '#dc2626' }}>
                         {s.finalScore}
                       </td>
-
-                      {/* ACTION CETAK RAPOR SISWA */}
-                      <td style={{ padding: '6px 8px', textAlign: 'center' }}>
-                        <button
-                          onClick={() => setRaporSiswa(s)}
-                          style={{
-                            background: '#f1f5f9',
-                            border: '1px solid #cbd5e1',
-                            color: '#0284c7',
-                            padding: '3px 8px',
-                            borderRadius: 6,
-                            fontSize: 10.5,
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 4
-                          }}
-                          title="Cetak E-Rapor Siswa Ini"
-                        >
-                          <FileText size={12} /> Cetak
-                        </button>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -308,21 +258,6 @@ export default function PenilaianLaporanView({ onBack }) {
           )}
         </div>
       </div>
-
-      {/* RAPOR MODAL PRINT DIALOG */}
-      <RaporModal
-        isOpen={Boolean(raporSiswa)}
-        onClose={() => setRaporSiswa(null)}
-        siswa={raporSiswa}
-        kelasNama={kelasNama}
-        mapelList={mapelList.map(m => ({
-          id: m.id,
-          nama_mapel: m.nama_mapel || m.nama,
-          finalScore: (students.find(st => st.id === raporSiswa?.id)?.finalScore) || 85
-        }))}
-        tahunAjaran={tahunAjaran}
-        semester={semester}
-      />
     </div>
   );
 }

@@ -28,12 +28,13 @@ import AdminAbsensiMapelTab from './AdminAbsensiMapelTab';
 import AdminLaporanGeneratorTab from './AdminLaporanGeneratorTab';
 import AdminPengumumanTab from './AdminPengumumanTab';
 import AdminKalenderTab from './AdminKalenderTab';
+import AdminRaporTab from './AdminRaporTab';
 
 const VALID_ADMIN_TABS = [
   'dashboard', 'pengumuman', 'kalender', 'kelas', 'siswa', 'guru', 'mapel', 'jadwal',
   'izin', 'presensiGuru', 'absensiSiswa', 'absensiMapel',
   'rekapGuru', 'rekapSiswa', 'rekapMapel',
-  'laporanSiswa', 'laporanGuru', 'laporanKelas',
+  'laporanRapor', 'laporanSiswa', 'laporanGuru', 'laporanKelas',
   'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel',
   'laporanSurat',
   'users', 'settings'
@@ -396,6 +397,18 @@ export default function AdminDesktopView({ user, onLogout }) {
           {/* ----------------- LAPORAN & REKAP ----------------- */}
           <div className="portal-menu-section-label">LAPORAN & REKAP</div>
 
+          {/* 4.9 E-Rapor Siswa */}
+          <button
+            type="button"
+            className={`portal-menu-item ${activeTab === 'laporanRapor' ? 'active' : ''}`}
+            onClick={() => handleSelectTab('laporanRapor')}
+          >
+            <div className="menu-icon-wrap">
+              <Award size={17} />
+            </div>
+            <span className="menu-label">E-Rapor Siswa</span>
+          </button>
+
           {/* 5. Laporan Master */}
           <div className="portal-menu-group">
             <button
@@ -684,6 +697,7 @@ export default function AdminDesktopView({ user, onLogout }) {
           {activeTab === 'absensiMapel' && <AdminAbsensiMapelTab />}
 
           {/* 4. LAPORAN & REKAP */}
+          {activeTab === 'laporanRapor' && <AdminRaporTab />}
           {['laporanSiswa', 'laporanGuru', 'laporanKelas', 'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat'].includes(activeTab) && (
             <AdminLaporanGeneratorTab reportType={activeTab} />
           )}
