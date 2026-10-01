@@ -42,7 +42,21 @@ export default function App() {
   const [activeTab, setActiveTabState] = useState(getInitialTab);
   const [presensiModalType, setPresensiModalType] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    try {
+      const shown = sessionStorage.getItem('esekolah_splash_shown');
+      return !shown;
+    } catch (e) {
+      return true;
+    }
+  });
+
+  const handleFinishSplash = () => {
+    setShowSplash(false);
+    try {
+      sessionStorage.setItem('esekolah_splash_shown', 'true');
+    } catch (e) {}
+  };
 
   const setActiveTab = (tab) => {
     setActiveTabState(tab);
@@ -163,8 +177,19 @@ export default function App() {
     });
   };
 
-  if (loading || showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} duration={2000} />;
+  if (showSplash) {
+    return <SplashScreen onFinish={handleFinishSplash} duration={1800} />;
+  }
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0f172a', color: '#ffffff' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="spinner-border text-primary" role="status" style={{ width: '2.5rem', height: '2.5rem', marginBottom: 12 }}></div>
+          <p style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600 }}>Memuat data...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!currentUser) {
