@@ -49,12 +49,16 @@ class TagihanSiswaModel {
   static async createInvoice({ siswa_id, tarif_id, bulan = null, tahun = null, nominal_tagihan, tanggal_jatuh_tempo = null }) {
     const kode_tagihan = `INV-${tahun || new Date().getFullYear()}${String(bulan || 0).padStart(2, '0')}-${siswa_id}-${Math.floor(1000 + Math.random() * 9000)}`;
 
+    const dueDate = (tanggal_jatuh_tempo && String(tanggal_jatuh_tempo).trim() !== '')
+      ? tanggal_jatuh_tempo
+      : (tahun && bulan ? `${tahun}-${String(bulan).padStart(2, '0')}-10` : null);
+
     const sql = `
       INSERT INTO tagihan_siswa (kode_tagihan, siswa_id, tarif_id, bulan, tahun, nominal_tagihan, status, tanggal_jatuh_tempo)
       VALUES (?, ?, ?, ?, ?, ?, 'UNPAID', ?)
       ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP
     `;
-    const res = await query(sql, [kode_tagihan, siswa_id, tarif_id, bulan, tahun, nominal_tagihan, tanggal_jatuh_tempo]);
+    const res = await query(sql, [kode_tagihan, siswa_id, tarif_id, bulan, tahun, nominal_tagihan, dueDate]);
     return res.insertId;
   }
 
