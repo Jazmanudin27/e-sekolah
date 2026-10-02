@@ -57,6 +57,8 @@ export default function AdminKeuanganTab() {
   const [transaksiPage, setTransaksiPage] = useState(1);
   const [showKwitansiModal, setShowKwitansiModal] = useState(false);
   const [selectedTransaksiDetail, setSelectedTransaksiDetail] = useState(null);
+  const [showEditTransaksiModal, setShowEditTransaksiModal] = useState(false);
+  const [editTransaksiData, setEditTransaksiData] = useState(null);
 
   // --- MASTER POS & TARIF STATE ---
   const [posList, setPosList] = useState([]);
@@ -239,6 +241,48 @@ export default function AdminKeuanganTab() {
       }
     } catch (e) {
       Swal.fire('Gagal', e.response?.data?.message || 'Gagal membatalkan transaksi.', 'error');
+    }
+  };
+
+  const handleOpenEditTransaksi = async (transaksiId) => {
+    try {
+      const res = await api.get(`/keuangan/transaksi/${transaksiId}`);
+      if (res.data?.success) {
+        setEditTransaksiData(res.data.data);
+        setShowEditTransaksiModal(true);
+      }
+    } catch (e) {
+      Swal.fire('Error', 'Gagal mengambil detail transaksi.', 'error');
+    }
+  };
+
+  const handleSaveEditTransaksi = async (e) => {
+    e.preventDefault();
+    if (!editTransaksiData) return;
+
+    try {
+      const items = (editTransaksiData.details || []).map(d => ({
+        tagihan_id: d.tagihan_id,
+        nominal_bayar: Number(d.nominal_dibayar) || 0
+      }));
+
+      const res = await api.put(`/keuangan/transaksi/${editTransaksiData.id}`, {
+        metode_pembayaran: editTransaksiData.metode_pembayaran,
+        items
+      });
+
+      if (res.data?.success) {
+        Swal.fire('Berhasil', 'Data transaksi pembayaran berhasil diperbarui.', 'success');
+        setShowEditTransaksiModal(false);
+        setEditTransaksiData(null);
+        fetchTransaksiList();
+        if (selectedSiswa) {
+          fetchSiswaTagihan(selectedSiswa.kode_siswa);
+          fetchSiswaRiwayatTransaksi(selectedSiswa.kode_siswa);
+        }
+      }
+    } catch (err) {
+      Swal.fire('Error', err.response?.data?.message || 'Gagal memperbarui transaksi.', 'error');
     }
   };
 
@@ -655,19 +699,31 @@ export default function AdminKeuanganTab() {
                                       onClick={() => handleOpenKwitansi(tr.id)}
                                       className="btn-outline-admin"
                                       style={{ padding: '4px 8px', fontSize: 11 }}
+                                      title="Cetak Kuitansi Pembayaran"
                                     >
-                                      <Printer size={13} style={{ marginRight: 4 }} /> Kuitansi
+                                      <Printer size={13} style={{ marginRight: 3 }} /> Kuitansi
                                     </button>
                                     {tr.status_transaksi !== 'CANCELLED' && (
-                                      <button
-                                        type="button"
-                                        onClick={() => handleCancelTransaksi(tr.id)}
-                                        className="btn-outline-admin"
-                                        style={{ padding: '4px 8px', fontSize: 11, color: '#ef4444', borderColor: '#fca5a5' }}
-                                        title="Batalkan / Hapus Transaksi Ini"
-                                      >
-                                        <Trash2 size={13} style={{ marginRight: 2 }} /> Batalkan
-                                      </button>
+                                      <>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenEditTransaksi(tr.id)}
+                                          className="btn-outline-admin"
+                                          style={{ padding: '4px 8px', fontSize: 11, color: '#0284c7', borderColor: '#bae6fd' }}
+                                          title="Edit Nominal / Detail Pembayaran"
+                                        >
+                                          <Edit2 size={13} style={{ marginRight: 3 }} /> Edit
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleCancelTransaksi(tr.id)}
+                                          className="btn-outline-admin"
+                                          style={{ padding: '4px 8px', fontSize: 11, color: '#ef4444', borderColor: '#fca5a5' }}
+                                          title="Batalkan Pembayaran Ini"
+                                        >
+                                          <Trash2 size={13} style={{ marginRight: 3 }} /> Batalkan
+                                        </button>
+                                      </>
                                     )}
                                   </div>
                                 </td>
@@ -1277,19 +1333,31 @@ export default function AdminKeuanganTab() {
                                 onClick={() => handleOpenKwitansi(tr.id)}
                                 className="btn-outline-admin"
                                 style={{ padding: '5px 10px', fontSize: 12 }}
+                                title="Cetak Kuitansi Pembayaran"
                               >
                                 <Printer size={14} style={{ marginRight: 4 }} /> Kuitansi
                               </button>
                               {tr.status_transaksi !== 'CANCELLED' && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleCancelTransaksi(tr.id)}
-                                  className="btn-outline-admin"
-                                  style={{ padding: '5px 10px', fontSize: 12, color: '#ef4444', borderColor: '#fca5a5' }}
-                                  title="Batalkan / Hapus Transaksi Ini"
-                                >
-                                  <Trash2 size={14} style={{ marginRight: 4 }} /> Batalkan
-                                </button>
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenEditTransaksi(tr.id)}
+                                    className="btn-outline-admin"
+                                    style={{ padding: '5px 10px', fontSize: 12, color: '#0284c7', borderColor: '#bae6fd' }}
+                                    title="Edit Nominal / Detail Pembayaran"
+                                  >
+                                    <Edit2 size={14} style={{ marginRight: 4 }} /> Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCancelTransaksi(tr.id)}
+                                    className="btn-outline-admin"
+                                    style={{ padding: '5px 10px', fontSize: 12, color: '#ef4444', borderColor: '#fca5a5' }}
+                                    title="Batalkan Pembayaran Ini"
+                                  >
+                                    <Trash2 size={14} style={{ marginRight: 4 }} /> Batalkan
+                                  </button>
+                                </>
                               )}
                             </div>
                           </td>
@@ -1566,6 +1634,78 @@ export default function AdminKeuanganTab() {
                 <Printer size={15} style={{ marginRight: 6 }} /> Cetak Kuitansi (Print)
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL EDIT TRANSAKSI PEMBAYARAN --- */}
+      {showEditTransaksiModal && editTransaksiData && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-box" style={{ maxWidth: 540 }}>
+            <div className="admin-modal-header">
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                Edit Transaksi ({editTransaksiData.no_transaksi})
+              </h3>
+              <button onClick={() => setShowEditTransaksiModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditTransaksi}>
+              <div className="admin-modal-body">
+                <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 16, fontSize: 12 }}>
+                  <div>Siswa: <strong>{editTransaksiData.nama_siswa} ({editTransaksiData.nis || '-'})</strong></div>
+                  <div>Kelas: <strong>{editTransaksiData.nama_kelas || '-'}</strong></div>
+                  <div>Tanggal: <strong>{new Date(editTransaksiData.tanggal_bayar).toLocaleString('id-ID')}</strong></div>
+                </div>
+
+                <div className="form-group-admin">
+                  <label>Metode Pembayaran</label>
+                  <SearchableSelect
+                    value={editTransaksiData.metode_pembayaran}
+                    onChange={(e) => setEditTransaksiData({ ...editTransaksiData, metode_pembayaran: e.target.value })}
+                    options={[
+                      { value: 'CASH', label: 'CASH / Tunai (Kasir TU)' },
+                      { value: 'TRANSFER', label: 'Transfer Bank' },
+                      { value: 'ONLINE', label: 'Payment Gateway Online' }
+                    ]}
+                  />
+                </div>
+
+                <div style={{ marginTop: 16 }}>
+                  <label style={{ fontSize: 13, fontWeight: 700, color: '#334155', display: 'block', marginBottom: 8 }}>
+                    Nominal Dibayar per Tagihan:
+                  </label>
+                  {(editTransaksiData.details || []).map((detail, index) => (
+                    <div key={index} style={{ background: '#ffffff', border: '1px solid #cbd5e1', padding: 10, borderRadius: 6, marginBottom: 10 }}>
+                      <div style={{ fontWeight: 700, fontSize: 12.5, color: '#0f172a', marginBottom: 4 }}>
+                        {detail.nama_pos} ({detail.bulan ? `${getBulanLabel(detail.bulan)} ${detail.tahun}` : 'Sekali Bayar'})
+                      </div>
+                      <input
+                        type="number"
+                        className="form-control-admin"
+                        value={detail.nominal_dibayar}
+                        onChange={(e) => {
+                          const newDetails = [...editTransaksiData.details];
+                          newDetails[index].nominal_dibayar = e.target.value;
+                          setEditTransaksiData({ ...editTransaksiData, details: newDetails });
+                        }}
+                        placeholder="Nominal Dibayar (Rp)"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="admin-modal-footer">
+                <button type="button" className="btn-outline-admin" onClick={() => setShowEditTransaksiModal(false)}>
+                  Batal
+                </button>
+                <button type="submit" className="btn-primary-admin">
+                  Simpan Perubahan
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

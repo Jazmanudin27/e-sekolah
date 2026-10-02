@@ -24,6 +24,7 @@ router.post('/tagihan/generate', authenticateToken, keuanganController.generateT
 router.post('/bayar/cash', authenticateToken, keuanganController.payCash);
 router.get('/transaksi', authenticateToken, keuanganController.getAllTransaksi);
 router.get('/transaksi/:id', authenticateToken, keuanganController.getTransaksiDetail);
+router.put('/transaksi/:id', authenticateToken, keuanganController.updateTransaksi);
 router.delete('/transaksi/:id', authenticateToken, keuanganController.cancelTransaksi);
 
 // --- WEBHOOK PAYMENT GATEWAY (Public Endpoint) ---

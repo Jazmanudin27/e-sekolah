@@ -159,6 +159,48 @@ class PembayaranTransaksiModel {
     await query("UPDATE pembayaran_transaksi SET status_transaksi = 'CANCELLED' WHERE id = ?", [id]);
     return await this.findById(id);
   }
+
+  /**
+   * Update / Edit existing payment transaction items & amounts
+   */
+  static async updateTransaction(id, { metode_pembayaran, items = [] }) {
+    const trx = await this.findById(id);
+    if (!trx) throw new Error('Transaksi tidak ditemukan');
+    if (trx.status_transaksi === 'CANCELLED') throw new Error('Transaksi yang telah dibatalkan tidak dapat diedit');
+
+    if (!items || items.length === 0) throw new Error('Item pembayaran tidak boleh kosong');
+
+    // 1. Revert previous amounts from tagihan_siswa
+    if (trx.details && trx.details.length > 0) {
+      for (const d of trx.details) {
+        await TagihanSiswaModel.reducePembayaran(d.tagihan_id, d.nominal_dibayar);
+      }
+    }
+
+    // 2. Delete old details
+    await query('DELETE FROM pembayaran_detail WHERE transaksi_id = ?', [id]);
+
+    // 3. Insert new details & apply updated payment to tagihan_siswa
+    let newTotal = 0;
+    for (const item of items) {
+      const nominal = Number(item.nominal_bayar) || 0;
+      newTotal += nominal;
+
+      await query(
+        'INSERT INTO pembayaran_detail (transaksi_id, tagihan_id, nominal_dibayar) VALUES (?, ?, ?)',
+        [id, item.tagihan_id, nominal]
+      );
+      await TagihanSiswaModel.updatePembayaran(item.tagihan_id, nominal);
+    }
+
+    // 4. Update header total & method
+    await query(
+      'UPDATE pembayaran_transaksi SET total_bayar = ?, metode_pembayaran = COALESCE(?, metode_pembayaran), updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [newTotal, metode_pembayaran || null, id]
+    );
+
+    return await this.findById(id);
+  }
 }
 
 module.exports = PembayaranTransaksiModel;
