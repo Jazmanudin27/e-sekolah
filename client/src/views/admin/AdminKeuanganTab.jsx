@@ -648,7 +648,7 @@ export default function AdminKeuanganTab() {
             SUB TAB 3: GENERATE TAGIHAN SPP
             ======================================================== */}
         {activeSubTab === 'generate' && (
-          <div style={{ maxWidth: 540, margin: '0 auto', background: '#f8fafc', padding: 24, borderRadius: 12, border: '1px solid #e2e8f0' }}>
+          <div style={{ maxWidth: 580, margin: 0, background: '#f8fafc', padding: 24, borderRadius: 12, border: '1px solid #e2e8f0' }}>
             <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
               <RefreshCw color="#0284c7" size={18} /> Auto-Generate Tagihan SPP Bulanan
             </div>
