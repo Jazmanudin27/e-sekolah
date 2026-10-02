@@ -759,8 +759,13 @@ export default function AdminKeuanganTab() {
                             const terbayar = Number(t.nominal_terbayar || 0);
                             const percent = Math.min(100, Math.round((terbayar / Number(t.nominal_tagihan)) * 100));
 
+                            const now = new Date();
+                            const curY = now.getFullYear();
+                            const curM = now.getMonth() + 1;
+                            const isPastMonth = isBulanan && t.bulan && t.tahun && (Number(t.tahun) < curY || (Number(t.tahun) === curY && Number(t.bulan) < curM));
+
                             return (
-                              <tr key={t.id} style={{ background: isChecked ? '#f0f9ff' : 'transparent' }}>
+                              <tr key={t.id} style={{ background: isChecked ? '#f0f9ff' : isPastMonth ? '#fff5f5' : 'transparent' }}>
                                 <td style={{ textAlign: 'center' }}>
                                   <input
                                     type="checkbox"
@@ -778,12 +783,25 @@ export default function AdminKeuanganTab() {
                                 <td>
                                   {isBulanan ? (
                                     <div>
-                                      <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                        🗓️ {getBulanLabel(t.bulan)} {t.tahun}
-                                      </span>
-                                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
-                                        Tagihan SPP Rutin Bulanan
-                                      </div>
+                                      {isPastMonth ? (
+                                        <>
+                                          <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                            ⚠️ Tunggakan {getBulanLabel(t.bulan)} {t.tahun}
+                                          </span>
+                                          <div style={{ fontSize: 11, color: '#dc2626', fontWeight: 700, marginTop: 4 }}>
+                                            Tagihan SPP Bulan Lalu (Menunggak)
+                                          </div>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                            🗓️ {getBulanLabel(t.bulan)} {t.tahun}
+                                          </span>
+                                          <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+                                            Tagihan SPP Rutin (Berjalan)
+                                          </div>
+                                        </>
+                                      )}
                                     </div>
                                   ) : (
                                     <div>
