@@ -114,11 +114,17 @@ class TagihanSiswaModel {
     const tarif = tarifRows[0];
 
     // 2. Get active students
-    let siswaSql = "SELECT * FROM siswa WHERE (status = 'Aktif' OR status IS NULL OR status = '')";
+    let siswaSql = "SELECT s.* FROM siswa s LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas WHERE (s.status = 'Aktif' OR s.status IS NULL OR s.status = '')";
     const siswaParams = [];
     if (kode_kelas) {
-      siswaSql += ' AND kode_kelas = ?';
-      siswaParams.push(kode_kelas);
+      siswaSql += ' AND (s.kode_kelas = ? OR k.nama_kelas = ?)';
+      siswaParams.push(kode_kelas, kode_kelas);
+    } else if (tarif.kode_kelas) {
+      siswaSql += ' AND (s.kode_kelas = ? OR k.nama_kelas = ?)';
+      siswaParams.push(tarif.kode_kelas, tarif.kode_kelas);
+    } else if (tarif.tingkat) {
+      siswaSql += ' AND (s.tingkat = ? OR k.nama_kelas LIKE ? OR s.kode_kelas LIKE ?)';
+      siswaParams.push(tarif.tingkat, `%${tarif.tingkat}%`, `${tarif.tingkat}%`);
     }
     const siswaList = await query(siswaSql, siswaParams);
 

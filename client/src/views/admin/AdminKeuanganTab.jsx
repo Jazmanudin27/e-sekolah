@@ -72,7 +72,11 @@ export default function AdminKeuanganTab() {
   const [editingPosId, setEditingPosId] = useState(null);
 
   const [showTarifModal, setShowTarifModal] = useState(false);
+  const [editingTarifId, setEditingTarifId] = useState(null);
+  const [targetType, setTargetType] = useState('UMUM'); // 'UMUM', 'TINGKAT', 'KELAS'
   const [tarifFormData, setTarifFormData] = useState({ pos_id: '', tahun_ajaran: '2025/2026', tingkat: '', kode_kelas: '', nominal: '' });
+  const [tarifFilterPos, setTarifFilterPos] = useState('');
+  const [tarifSearch, setTarifSearch] = useState('');
 
   const [showOverrideModal, setShowOverrideModal] = useState(false);
   const [overrideData, setOverrideData] = useState({ tarif_id: '', siswa_id: '', tipe_potongan: 'NOMINAL', nilai_potongan: '', keterangan: '' });
@@ -112,6 +116,10 @@ export default function AdminKeuanganTab() {
   const [isLoadingRekap, setIsLoadingRekap] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [showRekapDetailModal, setShowRekapDetailModal] = useState(false);
+  const [selectedRekapSiswa, setSelectedRekapSiswa] = useState(null);
+  const [rekapDetailTagihan, setRekapDetailTagihan] = useState([]);
+  const [isLoadingRekapDetail, setIsLoadingRekapDetail] = useState(false);
 
   // Load Initial Data
   useEffect(() => {
@@ -458,12 +466,54 @@ export default function AdminKeuanganTab() {
   };
 
   // --- TARIF HANDLERS ---
+  const handleOpenAddTarif = () => {
+    setEditingTarifId(null);
+    setTargetType('UMUM');
+    setTarifFormData({ pos_id: posList[0]?.id || '', tahun_ajaran: '2025/2026', tingkat: '', kode_kelas: '', nominal: '' });
+    setShowTarifModal(true);
+  };
+
+  const handleOpenEditTarif = (t) => {
+    setEditingTarifId(t.id);
+    let tt = 'UMUM';
+    if (t.kode_kelas) tt = 'KELAS';
+    else if (t.tingkat) tt = 'TINGKAT';
+    setTargetType(tt);
+    setTarifFormData({
+      pos_id: t.pos_id,
+      tahun_ajaran: t.tahun_ajaran || '2025/2026',
+      tingkat: t.tingkat || '',
+      kode_kelas: t.kode_kelas || '',
+      nominal: t.nominal || ''
+    });
+    setShowTarifModal(true);
+  };
+
   const handleSaveTarif = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/keuangan/tarif', tarifFormData);
-      Swal.fire('Berhasil', 'Tarif pembayaran berhasil ditambahkan.', 'success');
+      const payload = {
+        pos_id: tarifFormData.pos_id,
+        tahun_ajaran: tarifFormData.tahun_ajaran,
+        tingkat: targetType === 'TINGKAT' ? (tarifFormData.tingkat || null) : null,
+        kode_kelas: targetType === 'KELAS' ? (tarifFormData.kode_kelas || null) : null,
+        nominal: parseRupiahInput(tarifFormData.nominal) || Number(tarifFormData.nominal) || 0
+      };
+
+      if (!payload.pos_id) {
+        Swal.fire('Peringatan', 'Pilih Pos Pembayaran terlebih dahulu.', 'warning');
+        return;
+      }
+
+      if (editingTarifId) {
+        await api.put(`/keuangan/tarif/${editingTarifId}`, payload);
+        Swal.fire('Berhasil', 'Tarif pembayaran berhasil diperbarui.', 'success');
+      } else {
+        await api.post('/keuangan/tarif', payload);
+        Swal.fire('Berhasil', 'Tarif pembayaran berhasil ditambahkan.', 'success');
+      }
       setShowTarifModal(false);
+      setEditingTarifId(null);
       setTarifFormData({ pos_id: '', tahun_ajaran: '2025/2026', tingkat: '', kode_kelas: '', nominal: '' });
       fetchTarifList();
     } catch (err) {
@@ -702,6 +752,22 @@ export default function AdminKeuanganTab() {
       console.error(e);
     } finally {
       setIsLoadingRekap(false);
+    }
+  };
+
+  const handleShowRekapDetail = async (siswaItem) => {
+    setSelectedRekapSiswa(siswaItem);
+    setShowRekapDetailModal(true);
+    setIsLoadingRekapDetail(true);
+    try {
+      const res = await api.get(`/keuangan/tagihan/siswa/${siswaItem.kode_siswa}`, { params: { status: 'ALL' } });
+      const tagihans = res.data?.data || [];
+      const tunggakanList = tagihans.filter(t => t.status !== 'LUNAS' && (Number(t.nominal_tagihan) - Number(t.nominal_terbayar)) > 0);
+      setRekapDetailTagihan(tunggakanList);
+    } catch (err) {
+      console.error('Error fetching rekap detail tagihan:', err);
+    } finally {
+      setIsLoadingRekapDetail(false);
     }
   };
 
@@ -1532,11 +1598,37 @@ export default function AdminKeuanganTab() {
 
             {masterSubTab === 'tarif' && (
               <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Matrix Tarif Pembayaran</div>
-                  <button className="btn-primary-admin" onClick={() => setShowTarifModal(true)}>
+                  <button className="btn-primary-admin" onClick={handleOpenAddTarif}>
                     <Plus size={15} /> Tambah Tarif Baru
                   </button>
+                </div>
+
+                {/* FILTER BAR MATRIX TARIF */}
+                <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap', background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                  <div style={{ flex: '1 1 200px' }}>
+                    <SearchableSelect
+                      value={tarifFilterPos}
+                      onChange={(e) => setTarifFilterPos(e.target.value)}
+                      placeholder="-- Filter Pos Pembayaran --"
+                      options={[
+                        { value: '', label: 'Semua Pos Pembayaran' },
+                        ...posList.map(p => ({ value: p.id, label: p.nama_pos }))
+                      ]}
+                    />
+                  </div>
+                  <div style={{ flex: '1 1 200px', position: 'relative' }}>
+                    <Search size={15} style={{ position: 'absolute', left: 10, top: 10, color: '#64748b' }} />
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      style={{ paddingLeft: 32 }}
+                      placeholder="Cari kelas, tingkat, pos..."
+                      value={tarifSearch}
+                      onChange={(e) => setTarifSearch(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <div className="admin-table-wrapper">
@@ -1545,29 +1637,67 @@ export default function AdminKeuanganTab() {
                       <tr>
                         <th>Pos Pembayaran</th>
                         <th>Tahun Ajaran</th>
-                        <th>Sasaran Kelas/Tingkat</th>
-                        <th>Nominal Tarif (Rp)</th>
-                        <th style={{ width: 80, textAlign: 'center' }}>Aksi</th>
+                        <th>Sasaran Kelas / Tingkat</th>
+                        <th style={{ textAlign: 'right' }}>Nominal Tarif (Rp)</th>
+                        <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {tarifList.map((t) => (
-                        <tr key={t.id}>
-                          <td style={{ fontWeight: 700, color: '#0f172a' }}>{t.nama_pos}</td>
-                          <td style={{ color: '#64748b' }}>{t.tahun_ajaran}</td>
-                          <td>
-                            {t.nama_kelas ? `Kelas ${t.nama_kelas}` : t.tingkat ? `Tingkat ${t.tingkat}` : 'Semua Kelas (Umum)'}
-                          </td>
-                          <td style={{ fontWeight: 800, color: '#16a34a' }}>
-                            Rp {Number(t.nominal).toLocaleString('id-ID')}
-                          </td>
-                          <td style={{ textAlign: 'center' }}>
-                            <button className="btn-action-icon btn-delete" onClick={() => handleDeleteTarif(t.id)}>
-                              <Trash2 size={13} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                      {tarifList
+                        .filter(t => {
+                          if (tarifFilterPos && String(t.pos_id) !== String(tarifFilterPos)) return false;
+                          if (tarifSearch) {
+                            const q = tarifSearch.toLowerCase();
+                            const matchPos = String(t.nama_pos || '').toLowerCase().includes(q);
+                            const matchKelas = String(t.nama_kelas || t.kode_kelas || '').toLowerCase().includes(q);
+                            const matchTingkat = String(t.tingkat || '').toLowerCase().includes(q);
+                            const matchTA = String(t.tahun_ajaran || '').toLowerCase().includes(q);
+                            return matchPos || matchKelas || matchTingkat || matchTA;
+                          }
+                          return true;
+                        })
+                        .map((t) => (
+                          <tr key={t.id}>
+                            <td style={{ fontWeight: 700, color: '#0f172a' }}>{t.nama_pos}</td>
+                            <td style={{ color: '#64748b', fontWeight: 600 }}>{t.tahun_ajaran}</td>
+                            <td>
+                              {t.nama_kelas || t.kode_kelas ? (
+                                <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: 6, fontSize: 11.5, fontWeight: 800, border: '1px solid #bae6fd', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                  🏫 Kelas {t.nama_kelas || t.kode_kelas}
+                                </span>
+                              ) : t.tingkat ? (
+                                <span style={{ background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: 6, fontSize: 11.5, fontWeight: 800, border: '1px solid #fde68a', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                  📊 Tingkat / Angkatan {t.tingkat}
+                                </span>
+                              ) : (
+                                <span style={{ background: '#f1f5f9', color: '#475569', padding: '3px 8px', borderRadius: 6, fontSize: 11.5, fontWeight: 700, border: '1px solid #e2e8f0', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                  🌐 Semua Kelas (Umum)
+                                </span>
+                              )}
+                            </td>
+                            <td style={{ fontWeight: 800, color: '#16a34a', textAlign: 'right', fontSize: 13.5 }}>
+                              Rp {Number(t.nominal).toLocaleString('id-ID')}
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <div style={{ display: 'inline-flex', gap: 4 }}>
+                                <button
+                                  className="btn-action-icon btn-edit"
+                                  onClick={() => handleOpenEditTarif(t)}
+                                  title="Edit Tarif"
+                                >
+                                  <Edit2 size={13} />
+                                </button>
+                                <button
+                                  className="btn-action-icon btn-delete"
+                                  onClick={() => handleDeleteTarif(t.id)}
+                                  title="Hapus Tarif"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -1644,10 +1774,13 @@ export default function AdminKeuanganTab() {
                   value={genFormData.tarif_id}
                   onChange={(e) => setGenFormData({ ...genFormData, tarif_id: e.target.value })}
                   placeholder="-- Pilih Pos & Tarif SPP --"
-                  options={tarifList.map(t => ({
-                    value: t.id,
-                    label: `${t.nama_pos} - TA ${t.tahun_ajaran} (Rp ${Number(t.nominal).toLocaleString('id-ID')})`
-                  }))}
+                  options={tarifList.map(t => {
+                    const sasaran = t.nama_kelas ? `Kelas ${t.nama_kelas}` : t.tingkat ? `Tingkat ${t.tingkat}` : 'Semua Kelas';
+                    return {
+                      value: t.id,
+                      label: `${t.nama_pos} (${sasaran}) - TA ${t.tahun_ajaran} - Rp ${Number(t.nominal).toLocaleString('id-ID')}`
+                    };
+                  })}
                 />
               </div>
 
@@ -1783,12 +1916,13 @@ export default function AdminKeuanganTab() {
                     <th>Kelas</th>
                     <th>Total Tagihan Macet</th>
                     <th>Total Nominal Tunggakan (Rp)</th>
+                    <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginatedRekap.length === 0 ? (
                     <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
                         Tidak ada data tunggakan.
                       </td>
                     </tr>
@@ -1801,9 +1935,23 @@ export default function AdminKeuanganTab() {
                         <td style={{ color: '#64748b' }}>{r.nis || '-'}</td>
                         <td style={{ fontWeight: 800, color: '#0f172a' }}>{r.nama_siswa}</td>
                         <td>{r.nama_kelas || '-'}</td>
-                        <td>{r.total_tagihan} Invoice</td>
+                        <td>
+                          <span style={{ background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800 }}>
+                            {r.total_tagihan} Invoice
+                          </span>
+                        </td>
                         <td style={{ fontWeight: 800, color: '#dc2626' }}>
                           Rp {Number(r.total_tunggakan || 0).toLocaleString('id-ID')}
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <button
+                            className="btn-action-icon btn-edit"
+                            onClick={() => handleShowRekapDetail(r)}
+                            title="Lihat Detail Rincian Tunggakan"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 8px', fontSize: 11.5, width: 'auto' }}
+                          >
+                            <Eye size={13} /> Detail
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -2043,10 +2191,10 @@ export default function AdminKeuanganTab() {
       {/* --- MODAL TARIF PEMBAYARAN MATCHING ADMIN PENGUMUMAN MODAL --- */}
       {showTarifModal && (
         <div className="admin-modal-overlay">
-          <div className="admin-modal-box" style={{ maxWidth: 460 }}>
+          <div className="admin-modal-box" style={{ maxWidth: 480 }}>
             <div className="admin-modal-header">
               <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                Tambah Tarif Pembayaran
+                {editingTarifId ? 'Edit Tarif Pembayaran' : 'Tambah Tarif Pembayaran Matrix'}
               </h3>
               <button onClick={() => setShowTarifModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}>
                 <X size={20} />
@@ -2078,15 +2226,79 @@ export default function AdminKeuanganTab() {
                 </div>
 
                 <div className="form-group-admin">
-                  <label>Nominal Tarif (Rp) *</label>
-                  <input
-                    type="number"
-                    required
-                    className="form-control-admin"
-                    placeholder="Contoh: 350000"
-                    value={tarifFormData.nominal}
-                    onChange={(e) => setTarifFormData({ ...tarifFormData, nominal: e.target.value })}
+                  <label>Cakupan Tarif / Sasaran Pembayaran *</label>
+                  <SearchableSelect
+                    value={targetType}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setTargetType(val);
+                      if (val === 'UMUM') {
+                        setTarifFormData({ ...tarifFormData, tingkat: '', kode_kelas: '' });
+                      } else if (val === 'TINGKAT') {
+                        setTarifFormData({ ...tarifFormData, kode_kelas: '' });
+                      } else if (val === 'KELAS') {
+                        setTarifFormData({ ...tarifFormData, tingkat: '' });
+                      }
+                    }}
+                    options={[
+                      { value: 'UMUM', label: '🌐 Semua Kelas (Umum / Berlaku Seluruh Siswa)' },
+                      { value: 'TINGKAT', label: '📊 Per Tingkat / Angkatan (Contoh: Tingkat 10, 11, 12)' },
+                      { value: 'KELAS', label: '🏫 Per Kelas Spesifik (Contoh: X-RPL-1, XI-TKJ-2)' }
+                    ]}
                   />
+                </div>
+
+                {targetType === 'TINGKAT' && (
+                  <div className="form-group-admin">
+                    <label>Pilih Tingkat / Angkatan Kelas *</label>
+                    <SearchableSelect
+                      value={tarifFormData.tingkat}
+                      onChange={(e) => setTarifFormData({ ...tarifFormData, tingkat: e.target.value })}
+                      placeholder="-- Pilih Tingkat --"
+                      options={[
+                        { value: '10', label: 'Tingkat 10 (Kelas X / 10)' },
+                        { value: '11', label: 'Tingkat 11 (Kelas XI / 11)' },
+                        { value: '12', label: 'Tingkat 12 (Kelas XII / 12)' },
+                        { value: '7', label: 'Tingkat 7 (Kelas VII / 7)' },
+                        { value: '8', label: 'Tingkat 8 (Kelas VIII / 8)' },
+                        { value: '9', label: 'Tingkat 9 (Kelas IX / 9)' },
+                        { value: '1', label: 'Tingkat 1 (SD)' },
+                        { value: '2', label: 'Tingkat 2 (SD)' },
+                        { value: '3', label: 'Tingkat 3 (SD)' },
+                        { value: '4', label: 'Tingkat 4 (SD)' },
+                        { value: '5', label: 'Tingkat 5 (SD)' },
+                        { value: '6', label: 'Tingkat 6 (SD)' }
+                      ]}
+                    />
+                  </div>
+                )}
+
+                {targetType === 'KELAS' && (
+                  <div className="form-group-admin">
+                    <label>Pilih Kelas Spesifik *</label>
+                    <SearchableSelect
+                      value={tarifFormData.kode_kelas}
+                      onChange={(e) => setTarifFormData({ ...tarifFormData, kode_kelas: e.target.value })}
+                      placeholder="-- Pilih Kelas --"
+                      options={kelasList.map(k => ({ value: k.kode_kelas, label: `${k.nama_kelas || k.kode_kelas} (${k.jurusan || '-'})` }))}
+                    />
+                  </div>
+                )}
+
+                <div className="form-group-admin">
+                  <label>Nominal Tarif SPP / Pos (Rp) *</label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ position: 'absolute', left: 10, fontSize: 12, fontWeight: 700, color: '#64748b' }}>Rp</span>
+                    <input
+                      type="text"
+                      required
+                      className="form-control-admin"
+                      style={{ paddingLeft: 32, fontWeight: 800, fontSize: 14 }}
+                      placeholder="Contoh: 350.000"
+                      value={formatRupiahInput(tarifFormData.nominal)}
+                      onChange={(e) => setTarifFormData({ ...tarifFormData, nominal: parseRupiahInput(e.target.value) })}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -2095,7 +2307,7 @@ export default function AdminKeuanganTab() {
                   Batal
                 </button>
                 <button type="submit" className="btn-primary-admin">
-                  Simpan Tarif
+                  {editingTarifId ? 'Simpan Perubahan' : 'Simpan Tarif'}
                 </button>
               </div>
             </form>
@@ -2349,6 +2561,165 @@ export default function AdminKeuanganTab() {
                 <button type="submit" className="btn-primary-admin">Simpan Perubahan</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL DETAIL RINCIAN TUNGGAKAN SISWA --- */}
+      {showRekapDetailModal && selectedRekapSiswa && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-box" style={{ maxWidth: 720, padding: 0, overflow: 'hidden' }}>
+            <div className="admin-modal-header" style={{ background: '#0f172a', color: '#ffffff', padding: '16px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <AlertCircle size={20} color="#ef4444" />
+                <div>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                    Rincian Tunggakan Tagihan Siswa
+                  </h3>
+                  <div style={{ fontSize: 11.5, color: '#94a3b8', marginTop: 2 }}>
+                    {selectedRekapSiswa.nama_siswa} ({selectedRekapSiswa.nis || 'NIS -'}) — Kelas {selectedRekapSiswa.nama_kelas || '-'}
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => setShowRekapDetailModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div id="printable-tunggakan" style={{ padding: 20, background: '#ffffff' }}>
+              {/* SUMMARY INFO */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16, background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12 }}>
+                <div>
+                  <div style={{ color: '#64748b', fontSize: 11 }}>Nama Siswa:</div>
+                  <div style={{ fontWeight: 800, color: '#0f172a' }}>{selectedRekapSiswa.nama_siswa}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#64748b', fontSize: 11 }}>Kelas:</div>
+                  <div style={{ fontWeight: 700 }}>{selectedRekapSiswa.nama_kelas || '-'}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#64748b', fontSize: 11 }}>Total Tunggakan:</div>
+                  <div style={{ fontWeight: 900, color: '#dc2626', fontSize: 14 }}>
+                    Rp {Number(selectedRekapSiswa.total_tunggakan || 0).toLocaleString('id-ID')}
+                  </div>
+                </div>
+              </div>
+
+              {/* TABLE TAGIHAN UNPAID */}
+              {isLoadingRekapDetail ? (
+                <div style={{ textAlign: 'center', padding: '30px 0', color: '#64748b', fontSize: 13 }}>
+                  Memuat rincian item tunggakan...
+                </div>
+              ) : rekapDetailTagihan.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '30px 0', color: '#16a34a', fontWeight: 700 }}>
+                  🎉 Siswa ini tidak memiliki tunggakan tagihan aktif.
+                </div>
+              ) : (
+                <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                    <thead>
+                      <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #cbd5e1', textAlign: 'left' }}>
+                        <th style={{ padding: '8px 10px' }}>Pos Tagihan</th>
+                        <th style={{ padding: '8px 10px' }}>Periode</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'right' }}>Nominal (Rp)</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'right' }}>Terbayar (Rp)</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'right' }}>Sisa (Rp)</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'center' }}>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rekapDetailTagihan.map((t) => {
+                        const sisa = Number(t.nominal_tagihan) - Number(t.nominal_terbayar);
+                        return (
+                          <tr key={t.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                            <td style={{ padding: '8px 10px', fontWeight: 700, color: '#0f172a' }}>{t.nama_pos}</td>
+                            <td style={{ padding: '8px 10px', color: '#64748b' }}>
+                              {t.bulan ? `${getBulanLabel(t.bulan)} ${t.tahun}` : 'Sekali Bayar'}
+                            </td>
+                            <td style={{ padding: '8px 10px', textAlign: 'right' }}>
+                              Rp {Number(t.nominal_tagihan).toLocaleString('id-ID')}
+                            </td>
+                            <td style={{ padding: '8px 10px', textAlign: 'right', color: '#16a34a' }}>
+                              Rp {Number(t.nominal_terbayar).toLocaleString('id-ID')}
+                            </td>
+                            <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 800, color: '#dc2626' }}>
+                              Rp {sisa.toLocaleString('id-ID')}
+                            </td>
+                            <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                              <span style={{
+                                background: t.status === 'PARTIAL' ? '#fef3c7' : '#fee2e2',
+                                color: t.status === 'PARTIAL' ? '#b45309' : '#dc2626',
+                                padding: '3px 8px', borderRadius: 4, fontSize: 10.5, fontWeight: 800
+                              }}>
+                                {t.status === 'PARTIAL' ? 'SEBAGIAN' : 'BELUM BAYAR'}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="admin-modal-footer" style={{ background: '#f8fafc', borderTop: '1px solid #e2e8f0', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  type="button"
+                  className="btn-outline-admin"
+                  onClick={() => {
+                    const printContents = document.getElementById('printable-tunggakan').innerHTML;
+                    const win = window.open('', '', 'height=700,width=800');
+                    win.document.write(`
+                      <html>
+                        <head>
+                          <title>Surat Tunggakan - ${selectedRekapSiswa.nama_siswa}</title>
+                          <style>
+                            body { font-family: system-ui, -apple-system, sans-serif; padding: 24px; color: #0f172a; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+                            th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
+                            th { background: #f1f5f9; }
+                          </style>
+                        </head>
+                        <body>
+                          <h2 style="text-align:center; margin-bottom: 4px;">RINCIAN TUNGGAKAN PEMBAYARAN SEKOLAH</h2>
+                          <div style="text-align:center; color:#64748b; font-size:12px; margin-bottom: 20px;">SMK ARTANITA</div>
+                          ${printContents}
+                        </body>
+                      </html>
+                    `);
+                    win.document.close();
+                    win.focus();
+                    setTimeout(() => { win.print(); win.close(); }, 300);
+                  }}
+                >
+                  <Printer size={15} style={{ marginRight: 6 }} /> Cetak Rincian (Print)
+                </button>
+                <button
+                  type="button"
+                  className="btn-primary-admin"
+                  style={{ background: '#0284c7', borderColor: '#0284c7' }}
+                  onClick={() => {
+                    setShowRekapDetailModal(false);
+                    // Switch to Kasir tab & select student
+                    setActiveSubTab('kasir');
+                    handleSelectStudent({
+                      kode_siswa: selectedRekapSiswa.kode_siswa,
+                      nama_siswa: selectedRekapSiswa.nama_siswa,
+                      nis: selectedRekapSiswa.nis,
+                      nama_kelas: selectedRekapSiswa.nama_kelas
+                    });
+                  }}
+                >
+                  <CreditCard size={15} style={{ marginRight: 6 }} /> Bayar di Kasir TU
+                </button>
+              </div>
+
+              <button type="button" className="btn-outline-admin" onClick={() => setShowRekapDetailModal(false)}>
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}
