@@ -305,6 +305,35 @@ export default function AdminKeuanganTab() {
     calculateTotal(newNominal);
   };
 
+  const toggleSelectAllGroup = (items = []) => {
+    if (!items || items.length === 0) return;
+    const itemIds = items.map(t => t.id);
+    const allSelected = itemIds.every(id => selectedTagihanIds.includes(id));
+
+    let newIds = [...selectedTagihanIds];
+    let newNominal = { ...bayarNominal };
+
+    if (allSelected) {
+      newIds = newIds.filter(id => !itemIds.includes(id));
+      itemIds.forEach(id => delete newNominal[id]);
+    } else {
+      itemIds.forEach(id => {
+        if (!newIds.includes(id)) {
+          newIds.push(id);
+        }
+        const item = items.find(t => t.id === id);
+        if (item) {
+          const sisa = Number(item.nominal_tagihan) - Number(item.nominal_terbayar || 0);
+          newNominal[id] = sisa;
+        }
+      });
+    }
+
+    setSelectedTagihanIds(newIds);
+    setBayarNominal(newNominal);
+    calculateTotal(newNominal);
+  };
+
   const handleNominalChange = (tId, val) => {
     const num = Number(val) || 0;
     const newNominal = { ...bayarNominal, [tId]: num };
@@ -746,32 +775,65 @@ export default function AdminKeuanganTab() {
                           );
                         }
 
-                        const renderTagihanTable = (items, title, badgeColor, iconEmoji) => (
-                          <div style={{ marginBottom: 20 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, background: '#f8fafc', padding: '8px 14px', borderRadius: 8, borderLeft: `4px solid ${badgeColor}`, border: '1px solid #e2e8f0', borderLeftWidth: 4, borderLeftColor: badgeColor }}>
-                              <span style={{ fontSize: 16 }}>{iconEmoji}</span>
-                              <span style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>{title}</span>
-                              <span style={{ fontSize: 11, background: badgeColor, color: '#fff', padding: '2px 10px', borderRadius: 12, fontWeight: 700, marginLeft: 'auto' }}>
-                                {items.length} Tagihan
-                              </span>
-                            </div>
-                            {items.length === 0 ? (
-                              <div style={{ padding: '14px 18px', background: '#ffffff', borderRadius: 8, border: '1px solid #e2e8f0', color: '#64748b', fontSize: 12.5, fontStyle: 'italic' }}>
-                                Tidak ada {title.toLowerCase()} yang belum lunas.
+                        const renderTagihanTable = (items, title, badgeColor, iconEmoji) => {
+                          const isAllGroupSelected = items.length > 0 && items.every(t => selectedTagihanIds.includes(t.id));
+
+                          return (
+                            <div style={{ marginBottom: 20 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, background: '#f8fafc', padding: '8px 14px', borderRadius: 8, borderLeft: `4px solid ${badgeColor}`, border: '1px solid #e2e8f0', borderLeftWidth: 4, borderLeftColor: badgeColor }}>
+                                <span style={{ fontSize: 16 }}>{iconEmoji}</span>
+                                <span style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>{title}</span>
+                                {items.length > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleSelectAllGroup(items)}
+                                    style={{
+                                      fontSize: 11,
+                                      background: isAllGroupSelected ? '#e0f2fe' : '#ffffff',
+                                      color: isAllGroupSelected ? '#0369a1' : '#475569',
+                                      border: isAllGroupSelected ? '1px solid #7dd3fc' : '1px solid #cbd5e1',
+                                      padding: '3px 10px',
+                                      borderRadius: 6,
+                                      fontWeight: 700,
+                                      cursor: 'pointer',
+                                      marginLeft: 10,
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: 4
+                                    }}
+                                  >
+                                    {isAllGroupSelected ? '✓ Batalkan Pilih Semua' : '☑️ Pilih Semua (Pelunasan Sekaligus)'}
+                                  </button>
+                                )}
+                                <span style={{ fontSize: 11, background: badgeColor, color: '#fff', padding: '2px 10px', borderRadius: 12, fontWeight: 700, marginLeft: 'auto' }}>
+                                  {items.length} Tagihan
+                                </span>
                               </div>
-                            ) : (
-                              <div className="admin-table-wrapper" style={{ width: '100%' }}>
-                                <table className="admin-table" style={{ width: '100%' }}>
-                                  <thead>
-                                    <tr>
-                                      <th style={{ width: 50, textAlign: 'center' }}>Pilih</th>
-                                      <th style={{ width: 200 }}>Pos Pembayaran</th>
-                                      <th>Tipe & Periode Tagihan</th>
-                                      <th style={{ width: 140 }}>Nominal Tagihan</th>
-                                      <th style={{ width: 140 }}>Sisa Tagihan</th>
-                                      <th style={{ width: 180 }}>Nominal Bayar (Rp)</th>
-                                    </tr>
-                                  </thead>
+                              {items.length === 0 ? (
+                                <div style={{ padding: '14px 18px', background: '#ffffff', borderRadius: 8, border: '1px solid #e2e8f0', color: '#64748b', fontSize: 12.5, fontStyle: 'italic' }}>
+                                  Tidak ada {title.toLowerCase()} yang belum lunas.
+                                </div>
+                              ) : (
+                                <div className="admin-table-wrapper" style={{ width: '100%' }}>
+                                  <table className="admin-table" style={{ width: '100%' }}>
+                                    <thead>
+                                      <tr>
+                                        <th style={{ width: 50, textAlign: 'center' }}>
+                                          <input
+                                            type="checkbox"
+                                            checked={isAllGroupSelected}
+                                            onChange={() => toggleSelectAllGroup(items)}
+                                            style={{ width: 18, height: 18, cursor: 'pointer' }}
+                                            title="Centang / Hapus Centang Semua Tagihan"
+                                          />
+                                        </th>
+                                        <th style={{ width: 200 }}>Pos Pembayaran</th>
+                                        <th>Tipe & Periode Tagihan</th>
+                                        <th style={{ width: 140 }}>Nominal Tagihan</th>
+                                        <th style={{ width: 140 }}>Sisa Tagihan</th>
+                                        <th style={{ width: 180 }}>Nominal Bayar (Rp)</th>
+                                      </tr>
+                                    </thead>
                                   <tbody>
                                     {items.map((t) => {
                                       const isChecked = selectedTagihanIds.includes(t.id);
@@ -872,14 +934,15 @@ export default function AdminKeuanganTab() {
                             )}
                           </div>
                         );
+                      };
 
-                        return (
-                          <>
-                            {renderTagihanTable(unpaidBulanan, 'Tagihan SPP Rutin (Bulanan)', '#0284c7', '🗓️')}
-                            {renderTagihanTable(unpaidBebas, 'Tagihan Tipe Bebas (Non-Bulanan)', '#d97706', '💰')}
-                          </>
-                        );
-                      })()}
+                      return (
+                        <>
+                          {renderTagihanTable(unpaidBulanan, 'Tagihan SPP Rutin (Bulanan)', '#0284c7', '🗓️')}
+                          {renderTagihanTable(unpaidBebas, 'Tagihan Tipe Bebas (Non-Bulanan)', '#d97706', '💰')}
+                        </>
+                      );
+                    })()}
 
                   {/* BOTTOM FULL-WIDTH SUMMARY PANEL BELOW TABLE */}
                   <div style={{ background: '#ffffff', padding: 20, borderRadius: 10, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1.2fr 1.5fr 220px', gap: 20, alignItems: 'center' }}>
