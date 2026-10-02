@@ -162,6 +162,66 @@ class TagihanSiswaModel {
     return { total_siswa: siswaList.length, generated_count: generatedCount };
   }
 
+  /**
+   * Auto generate tagihan SPP untuk rentang bulan custom (misal Agustus 2025 s/d Juli 2026)
+   */
+  static async autoGenerateRangeInvoices({
+    tarif_id,
+    bulan_mulai,
+    tahun_mulai,
+    bulan_selesai,
+    tahun_selesai,
+    kode_kelas = null,
+    tanggal_jatuh_tempo = null
+  }) {
+    let curY = Number(tahun_mulai);
+    let curM = Number(bulan_mulai);
+    const endY = Number(tahun_selesai);
+    const endM = Number(bulan_selesai);
+
+    let totalGeneratedCount = 0;
+    let totalSiswa = 0;
+    let monthsProcessed = 0;
+
+    let loopGuard = 0;
+
+    while (loopGuard < 60) { // Max 5 tahun rentang
+      loopGuard++;
+      monthsProcessed++;
+
+      const res = await this.autoGenerateInvoices({
+        tarif_id,
+        bulan: curM,
+        tahun: curY,
+        kode_kelas,
+        tanggal_jatuh_tempo
+      });
+
+      totalSiswa = res.total_siswa;
+      totalGeneratedCount += res.generated_count;
+
+      if (curY === endY && curM === endM) {
+        break;
+      }
+
+      curM++;
+      if (curM > 12) {
+        curM = 1;
+        curY++;
+      }
+
+      if (curY > endY || (curY === endY && curM > endM)) {
+        break;
+      }
+    }
+
+    return {
+      total_siswa: totalSiswa,
+      months_processed: monthsProcessed,
+      generated_count: totalGeneratedCount
+    };
+  }
+
   // --- REKAPITULASI & LAPORAN ---
 
   static async getRekapTunggakan(kode_kelas = null) {

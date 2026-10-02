@@ -121,17 +121,38 @@ async function getTagihanSiswa(req, res, next) {
 
 async function generateTagihan(req, res, next) {
   try {
-    const { tarif_id, bulan, tahun, kode_kelas, tanggal_jatuh_tempo } = req.body;
-    if (!tarif_id || !bulan || !tahun) {
-      return sendError(res, 'tarif_id, bulan, dan tahun wajib diisi.', 400);
+    const { mode = 'SINGLE', tarif_id, bulan, tahun, bulan_mulai, tahun_mulai, bulan_selesai, tahun_selesai, kode_kelas, tanggal_jatuh_tempo } = req.body;
+    if (!tarif_id) {
+      return sendError(res, 'tarif_id wajib diisi.', 400);
     }
-    const result = await TagihanSiswaModel.autoGenerateInvoices({
-      tarif_id,
-      bulan,
-      tahun,
-      kode_kelas,
-      tanggal_jatuh_tempo
-    });
+
+    let result;
+    if (mode === 'RANGE' || (bulan_mulai && tahun_mulai && bulan_selesai && tahun_selesai)) {
+      if (!bulan_mulai || !tahun_mulai || !bulan_selesai || !tahun_selesai) {
+        return sendError(res, 'Bulan & tahun mulai serta selesai wajib diisi untuk mode rentang.', 400);
+      }
+      result = await TagihanSiswaModel.autoGenerateRangeInvoices({
+        tarif_id,
+        bulan_mulai,
+        tahun_mulai,
+        bulan_selesai,
+        tahun_selesai,
+        kode_kelas,
+        tanggal_jatuh_tempo
+      });
+    } else {
+      if (!bulan || !tahun) {
+        return sendError(res, 'bulan dan tahun wajib diisi.', 400);
+      }
+      result = await TagihanSiswaModel.autoGenerateInvoices({
+        tarif_id,
+        bulan,
+        tahun,
+        kode_kelas,
+        tanggal_jatuh_tempo
+      });
+    }
+
     sendSuccess(res, 'Tagihan siswa berhasil digenerate.', result, 201);
   } catch (error) {
     next(error);
