@@ -545,55 +545,57 @@ export default function AdminKeuanganTab() {
     }
 
     try {
-      if (editingTarifId) {
-        // Edit mode (single record)
-        const payload = {
-          pos_id: tarifFormData.pos_id,
-          tahun_ajaran: tarifFormData.tahun_ajaran,
-          tingkat: targetType === 'TINGKAT' ? (selectedTingkatList[0] || tarifFormData.tingkat || null) : null,
-          kode_kelas: targetType === 'KELAS' ? (selectedKelasList[0] || tarifFormData.kode_kelas || null) : null,
-          nominal: nominalNum
-        };
-        await api.put(`/keuangan/tarif/${editingTarifId}`, payload);
-        Swal.fire('Berhasil', 'Tarif pembayaran berhasil diperbarui.', 'success');
+      if (targetType === 'KELAS') {
+        if (selectedKelasList.length === 0) {
+          Swal.fire('Peringatan', 'Pilih minimal 1 kelas.', 'warning');
+          return;
+        }
+
+        // Save (create or update) tarif for EVERY selected class
+        await Promise.all(
+          selectedKelasList.map(k =>
+            api.post('/keuangan/tarif', {
+              pos_id: tarifFormData.pos_id,
+              tahun_ajaran: tarifFormData.tahun_ajaran,
+              kode_kelas: k,
+              tingkat: null,
+              nominal: nominalNum
+            })
+          )
+        );
+        Swal.fire('Berhasil', `Berhasil menyimpan tarif untuk ${selectedKelasList.length} kelas terpilih!`, 'success');
+
+      } else if (targetType === 'TINGKAT') {
+        if (selectedTingkatList.length === 0) {
+          Swal.fire('Peringatan', 'Pilih minimal 1 tingkat.', 'warning');
+          return;
+        }
+
+        // Save (create or update) tarif for EVERY selected tingkat
+        await Promise.all(
+          selectedTingkatList.map(t =>
+            api.post('/keuangan/tarif', {
+              pos_id: tarifFormData.pos_id,
+              tahun_ajaran: tarifFormData.tahun_ajaran,
+              kode_kelas: null,
+              tingkat: t,
+              nominal: nominalNum
+            })
+          )
+        );
+        Swal.fire('Berhasil', `Berhasil menyimpan tarif untuk ${selectedTingkatList.length} tingkat/angkatan terpilih!`, 'success');
+
       } else {
-        // Create mode (supports multi-select)
-        if (targetType === 'KELAS') {
-          if (selectedKelasList.length === 0) {
-            Swal.fire('Peringatan', 'Pilih minimal 1 kelas.', 'warning');
-            return;
-          }
-          await Promise.all(
-            selectedKelasList.map(k =>
-              api.post('/keuangan/tarif', {
-                pos_id: tarifFormData.pos_id,
-                tahun_ajaran: tarifFormData.tahun_ajaran,
-                kode_kelas: k,
-                tingkat: null,
-                nominal: nominalNum
-              })
-            )
-          );
-          Swal.fire('Berhasil', `Berhasil menambahkan tarif untuk ${selectedKelasList.length} kelas!`, 'success');
-        } else if (targetType === 'TINGKAT') {
-          if (selectedTingkatList.length === 0) {
-            Swal.fire('Peringatan', 'Pilih minimal 1 tingkat.', 'warning');
-            return;
-          }
-          await Promise.all(
-            selectedTingkatList.map(t =>
-              api.post('/keuangan/tarif', {
-                pos_id: tarifFormData.pos_id,
-                tahun_ajaran: tarifFormData.tahun_ajaran,
-                kode_kelas: null,
-                tingkat: t,
-                nominal: nominalNum
-              })
-            )
-          );
-          Swal.fire('Berhasil', `Berhasil menambahkan tarif untuk ${selectedTingkatList.length} tingkat/angkatan!`, 'success');
+        // UMUM (Semua Kelas)
+        if (editingTarifId) {
+          await api.put(`/keuangan/tarif/${editingTarifId}`, {
+            pos_id: tarifFormData.pos_id,
+            tahun_ajaran: tarifFormData.tahun_ajaran,
+            kode_kelas: null,
+            tingkat: null,
+            nominal: nominalNum
+          });
         } else {
-          // UMUM
           await api.post('/keuangan/tarif', {
             pos_id: tarifFormData.pos_id,
             tahun_ajaran: tarifFormData.tahun_ajaran,
@@ -601,8 +603,8 @@ export default function AdminKeuanganTab() {
             tingkat: null,
             nominal: nominalNum
           });
-          Swal.fire('Berhasil', 'Tarif pembayaran umum berhasil ditambahkan.', 'success');
         }
+        Swal.fire('Berhasil', 'Tarif pembayaran umum berhasil disimpan.', 'success');
       }
 
       setShowTarifModal(false);

@@ -55,6 +55,24 @@ class TarifPembayaranModel {
   }
 
   static async create({ pos_id, tahun_ajaran, tingkat = null, kode_kelas = null, nominal }) {
+    let existingSql = 'SELECT id FROM tarif_pembayaran WHERE pos_id = ? AND tahun_ajaran = ?';
+    const params = [pos_id, tahun_ajaran];
+    if (kode_kelas) {
+      existingSql += ' AND kode_kelas = ?';
+      params.push(kode_kelas);
+    } else if (tingkat) {
+      existingSql += ' AND tingkat = ? AND kode_kelas IS NULL';
+      params.push(tingkat);
+    } else {
+      existingSql += ' AND kode_kelas IS NULL AND tingkat IS NULL';
+    }
+
+    const existing = await query(existingSql, params);
+    if (existing && existing.length > 0) {
+      await query('UPDATE tarif_pembayaran SET nominal = ? WHERE id = ?', [nominal, existing[0].id]);
+      return existing[0].id;
+    }
+
     const res = await query(
       'INSERT INTO tarif_pembayaran (pos_id, tahun_ajaran, tingkat, kode_kelas, nominal) VALUES (?, ?, ?, ?, ?)',
       [pos_id, tahun_ajaran, tingkat, kode_kelas, nominal]
