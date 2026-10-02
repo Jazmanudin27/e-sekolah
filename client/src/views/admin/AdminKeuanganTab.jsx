@@ -14,6 +14,8 @@ export default function AdminKeuanganTab() {
 
   // --- KASIR STATE ---
   const [siswaSearch, setSiswaSearch] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [selectedSiswa, setSelectedSiswa] = useState(null);
   const [siswaTagihan, setSiswaTagihan] = useState([]);
   const [selectedTagihanIds, setSelectedTagihanIds] = useState([]);
@@ -91,21 +93,41 @@ export default function AdminKeuanganTab() {
   };
 
   // --- KASIR HANDLERS ---
-  const handleSearchSiswa = async (e) => {
-    e.preventDefault();
-    if (!siswaSearch.trim()) return;
+  const handleLiveSearch = async (queryVal) => {
+    if (!queryVal || !queryVal.trim()) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
     try {
-      const res = await api.get('/siswa', { params: { search: siswaSearch.trim() } });
+      const res = await api.get('/siswa', { params: { search: queryVal.trim() } });
       const students = res.data?.data || [];
-      if (students.length === 0) {
-        Swal.fire('Tidak Ditemukan', 'Siswa dengan NIS/Nama tersebut tidak ditemukan.', 'warning');
-        return;
+      setSearchResults(students);
+      setShowDropdown(true);
+
+      // Jika hanya ada 1 hasil pencarian yang tepat, langsung pilih
+      if (students.length === 1 && String(queryVal).trim().toLowerCase() === String(students[0].nis || '').toLowerCase()) {
+        handleSelectStudent(students[0]);
       }
-      const s = students[0];
-      setSelectedSiswa(s);
-      fetchSiswaTagihan(s.kode_siswa);
     } catch (err) {
-      Swal.fire('Error', 'Gagal mencari data siswa.', 'error');
+      console.error('Error live search:', err);
+    }
+  };
+
+  const handleSelectStudent = (student) => {
+    setSelectedSiswa(student);
+    setSiswaSearch(`${student.nama_siswa} (${student.nis || 'NIS'})`);
+    setShowDropdown(false);
+    setSearchResults([]);
+    fetchSiswaTagihan(student.kode_siswa);
+  };
+
+  const handleSearchSiswaSubmit = async (e) => {
+    e.preventDefault();
+    if (searchResults.length > 0) {
+      handleSelectStudent(searchResults[0]);
+    } else if (siswaSearch.trim()) {
+      handleLiveSearch(siswaSearch.trim());
     }
   };
 
@@ -372,17 +394,69 @@ export default function AdminKeuanganTab() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20 }}>
             {/* LEFT AREA: SEARCH & TAGIHAN TABLE */}
             <div>
-              <form onSubmit={handleSearchSiswa} style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+              <form onSubmit={handleSearchSiswaSubmit} style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
                 <div style={{ position: 'relative', flex: 1 }}>
-                  <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+                  <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 2 }} />
                   <input
                     type="text"
-                    placeholder="Ketik NIS, NISN, atau Nama Siswa..."
+                    placeholder="Ketik NIS, NISN, atau Nama Siswa... (Hasil langsung muncul)"
                     value={siswaSearch}
-                    onChange={(e) => setSiswaSearch(e.target.value)}
+                    onChange={(e) => {
+                      setSiswaSearch(e.target.value);
+                      handleLiveSearch(e.target.value);
+                    }}
+                    onFocus={() => {
+                      if (searchResults.length > 0) setShowDropdown(true);
+                    }}
                     className="form-control-admin"
-                    style={{ paddingLeft: 40 }}
+                    style={{ paddingLeft: 40, paddingRight: siswaSearch ? 36 : 12 }}
                   />
+                  {siswaSearch && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSiswaSearch('');
+                        setSelectedSiswa(null);
+                        setSiswaTagihan([]);
+                        setSearchResults([]);
+                        setShowDropdown(false);
+                      }}
+                      style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', zIndex: 2 }}
+                      title="Reset Pencarian"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+
+                  {/* FLOATING LIVE DROPDOWN SISTER SUGGESTIONS */}
+                  {showDropdown && searchResults.length > 0 && (
+                    <div
+                      style={{
+                        position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
+                        background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: 8,
+                        boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', zIndex: 99999,
+                        maxHeight: 280, overflowY: 'auto'
+                      }}
+                    >
+                      {searchResults.map((s) => (
+                        <div
+                          key={s.kode_siswa}
+                          onClick={() => handleSelectStudent(s)}
+                          style={{
+                            padding: '10px 14px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer',
+                            transition: 'background 0.15s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = '#f0f9ff'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = '#ffffff'}
+                        >
+                          <div style={{ fontWeight: 800, fontSize: 13.5, color: '#0f172a' }}>{s.nama_siswa}</div>
+                          <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>
+                            NIS: <strong style={{ color: '#0284c7' }}>{s.nis || '-'}</strong> • Kelas: <strong>{s.nama_kelas || '-'}</strong>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <button type="submit" className="btn-primary-admin">
                   Cari Siswa
