@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Wallet, CreditCard, Layers, RefreshCw, FileSpreadsheet,
   Plus, Search, Edit2, Trash2, CheckCircle, DollarSign,
-  X, Check, Printer, User, Filter, AlertCircle
+  X, Check, Printer, User, Filter, AlertCircle, History, Eye
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
@@ -33,7 +33,7 @@ const parseRupiahInput = (val) => {
 };
 
 export default function AdminKeuanganTab() {
-  const [activeSubTab, setActiveSubTab] = useState('kasir'); // 'kasir', 'master', 'generate', 'rekap'
+  const [activeSubTab, setActiveSubTab] = useState('kasir'); // 'kasir', 'master', 'generate', 'rekap', 'histori'
 
   // --- KASIR STATE ---
   const [siswaSearch, setSiswaSearch] = useState('');
@@ -47,6 +47,16 @@ export default function AdminKeuanganTab() {
   const [cashReceived, setCashReceived] = useState('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [lastReceipt, setLastReceipt] = useState(null);
+  const [kasirViewMode, setKasirViewMode] = useState('tagihan'); // 'tagihan' vs 'riwayat_siswa'
+  const [siswaRiwayatTransaksi, setSiswaRiwayatTransaksi] = useState([]);
+
+  // --- HISTORI TRANSAKSI STATE ---
+  const [transaksiList, setTransaksiList] = useState([]);
+  const [transaksiSearch, setTransaksiSearch] = useState('');
+  const [isLoadingTransaksi, setIsLoadingTransaksi] = useState(false);
+  const [transaksiPage, setTransaksiPage] = useState(1);
+  const [showKwitansiModal, setShowKwitansiModal] = useState(false);
+  const [selectedTransaksiDetail, setSelectedTransaksiDetail] = useState(null);
 
   // --- MASTER POS & TARIF STATE ---
   const [posList, setPosList] = useState([]);
@@ -143,7 +153,9 @@ export default function AdminKeuanganTab() {
     setSiswaSearch(`${student.nama_siswa} (${student.nis || 'NIS'})`);
     setShowDropdown(false);
     setSearchResults([]);
+    setKasirViewMode('tagihan');
     fetchSiswaTagihan(student.kode_siswa);
+    fetchSiswaRiwayatTransaksi(student.kode_siswa);
   };
 
   const handleSearchSiswaSubmit = async (e) => {
@@ -165,6 +177,39 @@ export default function AdminKeuanganTab() {
       setTotalBayar(0);
     } catch (e) {
       console.error('Error fetch tagihan siswa:', e);
+    }
+  };
+
+  const fetchSiswaRiwayatTransaksi = async (kode_siswa) => {
+    try {
+      const res = await api.get('/keuangan/transaksi', { params: { siswa_id: kode_siswa, limit: 50 } });
+      if (res.data?.success) setSiswaRiwayatTransaksi(res.data.data || []);
+    } catch (e) {
+      console.error('Error fetch riwayat siswa:', e);
+    }
+  };
+
+  const fetchTransaksiList = async () => {
+    setIsLoadingTransaksi(true);
+    try {
+      const res = await api.get('/keuangan/transaksi', { params: { limit: 100 } });
+      if (res.data?.success) setTransaksiList(res.data.data || []);
+    } catch (e) {
+      console.error('Error fetch transaksi:', e);
+    } finally {
+      setIsLoadingTransaksi(false);
+    }
+  };
+
+  const handleOpenKwitansi = async (transaksiId) => {
+    try {
+      const res = await api.get(`/keuangan/transaksi/${transaksiId}`);
+      if (res.data?.success) {
+        setSelectedTransaksiDetail(res.data.data);
+        setShowKwitansiModal(true);
+      }
+    } catch (e) {
+      Swal.fire('Error', 'Gagal memuat detail kuitansi.', 'error');
     }
   };
 
@@ -241,7 +286,11 @@ export default function AdminKeuanganTab() {
       if (res.data?.success) {
         Swal.fire('Sukses', 'Pembayaran berhasil diproses!', 'success');
         setLastReceipt(res.data.data);
+        if (res.data.data?.id) {
+          handleOpenKwitansi(res.data.data.id);
+        }
         fetchSiswaTagihan(selectedSiswa.kode_siswa);
+        fetchSiswaRiwayatTransaksi(selectedSiswa.kode_siswa);
       }
     } catch (e) {
       Swal.fire('Gagal', e.response?.data?.message || 'Gagal memproses pembayaran.', 'error');
@@ -389,6 +438,13 @@ export default function AdminKeuanganTab() {
             </button>
 
             <button
+              className={activeSubTab === 'histori' ? 'btn-primary-admin' : 'btn-outline-admin'}
+              onClick={() => { setActiveSubTab('histori'); fetchTransaksiList(); }}
+            >
+              <History size={15} /> Riwayat Transaksi
+            </button>
+
+            <button
               className={activeSubTab === 'master' ? 'btn-primary-admin' : 'btn-outline-admin'}
               onClick={() => setActiveSubTab('master')}
             >
@@ -411,9 +467,6 @@ export default function AdminKeuanganTab() {
           </div>
         </div>
 
-        {/* ========================================================
-            SUB TAB 1: KASIR TU (PEMBAYARAN SISWA)
-            ======================================================== */}
         {/* ========================================================
             SUB TAB 1: KASIR TU (PEMBAYARAN SISWA)
             ======================================================== */}
@@ -499,24 +552,101 @@ export default function AdminKeuanganTab() {
                         NIS: <strong>{selectedSiswa.nis || '-'}</strong> • Kelas: <strong>{selectedSiswa.nama_kelas || '-'}</strong>
                       </div>
                     </div>
-                    <span className="status-badge-active">
-                      Siswa Aktif
-                    </span>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        className={kasirViewMode === 'tagihan' ? 'btn-primary-admin' : 'btn-outline-admin'}
+                        style={{ padding: '6px 12px', fontSize: 12 }}
+                        onClick={() => setKasirViewMode('tagihan')}
+                      >
+                        Tagihan Belum Lunas ({siswaTagihan.filter(t => t.status !== 'PAID').length})
+                      </button>
+                      <button
+                        type="button"
+                        className={kasirViewMode === 'riwayat_siswa' ? 'btn-primary-admin' : 'btn-outline-admin'}
+                        style={{ padding: '6px 12px', fontSize: 12 }}
+                        onClick={() => {
+                          setKasirViewMode('riwayat_siswa');
+                          fetchSiswaRiwayatTransaksi(selectedSiswa.kode_siswa);
+                        }}
+                      >
+                        <History size={13} style={{ marginRight: 4 }} /> Riwayat Bayar Siswa ({siswaRiwayatTransaksi.length})
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="admin-table-wrapper" style={{ width: '100%' }}>
-                    <table className="admin-table" style={{ width: '100%' }}>
-                      <thead>
-                        <tr>
-                          <th style={{ width: 50, textAlign: 'center' }}>Pilih</th>
-                          <th style={{ width: 220 }}>Pos Pembayaran</th>
-                          <th>Tipe & Periode Tagihan</th>
-                          <th style={{ width: 160 }}>Nominal Tagihan</th>
-                          <th style={{ width: 160 }}>Sisa Tagihan</th>
-                          <th style={{ width: 220 }}>Nominal Bayar (Rp)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                  {kasirViewMode === 'riwayat_siswa' ? (
+                    <div className="admin-table-wrapper" style={{ width: '100%' }}>
+                      <table className="admin-table" style={{ width: '100%' }}>
+                        <thead>
+                          <tr>
+                            <th style={{ width: 50 }}>No</th>
+                            <th>No Transaksi</th>
+                            <th>Tanggal Bayar</th>
+                            <th>Total Pembayaran</th>
+                            <th>Metode & Kasir</th>
+                            <th style={{ textAlign: 'center' }}>Status</th>
+                            <th style={{ textAlign: 'center', width: 140 }}>Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {siswaRiwayatTransaksi.length === 0 ? (
+                            <tr>
+                              <td colSpan={7} style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
+                                Belum ada riwayat pembayaran untuk siswa ini.
+                              </td>
+                            </tr>
+                          ) : (
+                            siswaRiwayatTransaksi.map((tr, idx) => (
+                              <tr key={tr.id}>
+                                <td style={{ textAlign: 'center', color: '#64748b', fontWeight: 700 }}>{idx + 1}</td>
+                                <td style={{ fontWeight: 800, color: '#0284c7' }}>{tr.no_transaksi}</td>
+                                <td style={{ fontSize: 12, color: '#475569' }}>
+                                  {new Date(tr.tanggal_bayar).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </td>
+                                <td style={{ fontWeight: 800, color: '#16a34a' }}>
+                                  Rp {Number(tr.total_bayar || 0).toLocaleString('id-ID')}
+                                </td>
+                                <td>
+                                  <div style={{ fontSize: 12, fontWeight: 700 }}>{tr.metode_pembayaran}</div>
+                                  <div style={{ fontSize: 11, color: '#64748b' }}>Kasir: {tr.nama_kasir || 'Kasir TU'}</div>
+                                </td>
+                                <td style={{ textAlign: 'center' }}>
+                                  <span className="status-badge-active" style={{ background: '#dcfce7', color: '#15803d' }}>
+                                    {tr.status_transaksi || 'SUCCESS'}
+                                  </span>
+                                </td>
+                                <td style={{ textAlign: 'center' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenKwitansi(tr.id)}
+                                    className="btn-outline-admin"
+                                    style={{ padding: '4px 8px', fontSize: 11 }}
+                                  >
+                                    <Printer size={13} style={{ marginRight: 4 }} /> Cetak Kuitansi
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="admin-table-wrapper" style={{ width: '100%' }}>
+                        <table className="admin-table" style={{ width: '100%' }}>
+                          <thead>
+                            <tr>
+                              <th style={{ width: 50, textAlign: 'center' }}>Pilih</th>
+                              <th style={{ width: 220 }}>Pos Pembayaran</th>
+                              <th>Tipe & Periode Tagihan</th>
+                              <th style={{ width: 160 }}>Nominal Tagihan</th>
+                              <th style={{ width: 160 }}>Sisa Tagihan</th>
+                              <th style={{ width: 220 }}>Nominal Bayar (Rp)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
                         {siswaTagihan.filter(t => t.status !== 'PAID').length === 0 ? (
                           <tr>
                             <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#059669', fontWeight: 700 }}>
@@ -709,7 +839,9 @@ export default function AdminKeuanganTab() {
                     </div>
                   </div>
                 </>
-              ) : (
+              )}
+            </>
+          ) : (
                 <div style={{ textAlign: 'center', padding: '50px 20px', color: '#94a3b8', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
                   <Search size={40} style={{ marginBottom: 10, opacity: 0.5 }} />
                   <div style={{ fontWeight: 700, color: '#64748b' }}>Ketik NIS atau nama siswa pada pencarian di atas.</div>
@@ -991,6 +1123,120 @@ export default function AdminKeuanganTab() {
             />
           </div>
         )}
+
+        {/* ========================================================
+            SUB TAB 5: HISTORI TRANSAKSI PEMBAYARAN
+            ======================================================== */}
+        {activeSubTab === 'histori' && (
+          <div style={{ width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ position: 'relative', width: 350 }}>
+                <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+                <input
+                  type="text"
+                  placeholder="Cari NIS, Nama Siswa, atau No Transaksi..."
+                  value={transaksiSearch}
+                  onChange={(e) => setTransaksiSearch(e.target.value)}
+                  className="form-control-admin"
+                  style={{ paddingLeft: 40 }}
+                />
+              </div>
+              <button
+                type="button"
+                className="btn-outline-admin"
+                onClick={fetchTransaksiList}
+              >
+                <RefreshCw size={14} style={{ marginRight: 6 }} /> Refresh Data
+              </button>
+            </div>
+
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: 50 }}>No</th>
+                    <th>No Transaksi</th>
+                    <th>Tanggal Bayar</th>
+                    <th>Siswa</th>
+                    <th>Total Bayar (Rp)</th>
+                    <th>Metode & Kasir</th>
+                    <th style={{ textAlign: 'center' }}>Status</th>
+                    <th style={{ textAlign: 'center', width: 150 }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {isLoadingTransaksi ? (
+                    <tr>
+                      <td colSpan={8} style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
+                        Memuat riwayat transaksi...
+                      </td>
+                    </tr>
+                  ) : transaksiList.filter(tr => {
+                    if (!transaksiSearch.trim()) return true;
+                    const q = transaksiSearch.toLowerCase();
+                    return (
+                      (tr.no_transaksi || '').toLowerCase().includes(q) ||
+                      (tr.nama_siswa || '').toLowerCase().includes(q) ||
+                      (tr.nis || '').toLowerCase().includes(q)
+                    );
+                  }).length === 0 ? (
+                    <tr>
+                      <td colSpan={8} style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
+                        Tidak ada riwayat transaksi ditemukan.
+                      </td>
+                    </tr>
+                  ) : (
+                    transaksiList
+                      .filter(tr => {
+                        if (!transaksiSearch.trim()) return true;
+                        const q = transaksiSearch.toLowerCase();
+                        return (
+                          (tr.no_transaksi || '').toLowerCase().includes(q) ||
+                          (tr.nama_siswa || '').toLowerCase().includes(q) ||
+                          (tr.nis || '').toLowerCase().includes(q)
+                        );
+                      })
+                      .map((tr, idx) => (
+                        <tr key={tr.id}>
+                          <td style={{ textAlign: 'center', color: '#64748b', fontWeight: 700 }}>{idx + 1}</td>
+                          <td style={{ fontWeight: 800, color: '#0284c7' }}>{tr.no_transaksi}</td>
+                          <td style={{ fontSize: 12, color: '#475569' }}>
+                            {new Date(tr.tanggal_bayar).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 800, color: '#0f172a' }}>{tr.nama_siswa}</div>
+                            <div style={{ fontSize: 11, color: '#64748b' }}>NIS: {tr.nis || '-'}</div>
+                          </td>
+                          <td style={{ fontWeight: 800, color: '#16a34a' }}>
+                            Rp {Number(tr.total_bayar || 0).toLocaleString('id-ID')}
+                          </td>
+                          <td>
+                            <div style={{ fontSize: 12, fontWeight: 700 }}>{tr.metode_pembayaran}</div>
+                            <div style={{ fontSize: 11, color: '#64748b' }}>Kasir: {tr.nama_kasir || 'Kasir TU'}</div>
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <span className="status-badge-active" style={{ background: '#dcfce7', color: '#15803d' }}>
+                              {tr.status_transaksi || 'SUCCESS'}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenKwitansi(tr.id)}
+                              className="btn-outline-admin"
+                              style={{ padding: '5px 10px', fontSize: 12 }}
+                            >
+                              <Printer size={14} style={{ marginRight: 4 }} /> Cetak Kuitansi
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* --- MODAL POS PEMBAYARAN MATCHING ADMIN PENGUMUMAN MODAL --- */}
@@ -1128,6 +1374,134 @@ export default function AdminKeuanganTab() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL CETAK KUITANSI PEMBAYARAN --- */}
+      {showKwitansiModal && selectedTransaksiDetail && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-box" style={{ maxWidth: 600, padding: 0, overflow: 'hidden' }}>
+            <div className="admin-modal-header" style={{ background: '#0f172a', color: '#ffffff', padding: '16px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Printer size={20} color="#38bdf8" />
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                  Kuitansi Pembayaran Resmi
+                </h3>
+              </div>
+              <button onClick={() => setShowKwitansiModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div id="printable-receipt" style={{ padding: 24, background: '#ffffff', color: '#0f172a' }}>
+              {/* HEADER KUITANSI */}
+              <div style={{ borderBottom: '2px double #cbd5e1', paddingBottom: 12, marginBottom: 16, textAlign: 'center' }}>
+                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: '#0f172a', letterSpacing: 0.5 }}>SMK ARTANITA</h2>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>BUKTI PEMBAYARAN TAGIHAN SEKOLAH (E-BMS)</div>
+              </div>
+
+              {/* META INFO */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 12, marginBottom: 16, background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                <div>
+                  <div style={{ color: '#64748b', fontSize: 11 }}>No Transaksi:</div>
+                  <div style={{ fontWeight: 800, color: '#0284c7' }}>{selectedTransaksiDetail.no_transaksi}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#64748b', fontSize: 11 }}>Tanggal Bayar:</div>
+                  <div style={{ fontWeight: 700 }}>
+                    {new Date(selectedTransaksiDetail.tanggal_bayar).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: '#64748b', fontSize: 11 }}>Siswa / NIS:</div>
+                  <div style={{ fontWeight: 800 }}>{selectedTransaksiDetail.nama_siswa} ({selectedTransaksiDetail.nis || '-'})</div>
+                </div>
+                <div>
+                  <div style={{ color: '#64748b', fontSize: 11 }}>Kelas / Metode:</div>
+                  <div style={{ fontWeight: 700 }}>{selectedTransaksiDetail.nama_kelas || '-'} ({selectedTransaksiDetail.metode_pembayaran})</div>
+                </div>
+              </div>
+
+              {/* RINCIAN ITEM */}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 6, color: '#475569' }}>Rincian Pembayaran:</div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                  <thead>
+                    <tr style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
+                      <th style={{ padding: '6px 8px', textAlign: 'left' }}>Item Tagihan</th>
+                      <th style={{ padding: '6px 8px', textAlign: 'left' }}>Periode</th>
+                      <th style={{ padding: '6px 8px', textAlign: 'right' }}>Jumlah (Rp)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(selectedTransaksiDetail.details || []).map((d, i) => (
+                      <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '6px 8px', fontWeight: 700 }}>{d.nama_pos}</td>
+                        <td style={{ padding: '6px 8px', color: '#64748b' }}>
+                          {d.bulan ? `${getBulanLabel(d.bulan)} ${d.tahun}` : 'Sekali Bayar'}
+                        </td>
+                        <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 800 }}>
+                          Rp {Number(d.nominal_dibayar || 0).toLocaleString('id-ID')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{ borderTop: '2px solid #0f172a', fontWeight: 800 }}>
+                      <td colSpan={2} style={{ padding: '8px', textAlign: 'right' }}>TOTAL DIBAYAR:</td>
+                      <td style={{ padding: '8px', textAlign: 'right', color: '#16a34a', fontSize: 14 }}>
+                        Rp {Number(selectedTransaksiDetail.total_bayar || 0).toLocaleString('id-ID')}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              {/* FOOTER & SIGNATURE */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 24, paddingTop: 12, borderTop: '1px dashed #cbd5e1', fontSize: 11 }}>
+                <div>
+                  <div style={{ color: '#64748b' }}>Status: <strong style={{ color: '#16a34a' }}>LUNAS / BERHASIL</strong></div>
+                  <div style={{ color: '#64748b', marginTop: 2 }}>Petugas Kasir: <strong>{selectedTransaksiDetail.nama_kasir || 'Kasir TU'}</strong></div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: '#64748b', marginBottom: 36 }}>Kasir / Keuangan</div>
+                  <div style={{ fontWeight: 800, textDecoration: 'underline' }}>({selectedTransaksiDetail.nama_kasir || 'Kasir TU'})</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="admin-modal-footer" style={{ background: '#f8fafc', borderTop: '1px solid #e2e8f0', padding: '12px 20px', display: 'flex', justifyContent: 'space-between' }}>
+              <button type="button" className="btn-outline-admin" onClick={() => setShowKwitansiModal(false)}>
+                Tutup
+              </button>
+              <button
+                type="button"
+                className="btn-primary-admin"
+                style={{ background: '#0284c7', borderColor: '#0284c7' }}
+                onClick={() => {
+                  const printContents = document.getElementById('printable-receipt').innerHTML;
+                  const win = window.open('', '', 'height=700,width=800');
+                  win.document.write(`
+                    <html>
+                      <head>
+                        <title>Kuitansi ${selectedTransaksiDetail.no_transaksi}</title>
+                        <style>
+                          body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; color: #0f172a; }
+                          table { width: 100%; border-collapse: collapse; }
+                        </style>
+                      </head>
+                      <body>${printContents}</body>
+                    </html>
+                  `);
+                  win.document.close();
+                  win.focus();
+                  setTimeout(() => { win.print(); win.close(); }, 300);
+                }}
+              >
+                <Printer size={15} style={{ marginRight: 6 }} /> Cetak Kuitansi (Print)
+              </button>
+            </div>
           </div>
         </div>
       )}
