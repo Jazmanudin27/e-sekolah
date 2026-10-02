@@ -538,9 +538,6 @@ export default function AdminKeuanganTab() {
                     </div>
                   )}
                 </div>
-                <button type="submit" className="btn-primary-admin">
-                  Cari Siswa
-                </button>
               </form>
 
               {selectedSiswa ? (
