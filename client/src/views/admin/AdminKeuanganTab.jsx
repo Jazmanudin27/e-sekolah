@@ -737,16 +737,17 @@ export default function AdminKeuanganTab() {
                           <thead>
                             <tr>
                               <th style={{ width: 50, textAlign: 'center' }}>Pilih</th>
-                              <th style={{ width: 220 }}>Pos Pembayaran</th>
+                              <th style={{ width: 200 }}>Pos Pembayaran</th>
                               <th>Tipe & Periode Tagihan</th>
-                              <th style={{ width: 180 }}>Nominal Tagihan</th>
-                              <th style={{ width: 180 }}>Sisa Tagihan (Acu Bayar)</th>
+                              <th style={{ width: 140 }}>Nominal Tagihan</th>
+                              <th style={{ width: 140 }}>Sisa Tagihan</th>
+                              <th style={{ width: 180 }}>Nominal Bayar (Rp)</th>
                             </tr>
                           </thead>
                           <tbody>
                         {siswaTagihan.filter(t => t.status !== 'PAID').length === 0 ? (
                           <tr>
-                            <td colSpan={5} style={{ textAlign: 'center', padding: '40px 0', color: '#059669', fontWeight: 700 }}>
+                            <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#059669', fontWeight: 700 }}>
                               <CheckCircle size={36} style={{ marginBottom: 6 }} /><br />
                               Semua tagihan siswa ini telah LUNAS!
                             </td>
@@ -827,6 +828,23 @@ export default function AdminKeuanganTab() {
                                 <td style={{ fontWeight: 600 }}>Rp {Number(t.nominal_tagihan).toLocaleString('id-ID')}</td>
                                 <td style={{ fontWeight: 800, color: '#dc2626', fontSize: 14 }}>
                                   Rp {sisa.toLocaleString('id-ID')}
+                                </td>
+                                <td>
+                                  {isChecked ? (
+                                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                      <span style={{ position: 'absolute', left: 8, fontSize: 12, fontWeight: 700, color: '#64748b' }}>Rp</span>
+                                      <input
+                                        type="text"
+                                        value={formatRupiahInput(bayarNominal[t.id] !== undefined ? bayarNominal[t.id] : sisa)}
+                                        onChange={(e) => handleNominalChange(t.id, parseRupiahInput(e.target.value))}
+                                        className="form-control-admin"
+                                        placeholder="0"
+                                        style={{ paddingLeft: 28, fontWeight: 800, fontSize: 13, color: '#0284c7', background: '#ffffff', borderColor: '#7dd3fc' }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <span style={{ color: '#94a3b8', fontSize: 12 }}>-</span>
+                                  )}
                                 </td>
                               </tr>
                             );
