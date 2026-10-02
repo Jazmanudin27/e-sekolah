@@ -76,6 +76,9 @@ export default function AdminKeuanganTab() {
   const [showTarifModal, setShowTarifModal] = useState(false);
   const [editingTarifId, setEditingTarifId] = useState(null);
   const [targetType, setTargetType] = useState('UMUM'); // 'UMUM', 'TINGKAT', 'KELAS'
+  const [selectedKelasList, setSelectedKelasList] = useState([]); // array of kode_kelas for multi-select
+  const [selectedTingkatList, setSelectedTingkatList] = useState([]); // array of tingkat for multi-select
+  const [kelasSearchQuery, setKelasSearchQuery] = useState('');
   const [tarifFormData, setTarifFormData] = useState({ pos_id: '', tahun_ajaran: `${currentYear}/${currentYear + 1}`, tingkat: '', kode_kelas: '', nominal: '' });
   const [tarifFilterPos, setTarifFilterPos] = useState('');
   const [tarifSearch, setTarifSearch] = useState('');
@@ -494,19 +497,33 @@ export default function AdminKeuanganTab() {
   const handleOpenAddTarif = () => {
     setEditingTarifId(null);
     setTargetType('UMUM');
-    setTarifFormData({ pos_id: posList[0]?.id || '', tahun_ajaran: '2025/2026', tingkat: '', kode_kelas: '', nominal: '' });
+    setSelectedKelasList([]);
+    setSelectedTingkatList([]);
+    setKelasSearchQuery('');
+    setTarifFormData({ pos_id: posList[0]?.id || '', tahun_ajaran: `${currentYear}/${currentYear + 1}`, tingkat: '', kode_kelas: '', nominal: '' });
     setShowTarifModal(true);
   };
 
   const handleOpenEditTarif = (t) => {
     setEditingTarifId(t.id);
     let tt = 'UMUM';
-    if (t.kode_kelas) tt = 'KELAS';
-    else if (t.tingkat) tt = 'TINGKAT';
+    if (t.kode_kelas) {
+      tt = 'KELAS';
+      setSelectedKelasList([t.kode_kelas]);
+      setSelectedTingkatList([]);
+    } else if (t.tingkat) {
+      tt = 'TINGKAT';
+      setSelectedTingkatList([t.tingkat]);
+      setSelectedKelasList([]);
+    } else {
+      setSelectedKelasList([]);
+      setSelectedTingkatList([]);
+    }
     setTargetType(tt);
+    setKelasSearchQuery('');
     setTarifFormData({
       pos_id: t.pos_id,
-      tahun_ajaran: t.tahun_ajaran || '2025/2026',
+      tahun_ajaran: t.tahun_ajaran || `${currentYear}/${currentYear + 1}`,
       tingkat: t.tingkat || '',
       kode_kelas: t.kode_kelas || '',
       nominal: t.nominal || ''
@@ -516,30 +533,83 @@ export default function AdminKeuanganTab() {
 
   const handleSaveTarif = async (e) => {
     e.preventDefault();
+    if (!tarifFormData.pos_id) {
+      Swal.fire('Peringatan', 'Pilih Pos Pembayaran terlebih dahulu.', 'warning');
+      return;
+    }
+
+    const nominalNum = parseRupiahInput(tarifFormData.nominal) || Number(tarifFormData.nominal) || 0;
+    if (nominalNum <= 0) {
+      Swal.fire('Peringatan', 'Nominal tarif harus lebih besar dari 0.', 'warning');
+      return;
+    }
+
     try {
-      const payload = {
-        pos_id: tarifFormData.pos_id,
-        tahun_ajaran: tarifFormData.tahun_ajaran,
-        tingkat: targetType === 'TINGKAT' ? (tarifFormData.tingkat || null) : null,
-        kode_kelas: targetType === 'KELAS' ? (tarifFormData.kode_kelas || null) : null,
-        nominal: parseRupiahInput(tarifFormData.nominal) || Number(tarifFormData.nominal) || 0
-      };
-
-      if (!payload.pos_id) {
-        Swal.fire('Peringatan', 'Pilih Pos Pembayaran terlebih dahulu.', 'warning');
-        return;
-      }
-
       if (editingTarifId) {
+        // Edit mode (single record)
+        const payload = {
+          pos_id: tarifFormData.pos_id,
+          tahun_ajaran: tarifFormData.tahun_ajaran,
+          tingkat: targetType === 'TINGKAT' ? (selectedTingkatList[0] || tarifFormData.tingkat || null) : null,
+          kode_kelas: targetType === 'KELAS' ? (selectedKelasList[0] || tarifFormData.kode_kelas || null) : null,
+          nominal: nominalNum
+        };
         await api.put(`/keuangan/tarif/${editingTarifId}`, payload);
         Swal.fire('Berhasil', 'Tarif pembayaran berhasil diperbarui.', 'success');
       } else {
-        await api.post('/keuangan/tarif', payload);
-        Swal.fire('Berhasil', 'Tarif pembayaran berhasil ditambahkan.', 'success');
+        // Create mode (supports multi-select)
+        if (targetType === 'KELAS') {
+          if (selectedKelasList.length === 0) {
+            Swal.fire('Peringatan', 'Pilih minimal 1 kelas.', 'warning');
+            return;
+          }
+          await Promise.all(
+            selectedKelasList.map(k =>
+              api.post('/keuangan/tarif', {
+                pos_id: tarifFormData.pos_id,
+                tahun_ajaran: tarifFormData.tahun_ajaran,
+                kode_kelas: k,
+                tingkat: null,
+                nominal: nominalNum
+              })
+            )
+          );
+          Swal.fire('Berhasil', `Berhasil menambahkan tarif untuk ${selectedKelasList.length} kelas!`, 'success');
+        } else if (targetType === 'TINGKAT') {
+          if (selectedTingkatList.length === 0) {
+            Swal.fire('Peringatan', 'Pilih minimal 1 tingkat.', 'warning');
+            return;
+          }
+          await Promise.all(
+            selectedTingkatList.map(t =>
+              api.post('/keuangan/tarif', {
+                pos_id: tarifFormData.pos_id,
+                tahun_ajaran: tarifFormData.tahun_ajaran,
+                kode_kelas: null,
+                tingkat: t,
+                nominal: nominalNum
+              })
+            )
+          );
+          Swal.fire('Berhasil', `Berhasil menambahkan tarif untuk ${selectedTingkatList.length} tingkat/angkatan!`, 'success');
+        } else {
+          // UMUM
+          await api.post('/keuangan/tarif', {
+            pos_id: tarifFormData.pos_id,
+            tahun_ajaran: tarifFormData.tahun_ajaran,
+            kode_kelas: null,
+            tingkat: null,
+            nominal: nominalNum
+          });
+          Swal.fire('Berhasil', 'Tarif pembayaran umum berhasil ditambahkan.', 'success');
+        }
       }
+
       setShowTarifModal(false);
       setEditingTarifId(null);
-      setTarifFormData({ pos_id: '', tahun_ajaran: '2025/2026', tingkat: '', kode_kelas: '', nominal: '' });
+      setSelectedKelasList([]);
+      setSelectedTingkatList([]);
+      setTarifFormData({ pos_id: '', tahun_ajaran: `${currentYear}/${currentYear + 1}`, tingkat: '', kode_kelas: '', nominal: '' });
       fetchTarifList();
     } catch (err) {
       Swal.fire('Error', err.response?.data?.message || 'Gagal menyimpan tarif.', 'error');
@@ -2258,42 +2328,207 @@ export default function AdminKeuanganTab() {
                       const val = e.target.value;
                       setTargetType(val);
                       if (val === 'UMUM') {
-                        setTarifFormData({ ...tarifFormData, tingkat: '', kode_kelas: '' });
-                      } else if (val === 'TINGKAT') {
-                        setTarifFormData({ ...tarifFormData, kode_kelas: '' });
-                      } else if (val === 'KELAS') {
-                        setTarifFormData({ ...tarifFormData, tingkat: '' });
+                        setSelectedKelasList([]);
+                        setSelectedTingkatList([]);
                       }
                     }}
                     options={[
                       { value: 'UMUM', label: '🌐 Semua Kelas (Umum / Berlaku Seluruh Siswa)' },
-                      { value: 'TINGKAT', label: '📊 Per Tingkat / Angkatan (Contoh: Tingkat 10, 11, 12)' },
-                      { value: 'KELAS', label: '🏫 Per Kelas Spesifik (Contoh: X-RPL-1, XI-TKJ-2)' }
+                      { value: 'TINGKAT', label: '📊 Per Tingkat / Angkatan (Multi-Select: Tingkat 10, 11, 12)' },
+                      { value: 'KELAS', label: '🏫 Per Kelas Spesifik (Multi-Select: Pilih Bebas Beberapa Kelas)' }
                     ]}
                   />
                 </div>
 
+                {/* MULTI-SELECT TINGKAT */}
                 {targetType === 'TINGKAT' && (
                   <div className="form-group-admin">
-                    <label>Pilih Tingkat / Angkatan Kelas *</label>
-                    <SearchableSelect
-                      value={tarifFormData.tingkat}
-                      onChange={(e) => setTarifFormData({ ...tarifFormData, tingkat: e.target.value })}
-                      placeholder="-- Pilih Tingkat --"
-                      options={tingkatOptions}
-                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <label style={{ margin: 0 }}>Pilih Tingkat / Angkatan (Bisa Pilih Banyak) *</label>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTingkatList(tingkatOptions.map(t => t.value))}
+                          style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          Pilih Semua
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTingkatList([])}
+                          style={{ background: '#f8fafc', color: '#64748b', border: '1px solid #cbd5e1', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          Reset
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, border: '1px solid #cbd5e1', borderRadius: 8, padding: 10, background: '#ffffff', maxHeight: 180, overflowY: 'auto' }}>
+                      {tingkatOptions.map(tOpt => {
+                        const isChecked = selectedTingkatList.includes(tOpt.value);
+                        return (
+                          <label
+                            key={tOpt.value}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8,
+                              padding: '6px 8px',
+                              borderRadius: 6,
+                              background: isChecked ? '#fef3c7' : '#f8fafc',
+                              border: isChecked ? '1px solid #fde68a' : '1px solid #e2e8f0',
+                              cursor: 'pointer',
+                              fontSize: 12.5,
+                              fontWeight: isChecked ? 800 : 500,
+                              color: isChecked ? '#b45309' : '#334155'
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedTingkatList([...selectedTingkatList, tOpt.value]);
+                                } else {
+                                  setSelectedTingkatList(selectedTingkatList.filter(t => t !== tOpt.value));
+                                }
+                              }}
+                              style={{ width: 15, height: 15, accentColor: '#d97706' }}
+                            />
+                            <span>Tingkat {tOpt.value}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: '#b45309', marginTop: 4, fontWeight: 700 }}>
+                      📌 Terpilih: {selectedTingkatList.length} Tingkat
+                    </div>
                   </div>
                 )}
 
+                {/* MULTI-SELECT KELAS */}
                 {targetType === 'KELAS' && (
                   <div className="form-group-admin">
-                    <label>Pilih Kelas Spesifik *</label>
-                    <SearchableSelect
-                      value={tarifFormData.kode_kelas}
-                      onChange={(e) => setTarifFormData({ ...tarifFormData, kode_kelas: e.target.value })}
-                      placeholder="-- Pilih Kelas --"
-                      options={kelasList.map(k => ({ value: k.kode_kelas, label: `${k.nama_kelas || k.kode_kelas} (${k.jurusan || '-'})` }))}
-                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <label style={{ margin: 0 }}>Pilih Kelas (Bisa Pilih Banyak Kelas) *</label>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedKelasList(kelasList.map(k => k.kode_kelas || k.id))}
+                          style={{ background: '#f0f9ff', color: '#0284c7', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          Pilih Semua ({kelasList.length})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedKelasList([])}
+                          style={{ background: '#f8fafc', color: '#64748b', border: '1px solid #cbd5e1', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          Reset
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* SEARCH INPUT BAR */}
+                    <div style={{ position: 'relative', marginBottom: 8 }}>
+                      <Search size={14} style={{ position: 'absolute', left: 10, top: 9, color: '#94a3b8' }} />
+                      <input
+                        type="text"
+                        className="form-control-admin"
+                        style={{ paddingLeft: 30, fontSize: 12, height: 32 }}
+                        placeholder="Cari nama kelas / jurusan..."
+                        value={kelasSearchQuery}
+                        onChange={(e) => setKelasSearchQuery(e.target.value)}
+                      />
+                    </div>
+
+                    {/* QUICK TINGKAT CHIPS */}
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+                      {tingkatOptions.map(tOpt => {
+                        const matchClasses = kelasList.filter(k => {
+                          const name = String(k.nama_kelas || k.kode_kelas || '').toUpperCase();
+                          return name.startsWith(tOpt.value) || name.includes(` ${tOpt.value}`);
+                        });
+                        if (matchClasses.length === 0) return null;
+                        const classCodes = matchClasses.map(k => k.kode_kelas || k.id);
+                        const isAllSelected = classCodes.length > 0 && classCodes.every(c => selectedKelasList.includes(c));
+
+                        return (
+                          <button
+                            key={tOpt.value}
+                            type="button"
+                            onClick={() => {
+                              if (isAllSelected) {
+                                setSelectedKelasList(selectedKelasList.filter(c => !classCodes.includes(c)));
+                              } else {
+                                setSelectedKelasList(Array.from(new Set([...selectedKelasList, ...classCodes])));
+                              }
+                            }}
+                            style={{
+                              background: isAllSelected ? '#0284c7' : '#e0f2fe',
+                              color: isAllSelected ? '#ffffff' : '#0369a1',
+                              border: '1px solid #bae6fd',
+                              padding: '3px 8px',
+                              borderRadius: 6,
+                              fontSize: 11,
+                              fontWeight: 700,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {isAllSelected ? '✓' : '+'} Kelas {tOpt.value} ({matchClasses.length})
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* CHECKBOX LIST */}
+                    <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #cbd5e1', borderRadius: 8, padding: 8, background: '#ffffff' }}>
+                      {kelasList
+                        .filter(k => {
+                          if (!kelasSearchQuery.trim()) return true;
+                          const q = kelasSearchQuery.toLowerCase();
+                          return String(k.nama_kelas || k.kode_kelas || '').toLowerCase().includes(q) || String(k.jurusan || '').toLowerCase().includes(q);
+                        })
+                        .map(k => {
+                          const kCode = k.kode_kelas || k.id;
+                          const isChecked = selectedKelasList.includes(kCode);
+                          return (
+                            <label
+                              key={kCode}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                padding: '6px 8px',
+                                borderRadius: 6,
+                                background: isChecked ? '#f0f9ff' : 'transparent',
+                                cursor: 'pointer',
+                                marginBottom: 2,
+                                fontSize: 12.5,
+                                fontWeight: isChecked ? 800 : 500,
+                                color: isChecked ? '#0284c7' : '#334155'
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedKelasList([...selectedKelasList, kCode]);
+                                  } else {
+                                    setSelectedKelasList(selectedKelasList.filter(c => c !== kCode));
+                                  }
+                                }}
+                                style={{ width: 15, height: 15, accentColor: '#0284c7' }}
+                              />
+                              <span>{k.nama_kelas || k.kode_kelas} {k.jurusan ? `(${k.jurusan})` : ''}</span>
+                            </label>
+                          );
+                        })}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: '#0284c7', marginTop: 4, fontWeight: 700 }}>
+                      📌 Terpilih: {selectedKelasList.length} Kelas
+                    </div>
                   </div>
                 )}
 
