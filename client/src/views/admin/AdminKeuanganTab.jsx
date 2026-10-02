@@ -213,6 +213,35 @@ export default function AdminKeuanganTab() {
     }
   };
 
+  const handleCancelTransaksi = async (transaksiId) => {
+    const confirm = await Swal.fire({
+      title: 'Batalkan Pembayaran Ini?',
+      text: 'Status transaksi akan diubah menjadi CANCELLED dan nominal tagihan siswa akan dikembalikan menjadi BELUM LUNAS.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Batalkan Transaksi',
+      cancelButtonText: 'Batal'
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      const res = await api.delete(`/keuangan/transaksi/${transaksiId}`);
+      if (res.data?.success) {
+        Swal.fire('Sukses', 'Transaksi berhasil dibatalkan dan tagihan siswa dikembalikan.', 'success');
+        fetchTransaksiList();
+        if (selectedSiswa) {
+          fetchSiswaTagihan(selectedSiswa.kode_siswa);
+          fetchSiswaRiwayatTransaksi(selectedSiswa.kode_siswa);
+        }
+      }
+    } catch (e) {
+      Swal.fire('Gagal', e.response?.data?.message || 'Gagal membatalkan transaksi.', 'error');
+    }
+  };
+
   const toggleSelectTagihan = (t) => {
     const isSelected = selectedTagihanIds.includes(t.id);
     let newIds = [];
@@ -609,19 +638,38 @@ export default function AdminKeuanganTab() {
                                   <div style={{ fontSize: 11, color: '#64748b' }}>Kasir: {tr.nama_kasir || 'Kasir TU'}</div>
                                 </td>
                                 <td style={{ textAlign: 'center' }}>
-                                  <span className="status-badge-active" style={{ background: '#dcfce7', color: '#15803d' }}>
+                                  <span
+                                    className="status-badge-active"
+                                    style={{
+                                      background: tr.status_transaksi === 'CANCELLED' ? '#fee2e2' : '#dcfce7',
+                                      color: tr.status_transaksi === 'CANCELLED' ? '#dc2626' : '#15803d'
+                                    }}
+                                  >
                                     {tr.status_transaksi || 'SUCCESS'}
                                   </span>
                                 </td>
                                 <td style={{ textAlign: 'center' }}>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenKwitansi(tr.id)}
-                                    className="btn-outline-admin"
-                                    style={{ padding: '4px 8px', fontSize: 11 }}
-                                  >
-                                    <Printer size={13} style={{ marginRight: 4 }} /> Cetak Kuitansi
-                                  </button>
+                                  <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenKwitansi(tr.id)}
+                                      className="btn-outline-admin"
+                                      style={{ padding: '4px 8px', fontSize: 11 }}
+                                    >
+                                      <Printer size={13} style={{ marginRight: 4 }} /> Kuitansi
+                                    </button>
+                                    {tr.status_transaksi !== 'CANCELLED' && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleCancelTransaksi(tr.id)}
+                                        className="btn-outline-admin"
+                                        style={{ padding: '4px 8px', fontSize: 11, color: '#ef4444', borderColor: '#fca5a5' }}
+                                        title="Batalkan / Hapus Transaksi Ini"
+                                      >
+                                        <Trash2 size={13} style={{ marginRight: 2 }} /> Batalkan
+                                      </button>
+                                    )}
+                                  </div>
                                 </td>
                               </tr>
                             ))
@@ -1212,19 +1260,38 @@ export default function AdminKeuanganTab() {
                             <div style={{ fontSize: 11, color: '#64748b' }}>Kasir: {tr.nama_kasir || 'Kasir TU'}</div>
                           </td>
                           <td style={{ textAlign: 'center' }}>
-                            <span className="status-badge-active" style={{ background: '#dcfce7', color: '#15803d' }}>
+                            <span
+                              className="status-badge-active"
+                              style={{
+                                background: tr.status_transaksi === 'CANCELLED' ? '#fee2e2' : '#dcfce7',
+                                color: tr.status_transaksi === 'CANCELLED' ? '#dc2626' : '#15803d'
+                              }}
+                            >
                               {tr.status_transaksi || 'SUCCESS'}
                             </span>
                           </td>
                           <td style={{ textAlign: 'center' }}>
-                            <button
-                              type="button"
-                              onClick={() => handleOpenKwitansi(tr.id)}
-                              className="btn-outline-admin"
-                              style={{ padding: '5px 10px', fontSize: 12 }}
-                            >
-                              <Printer size={14} style={{ marginRight: 4 }} /> Cetak Kuitansi
-                            </button>
+                            <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenKwitansi(tr.id)}
+                                className="btn-outline-admin"
+                                style={{ padding: '5px 10px', fontSize: 12 }}
+                              >
+                                <Printer size={14} style={{ marginRight: 4 }} /> Kuitansi
+                              </button>
+                              {tr.status_transaksi !== 'CANCELLED' && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleCancelTransaksi(tr.id)}
+                                  className="btn-outline-admin"
+                                  style={{ padding: '5px 10px', fontSize: 12, color: '#ef4444', borderColor: '#fca5a5' }}
+                                  title="Batalkan / Hapus Transaksi Ini"
+                                >
+                                  <Trash2 size={14} style={{ marginRight: 4 }} /> Batalkan
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))

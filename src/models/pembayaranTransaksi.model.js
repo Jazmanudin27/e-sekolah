@@ -139,6 +139,26 @@ class PembayaranTransaksiModel {
 
     return await this.findById(trx.id);
   }
+
+  /**
+   * Cancel / Void payment transaction and restore invoice balance
+   */
+  static async cancelTransaction(id) {
+    const trx = await this.findById(id);
+    if (!trx) throw new Error('Transaksi tidak ditemukan');
+    if (trx.status_transaksi === 'CANCELLED') throw new Error('Transaksi ini sudah dibatalkan sebelumnya');
+
+    // Restore tagihan_siswa nominal_terbayar & status
+    if (trx.details && trx.details.length > 0) {
+      for (const d of trx.details) {
+        await TagihanSiswaModel.reducePembayaran(d.tagihan_id, d.nominal_dibayar);
+      }
+    }
+
+    // Mark header status as CANCELLED
+    await query("UPDATE pembayaran_transaksi SET status_transaksi = 'CANCELLED' WHERE id = ?", [id]);
+    return await this.findById(id);
+  }
 }
 
 module.exports = PembayaranTransaksiModel;

@@ -82,6 +82,28 @@ class TagihanSiswaModel {
     return { new_terbayar, new_status };
   }
 
+  static async reducePembayaran(tagihan_id, nominal_batal) {
+    const tagihan = await this.findById(tagihan_id);
+    if (!tagihan) return;
+
+    const new_terbayar = Math.max(0, Number(tagihan.nominal_terbayar || 0) - Number(nominal_batal));
+    let new_status = 'UNPAID';
+
+    if (new_terbayar >= Number(tagihan.nominal_tagihan)) {
+      new_status = 'PAID';
+    } else if (new_terbayar > 0) {
+      new_status = 'PARTIAL';
+    }
+
+    const sql = `
+      UPDATE tagihan_siswa 
+      SET nominal_terbayar = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `;
+    await query(sql, [new_terbayar, new_status, tagihan_id]);
+    return { new_terbayar, new_status };
+  }
+
   /**
    * Auto generate tagihan SPP untuk satu kelas / angkatan berdasarkan tarif & override beasiswa
    */

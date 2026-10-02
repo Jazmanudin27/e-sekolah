@@ -203,6 +203,16 @@ async function handleWebhookMidtrans(req, res, next) {
   }
 }
 
+async function cancelTransaksi(req, res, next) {
+  try {
+    const { id } = req.params;
+    const cancelledTrx = await PembayaranTransaksiModel.cancelTransaction(id);
+    sendSuccess(res, 'Transaksi berhasil dibatalkan dan nominal tagihan telah dikembalikan.', cancelledTrx);
+  } catch (error) {
+    next(error);
+  }
+}
+
 // --- LAPORAN & REKAP CONTROLLERS ---
 
 async function getRekapTunggakan(req, res, next) {
@@ -230,6 +240,7 @@ module.exports = {
   payCash,
   getAllTransaksi,
   getTransaksiDetail,
+  cancelTransaksi,
   handleWebhookMidtrans,
   getRekapTunggakan
 };
