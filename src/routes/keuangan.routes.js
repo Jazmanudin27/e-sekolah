@@ -17,8 +17,12 @@ router.delete('/tarif/:id', authenticateToken, keuanganController.deleteTarif);
 router.post('/tarif/override', authenticateToken, keuanganController.setTarifOverride);
 
 // --- TAGIHAN SISWA ROUTES ---
+router.get('/tagihan', authenticateToken, keuanganController.getAllTagihan);
 router.get('/tagihan/siswa/:siswa_id', authenticateToken, keuanganController.getTagihanSiswa);
 router.post('/tagihan/generate', authenticateToken, keuanganController.generateTagihan);
+router.put('/tagihan/:id', authenticateToken, keuanganController.updateTagihan);
+router.delete('/tagihan/:id', authenticateToken, keuanganController.deleteTagihan);
+router.post('/tagihan/delete-batch', authenticateToken, keuanganController.deleteBatchUnpaidTagihan);
 
 // --- TRANSAKSI & KASIR ROUTES ---
 router.post('/bayar/cash', authenticateToken, keuanganController.payCash);

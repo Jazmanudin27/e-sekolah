@@ -92,6 +92,20 @@ export default function AdminKeuanganTab() {
   });
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // --- KELOLA TAGIHAN STATE ---
+  const [allTagihanList, setAllTagihanList] = useState([]);
+  const [isLoadingAllTagihan, setIsLoadingAllTagihan] = useState(false);
+  const [tagihanSearch, setTagihanSearch] = useState('');
+  const [tagihanFilterPos, setTagihanFilterPos] = useState('');
+  const [tagihanFilterKelas, setTagihanFilterKelas] = useState('');
+  const [tagihanFilterBulan, setTagihanFilterBulan] = useState('');
+  const [tagihanFilterTahun, setTagihanFilterTahun] = useState('');
+  const [tagihanFilterStatus, setTagihanFilterStatus] = useState('ALL');
+
+  // Edit Tagihan Modal State
+  const [showEditTagihanModal, setShowEditTagihanModal] = useState(false);
+  const [editTagihanData, setEditTagihanData] = useState(null);
+
   // --- REKAP TUNGGAKAN STATE ---
   const [rekapFilterKelas, setRekapFilterKelas] = useState('');
   const [rekapTunggakan, setRekapTunggakan] = useState([]);
@@ -536,6 +550,148 @@ export default function AdminKeuanganTab() {
     }
   };
 
+  // --- KELOLA TAGIHAN HANDLERS ---
+  const fetchAllTagihanList = async () => {
+    setIsLoadingAllTagihan(true);
+    try {
+      const res = await api.get('/keuangan/tagihan', {
+        params: {
+          search: tagihanSearch,
+          pos_id: tagihanFilterPos,
+          kode_kelas: tagihanFilterKelas,
+          bulan: tagihanFilterBulan,
+          tahun: tagihanFilterTahun,
+          status: tagihanFilterStatus,
+          limit: 100
+        }
+      });
+      if (res.data?.success) setAllTagihanList(res.data.data || []);
+    } catch (e) {
+      console.error('Error fetch all tagihan:', e);
+    } finally {
+      setIsLoadingAllTagihan(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeSubTab === 'tagihan_list') {
+      fetchAllTagihanList();
+    }
+  }, [activeSubTab, tagihanFilterPos, tagihanFilterKelas, tagihanFilterBulan, tagihanFilterTahun, tagihanFilterStatus]);
+
+  const handleDeleteSingleTagihan = async (t) => {
+    if (Number(t.nominal_terbayar || 0) > 0) {
+      Swal.fire('Tidak Dapat Dihapus', 'Tagihan ini sudah pernah dibayar sebagian/lunas. Silakan batalkan transaksinya terlebih dahulu di Riwayat Transaksi.', 'warning');
+      return;
+    }
+
+    const confirm = await Swal.fire({
+      title: 'Hapus Tagihan Ini?',
+      html: `
+        <div style="text-align:left; font-size:13px;">
+          <p><strong>Kode Tagihan:</strong> ${t.kode_tagihan}</p>
+          <p><strong>Siswa:</strong> ${t.nama_siswa} (${t.nama_kelas || 'Tanpa Kelas'})</p>
+          <p><strong>Pos & Periode:</strong> ${t.nama_pos} - ${t.bulan ? `${getBulanLabel(t.bulan)} ${t.tahun}` : 'Tipe Bebas'}</p>
+          <p><strong>Nominal Tagihan:</strong> <span style="color:#dc2626; font-weight:700;">Rp ${Number(t.nominal_tagihan).toLocaleString('id-ID')}</span></p>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      confirmButtonText: 'Ya, Hapus Tagihan'
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      const res = await api.delete(`/keuangan/tagihan/${t.id}`);
+      if (res.data?.success) {
+        Swal.fire('Berhasil', 'Tagihan berhasil dihapus dari database.', 'success');
+        fetchAllTagihanList();
+      }
+    } catch (err) {
+      Swal.fire('Gagal', err.response?.data?.message || 'Gagal menghapus tagihan.', 'error');
+    }
+  };
+
+  const handleOpenEditTagihan = (t) => {
+    setEditTagihanData({
+      id: t.id,
+      kode_tagihan: t.kode_tagihan,
+      nama_siswa: t.nama_siswa,
+      nama_pos: t.nama_pos,
+      nominal_tagihan: t.nominal_tagihan,
+      tanggal_jatuh_tempo: t.tanggal_jatuh_tempo ? t.tanggal_jatuh_tempo.substring(0, 10) : ''
+    });
+    setShowEditTagihanModal(true);
+  };
+
+  const handleSaveEditTagihan = async (e) => {
+    e.preventDefault();
+    if (!editTagihanData) return;
+
+    try {
+      const res = await api.put(`/keuangan/tagihan/${editTagihanData.id}`, {
+        nominal_tagihan: editTagihanData.nominal_tagihan,
+        tanggal_jatuh_tempo: editTagihanData.tanggal_jatuh_tempo
+      });
+
+      if (res.data?.success) {
+        Swal.fire('Berhasil', 'Data tagihan berhasil diperbarui.', 'success');
+        setShowEditTagihanModal(false);
+        setEditTagihanData(null);
+        fetchAllTagihanList();
+      }
+    } catch (err) {
+      Swal.fire('Gagal', err.response?.data?.message || 'Gagal memperbarui tagihan.', 'error');
+    }
+  };
+
+  const handleDeleteBatchTagihan = async () => {
+    if (!tagihanFilterPos && !tagihanFilterBulan && !tagihanFilterTahun && !tagihanFilterKelas) {
+      Swal.fire('Peringatan', 'Silakan pilih filter Pos, Bulan, Tahun, atau Kelas terlebih dahulu untuk menghapus tagihan secara masal.', 'warning');
+      return;
+    }
+
+    const confirm = await Swal.fire({
+      title: 'Hapus Tagihan Masal (UNPAID)?',
+      html: `
+        <div style="text-align:left; font-size:13px;">
+          <p>Sistem akan menghapus seluruh tagihan berkriteria berikut yang <strong>BELUM DIBAYAR (UNPAID)</strong>:</p>
+          <ul>
+            ${tagihanFilterPos ? `<li>Pos: <strong>${(posList.find(p => p.id == tagihanFilterPos) || {}).nama_pos || tagihanFilterPos}</strong></li>` : ''}
+            ${tagihanFilterBulan ? `<li>Bulan: <strong>${getBulanLabel(tagihanFilterBulan)}</strong></li>` : ''}
+            ${tagihanFilterTahun ? `<li>Tahun: <strong>${tagihanFilterTahun}</strong></li>` : ''}
+            ${tagihanFilterKelas ? `<li>Kelas: <strong>Kelas ${(kelasList.find(k => (k.kode_kelas||k.id) == tagihanFilterKelas) || {}).nama_kelas || tagihanFilterKelas}</strong></li>` : ''}
+          </ul>
+          <p style="color:#dc2626; font-weight:700;">Tindakan ini tidak dapat dibatalkan!</p>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      confirmButtonText: 'Ya, Hapus Tagihan Masal'
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      const res = await api.post('/keuangan/tagihan/delete-batch', {
+        pos_id: tagihanFilterPos,
+        bulan: tagihanFilterBulan,
+        tahun: tagihanFilterTahun,
+        kode_kelas: tagihanFilterKelas
+      });
+
+      if (res.data?.success) {
+        Swal.fire('Berhasil', res.data.message || 'Tagihan masal berhasil dihapus.', 'success');
+        fetchAllTagihanList();
+      }
+    } catch (err) {
+      Swal.fire('Gagal', err.response?.data?.message || 'Gagal menghapus tagihan masal.', 'error');
+    }
+  };
+
   // --- REKAP HANDLERS ---
   const fetchRekapTunggakan = async () => {
     setIsLoadingRekap(true);
@@ -575,6 +731,13 @@ export default function AdminKeuanganTab() {
               onClick={() => setActiveSubTab('kasir')}
             >
               <CreditCard size={15} /> Kasir TU
+            </button>
+
+            <button
+              className={activeSubTab === 'tagihan_list' ? 'btn-primary-admin' : 'btn-outline-admin'}
+              onClick={() => { setActiveSubTab('tagihan_list'); fetchAllTagihanList(); }}
+            >
+              <FileSpreadsheet size={15} /> Kelola Tagihan
             </button>
 
             <button
@@ -1082,6 +1245,200 @@ export default function AdminKeuanganTab() {
                   <div style={{ fontWeight: 700, color: '#64748b' }}>Ketik NIS atau nama siswa pada pencarian di atas.</div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================
+            SUB TAB 1.5: KELOLA TAGIHAN SISWA (SEARCH, EDIT & DELETE)
+            ======================================================== */}
+        {activeSubTab === 'tagihan_list' && (
+          <div style={{ width: '100%' }}>
+            {/* FILTER BAR */}
+            <div style={{ background: '#f8fafc', padding: 16, borderRadius: 10, border: '1px solid #e2e8f0', marginBottom: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 100px 100px 120px auto', gap: 10, alignItems: 'center' }}>
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 2, display: 'block' }}>Cari Tagihan</label>
+                  <div style={{ position: 'relative' }}>
+                    <Search size={14} color="#94a3b8" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
+                    <input
+                      type="text"
+                      placeholder="Cari NIS / Nama / Kode Inv..."
+                      value={tagihanSearch}
+                      onChange={(e) => setTagihanSearch(e.target.value)}
+                      className="form-control-admin"
+                      style={{ paddingLeft: 30, fontSize: 12.5 }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 2, display: 'block' }}>Pos Pembayaran</label>
+                  <SearchableSelect
+                    value={tagihanFilterPos}
+                    onChange={(e) => setTagihanFilterPos(e.target.value)}
+                    placeholder="Semua Pos"
+                    options={posList.map(p => ({ value: p.id, label: p.nama_pos }))}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 2, display: 'block' }}>Kelas</label>
+                  <SearchableSelect
+                    value={tagihanFilterKelas}
+                    onChange={(e) => setTagihanFilterKelas(e.target.value)}
+                    placeholder="Semua Kelas"
+                    options={kelasList.map(k => ({ value: k.kode_kelas || k.id, label: `Kelas ${k.nama_kelas}` }))}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 2, display: 'block' }}>Bulan</label>
+                  <SearchableSelect
+                    value={tagihanFilterBulan}
+                    onChange={(e) => setTagihanFilterBulan(e.target.value)}
+                    placeholder="Semua"
+                    options={[1,2,3,4,5,6,7,8,9,10,11,12].map(m => ({ value: m, label: getBulanLabel(m) }))}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 2, display: 'block' }}>Tahun</label>
+                  <input
+                    type="number"
+                    placeholder="Tahun"
+                    value={tagihanFilterTahun}
+                    onChange={(e) => setTagihanFilterTahun(e.target.value)}
+                    className="form-control-admin"
+                    style={{ fontSize: 12.5 }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 2, display: 'block' }}>Status</label>
+                  <SearchableSelect
+                    value={tagihanFilterStatus}
+                    onChange={(e) => setTagihanFilterStatus(e.target.value)}
+                    options={[
+                      { value: 'ALL', label: 'Semua Status' },
+                      { value: 'UNPAID', label: 'Belum Lunas' },
+                      { value: 'PARTIAL', label: 'Dicicil' },
+                      { value: 'PAID', label: 'Lunas' }
+                    ]}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', paddingTop: 18 }}>
+                  <button type="button" className="btn-outline-admin" onClick={fetchAllTagihanList} title="Refresh">
+                    <RefreshCw size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteBatchTagihan}
+                    style={{ padding: '6px 10px', borderRadius: 6, background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    title="Hapus Tagihan UNPAID Masal Sesuai Filter"
+                  >
+                    <Trash2 size={13} style={{ marginRight: 4 }} /> Hapus Masal
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* TABLE OF TAGIHAN */}
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: 40 }}>No</th>
+                    <th>Kode Invoice</th>
+                    <th>Siswa & Kelas</th>
+                    <th>Pos & Periode Tagihan</th>
+                    <th style={{ textAlign: 'right' }}>Nominal Tagihan</th>
+                    <th style={{ textAlign: 'right' }}>Terbayar / Sisa</th>
+                    <th style={{ textAlign: 'center' }}>Status</th>
+                    <th style={{ textAlign: 'center', width: 100 }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {isLoadingAllTagihan ? (
+                    <tr>
+                      <td colSpan={8} style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
+                        Memuat data tagihan...
+                      </td>
+                    </tr>
+                  ) : allTagihanList.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
+                        Tidak ada data tagihan ditemukan.
+                      </td>
+                    </tr>
+                  ) : (
+                    allTagihanList.map((t, idx) => {
+                      const sisa = Number(t.nominal_tagihan) - Number(t.nominal_terbayar || 0);
+                      return (
+                        <tr key={t.id}>
+                          <td style={{ textAlign: 'center', color: '#64748b', fontWeight: 700 }}>{idx + 1}</td>
+                          <td style={{ fontWeight: 800, color: '#0284c7', fontSize: 12.5 }}>{t.kode_tagihan}</td>
+                          <td>
+                            <div style={{ fontWeight: 800, color: '#0f172a' }}>{t.nama_siswa}</div>
+                            <div style={{ fontSize: 11, color: '#64748b' }}>
+                              NIS: {t.nis || '-'} • Kelas: <strong>{t.nama_kelas || '-'}</strong>
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, color: '#334155' }}>{t.nama_pos}</div>
+                            <div style={{ fontSize: 11, color: '#64748b' }}>
+                              {t.tipe_pos === 'BULANAN' ? `${getBulanLabel(t.bulan)} ${t.tahun}` : 'Tipe Bebas (Non-Bulanan)'}
+                            </div>
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 800, color: '#0f172a' }}>
+                            Rp {Number(t.nominal_tagihan).toLocaleString('id-ID')}
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: 11, color: '#16a34a', fontWeight: 700 }}>
+                              Bayar: Rp {Number(t.nominal_terbayar || 0).toLocaleString('id-ID')}
+                            </div>
+                            <div style={{ fontSize: 11, color: sisa > 0 ? '#dc2626' : '#64748b', fontWeight: 700 }}>
+                              Sisa: Rp {sisa.toLocaleString('id-ID')}
+                            </div>
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <span
+                              className="status-badge-active"
+                              style={{
+                                background: t.status === 'PAID' ? '#dcfce7' : t.status === 'PARTIAL' ? '#fef3c7' : '#fee2e2',
+                                color: t.status === 'PAID' ? '#15803d' : t.status === 'PARTIAL' ? '#b45309' : '#dc2626'
+                              }}
+                            >
+                              {t.status}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <div style={{ display: 'inline-flex', gap: 6 }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditTagihan(t)}
+                                style={{ padding: '5px 8px', borderRadius: 6, background: '#fef3c7', color: '#d97706', border: '1px solid #fcd34d', cursor: 'pointer' }}
+                                title="Edit Nominal / Tanggal Tagihan"
+                              >
+                                <Edit2 size={14} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteSingleTagihan(t)}
+                                style={{ padding: '5px 8px', borderRadius: 6, background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', cursor: 'pointer' }}
+                                title="Hapus Tagihan Ini"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
@@ -1940,6 +2297,56 @@ export default function AdminKeuanganTab() {
                 <button type="submit" className="btn-primary-admin">
                   Simpan Perubahan
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL EDIT TAGIHAN SISWA */}
+      {showEditTagihanModal && editTagihanData && (
+        <div className="modal-overlay-admin">
+          <div className="modal-content-admin" style={{ maxWidth: 450 }}>
+            <div className="modal-header-admin">
+              <h3>Edit Tagihan Siswa</h3>
+              <button onClick={() => setShowEditTagihanModal(false)}><X size={18} /></button>
+            </div>
+            <form onSubmit={handleSaveEditTagihan}>
+              <div className="modal-body-admin">
+                <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 14 }}>
+                  <div style={{ fontSize: 11.5, color: '#64748b' }}>Kode: <strong>{editTagihanData.kode_tagihan}</strong></div>
+                  <div style={{ fontSize: 13.5, fontWeight: 800, color: '#0f172a', marginTop: 2 }}>{editTagihanData.nama_siswa}</div>
+                  <div style={{ fontSize: 12, color: '#0284c7', fontWeight: 700, marginTop: 2 }}>{editTagihanData.nama_pos}</div>
+                </div>
+
+                <div className="form-group-admin" style={{ marginBottom: 14 }}>
+                  <label>Nominal Tagihan (Rp) *</label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ position: 'absolute', left: 10, fontSize: 12, fontWeight: 700, color: '#64748b' }}>Rp</span>
+                    <input
+                      type="text"
+                      className="form-control-admin"
+                      style={{ paddingLeft: 32, fontWeight: 800, fontSize: 14 }}
+                      value={formatRupiahInput(editTagihanData.nominal_tagihan)}
+                      onChange={(e) => setEditTagihanData({ ...editTagihanData, nominal_tagihan: parseRupiahInput(e.target.value) })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group-admin">
+                  <label>Tanggal Jatuh Tempo</label>
+                  <input
+                    type="date"
+                    className="form-control-admin"
+                    value={editTagihanData.tanggal_jatuh_tempo || ''}
+                    onChange={(e) => setEditTagihanData({ ...editTagihanData, tanggal_jatuh_tempo: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer-admin" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '12px 16px', borderTop: '1px solid #e2e8f0' }}>
+                <button type="button" className="btn-outline-admin" onClick={() => setShowEditTagihanModal(false)}>Batal</button>
+                <button type="submit" className="btn-primary-admin">Simpan Perubahan</button>
               </div>
             </form>
           </div>

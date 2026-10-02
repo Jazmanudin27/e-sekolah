@@ -257,6 +257,49 @@ async function getRekapTunggakan(req, res, next) {
   }
 }
 
+// --- KELOLA & MANAGEMENT TAGIHAN CONTROLLERS ---
+
+async function getAllTagihan(req, res, next) {
+  try {
+    const { search, pos_id, kode_kelas, bulan, tahun, status, limit } = req.query;
+    const list = await TagihanSiswaModel.getAllTagihan({ search, pos_id, kode_kelas, bulan, tahun, status, limit });
+    sendSuccess(res, 'Daftar tagihan berhasil diambil.', list);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function updateTagihan(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { nominal_tagihan, tanggal_jatuh_tempo } = req.body;
+    const updated = await TagihanSiswaModel.updateInvoice(id, { nominal_tagihan, tanggal_jatuh_tempo });
+    sendSuccess(res, 'Tagihan berhasil diperbarui.', updated);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function deleteTagihan(req, res, next) {
+  try {
+    const { id } = req.params;
+    await TagihanSiswaModel.deleteInvoice(id);
+    sendSuccess(res, 'Tagihan berhasil dihapus.');
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function deleteBatchUnpaidTagihan(req, res, next) {
+  try {
+    const { pos_id, bulan, tahun, kode_kelas } = req.body;
+    const result = await TagihanSiswaModel.deleteBatchUnpaid({ pos_id, bulan, tahun, kode_kelas });
+    sendSuccess(res, `Berhasil menghapus ${result.affected_rows} tagihan yang belum dibayar.`, result);
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getAllPos,
   createPos,
@@ -268,6 +311,10 @@ module.exports = {
   deleteTarif,
   setTarifOverride,
   getTagihanSiswa,
+  getAllTagihan,
+  updateTagihan,
+  deleteTagihan,
+  deleteBatchUnpaidTagihan,
   generateTagihan,
   payCash,
   getAllTransaksi,

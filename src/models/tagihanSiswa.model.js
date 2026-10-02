@@ -245,6 +245,105 @@ class TagihanSiswaModel {
     sql += ' GROUP BY s.kode_siswa ORDER BY total_tunggakan DESC';
     return await query(sql, params);
   }
+
+  // --- KELOLA & MANAGEMENT TAGIHAN ---
+
+  static async getAllTagihan({ search = '', pos_id = '', kode_kelas = '', bulan = '', tahun = '', status = '', limit = 100 }) {
+    let sql = `
+      SELECT t.*, s.nama_siswa, s.nis, s.kode_kelas, k.nama_kelas, p.nama_pos, p.tipe AS tipe_pos
+      FROM tagihan_siswa t
+      JOIN siswa s ON t.siswa_id = s.kode_siswa
+      LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas
+      JOIN tarif_pembayaran tr ON t.tarif_id = tr.id
+      JOIN pos_pembayaran p ON tr.pos_id = p.id
+      WHERE 1=1
+    `;
+    const params = [];
+
+    if (search && String(search).trim()) {
+      sql += ' AND (s.nama_siswa LIKE ? OR s.nis LIKE ? OR t.kode_tagihan LIKE ?)';
+      const q = `%${String(search).trim()}%`;
+      params.push(q, q, q);
+    }
+    if (pos_id) {
+      sql += ' AND tr.pos_id = ?';
+      params.push(pos_id);
+    }
+    if (kode_kelas) {
+      sql += ' AND s.kode_kelas = ?';
+      params.push(kode_kelas);
+    }
+    if (bulan) {
+      sql += ' AND t.bulan = ?';
+      params.push(bulan);
+    }
+    if (tahun) {
+      sql += ' AND t.tahun = ?';
+      params.push(tahun);
+    }
+    if (status && status !== 'ALL') {
+      sql += ' AND t.status = ?';
+      params.push(status);
+    }
+
+    sql += ' ORDER BY t.tahun DESC, t.bulan DESC, t.id DESC LIMIT ?';
+    params.push(Number(limit) || 100);
+
+    return await query(sql, params);
+  }
+
+  static async updateInvoice(id, { nominal_tagihan, tanggal_jatuh_tempo }) {
+    const existing = await this.findById(id);
+    if (!existing) throw new Error('Tagihan tidak ditemukan.');
+
+    const sql = `
+      UPDATE tagihan_siswa
+      SET nominal_tagihan = ?, tanggal_jatuh_tempo = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `;
+    await query(sql, [nominal_tagihan, tanggal_jatuh_tempo || existing.tanggal_jatuh_tempo, id]);
+    return await this.findById(id);
+  }
+
+  static async deleteInvoice(id) {
+    const existing = await this.findById(id);
+    if (!existing) throw new Error('Tagihan tidak ditemukan.');
+    if (Number(existing.nominal_terbayar || 0) > 0) {
+      throw new Error('Tagihan yang sudah pernah dibayar (sebagian/lunas) tidak dapat dihapus langsung. Batalkan transaksinya terlebih dahulu di Riwayat Transaksi.');
+    }
+    const sql = 'DELETE FROM tagihan_siswa WHERE id = ?';
+    await query(sql, [id]);
+    return true;
+  }
+
+  static async deleteBatchUnpaid({ pos_id = null, bulan = null, tahun = null, kode_kelas = null }) {
+    let sql = `
+      DELETE t FROM tagihan_siswa t
+      JOIN tarif_pembayaran tr ON t.tarif_id = tr.id
+      JOIN siswa s ON t.siswa_id = s.kode_siswa
+      WHERE t.status = 'UNPAID' AND (t.nominal_terbayar = 0 OR t.nominal_terbayar IS NULL)
+    `;
+    const params = [];
+    if (pos_id) {
+      sql += ' AND tr.pos_id = ?';
+      params.push(pos_id);
+    }
+    if (bulan) {
+      sql += ' AND t.bulan = ?';
+      params.push(bulan);
+    }
+    if (tahun) {
+      sql += ' AND t.tahun = ?';
+      params.push(tahun);
+    }
+    if (kode_kelas) {
+      sql += ' AND s.kode_kelas = ?';
+      params.push(kode_kelas);
+    }
+
+    const res = await query(sql, params);
+    return { affected_rows: res.affectedRows };
+  }
 }
 
 module.exports = TagihanSiswaModel;
