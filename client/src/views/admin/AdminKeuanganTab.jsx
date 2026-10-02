@@ -636,47 +636,71 @@ export default function AdminKeuanganTab() {
   const handleGenerateInvoice = async (e) => {
     e.preventDefault();
     if (!genFormData.tarif_id) {
-      Swal.fire('Peringatan', 'Pilih Tarif SPP terlebih dahulu.', 'warning');
+      Swal.fire('Peringatan', 'Pilih Pos & Tarif terlebih dahulu.', 'warning');
       return;
     }
 
-    if (genFormData.mode === 'SINGLE') {
-      if (!genFormData.bulan || !genFormData.tahun) {
-        Swal.fire('Peringatan', 'Pilih Bulan dan Tahun tagihan terlebih dahulu.', 'warning');
+    const selectedTarif = tarifList.find(t => String(t.id) === String(genFormData.tarif_id));
+    const isBebas = selectedTarif?.tipe === 'BEBAS';
+
+    if (isBebas) {
+      if (!genFormData.tahun) {
+        Swal.fire('Peringatan', 'Isi Tahun Tagihan terlebih dahulu.', 'warning');
         return;
       }
     } else {
-      if (!genFormData.bulan_mulai || !genFormData.tahun_mulai || !genFormData.bulan_selesai || !genFormData.tahun_selesai) {
-        Swal.fire('Peringatan', 'Lengkapi bulan & tahun mulai serta selesai.', 'warning');
-        return;
+      if (genFormData.mode === 'SINGLE') {
+        if (!genFormData.bulan || !genFormData.tahun) {
+          Swal.fire('Peringatan', 'Pilih Bulan dan Tahun tagihan terlebih dahulu.', 'warning');
+          return;
+        }
+      } else {
+        if (!genFormData.bulan_mulai || !genFormData.tahun_mulai || !genFormData.bulan_selesai || !genFormData.tahun_selesai) {
+          Swal.fire('Peringatan', 'Lengkapi bulan & tahun mulai serta selesai.', 'warning');
+          return;
+        }
       }
     }
 
-    const modeText = genFormData.mode === 'SINGLE'
-      ? `1 bulan (${getBulanLabel(genFormData.bulan)} ${genFormData.tahun})`
-      : `rentang bulan ${getBulanLabel(genFormData.bulan_mulai)} ${genFormData.tahun_mulai} s/d ${getBulanLabel(genFormData.bulan_selesai)} ${genFormData.tahun_selesai}`;
+    let modeText = '';
+    if (isBebas) {
+      modeText = `Tipe Bebas (Tahun ${genFormData.tahun})`;
+    } else if (genFormData.mode === 'SINGLE') {
+      modeText = `1 bulan (${getBulanLabel(genFormData.bulan)} ${genFormData.tahun})`;
+    } else {
+      modeText = `rentang bulan ${getBulanLabel(genFormData.bulan_mulai)} ${genFormData.tahun_mulai} s/d ${getBulanLabel(genFormData.bulan_selesai)} ${genFormData.tahun_selesai}`;
+    }
 
     const confirm = await Swal.fire({
-      title: 'Generate Tagihan SPP?',
+      title: isBebas ? 'Generate Tagihan Tipe Bebas?' : 'Generate Tagihan SPP?',
       html: `
         <div style="text-align:left; font-size:13.5px;">
-          <p>Sistem akan melakukan <strong>looping auto-generate tagihan</strong> untuk <strong>${modeText}</strong>.</p>
+          <p>Sistem akan membuat <strong>tagihan ${isBebas ? 'Tipe Bebas (Non-Bulanan)' : 'SPP Bulanan'}</strong> untuk <strong>${modeText}</strong>.</p>
           <p style="color:#64748b; font-size:12px; margin-top:6px;">Tagihan yang sudah ada sebelumnya akan otomatis dilewati (tidak duplikat).</p>
         </div>
       `,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Ya, Proses Looping'
+      confirmButtonText: 'Ya, Proses Generate'
     });
 
     if (!confirm.isConfirmed) return;
 
     setIsGenerating(true);
     try {
-      const res = await api.post('/keuangan/tagihan/generate', genFormData);
+      const payload = isBebas ? {
+        mode: 'SINGLE',
+        tarif_id: genFormData.tarif_id,
+        bulan: null,
+        tahun: genFormData.tahun,
+        kode_kelas: genFormData.kode_kelas,
+        tanggal_jatuh_tempo: genFormData.tanggal_jatuh_tempo
+      } : genFormData;
+
+      const res = await api.post('/keuangan/tagihan/generate', payload);
       if (res.data?.success) {
         const d = res.data.data;
-        if (genFormData.mode === 'RANGE') {
+        if (!isBebas && genFormData.mode === 'RANGE') {
           Swal.fire(
             'Generasi Berhasil',
             `Berhasil meloop ${d.months_processed || 1} bulan. Total ${d.generated_count} tagihan baru terbuat untuk ${d.total_siswa} siswa.`,
@@ -1804,184 +1828,228 @@ export default function AdminKeuanganTab() {
         )}
 
         {/* ========================================================
-            SUB TAB 3: GENERATE TAGIHAN SPP
+            SUB TAB 3: GENERATE TAGIHAN SPP / BEBAS
             ======================================================== */}
-        {activeSubTab === 'generate' && (
-          <div style={{ maxWidth: 640, margin: 0, background: '#f8fafc', padding: 24, borderRadius: 12, border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <RefreshCw color="#0284c7" size={18} /> Auto-Generate Tagihan SPP Bulanan
+        {activeSubTab === 'generate' && (() => {
+          const selectedTarif = tarifList.find(t => String(t.id) === String(genFormData.tarif_id));
+          const isBebas = selectedTarif?.tipe === 'BEBAS';
+
+          return (
+            <div style={{ maxWidth: 640, margin: 0, background: '#f8fafc', padding: 24, borderRadius: 12, border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <RefreshCw color="#0284c7" size={18} /> {isBebas ? 'Auto-Generate Tagihan Tipe Bebas (Non-Bulanan)' : 'Auto-Generate Tagihan SPP Bulanan'}
+              </div>
+              <div style={{ fontSize: 12.5, color: '#64748b', marginBottom: 20 }}>
+                {isBebas
+                  ? 'Sistem akan membuat tagihan 1x (Non-Bulanan) untuk seluruh siswa aktif sesuai tarif yang ditentukan.'
+                  : 'Sistem akan membuat tagihan SPP bulanan secara otomatis untuk seluruh siswa aktif sesuai tarif dan periode yang ditentukan.'}
+              </div>
+
+              <form onSubmit={handleGenerateInvoice}>
+                {/* TARIF SELECTOR */}
+                <div className="form-group-admin" style={{ marginBottom: 16 }}>
+                  <label>Pilih Pos & Tarif Pembayaran *</label>
+                  <SearchableSelect
+                    value={genFormData.tarif_id}
+                    onChange={(e) => setGenFormData({ ...genFormData, tarif_id: e.target.value })}
+                    placeholder="-- Pilih Pos & Tarif --"
+                    options={tarifList.map(t => {
+                      const sasaran = t.nama_kelas ? `Kelas ${t.nama_kelas}` : t.tingkat ? `Tingkat ${t.tingkat}` : 'Semua Kelas';
+                      const tipeBadge = t.tipe === 'BEBAS' ? '[BEBAS]' : '[BULANAN]';
+                      return {
+                        value: t.id,
+                        label: `${tipeBadge} ${t.nama_pos} (${sasaran}) - TA ${t.tahun_ajaran} - Rp ${Number(t.nominal).toLocaleString('id-ID')}`
+                      };
+                    })}
+                  />
+                </div>
+
+                {isBebas ? (
+                  /* TIPE BEBAS FORM FIELDS */
+                  <div style={{ background: '#fffbe6', padding: 16, borderRadius: 10, border: '1px solid #ffe58f', marginBottom: 16 }}>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: '#d97706', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      💰 Tagihan Tipe Bebas (Non-Bulanan)
+                    </div>
+                    <div style={{ fontSize: 12, color: '#78350f', marginBottom: 12, lineHeight: 1.4 }}>
+                      Biaya ini bersifat <strong>non-rutin bulanan</strong> (seperti Uang Gedung/DSP, Uang Seragam, Uang Ujian). Tidak memerlukan rentang bulan. Tagihan akan otomatis digenerate 1x per siswa.
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div className="form-group-admin">
+                        <label>Tahun Tagihan *</label>
+                        <input
+                          type="number"
+                          className="form-control-admin"
+                          value={genFormData.tahun || currentYear}
+                          onChange={(e) => setGenFormData({ ...genFormData, tahun: Number(e.target.value) })}
+                        />
+                      </div>
+                      <div className="form-group-admin">
+                        <label>Tanggal Jatuh Tempo (Opsional)</label>
+                        <input
+                          type="date"
+                          className="form-control-admin"
+                          value={genFormData.tanggal_jatuh_tempo || ''}
+                          onChange={(e) => setGenFormData({ ...genFormData, tanggal_jatuh_tempo: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* TIPE BULANAN FORM FIELDS */
+                  <>
+                    {/* MODE SELECTION */}
+                    <div className="form-group-admin" style={{ marginBottom: 16 }}>
+                      <label>Mode Generasi Tagihan *</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 4 }}>
+                        <button
+                          type="button"
+                          onClick={() => setGenFormData({ ...genFormData, mode: 'RANGE' })}
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: 8,
+                            border: genFormData.mode === 'RANGE' ? '2px solid #0284c7' : '1px solid #cbd5e1',
+                            background: genFormData.mode === 'RANGE' ? '#e0f2fe' : '#ffffff',
+                            color: genFormData.mode === 'RANGE' ? '#0369a1' : '#475569',
+                            fontWeight: 800,
+                            fontSize: 12.5,
+                            cursor: 'pointer',
+                            textAlign: 'left'
+                          }}
+                        >
+                          🔄 Rentang Bulan Custom (Looping)
+                          <div style={{ fontSize: 11, fontWeight: 500, color: '#64748b', marginTop: 2 }}>
+                            Misal: Agustus 2025 s/d Juli 2026 (1 Tahun Ajaran)
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setGenFormData({ ...genFormData, mode: 'SINGLE' })}
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: 8,
+                            border: genFormData.mode === 'SINGLE' ? '2px solid #0284c7' : '1px solid #cbd5e1',
+                            background: genFormData.mode === 'SINGLE' ? '#e0f2fe' : '#ffffff',
+                            color: genFormData.mode === 'SINGLE' ? '#0369a1' : '#475569',
+                            fontWeight: 800,
+                            fontSize: 12.5,
+                            cursor: 'pointer',
+                            textAlign: 'left'
+                          }}
+                        >
+                          🗓️ Per 1 Bulan (Single)
+                          <div style={{ fontSize: 11, fontWeight: 500, color: '#64748b', marginTop: 2 }}>
+                            Generate hanya untuk 1 bulan spesifik
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* RENDER DYNAMIC INPUTS BASED ON MODE */}
+                    {genFormData.mode === 'RANGE' ? (
+                      <div style={{ background: '#ffffff', padding: 16, borderRadius: 10, border: '1px solid #bae6fd', marginBottom: 16 }}>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: '#0369a1', marginBottom: 12 }}>
+                          📅 Rentang Bulan Custom (Looping Auto-Generate)
+                        </div>
+
+                        {/* DARI PERIODE */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                          <div className="form-group-admin">
+                            <label style={{ fontSize: 11.5 }}>Dari Bulan (Mulai) *</label>
+                            <SearchableSelect
+                              value={genFormData.bulan_mulai}
+                              onChange={(e) => setGenFormData({ ...genFormData, bulan_mulai: Number(e.target.value) })}
+                              options={[1,2,3,4,5,6,7,8,9,10,11,12].map(m => ({ value: m, label: `${m} - ${getBulanLabel(m)}` }))}
+                            />
+                          </div>
+                          <div className="form-group-admin">
+                            <label style={{ fontSize: 11.5 }}>Tahun Mulai *</label>
+                            <input
+                              type="number"
+                              className="form-control-admin"
+                              value={genFormData.tahun_mulai}
+                              onChange={(e) => setGenFormData({ ...genFormData, tahun_mulai: Number(e.target.value) })}
+                            />
+                          </div>
+                        </div>
+
+                        {/* SAMPAI PERIODE */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 8 }}>
+                          <div className="form-group-admin">
+                            <label style={{ fontSize: 11.5 }}>Sampai Bulan (Selesai) *</label>
+                            <SearchableSelect
+                              value={genFormData.bulan_selesai}
+                              onChange={(e) => setGenFormData({ ...genFormData, bulan_selesai: Number(e.target.value) })}
+                              options={[1,2,3,4,5,6,7,8,9,10,11,12].map(m => ({ value: m, label: `${m} - ${getBulanLabel(m)}` }))}
+                            />
+                          </div>
+                          <div className="form-group-admin">
+                            <label style={{ fontSize: 11.5 }}>Tahun Selesai *</label>
+                            <input
+                              type="number"
+                              className="form-control-admin"
+                              value={genFormData.tahun_selesai}
+                              onChange={(e) => setGenFormData({ ...genFormData, tahun_selesai: Number(e.target.value) })}
+                            />
+                          </div>
+                        </div>
+
+                        <div style={{ fontSize: 11.5, color: '#0284c7', background: '#f0f9ff', padding: '8px 12px', borderRadius: 6, marginTop: 8 }}>
+                          💡 <strong>Looping otomatis:</strong> Sistem akan membuat tagihan per bulan mulai dari <strong>{getBulanLabel(genFormData.bulan_mulai)} {genFormData.tahun_mulai}</strong> sampai <strong>{getBulanLabel(genFormData.bulan_selesai)} {genFormData.tahun_selesai}</strong>. Tagihan yang sudah pernah ada akan dilewati (tidak akan duplikat).
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
+                        <div className="form-group-admin">
+                          <label>Bulan Tagihan *</label>
+                          <SearchableSelect
+                            value={genFormData.bulan}
+                            onChange={(e) => setGenFormData({ ...genFormData, bulan: Number(e.target.value) })}
+                            options={[1,2,3,4,5,6,7,8,9,10,11,12].map(m => ({ value: m, label: `${m} - ${getBulanLabel(m)}` }))}
+                          />
+                        </div>
+
+                        <div className="form-group-admin">
+                          <label>Tahun Tagihan *</label>
+                          <input
+                            type="number"
+                            className="form-control-admin"
+                            value={genFormData.tahun}
+                            onChange={(e) => setGenFormData({ ...genFormData, tahun: Number(e.target.value) })}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* FILTER KELAS */}
+                <div className="form-group-admin" style={{ marginBottom: 20 }}>
+                  <label>Filter Kelas (Opsional)</label>
+                  <SearchableSelect
+                    value={genFormData.kode_kelas}
+                    onChange={(e) => setGenFormData({ ...genFormData, kode_kelas: e.target.value })}
+                    placeholder="-- Semua Kelas (Semua Siswa Aktif) --"
+                    options={kelasList.map(k => ({
+                      value: k.kode_kelas || k.id,
+                      label: `Kelas ${k.nama_kelas}`
+                    }))}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isGenerating}
+                  className="btn-primary-admin"
+                  style={{ width: '100%', padding: '13px', fontWeight: 800, fontSize: 14 }}
+                >
+                  {isGenerating ? 'Sedang Memproses Tagihan...' : `⚡ Process Auto-Generate Tagihan ${isBebas ? '(Tipe Bebas)' : ''}`}
+                </button>
+              </form>
             </div>
-            <div style={{ fontSize: 12.5, color: '#64748b', marginBottom: 20 }}>
-              Sistem akan membuat tagihan SPP bulanan secara otomatis untuk seluruh siswa aktif sesuai tarif dan periode yang ditentukan.
-            </div>
-
-            <form onSubmit={handleGenerateInvoice}>
-              {/* MODE SELECTION */}
-              <div className="form-group-admin" style={{ marginBottom: 16 }}>
-                <label>Mode Generasi Tagihan *</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 4 }}>
-                  <button
-                    type="button"
-                    onClick={() => setGenFormData({ ...genFormData, mode: 'RANGE' })}
-                    style={{
-                      padding: '10px 14px',
-                      borderRadius: 8,
-                      border: genFormData.mode === 'RANGE' ? '2px solid #0284c7' : '1px solid #cbd5e1',
-                      background: genFormData.mode === 'RANGE' ? '#e0f2fe' : '#ffffff',
-                      color: genFormData.mode === 'RANGE' ? '#0369a1' : '#475569',
-                      fontWeight: 800,
-                      fontSize: 12.5,
-                      cursor: 'pointer',
-                      textAlign: 'left'
-                    }}
-                  >
-                    🔄 Rentang Bulan Custom (Looping)
-                    <div style={{ fontSize: 11, fontWeight: 500, color: '#64748b', marginTop: 2 }}>
-                      Misal: Agustus 2025 s/d Juli 2026 (1 Tahun Ajaran)
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setGenFormData({ ...genFormData, mode: 'SINGLE' })}
-                    style={{
-                      padding: '10px 14px',
-                      borderRadius: 8,
-                      border: genFormData.mode === 'SINGLE' ? '2px solid #0284c7' : '1px solid #cbd5e1',
-                      background: genFormData.mode === 'SINGLE' ? '#e0f2fe' : '#ffffff',
-                      color: genFormData.mode === 'SINGLE' ? '#0369a1' : '#475569',
-                      fontWeight: 800,
-                      fontSize: 12.5,
-                      cursor: 'pointer',
-                      textAlign: 'left'
-                    }}
-                  >
-                    🗓️ Per 1 Bulan (Single)
-                    <div style={{ fontSize: 11, fontWeight: 500, color: '#64748b', marginTop: 2 }}>
-                      Generate hanya untuk 1 bulan spesifik
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* TARIF SELECTOR */}
-              <div className="form-group-admin" style={{ marginBottom: 16 }}>
-                <label>Pilih Pos & Tarif SPP *</label>
-                <SearchableSelect
-                  value={genFormData.tarif_id}
-                  onChange={(e) => setGenFormData({ ...genFormData, tarif_id: e.target.value })}
-                  placeholder="-- Pilih Pos & Tarif SPP --"
-                  options={tarifList.map(t => {
-                    const sasaran = t.nama_kelas ? `Kelas ${t.nama_kelas}` : t.tingkat ? `Tingkat ${t.tingkat}` : 'Semua Kelas';
-                    return {
-                      value: t.id,
-                      label: `${t.nama_pos} (${sasaran}) - TA ${t.tahun_ajaran} - Rp ${Number(t.nominal).toLocaleString('id-ID')}`
-                    };
-                  })}
-                />
-              </div>
-
-              {/* RENDER DYNAMIC INPUTS BASED ON MODE */}
-              {genFormData.mode === 'RANGE' ? (
-                <div style={{ background: '#ffffff', padding: 16, borderRadius: 10, border: '1px solid #bae6fd', marginBottom: 16 }}>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: '#0369a1', marginBottom: 12 }}>
-                    📅 Rentang Bulan Custom (Looping Auto-Generate)
-                  </div>
-
-                  {/* DARI PERIODE */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-                    <div className="form-group-admin">
-                      <label style={{ fontSize: 11.5 }}>Dari Bulan (Mulai) *</label>
-                      <SearchableSelect
-                        value={genFormData.bulan_mulai}
-                        onChange={(e) => setGenFormData({ ...genFormData, bulan_mulai: Number(e.target.value) })}
-                        options={[1,2,3,4,5,6,7,8,9,10,11,12].map(m => ({ value: m, label: `${m} - ${getBulanLabel(m)}` }))}
-                      />
-                    </div>
-                    <div className="form-group-admin">
-                      <label style={{ fontSize: 11.5 }}>Tahun Mulai *</label>
-                      <input
-                        type="number"
-                        className="form-control-admin"
-                        value={genFormData.tahun_mulai}
-                        onChange={(e) => setGenFormData({ ...genFormData, tahun_mulai: Number(e.target.value) })}
-                      />
-                    </div>
-                  </div>
-
-                  {/* SAMPAI PERIODE */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 8 }}>
-                    <div className="form-group-admin">
-                      <label style={{ fontSize: 11.5 }}>Sampai Bulan (Selesai) *</label>
-                      <SearchableSelect
-                        value={genFormData.bulan_selesai}
-                        onChange={(e) => setGenFormData({ ...genFormData, bulan_selesai: Number(e.target.value) })}
-                        options={[1,2,3,4,5,6,7,8,9,10,11,12].map(m => ({ value: m, label: `${m} - ${getBulanLabel(m)}` }))}
-                      />
-                    </div>
-                    <div className="form-group-admin">
-                      <label style={{ fontSize: 11.5 }}>Tahun Selesai *</label>
-                      <input
-                        type="number"
-                        className="form-control-admin"
-                        value={genFormData.tahun_selesai}
-                        onChange={(e) => setGenFormData({ ...genFormData, tahun_selesai: Number(e.target.value) })}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ fontSize: 11.5, color: '#0284c7', background: '#f0f9ff', padding: '8px 12px', borderRadius: 6, marginTop: 8 }}>
-                    💡 <strong>Looping otomatis:</strong> Sistem akan membuat tagihan per bulan mulai dari <strong>{getBulanLabel(genFormData.bulan_mulai)} {genFormData.tahun_mulai}</strong> sampai <strong>{getBulanLabel(genFormData.bulan_selesai)} {genFormData.tahun_selesai}</strong>. Tagihan yang sudah pernah ada akan dilewati (tidak akan duplikat).
-                  </div>
-                </div>
-              ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
-                  <div className="form-group-admin">
-                    <label>Bulan Tagihan *</label>
-                    <SearchableSelect
-                      value={genFormData.bulan}
-                      onChange={(e) => setGenFormData({ ...genFormData, bulan: Number(e.target.value) })}
-                      options={[1,2,3,4,5,6,7,8,9,10,11,12].map(m => ({ value: m, label: `${m} - ${getBulanLabel(m)}` }))}
-                    />
-                  </div>
-
-                  <div className="form-group-admin">
-                    <label>Tahun Tagihan *</label>
-                    <input
-                      type="number"
-                      className="form-control-admin"
-                      value={genFormData.tahun}
-                      onChange={(e) => setGenFormData({ ...genFormData, tahun: Number(e.target.value) })}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* FILTER KELAS */}
-              <div className="form-group-admin" style={{ marginBottom: 20 }}>
-                <label>Filter Kelas (Opsional)</label>
-                <SearchableSelect
-                  value={genFormData.kode_kelas}
-                  onChange={(e) => setGenFormData({ ...genFormData, kode_kelas: e.target.value })}
-                  placeholder="-- Semua Kelas (Semua Siswa Aktif) --"
-                  options={kelasList.map(k => ({
-                    value: k.kode_kelas || k.id,
-                    label: `Kelas ${k.nama_kelas}`
-                  }))}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isGenerating}
-                className="btn-primary-admin"
-                style={{ width: '100%', padding: '13px', fontWeight: 800, fontSize: 14 }}
-              >
-                {isGenerating ? 'Sedang Melloop & Memproses Tagihan...' : '⚡ Process Auto-Generate Tagihan'}
-              </button>
-            </form>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ========================================================
             SUB TAB 4: REKAP TUNGGAKAN

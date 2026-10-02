@@ -137,11 +137,14 @@ class TagihanSiswaModel {
   }
 
   /**
-   * Auto generate tagihan SPP untuk satu kelas / angkatan berdasarkan tarif & override beasiswa
+   * Auto generate tagihan SPP / Bebas untuk siswa berdasarkan tarif & override beasiswa
    */
-  static async autoGenerateInvoices({ tarif_id, bulan, tahun, kode_kelas = null, tanggal_jatuh_tempo = null }) {
+  static async autoGenerateInvoices({ tarif_id, bulan = null, tahun = null, kode_kelas = null, tanggal_jatuh_tempo = null }) {
     // 1. Get tarif details
-    const tarifRows = await query('SELECT * FROM tarif_pembayaran WHERE id = ?', [tarif_id]);
+    const tarifRows = await query(
+      'SELECT t.*, p.tipe AS tipe_pos FROM tarif_pembayaran t JOIN pos_pembayaran p ON t.pos_id = p.id WHERE t.id = ?',
+      [tarif_id]
+    );
     if (!tarifRows || tarifRows.length === 0) throw new Error('Tarif tidak ditemukan');
     const tarif = tarifRows[0];
 
@@ -162,12 +165,24 @@ class TagihanSiswaModel {
 
     // 3. Loop generate for each student
     let generatedCount = 0;
+    const isBebas = (tarif.tipe_pos === 'BEBAS' || !bulan);
+
     for (const s of siswaList) {
       // Check existing invoice for this period
-      const existing = await query(
-        'SELECT id FROM tagihan_siswa WHERE siswa_id = ? AND tarif_id = ? AND bulan = ? AND tahun = ?',
-        [s.kode_siswa, tarif_id, bulan, tahun]
-      );
+      let existingSql = 'SELECT id FROM tagihan_siswa WHERE siswa_id = ? AND tarif_id = ?';
+      const existingParams = [s.kode_siswa, tarif_id];
+
+      if (isBebas) {
+        if (tahun) {
+          existingSql += ' AND (tahun = ? OR tahun IS NULL)';
+          existingParams.push(tahun);
+        }
+      } else {
+        existingSql += ' AND bulan = ? AND tahun = ?';
+        existingParams.push(bulan, tahun);
+      }
+
+      const existing = await query(existingSql, existingParams);
       if (existing && existing.length > 0) continue; // Skip if already created
 
       // Check scholarship / override
@@ -189,7 +204,7 @@ class TagihanSiswaModel {
       await this.createInvoice({
         siswa_id: s.kode_siswa,
         tarif_id,
-        bulan,
+        bulan: isBebas ? null : bulan,
         tahun,
         nominal_tagihan: finalNominal,
         tanggal_jatuh_tempo
@@ -212,6 +227,20 @@ class TagihanSiswaModel {
     kode_kelas = null,
     tanggal_jatuh_tempo = null
   }) {
+    const tarifRows = await query(
+      'SELECT t.*, p.tipe AS tipe_pos FROM tarif_pembayaran t JOIN pos_pembayaran p ON t.pos_id = p.id WHERE t.id = ?',
+      [tarif_id]
+    );
+    if (tarifRows && tarifRows.length > 0 && tarifRows[0].tipe_pos === 'BEBAS') {
+      return await this.autoGenerateInvoices({
+        tarif_id,
+        bulan: null,
+        tahun: tahun_mulai || new Date().getFullYear(),
+        kode_kelas,
+        tanggal_jatuh_tempo
+      });
+    }
+
     let curY = Number(tahun_mulai);
     let curM = Number(bulan_mulai);
     const endY = Number(tahun_selesai);
@@ -247,17 +276,9 @@ class TagihanSiswaModel {
         curM = 1;
         curY++;
       }
-
-      if (curY > endY || (curY === endY && curM > endM)) {
-        break;
-      }
     }
 
-    return {
-      total_siswa: totalSiswa,
-      months_processed: monthsProcessed,
-      generated_count: totalGeneratedCount
-    };
+    return { total_siswa: totalSiswa, generated_count: totalGeneratedCount, months_processed: monthsProcessed };
   }
 
   // --- REKAPITULASI & LAPORAN ---
