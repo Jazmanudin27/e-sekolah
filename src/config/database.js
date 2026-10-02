@@ -46,11 +46,11 @@ function getPool(customHost) {
   const currentHost = customHost || tenantStorage.getStore();
   const config = getTenantConfig(currentHost);
 
-  const dbHost = config ? config.host : (process.env.DB_HOST || 'localhost');
-  const dbPort = config ? config.port : (parseInt(process.env.DB_PORT, 10) || 3306);
-  const dbUser = config ? config.user : (process.env.DB_USER || 'artanita');
-  const dbPassword = config ? config.password : (process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : 'Jazman@271998');
-  const dbName = config ? config.database : (process.env.DB_NAME || 'artanita');
+  const dbHost = process.env.DB_HOST || (config ? config.host : 'localhost');
+  const dbPort = parseInt(process.env.DB_PORT, 10) || (config ? config.port : 3306);
+  const dbUser = process.env.DB_USER || (config ? config.user : 'artanita');
+  const dbPassword = process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : (config ? config.password : 'Jazman@271998');
+  const dbName = process.env.DB_NAME || (config ? config.database : 'artanita');
 
   const poolKey = `${dbHost}:${dbPort}:${dbUser}:${dbName}`;
 
