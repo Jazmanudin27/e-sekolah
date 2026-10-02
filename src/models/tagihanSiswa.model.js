@@ -46,8 +46,40 @@ class TagihanSiswaModel {
     return await query(sql, ids);
   }
 
-  static async createInvoice({ siswa_id, tarif_id, bulan = null, tahun = null, nominal_tagihan, tanggal_jatuh_tempo = null }) {
-    const kode_tagihan = `INV-${tahun || new Date().getFullYear()}${String(bulan || 0).padStart(2, '0')}-${siswa_id}-${Math.floor(1000 + Math.random() * 9000)}`;
+  static async generateKodeInvoice(tahun) {
+    const yr = String(tahun || new Date().getFullYear()).slice(-2);
+    const prefix = `INV-${yr}`;
+    const rows = await query(
+      "SELECT kode_tagihan FROM tagihan_siswa WHERE kode_tagihan LIKE ? ORDER BY id DESC LIMIT 1",
+      [`${prefix}%`]
+    );
+    let nextNum = 10001;
+    if (rows && rows.length > 0 && rows[0].kode_tagihan) {
+      const match = rows[0].kode_tagihan.match(/INV-\d{2}(\d+)/);
+      if (match && match[1]) {
+        const lastNum = parseInt(match[1], 10);
+        if (!isNaN(lastNum)) {
+          nextNum = lastNum + 1;
+        }
+      }
+    }
+
+    let candidate = `${prefix}${nextNum}`;
+    let attempts = 0;
+    while (attempts < 10) {
+      const check = await query('SELECT id FROM tagihan_siswa WHERE kode_tagihan = ?', [candidate]);
+      if (!check || check.length === 0) break;
+      nextNum++;
+      candidate = `${prefix}${nextNum}`;
+      attempts++;
+    }
+    return candidate;
+  }
+
+  static async createInvoice({ siswa_id, tarif_id, bulan = null, tahun = null, nominal_tagihan, tanggal_jatuh_tempo = null, kode_tagihan = null }) {
+    if (!kode_tagihan) {
+      kode_tagihan = await this.generateKodeInvoice(tahun);
+    }
 
     const dueDate = (tanggal_jatuh_tempo && String(tanggal_jatuh_tempo).trim() !== '')
       ? tanggal_jatuh_tempo
