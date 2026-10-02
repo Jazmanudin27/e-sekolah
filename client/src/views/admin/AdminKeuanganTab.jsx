@@ -698,10 +698,10 @@ export default function AdminKeuanganTab() {
                                       type="button"
                                       onClick={() => handleOpenKwitansi(tr.id)}
                                       className="btn-outline-admin"
-                                      style={{ padding: '4px 8px', fontSize: 11 }}
+                                      style={{ padding: '6px', borderRadius: 6 }}
                                       title="Cetak Kuitansi Pembayaran"
                                     >
-                                      <Printer size={13} style={{ marginRight: 3 }} /> Kuitansi
+                                      <Printer size={15} />
                                     </button>
                                     {tr.status_transaksi !== 'CANCELLED' && (
                                       <>
@@ -709,19 +709,19 @@ export default function AdminKeuanganTab() {
                                           type="button"
                                           onClick={() => handleOpenEditTransaksi(tr.id)}
                                           className="btn-outline-admin"
-                                          style={{ padding: '4px 8px', fontSize: 11, color: '#0284c7', borderColor: '#bae6fd' }}
+                                          style={{ padding: '6px', borderRadius: 6, color: '#0284c7', borderColor: '#bae6fd' }}
                                           title="Edit Nominal / Detail Pembayaran"
                                         >
-                                          <Edit2 size={13} style={{ marginRight: 3 }} /> Edit
+                                          <Edit2 size={15} />
                                         </button>
                                         <button
                                           type="button"
                                           onClick={() => handleCancelTransaksi(tr.id)}
                                           className="btn-outline-admin"
-                                          style={{ padding: '4px 8px', fontSize: 11, color: '#ef4444', borderColor: '#fca5a5' }}
+                                          style={{ padding: '6px', borderRadius: 6, color: '#ef4444', borderColor: '#fca5a5' }}
                                           title="Batalkan Pembayaran Ini"
                                         >
-                                          <Trash2 size={13} style={{ marginRight: 3 }} /> Batalkan
+                                          <Trash2 size={15} />
                                         </button>
                                       </>
                                     )}
@@ -1332,10 +1332,10 @@ export default function AdminKeuanganTab() {
                                 type="button"
                                 onClick={() => handleOpenKwitansi(tr.id)}
                                 className="btn-outline-admin"
-                                style={{ padding: '5px 10px', fontSize: 12 }}
+                                style={{ padding: '6px 8px', borderRadius: 6 }}
                                 title="Cetak Kuitansi Pembayaran"
                               >
-                                <Printer size={14} style={{ marginRight: 4 }} /> Kuitansi
+                                <Printer size={15} />
                               </button>
                               {tr.status_transaksi !== 'CANCELLED' && (
                                 <>
@@ -1343,19 +1343,19 @@ export default function AdminKeuanganTab() {
                                     type="button"
                                     onClick={() => handleOpenEditTransaksi(tr.id)}
                                     className="btn-outline-admin"
-                                    style={{ padding: '5px 10px', fontSize: 12, color: '#0284c7', borderColor: '#bae6fd' }}
+                                    style={{ padding: '6px 8px', borderRadius: 6, color: '#0284c7', borderColor: '#bae6fd' }}
                                     title="Edit Nominal / Detail Pembayaran"
                                   >
-                                    <Edit2 size={14} style={{ marginRight: 4 }} /> Edit
+                                    <Edit2 size={15} />
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => handleCancelTransaksi(tr.id)}
                                     className="btn-outline-admin"
-                                    style={{ padding: '5px 10px', fontSize: 12, color: '#ef4444', borderColor: '#fca5a5' }}
+                                    style={{ padding: '6px 8px', borderRadius: 6, color: '#ef4444', borderColor: '#fca5a5' }}
                                     title="Batalkan Pembayaran Ini"
                                   >
-                                    <Trash2 size={14} style={{ marginRight: 4 }} /> Batalkan
+                                    <Trash2 size={15} />
                                   </button>
                                 </>
                               )}
