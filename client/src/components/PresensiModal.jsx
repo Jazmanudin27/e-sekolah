@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, MapPin, Send, ShieldCheck, Navigation, AlertTriangle, CheckCircle2, Camera, RefreshCw, Check } from 'lucide-react';
+import Swal from 'sweetalert2';
 import api from '../api/client';
 
 export default function PresensiModal({ type: initialType = 'in', onClose, onSuccess, showToast }) {
@@ -291,12 +292,42 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
         is_fake_gps: isFakeGpsDetected
       });
       if (res.data.success) {
-        showToast(res.data.message || `Presensi ${scanType === 'in' ? 'Masuk' : 'Pulang'} berhasil!`, true);
         stopCamera();
-        onSuccess();
-        onClose();
+        const successTitle = `Presensi ${scanType === 'in' ? 'Masuk' : 'Pulang'} Berhasil!`;
+        const successMsg = res.data.message || `Data presensi ${scanType === 'in' ? 'masuk' : 'pulang'} Anda telah berhasil disimpan.`;
+
+        if (typeof showToast === 'function') {
+          showToast(successMsg, true);
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: successTitle,
+          text: successMsg,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#0066ff',
+          timer: 2500,
+          timerProgressBar: true,
+          allowOutsideClick: false
+        }).then(() => {
+          if (typeof onSuccess === 'function') {
+            onSuccess();
+          }
+          if (typeof onClose === 'function') {
+            onClose();
+          }
+          window.location.reload();
+        });
       } else {
-        showToast(res.data.message || 'Presensi gagal.', false);
+        if (typeof showToast === 'function') {
+          showToast(res.data.message || 'Presensi gagal.', false);
+        }
+        Swal.fire({
+          icon: 'error',
+          title: 'Presensi Gagal',
+          text: res.data.message || 'Gagal menyimpan data presensi.',
+          confirmButtonColor: '#ef4444'
+        });
       }
     } catch (err) {
       showToast(err.response?.data?.message || 'Terjadi kesalahan sistem.', false);
