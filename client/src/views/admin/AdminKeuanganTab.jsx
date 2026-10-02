@@ -739,15 +739,14 @@ export default function AdminKeuanganTab() {
                               <th style={{ width: 50, textAlign: 'center' }}>Pilih</th>
                               <th style={{ width: 220 }}>Pos Pembayaran</th>
                               <th>Tipe & Periode Tagihan</th>
-                              <th style={{ width: 160 }}>Nominal Tagihan</th>
-                              <th style={{ width: 160 }}>Sisa Tagihan</th>
-                              <th style={{ width: 220 }}>Nominal Bayar (Rp)</th>
+                              <th style={{ width: 180 }}>Nominal Tagihan</th>
+                              <th style={{ width: 180 }}>Sisa Tagihan (Acu Bayar)</th>
                             </tr>
                           </thead>
                           <tbody>
                         {siswaTagihan.filter(t => t.status !== 'PAID').length === 0 ? (
                           <tr>
-                            <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#059669', fontWeight: 700 }}>
+                            <td colSpan={5} style={{ textAlign: 'center', padding: '40px 0', color: '#059669', fontWeight: 700 }}>
                               <CheckCircle size={36} style={{ marginBottom: 6 }} /><br />
                               Semua tagihan siswa ini telah LUNAS!
                             </td>
@@ -756,7 +755,7 @@ export default function AdminKeuanganTab() {
                           siswaTagihan.filter(t => t.status !== 'PAID').map((t) => {
                             const isChecked = selectedTagihanIds.includes(t.id);
                             const sisa = Number(t.nominal_tagihan) - Number(t.nominal_terbayar || 0);
-                            const isBulanan = t.tipe_pos === 'BULANAN' || Boolean(t.bulan);
+                            const isBulanan = t.tipe_pos === 'BULANAN';
                             const terbayar = Number(t.nominal_terbayar || 0);
                             const percent = Math.min(100, Math.round((terbayar / Number(t.nominal_tagihan)) * 100));
 
@@ -789,8 +788,11 @@ export default function AdminKeuanganTab() {
                                   ) : (
                                     <div>
                                       <span style={{ background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                        💰 Tipe Bebas (Bisa Dicicil)
+                                        💰 Tipe Bebas (Non-Bulanan)
                                       </span>
+                                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+                                        {t.bulan ? `Periode ${getBulanLabel(t.bulan)} ${t.tahun}` : 'Pembayaran Sekali / Cicilan'}
+                                      </div>
                                       {terbayar > 0 && (
                                         <div style={{ marginTop: 4 }}>
                                           <div style={{ fontSize: 10.5, color: '#475569', fontWeight: 600 }}>
@@ -805,37 +807,8 @@ export default function AdminKeuanganTab() {
                                   )}
                                 </td>
                                 <td style={{ fontWeight: 600 }}>Rp {Number(t.nominal_tagihan).toLocaleString('id-ID')}</td>
-                                <td style={{ fontWeight: 800, color: '#dc2626' }}>
+                                <td style={{ fontWeight: 800, color: '#dc2626', fontSize: 14 }}>
                                   Rp {sisa.toLocaleString('id-ID')}
-                                </td>
-                                <td>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                      <span style={{ position: 'absolute', left: 8, fontSize: 12, fontWeight: 700, color: isChecked ? '#0284c7' : '#94a3b8', zIndex: 2 }}>Rp</span>
-                                      <input
-                                        type="text"
-                                        disabled={!isChecked}
-                                        value={formatRupiahInput(bayarNominal[t.id])}
-                                        onChange={(e) => handleNominalChange(t.id, parseRupiahInput(e.target.value))}
-                                        className="form-control-admin"
-                                        style={{ paddingLeft: 30, paddingRight: 8, fontWeight: 800, fontSize: 13, color: '#0284c7' }}
-                                        placeholder="0"
-                                      />
-                                    </div>
-
-                                    {/* QUICK BUTTONS FOR FREE TYPE CICILAN */}
-                                    {isChecked && !isBulanan && (
-                                      <div style={{ display: 'flex', gap: 4 }}>
-                                        <button
-                                          type="button"
-                                          onClick={() => handleNominalChange(t.id, sisa)}
-                                          style={{ background: '#e0f2fe', color: '#0369a1', border: 'none', padding: '2px 6px', borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}
-                                        >
-                                          Pelunasan Rp {sisa.toLocaleString('id-ID')}
-                                        </button>
-                                      </div>
-                                    )}
-                                  </div>
                                 </td>
                               </tr>
                             );
