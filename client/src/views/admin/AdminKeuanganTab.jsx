@@ -414,11 +414,14 @@ export default function AdminKeuanganTab() {
         {/* ========================================================
             SUB TAB 1: KASIR TU (PEMBAYARAN SISWA)
             ======================================================== */}
+        {/* ========================================================
+            SUB TAB 1: KASIR TU (PEMBAYARAN SISWA)
+            ======================================================== */}
         {activeSubTab === 'kasir' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20 }}>
-            {/* LEFT AREA: SEARCH & TAGIHAN TABLE */}
+          <div style={{ width: '100%' }}>
+            {/* SEARCH FORM & FULL-WIDTH TABLE */}
             <div>
-              <form onSubmit={handleSearchSiswaSubmit} style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+              <form onSubmit={handleSearchSiswaSubmit} style={{ display: 'flex', gap: 10, marginBottom: 16, maxWidth: 650 }}>
                 <div style={{ position: 'relative', flex: 1 }}>
                   <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 2 }} />
                   <input
@@ -491,7 +494,7 @@ export default function AdminKeuanganTab() {
                 <>
                   <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10, border: '1px solid #e2e8f0', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <div style={{ fontWeight: 800, fontSize: 15, color: '#0f172a' }}>{selectedSiswa.nama_siswa}</div>
+                      <div style={{ fontWeight: 800, fontSize: 16, color: '#0f172a' }}>{selectedSiswa.nama_siswa}</div>
                       <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
                         NIS: <strong>{selectedSiswa.nis || '-'}</strong> • Kelas: <strong>{selectedSiswa.nama_kelas || '-'}</strong>
                       </div>
@@ -501,15 +504,15 @@ export default function AdminKeuanganTab() {
                     </span>
                   </div>
 
-                  <div className="admin-table-wrapper">
-                    <table className="admin-table">
+                  <div className="admin-table-wrapper" style={{ width: '100%' }}>
+                    <table className="admin-table" style={{ width: '100%' }}>
                       <thead>
                         <tr>
-                          <th style={{ width: 40, textAlign: 'center' }}>Pilih</th>
-                          <th>Pos Pembayaran</th>
+                          <th style={{ width: 50, textAlign: 'center' }}>Pilih</th>
+                          <th style={{ width: 220 }}>Pos Pembayaran</th>
                           <th>Tipe & Periode Tagihan</th>
-                          <th>Nominal Tagihan</th>
-                          <th>Sisa Tagihan</th>
+                          <th style={{ width: 160 }}>Nominal Tagihan</th>
+                          <th style={{ width: 160 }}>Sisa Tagihan</th>
                           <th style={{ width: 220 }}>Nominal Bayar (Rp)</th>
                         </tr>
                       </thead>
@@ -613,6 +616,98 @@ export default function AdminKeuanganTab() {
                       </tbody>
                     </table>
                   </div>
+
+                  {/* BOTTOM FULL-WIDTH SUMMARY PANEL BELOW TABLE */}
+                  <div style={{ background: '#ffffff', padding: 20, borderRadius: 10, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1.2fr 1.5fr 220px', gap: 20, alignItems: 'center' }}>
+                    {/* COL 1: ITEM SELECTED */}
+                    <div>
+                      <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Item Tagihan Dipilih:</div>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: '2px 0' }}>{selectedTagihanIds.length} Tagihan</div>
+                      <div style={{ fontSize: 11, color: '#64748b' }}>Metode: <strong>Tunai (Kasir TU)</strong></div>
+                    </div>
+
+                    {/* COL 2: TOTAL HARUS DIBAYAR */}
+                    <div style={{ borderLeft: '1px dashed #cbd5e1', paddingLeft: 20 }}>
+                      <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Total Harus Dibayar:</div>
+                      <div style={{ fontSize: 24, fontWeight: 800, color: '#16a34a' }}>
+                        Rp {totalBayar.toLocaleString('id-ID')}
+                      </div>
+                    </div>
+
+                    {/* COL 3: CASH IN & KEMBALIAN */}
+                    <div style={{ borderLeft: '1px dashed #cbd5e1', paddingLeft: 20 }}>
+                      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                        Uang Diterima (Cash In):
+                      </label>
+                      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ position: 'absolute', left: 8, fontSize: 12, fontWeight: 700, color: '#64748b' }}>Rp</span>
+                        <input
+                          type="text"
+                          value={formatRupiahInput(cashReceived)}
+                          onChange={(e) => setCashReceived(parseRupiahInput(e.target.value))}
+                          className="form-control-admin"
+                          placeholder="0"
+                          style={{ paddingLeft: 30, fontWeight: 800, fontSize: 13, color: '#0f172a' }}
+                        />
+                      </div>
+
+                      {/* QUICK CASH PRESETS */}
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 4 }}>
+                        <button
+                          type="button"
+                          onClick={() => setCashReceived(totalBayar)}
+                          style={{ background: '#e2e8f0', border: 'none', padding: '2px 6px', borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          Uang Pas
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCashReceived(50000)}
+                          style={{ background: '#e2e8f0', border: 'none', padding: '2px 6px', borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          50rb
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCashReceived(100000)}
+                          style={{ background: '#e2e8f0', border: 'none', padding: '2px 6px', borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          100rb
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCashReceived(500000)}
+                          style={{ background: '#e2e8f0', border: 'none', padding: '2px 6px', borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          500rb
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 4 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>Kembalian:</span>
+                        <span style={{ fontSize: 14, fontWeight: 800, color: (parseRupiahInput(cashReceived) - totalBayar) < 0 ? '#dc2626' : '#0284c7' }}>
+                          Rp {Math.max(0, parseRupiahInput(cashReceived) - totalBayar).toLocaleString('id-ID')}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* COL 4: ACTION BUTTON */}
+                    <div>
+                      <button
+                        type="button"
+                        disabled={isProcessingPayment || selectedTagihanIds.length === 0}
+                        onClick={handleProcessPayment}
+                        className="btn-primary-admin"
+                        style={{
+                          width: '100%', padding: '14px',
+                          opacity: selectedTagihanIds.length === 0 ? 0.6 : 1,
+                          background: '#16a34a', borderColor: '#16a34a', fontSize: 14, fontWeight: 800
+                        }}
+                      >
+                        {isProcessingPayment ? 'Memproses...' : 'Proses & Cetak Kuitansi'}
+                      </button>
+                    </div>
+                  </div>
                 </>
               ) : (
                 <div style={{ textAlign: 'center', padding: '50px 20px', color: '#94a3b8', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
@@ -620,102 +715,6 @@ export default function AdminKeuanganTab() {
                   <div style={{ fontWeight: 700, color: '#64748b' }}>Ketik NIS atau nama siswa pada pencarian di atas.</div>
                 </div>
               )}
-            </div>
-
-            {/* RIGHT PANEL: CHECKOUT KASIR WITH CASH RECEIVED & CHANGE CALCULATION */}
-            <div style={{ background: '#ffffff', padding: 20, borderRadius: 10, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <DollarSign color="#16a34a" size={20} /> Ringkasan Pembayaran
-                </div>
-
-                <div style={{ borderBottom: '1px dashed #cbd5e1', paddingBottom: 12, marginBottom: 12 }}>
-                  <div style={{ fontSize: 12, color: '#64748b' }}>Item Tagihan Dipilih:</div>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>{selectedTagihanIds.length} Tagihan</div>
-                </div>
-
-                <div style={{ borderBottom: '1px dashed #cbd5e1', paddingBottom: 12, marginBottom: 16 }}>
-                  <div style={{ fontSize: 12, color: '#64748b' }}>Total Harus Dibayar:</div>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: '#16a34a' }}>
-                    Rp {totalBayar.toLocaleString('id-ID')}
-                  </div>
-                </div>
-
-                {/* UANG DITERIMA & KEMBALIAN */}
-                <div style={{ background: '#f8fafc', padding: 14, borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 16 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                    Uang Diterima (Cash In):
-                  </label>
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{ position: 'absolute', left: 10, fontSize: 13, fontWeight: 700, color: '#64748b' }}>Rp</span>
-                    <input
-                      type="text"
-                      value={formatRupiahInput(cashReceived)}
-                      onChange={(e) => setCashReceived(parseRupiahInput(e.target.value))}
-                      className="form-control-admin"
-                      placeholder="0"
-                      style={{ paddingLeft: 34, fontWeight: 800, fontSize: 14, color: '#0f172a' }}
-                    />
-                  </div>
-
-                  {/* QUICK CASH PRESETS */}
-                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
-                    <button
-                      type="button"
-                      onClick={() => setCashReceived(totalBayar)}
-                      style={{ background: '#e2e8f0', border: 'none', padding: '3px 8px', borderRadius: 4, fontSize: 10.5, fontWeight: 700, cursor: 'pointer' }}
-                    >
-                      Uang Pas
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCashReceived(50000)}
-                      style={{ background: '#e2e8f0', border: 'none', padding: '3px 8px', borderRadius: 4, fontSize: 10.5, fontWeight: 700, cursor: 'pointer' }}
-                    >
-                      50rb
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCashReceived(100000)}
-                      style={{ background: '#e2e8f0', border: 'none', padding: '3px 8px', borderRadius: 4, fontSize: 10.5, fontWeight: 700, cursor: 'pointer' }}
-                    >
-                      100rb
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCashReceived(500000)}
-                      style={{ background: '#e2e8f0', border: 'none', padding: '3px 8px', borderRadius: 4, fontSize: 10.5, fontWeight: 700, cursor: 'pointer' }}
-                    >
-                      500rb
-                    </button>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, borderTop: '1px solid #cbd5e1' }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>Kembalian:</span>
-                    <span style={{ fontSize: 15, fontWeight: 800, color: (parseRupiahInput(cashReceived) - totalBayar) < 0 ? '#dc2626' : '#0284c7' }}>
-                      Rp {Math.max(0, parseRupiahInput(cashReceived) - totalBayar).toLocaleString('id-ID')}
-                    </span>
-                  </div>
-                </div>
-
-                <div style={{ fontSize: 11, color: '#64748b', background: '#f1f5f9', padding: 8, borderRadius: 6 }}>
-                  Metode: <strong>Tunai (Kasir TU)</strong> • Cetak Struk Otomatis
-                </div>
-              </div>
-
-              <button
-                type="button"
-                disabled={isProcessingPayment || selectedTagihanIds.length === 0}
-                onClick={handleProcessPayment}
-                className="btn-primary-admin"
-                style={{
-                  width: '100%', padding: '12px', marginTop: 16,
-                  opacity: selectedTagihanIds.length === 0 ? 0.6 : 1,
-                  background: '#16a34a', borderColor: '#16a34a', fontSize: 14, fontWeight: 800
-                }}
-              >
-                {isProcessingPayment ? 'Memproses Transaksi...' : 'Proses & Cetak Kuitansi'}
-              </button>
             </div>
           </div>
         )}
