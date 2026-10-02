@@ -66,6 +66,8 @@ export default function AdminKeuanganTab() {
   const [kelasList, setKelasList] = useState([]);
   const [masterSubTab, setMasterSubTab] = useState('pos'); // 'pos', 'tarif', 'override'
 
+  const currentYear = new Date().getFullYear();
+
   // Modal States
   const [showPosModal, setShowPosModal] = useState(false);
   const [posFormData, setPosFormData] = useState({ kode_pos: '', nama_pos: '', tipe: 'BULANAN', deskripsi: '' });
@@ -74,9 +76,32 @@ export default function AdminKeuanganTab() {
   const [showTarifModal, setShowTarifModal] = useState(false);
   const [editingTarifId, setEditingTarifId] = useState(null);
   const [targetType, setTargetType] = useState('UMUM'); // 'UMUM', 'TINGKAT', 'KELAS'
-  const [tarifFormData, setTarifFormData] = useState({ pos_id: '', tahun_ajaran: '2025/2026', tingkat: '', kode_kelas: '', nominal: '' });
+  const [tarifFormData, setTarifFormData] = useState({ pos_id: '', tahun_ajaran: `${currentYear}/${currentYear + 1}`, tingkat: '', kode_kelas: '', nominal: '' });
   const [tarifFilterPos, setTarifFilterPos] = useState('');
   const [tarifSearch, setTarifSearch] = useState('');
+
+  // Dynamic levels extracted from database kelasList
+  const tingkatOptions = React.useMemo(() => {
+    const setTingkat = new Set();
+    kelasList.forEach(k => {
+      const name = String(k.nama_kelas || k.kode_kelas || '').trim();
+      const match = name.match(/^(\d+|X|XI|XII|VII|VIII|IX|IV|V|VI|I|II|III)/i);
+      if (match) {
+        setTingkat.add(match[1].toUpperCase());
+      }
+    });
+    tarifList.forEach(t => {
+      if (t.tingkat) setTingkat.add(String(t.tingkat).toUpperCase());
+    });
+
+    const found = Array.from(setTingkat);
+    const defaults = ['10', '11', '12', 'X', 'XI', 'XII', '7', '8', '9'];
+    const merged = Array.from(new Set([...found, ...defaults]));
+    return merged.map(val => ({
+      value: val,
+      label: `Tingkat ${val}`
+    }));
+  }, [kelasList, tarifList]);
 
   const [showOverrideModal, setShowOverrideModal] = useState(false);
   const [overrideData, setOverrideData] = useState({ tarif_id: '', siswa_id: '', tipe_potongan: 'NOMINAL', nilai_potongan: '', keterangan: '' });
@@ -86,11 +111,11 @@ export default function AdminKeuanganTab() {
     mode: 'RANGE',
     tarif_id: '',
     bulan: new Date().getMonth() + 1,
-    tahun: new Date().getFullYear(),
-    bulan_mulai: 8,
-    tahun_mulai: 2025,
-    bulan_selesai: 7,
-    tahun_selesai: 2026,
+    tahun: currentYear,
+    bulan_mulai: 7,
+    tahun_mulai: currentYear,
+    bulan_selesai: 6,
+    tahun_selesai: currentYear + 1,
     kode_kelas: '',
     tanggal_jatuh_tempo: ''
   });
@@ -2255,20 +2280,7 @@ export default function AdminKeuanganTab() {
                       value={tarifFormData.tingkat}
                       onChange={(e) => setTarifFormData({ ...tarifFormData, tingkat: e.target.value })}
                       placeholder="-- Pilih Tingkat --"
-                      options={[
-                        { value: '10', label: 'Tingkat 10 (Kelas X / 10)' },
-                        { value: '11', label: 'Tingkat 11 (Kelas XI / 11)' },
-                        { value: '12', label: 'Tingkat 12 (Kelas XII / 12)' },
-                        { value: '7', label: 'Tingkat 7 (Kelas VII / 7)' },
-                        { value: '8', label: 'Tingkat 8 (Kelas VIII / 8)' },
-                        { value: '9', label: 'Tingkat 9 (Kelas IX / 9)' },
-                        { value: '1', label: 'Tingkat 1 (SD)' },
-                        { value: '2', label: 'Tingkat 2 (SD)' },
-                        { value: '3', label: 'Tingkat 3 (SD)' },
-                        { value: '4', label: 'Tingkat 4 (SD)' },
-                        { value: '5', label: 'Tingkat 5 (SD)' },
-                        { value: '6', label: 'Tingkat 6 (SD)' }
-                      ]}
+                      options={tingkatOptions}
                     />
                   </div>
                 )}
