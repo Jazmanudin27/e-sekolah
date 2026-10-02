@@ -2568,15 +2568,15 @@ export default function AdminKeuanganTab() {
       {/* --- MODAL DETAIL RINCIAN TUNGGAKAN SISWA --- */}
       {showRekapDetailModal && selectedRekapSiswa && (
         <div className="admin-modal-overlay">
-          <div className="admin-modal-box" style={{ maxWidth: 720, padding: 0, overflow: 'hidden' }}>
-            <div className="admin-modal-header" style={{ background: '#0f172a', color: '#ffffff', padding: '16px 20px' }}>
+          <div className="admin-modal-box" style={{ maxWidth: 960, width: '92%', padding: 0, overflow: 'hidden' }}>
+            <div className="admin-modal-header" style={{ background: '#0f172a', color: '#ffffff', padding: '16px 24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <AlertCircle size={20} color="#ef4444" />
+                <AlertCircle size={22} color="#ef4444" />
                 <div>
-                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                  <h3 style={{ fontSize: 17, fontWeight: 800, color: '#ffffff', margin: 0 }}>
                     Rincian Tunggakan Tagihan Siswa
                   </h3>
-                  <div style={{ fontSize: 11.5, color: '#94a3b8', marginTop: 2 }}>
+                  <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>
                     {selectedRekapSiswa.nama_siswa} ({selectedRekapSiswa.nis || 'NIS -'}) — Kelas {selectedRekapSiswa.nama_kelas || '-'}
                   </div>
                 </div>
@@ -2586,20 +2586,20 @@ export default function AdminKeuanganTab() {
               </button>
             </div>
 
-            <div id="printable-tunggakan" style={{ padding: 20, background: '#ffffff' }}>
+            <div id="printable-tunggakan" style={{ padding: 24, background: '#ffffff' }}>
               {/* SUMMARY INFO */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16, background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 20, background: '#f8fafc', padding: 16, borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13 }}>
                 <div>
-                  <div style={{ color: '#64748b', fontSize: 11 }}>Nama Siswa:</div>
-                  <div style={{ fontWeight: 800, color: '#0f172a' }}>{selectedRekapSiswa.nama_siswa}</div>
+                  <div style={{ color: '#64748b', fontSize: 11.5 }}>Nama Siswa:</div>
+                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 14 }}>{selectedRekapSiswa.nama_siswa}</div>
                 </div>
                 <div>
-                  <div style={{ color: '#64748b', fontSize: 11 }}>Kelas:</div>
-                  <div style={{ fontWeight: 700 }}>{selectedRekapSiswa.nama_kelas || '-'}</div>
+                  <div style={{ color: '#64748b', fontSize: 11.5 }}>Kelas:</div>
+                  <div style={{ fontWeight: 700, fontSize: 13.5 }}>{selectedRekapSiswa.nama_kelas || '-'}</div>
                 </div>
                 <div>
-                  <div style={{ color: '#64748b', fontSize: 11 }}>Total Tunggakan:</div>
-                  <div style={{ fontWeight: 900, color: '#dc2626', fontSize: 14 }}>
+                  <div style={{ color: '#64748b', fontSize: 11.5 }}>Total Tunggakan:</div>
+                  <div style={{ fontWeight: 900, color: '#dc2626', fontSize: 16 }}>
                     Rp {Number(selectedRekapSiswa.total_tunggakan || 0).toLocaleString('id-ID')}
                   </div>
                 </div>
@@ -2607,24 +2607,24 @@ export default function AdminKeuanganTab() {
 
               {/* TABLE TAGIHAN UNPAID */}
               {isLoadingRekapDetail ? (
-                <div style={{ textAlign: 'center', padding: '30px 0', color: '#64748b', fontSize: 13 }}>
+                <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748b', fontSize: 13 }}>
                   Memuat rincian item tunggakan...
                 </div>
               ) : rekapDetailTagihan.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '30px 0', color: '#16a34a', fontWeight: 700 }}>
+                <div style={{ textAlign: 'center', padding: '40px 0', color: '#16a34a', fontWeight: 700 }}>
                   🎉 Siswa ini tidak memiliki tunggakan tagihan aktif.
                 </div>
               ) : (
-                <div style={{ maxHeight: 360, overflowY: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                <div style={{ maxHeight: 420, overflowY: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                     <thead>
                       <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #cbd5e1', textAlign: 'left' }}>
-                        <th style={{ padding: '8px 10px' }}>Pos Tagihan</th>
-                        <th style={{ padding: '8px 10px' }}>Periode</th>
-                        <th style={{ padding: '8px 10px', textAlign: 'right' }}>Nominal (Rp)</th>
-                        <th style={{ padding: '8px 10px', textAlign: 'right' }}>Terbayar (Rp)</th>
-                        <th style={{ padding: '8px 10px', textAlign: 'right' }}>Sisa (Rp)</th>
-                        <th style={{ padding: '8px 10px', textAlign: 'center' }}>Status</th>
+                        <th style={{ padding: '10px 14px' }}>Pos Tagihan</th>
+                        <th style={{ padding: '10px 14px' }}>Periode</th>
+                        <th style={{ padding: '10px 14px', textAlign: 'right' }}>Nominal (Rp)</th>
+                        <th style={{ padding: '10px 14px', textAlign: 'right' }}>Terbayar (Rp)</th>
+                        <th style={{ padding: '10px 14px', textAlign: 'right' }}>Sisa (Rp)</th>
+                        <th style={{ padding: '10px 14px', textAlign: 'center' }}>Status</th>
                       </tr>
                     </thead>
                     <tbody>
