@@ -1,7 +1,21 @@
 const { query } = require('../config/database');
 
 class TarifPembayaranModel {
+  static async ensureColumns() {
+    try {
+      await query("ALTER TABLE tarif_pembayaran MODIFY COLUMN nominal BIGINT NOT NULL DEFAULT 0");
+      await query("ALTER TABLE tagihan_siswa MODIFY COLUMN nominal_tagihan BIGINT NOT NULL DEFAULT 0, MODIFY COLUMN nominal_terbayar BIGINT NOT NULL DEFAULT 0");
+      await query("ALTER TABLE pembayaran_transaksi MODIFY COLUMN total_bayar BIGINT NOT NULL DEFAULT 0");
+      await query("ALTER TABLE pembayaran_transaksi_detail MODIFY COLUMN nominal_dibayar BIGINT NOT NULL DEFAULT 0");
+      await query("ALTER TABLE tarif_siswa_override MODIFY COLUMN nilai_potongan BIGINT NOT NULL DEFAULT 0");
+      console.log('[TarifPembayaranModel] Successfully ensured BIGINT column types for financial nominals.');
+    } catch (e) {
+      console.warn('[TarifPembayaranModel.ensureColumns] Column migration notice:', e.message);
+    }
+  }
+
   static async findAll({ pos_id = null, tahun_ajaran = null }) {
+    await this.ensureColumns().catch(() => {});
     let sql = `
       SELECT t.*, p.nama_pos, p.tipe, k.nama_kelas
       FROM tarif_pembayaran t
