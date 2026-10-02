@@ -4,10 +4,10 @@ const TagihanSiswaModel = require('./tagihanSiswa.model');
 class PembayaranTransaksiModel {
   static async findAll({ siswa_id = null, status = null, limit = 50 }) {
     let sql = `
-      SELECT tr.*, s.nama_siswa, s.nis, u.nama_lengkap AS nama_kasir
+      SELECT tr.*, s.nama_siswa, s.nis, COALESCE(u.name, u.nama, u.username, u.nama_lengkap, 'Kasir TU') AS nama_kasir
       FROM pembayaran_transaksi tr
       JOIN siswa s ON tr.siswa_id = s.kode_siswa
-      LEFT JOIN user u ON tr.user_id_kasir = u.id
+      LEFT JOIN users u ON (tr.user_id_kasir = u.id OR tr.user_id_kasir = u.id_user)
       WHERE 1=1
     `;
     const params = [];
@@ -28,11 +28,11 @@ class PembayaranTransaksiModel {
 
   static async findById(id) {
     const sql = `
-      SELECT tr.*, s.nama_siswa, s.nis, k.nama_kelas, u.nama_lengkap AS nama_kasir
+      SELECT tr.*, s.nama_siswa, s.nis, k.nama_kelas, COALESCE(u.name, u.nama, u.username, u.nama_lengkap, 'Kasir TU') AS nama_kasir
       FROM pembayaran_transaksi tr
       JOIN siswa s ON tr.siswa_id = s.kode_siswa
       LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas
-      LEFT JOIN user u ON tr.user_id_kasir = u.id
+      LEFT JOIN users u ON (tr.user_id_kasir = u.id OR tr.user_id_kasir = u.id_user)
       WHERE tr.id = ?
     `;
     const rows = await query(sql, [id]);
