@@ -1851,7 +1851,28 @@ export default function AdminKeuanganTab() {
                   <label>Pilih Pos & Tarif Pembayaran *</label>
                   <SearchableSelect
                     value={genFormData.tarif_id}
-                    onChange={(e) => setGenFormData({ ...genFormData, tarif_id: e.target.value })}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const selected = tarifList.find(t => String(t.id) === String(val));
+                      let autoKelas = '';
+                      if (selected && selected.kode_kelas) {
+                        const matchKelas = kelasList.find(k => 
+                          (k.kode_kelas && String(k.kode_kelas) === String(selected.kode_kelas)) || 
+                          (k.id && String(k.id) === String(selected.kode_kelas)) || 
+                          (k.nama_kelas && selected.nama_kelas && k.nama_kelas === selected.nama_kelas)
+                        );
+                        if (matchKelas) {
+                          autoKelas = matchKelas.kode_kelas || matchKelas.id;
+                        } else {
+                          autoKelas = selected.kode_kelas;
+                        }
+                      }
+                      setGenFormData(prev => ({
+                        ...prev,
+                        tarif_id: val,
+                        kode_kelas: autoKelas
+                      }));
+                    }}
                     placeholder="-- Pilih Pos & Tarif --"
                     options={tarifList.map(t => {
                       const sasaran = t.nama_kelas ? `Kelas ${t.nama_kelas}` : t.tingkat ? `Tingkat ${t.tingkat}` : 'Semua Kelas';
