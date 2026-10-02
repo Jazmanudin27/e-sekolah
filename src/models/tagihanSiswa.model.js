@@ -16,7 +16,7 @@ class TagihanSiswaModel {
       params.push(status);
     }
 
-    sql += ' ORDER BY t.tahun DESC, t.bulan DESC, t.id DESC';
+    sql += ' ORDER BY t.tahun ASC, t.bulan ASC, t.id ASC';
     return await query(sql, params);
   }
 
