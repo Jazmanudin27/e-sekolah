@@ -1,13 +1,39 @@
 const { query } = require('../config/database');
 const TagihanSiswaModel = require('./tagihanSiswa.model');
+const UserModel = require('./user.model');
+
+async function getUserQueryParts() {
+  try {
+    const { tableName, columns } = await UserModel.resolveUserTableInfo();
+    const idCol = columns.includes('id_user') ? 'id_user' : 'id';
+    
+    // Filter candidate name columns that actually exist in the DB schema
+    const candidates = ['nama_lengkap', 'nama', 'name', 'username', 'email'];
+    const validCols = candidates.filter(c => columns.includes(c));
+    
+    let selectKasir = "'Kasir TU' AS nama_kasir";
+    if (validCols.length > 0) {
+      selectKasir = `COALESCE(${validCols.map(c => `u.\`${c}\``).join(', ')}, 'Kasir TU') AS nama_kasir`;
+    }
+    
+    const joinClause = `LEFT JOIN \`${tableName}\` u ON tr.user_id_kasir = u.\`${idCol}\``;
+    return { selectKasir, joinClause };
+  } catch (e) {
+    return {
+      selectKasir: "'Kasir TU' AS nama_kasir",
+      joinClause: "LEFT JOIN users u ON tr.user_id_kasir = u.id"
+    };
+  }
+}
 
 class PembayaranTransaksiModel {
   static async findAll({ siswa_id = null, status = null, limit = 50 }) {
+    const { selectKasir, joinClause } = await getUserQueryParts();
     let sql = `
-      SELECT tr.*, s.nama_siswa, s.nis, COALESCE(u.name, u.nama, u.username, u.nama_lengkap, 'Kasir TU') AS nama_kasir
+      SELECT tr.*, s.nama_siswa, s.nis, ${selectKasir}
       FROM pembayaran_transaksi tr
       JOIN siswa s ON tr.siswa_id = s.kode_siswa
-      LEFT JOIN users u ON (tr.user_id_kasir = u.id OR tr.user_id_kasir = u.id_user)
+      ${joinClause}
       WHERE 1=1
     `;
     const params = [];
@@ -27,12 +53,13 @@ class PembayaranTransaksiModel {
   }
 
   static async findById(id) {
+    const { selectKasir, joinClause } = await getUserQueryParts();
     const sql = `
-      SELECT tr.*, s.nama_siswa, s.nis, k.nama_kelas, COALESCE(u.name, u.nama, u.username, u.nama_lengkap, 'Kasir TU') AS nama_kasir
+      SELECT tr.*, s.nama_siswa, s.nis, k.nama_kelas, ${selectKasir}
       FROM pembayaran_transaksi tr
       JOIN siswa s ON tr.siswa_id = s.kode_siswa
       LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas
-      LEFT JOIN users u ON (tr.user_id_kasir = u.id OR tr.user_id_kasir = u.id_user)
+      ${joinClause}
       WHERE tr.id = ?
     `;
     const rows = await query(sql, [id]);

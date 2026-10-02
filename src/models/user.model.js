@@ -309,4 +309,6 @@ class UserModel {
   }
 }
 
+UserModel.resolveUserTableInfo = resolveUserTableInfo;
+
 module.exports = UserModel;
