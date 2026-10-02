@@ -9,6 +9,29 @@ import api from '../../api/client';
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
 
+const NAMA_BULAN = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
+const getBulanLabel = (bulanNum) => {
+  if (!bulanNum) return '';
+  const idx = Number(bulanNum) - 1;
+  return NAMA_BULAN[idx] || `Bulan ${bulanNum}`;
+};
+
+const formatRupiahInput = (val) => {
+  if (val === undefined || val === null || val === '') return '';
+  const numStr = String(val).replace(/[^0-9]/g, '');
+  if (!numStr) return '';
+  return parseInt(numStr, 10).toLocaleString('id-ID');
+};
+
+const parseRupiahInput = (val) => {
+  if (!val) return 0;
+  return parseInt(String(val).replace(/[^0-9]/g, ''), 10) || 0;
+};
+
 export default function AdminKeuanganTab() {
   const [activeSubTab, setActiveSubTab] = useState('kasir'); // 'kasir', 'master', 'generate', 'rekap'
 
@@ -21,6 +44,7 @@ export default function AdminKeuanganTab() {
   const [selectedTagihanIds, setSelectedTagihanIds] = useState([]);
   const [bayarNominal, setBayarNominal] = useState({});
   const [totalBayar, setTotalBayar] = useState(0);
+  const [cashReceived, setCashReceived] = useState('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [lastReceipt, setLastReceipt] = useState(null);
 
@@ -483,17 +507,17 @@ export default function AdminKeuanganTab() {
                         <tr>
                           <th style={{ width: 40, textAlign: 'center' }}>Pilih</th>
                           <th>Pos Pembayaran</th>
-                          <th>Periode</th>
+                          <th>Tipe & Periode Tagihan</th>
                           <th>Nominal Tagihan</th>
                           <th>Sisa Tagihan</th>
-                          <th style={{ width: 140 }}>Nominal Bayar (Rp)</th>
+                          <th style={{ width: 220 }}>Nominal Bayar (Rp)</th>
                         </tr>
                       </thead>
                       <tbody>
                         {siswaTagihan.filter(t => t.status !== 'PAID').length === 0 ? (
                           <tr>
-                            <td colSpan={6} style={{ textAlign: 'center', padding: '30px 0', color: '#059669', fontWeight: 700 }}>
-                              <CheckCircle size={32} style={{ marginBottom: 6 }} /><br />
+                            <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#059669', fontWeight: 700 }}>
+                              <CheckCircle size={36} style={{ marginBottom: 6 }} /><br />
                               Semua tagihan siswa ini telah LUNAS!
                             </td>
                           </tr>
@@ -501,6 +525,10 @@ export default function AdminKeuanganTab() {
                           siswaTagihan.filter(t => t.status !== 'PAID').map((t) => {
                             const isChecked = selectedTagihanIds.includes(t.id);
                             const sisa = Number(t.nominal_tagihan) - Number(t.nominal_terbayar || 0);
+                            const isBulanan = t.tipe_pos === 'BULANAN' || Boolean(t.bulan);
+                            const terbayar = Number(t.nominal_terbayar || 0);
+                            const percent = Math.min(100, Math.round((terbayar / Number(t.nominal_tagihan)) * 100));
+
                             return (
                               <tr key={t.id} style={{ background: isChecked ? '#f0f9ff' : 'transparent' }}>
                                 <td style={{ textAlign: 'center' }}>
@@ -508,24 +536,75 @@ export default function AdminKeuanganTab() {
                                     type="checkbox"
                                     checked={isChecked}
                                     onChange={() => toggleSelectTagihan(t)}
-                                    style={{ width: 16, height: 16, cursor: 'pointer' }}
+                                    style={{ width: 18, height: 18, cursor: 'pointer' }}
                                   />
                                 </td>
-                                <td style={{ fontWeight: 700, color: '#0f172a' }}>{t.nama_pos}</td>
-                                <td style={{ fontSize: 11.5, color: '#64748b' }}>
-                                  {t.bulan ? `Bulan ${t.bulan} / ${t.tahun}` : 'Tipe Bebas'}
-                                </td>
-                                <td>Rp {Number(t.nominal_tagihan).toLocaleString('id-ID')}</td>
-                                <td style={{ fontWeight: 800, color: '#dc2626' }}>Rp {sisa.toLocaleString('id-ID')}</td>
                                 <td>
-                                  <input
-                                    type="number"
-                                    disabled={!isChecked}
-                                    value={bayarNominal[t.id] || ''}
-                                    onChange={(e) => handleNominalChange(t.id, e.target.value)}
-                                    className="form-control-admin"
-                                    style={{ padding: '4px 8px', fontWeight: 700, fontSize: 13 }}
-                                  />
+                                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 13.5 }}>{t.nama_pos}</div>
+                                  <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                                    Kode: {t.kode_tagihan || `INV-${t.id}`}
+                                  </div>
+                                </td>
+                                <td>
+                                  {isBulanan ? (
+                                    <div>
+                                      <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                        🗓️ {getBulanLabel(t.bulan)} {t.tahun}
+                                      </span>
+                                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+                                        Tagihan SPP Rutin Bulanan
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div>
+                                      <span style={{ background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                        💰 Tipe Bebas (Bisa Dicicil)
+                                      </span>
+                                      {terbayar > 0 && (
+                                        <div style={{ marginTop: 4 }}>
+                                          <div style={{ fontSize: 10.5, color: '#475569', fontWeight: 600 }}>
+                                            Sudah dicicil: <strong>Rp {terbayar.toLocaleString('id-ID')}</strong> ({percent}%)
+                                          </div>
+                                          <div style={{ width: '100%', height: 4, background: '#e2e8f0', borderRadius: 2, marginTop: 2, overflow: 'hidden' }}>
+                                            <div style={{ width: `${percent}%`, height: '100%', background: '#0284c7' }} />
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </td>
+                                <td style={{ fontWeight: 600 }}>Rp {Number(t.nominal_tagihan).toLocaleString('id-ID')}</td>
+                                <td style={{ fontWeight: 800, color: '#dc2626' }}>
+                                  Rp {sisa.toLocaleString('id-ID')}
+                                </td>
+                                <td>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                      <span style={{ position: 'absolute', left: 8, fontSize: 12, fontWeight: 700, color: isChecked ? '#0284c7' : '#94a3b8', zIndex: 2 }}>Rp</span>
+                                      <input
+                                        type="text"
+                                        disabled={!isChecked}
+                                        value={formatRupiahInput(bayarNominal[t.id])}
+                                        onChange={(e) => handleNominalChange(t.id, parseRupiahInput(e.target.value))}
+                                        className="form-control-admin"
+                                        style={{ paddingLeft: 30, paddingRight: 8, fontWeight: 800, fontSize: 13, color: '#0284c7' }}
+                                        placeholder="0"
+                                      />
+                                    </div>
+
+                                    {/* QUICK BUTTONS FOR FREE TYPE CICILAN */}
+                                    {isChecked && !isBulanan && (
+                                      <div style={{ display: 'flex', gap: 4 }}>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleNominalChange(t.id, sisa)}
+                                          style={{ background: '#e0f2fe', color: '#0369a1', border: 'none', padding: '2px 6px', borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}
+                                        >
+                                          Pelunasan Rp {sisa.toLocaleString('id-ID')}
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
                                 </td>
                               </tr>
                             );
@@ -543,8 +622,8 @@ export default function AdminKeuanganTab() {
               )}
             </div>
 
-            {/* RIGHT PANEL: CHECKOUT KASIR */}
-            <div style={{ background: '#f8fafc', padding: 20, borderRadius: 10, border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            {/* RIGHT PANEL: CHECKOUT KASIR WITH CASH RECEIVED & CHANGE CALCULATION */}
+            <div style={{ background: '#ffffff', padding: 20, borderRadius: 10, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
                 <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <DollarSign color="#16a34a" size={20} /> Ringkasan Pembayaran
@@ -556,15 +635,71 @@ export default function AdminKeuanganTab() {
                 </div>
 
                 <div style={{ borderBottom: '1px dashed #cbd5e1', paddingBottom: 12, marginBottom: 16 }}>
-                  <div style={{ fontSize: 12, color: '#64748b' }}>Total Yang Harus Dibayar:</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: '#16a34a' }}>
+                  <div style={{ fontSize: 12, color: '#64748b' }}>Total Harus Dibayar:</div>
+                  <div style={{ fontSize: 24, fontWeight: 800, color: '#16a34a' }}>
                     Rp {totalBayar.toLocaleString('id-ID')}
                   </div>
                 </div>
 
-                <div style={{ fontSize: 11.5, color: '#64748b', background: '#ffffff', padding: 10, borderRadius: 8, border: '1px solid #cbd5e1' }}>
-                  Metode: <strong>Tunai (Kasir TU)</strong><br />
-                  Struk bukti pembayaran otomatis dapat dicetak setelah disubmit.
+                {/* UANG DITERIMA & KEMBALIAN */}
+                <div style={{ background: '#f8fafc', padding: 14, borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    Uang Diterima (Cash In):
+                  </label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ position: 'absolute', left: 10, fontSize: 13, fontWeight: 700, color: '#64748b' }}>Rp</span>
+                    <input
+                      type="text"
+                      value={formatRupiahInput(cashReceived)}
+                      onChange={(e) => setCashReceived(parseRupiahInput(e.target.value))}
+                      className="form-control-admin"
+                      placeholder="0"
+                      style={{ paddingLeft: 34, fontWeight: 800, fontSize: 14, color: '#0f172a' }}
+                    />
+                  </div>
+
+                  {/* QUICK CASH PRESETS */}
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
+                    <button
+                      type="button"
+                      onClick={() => setCashReceived(totalBayar)}
+                      style={{ background: '#e2e8f0', border: 'none', padding: '3px 8px', borderRadius: 4, fontSize: 10.5, fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      Uang Pas
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCashReceived(50000)}
+                      style={{ background: '#e2e8f0', border: 'none', padding: '3px 8px', borderRadius: 4, fontSize: 10.5, fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      50rb
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCashReceived(100000)}
+                      style={{ background: '#e2e8f0', border: 'none', padding: '3px 8px', borderRadius: 4, fontSize: 10.5, fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      100rb
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCashReceived(500000)}
+                      style={{ background: '#e2e8f0', border: 'none', padding: '3px 8px', borderRadius: 4, fontSize: 10.5, fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      500rb
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, borderTop: '1px solid #cbd5e1' }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>Kembalian:</span>
+                    <span style={{ fontSize: 15, fontWeight: 800, color: (parseRupiahInput(cashReceived) - totalBayar) < 0 ? '#dc2626' : '#0284c7' }}>
+                      Rp {Math.max(0, parseRupiahInput(cashReceived) - totalBayar).toLocaleString('id-ID')}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ fontSize: 11, color: '#64748b', background: '#f1f5f9', padding: 8, borderRadius: 6 }}>
+                  Metode: <strong>Tunai (Kasir TU)</strong> • Cetak Struk Otomatis
                 </div>
               </div>
 
@@ -574,12 +709,12 @@ export default function AdminKeuanganTab() {
                 onClick={handleProcessPayment}
                 className="btn-primary-admin"
                 style={{
-                  width: '100%', padding: '12px', marginTop: 20,
+                  width: '100%', padding: '12px', marginTop: 16,
                   opacity: selectedTagihanIds.length === 0 ? 0.6 : 1,
-                  background: '#16a34a', borderColor: '#16a34a'
+                  background: '#16a34a', borderColor: '#16a34a', fontSize: 14, fontWeight: 800
                 }}
               >
-                {isProcessingPayment ? 'Memproses...' : 'Proses & Cetak Kuitansi'}
+                {isProcessingPayment ? 'Memproses Transaksi...' : 'Proses & Cetak Kuitansi'}
               </button>
             </div>
           </div>
