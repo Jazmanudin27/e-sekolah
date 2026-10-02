@@ -732,127 +732,154 @@ export default function AdminKeuanganTab() {
                     </div>
                   ) : (
                     <>
-                      <div className="admin-table-wrapper" style={{ width: '100%' }}>
-                        <table className="admin-table" style={{ width: '100%' }}>
-                          <thead>
-                            <tr>
-                              <th style={{ width: 50, textAlign: 'center' }}>Pilih</th>
-                              <th style={{ width: 200 }}>Pos Pembayaran</th>
-                              <th>Tipe & Periode Tagihan</th>
-                              <th style={{ width: 140 }}>Nominal Tagihan</th>
-                              <th style={{ width: 140 }}>Sisa Tagihan</th>
-                              <th style={{ width: 180 }}>Nominal Bayar (Rp)</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                        {siswaTagihan.filter(t => t.status !== 'PAID').length === 0 ? (
-                          <tr>
-                            <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#059669', fontWeight: 700 }}>
+                      {(() => {
+                        const unpaidList = siswaTagihan.filter(t => t.status !== 'PAID');
+                        const unpaidBulanan = unpaidList.filter(t => t.tipe_pos === 'BULANAN');
+                        const unpaidBebas = unpaidList.filter(t => t.tipe_pos !== 'BULANAN');
+
+                        if (unpaidList.length === 0) {
+                          return (
+                            <div style={{ background: '#ecfdf5', padding: '30px 20px', borderRadius: 10, border: '1px solid #a7f3d0', textAlign: 'center', color: '#047857' }}>
                               <CheckCircle size={36} style={{ marginBottom: 6 }} /><br />
-                              Semua tagihan siswa ini telah LUNAS!
-                            </td>
-                          </tr>
-                        ) : (
-                          siswaTagihan.filter(t => t.status !== 'PAID').map((t) => {
-                            const isChecked = selectedTagihanIds.includes(t.id);
-                            const sisa = Number(t.nominal_tagihan) - Number(t.nominal_terbayar || 0);
-                            const isBulanan = t.tipe_pos === 'BULANAN';
-                            const terbayar = Number(t.nominal_terbayar || 0);
-                            const percent = Math.min(100, Math.round((terbayar / Number(t.nominal_tagihan)) * 100));
+                              <strong style={{ fontSize: 16 }}>Semua tagihan siswa ini telah LUNAS!</strong>
+                            </div>
+                          );
+                        }
 
-                            const now = new Date();
-                            const curY = now.getFullYear();
-                            const curM = now.getMonth() + 1;
-                            const isPastMonth = isBulanan && t.bulan && t.tahun && (Number(t.tahun) < curY || (Number(t.tahun) === curY && Number(t.bulan) < curM));
+                        const renderTagihanTable = (items, title, badgeColor, iconEmoji) => (
+                          <div style={{ marginBottom: 20 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, background: '#f8fafc', padding: '8px 14px', borderRadius: 8, borderLeft: `4px solid ${badgeColor}`, border: '1px solid #e2e8f0', borderLeftWidth: 4, borderLeftColor: badgeColor }}>
+                              <span style={{ fontSize: 16 }}>{iconEmoji}</span>
+                              <span style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>{title}</span>
+                              <span style={{ fontSize: 11, background: badgeColor, color: '#fff', padding: '2px 10px', borderRadius: 12, fontWeight: 700, marginLeft: 'auto' }}>
+                                {items.length} Tagihan
+                              </span>
+                            </div>
+                            {items.length === 0 ? (
+                              <div style={{ padding: '14px 18px', background: '#ffffff', borderRadius: 8, border: '1px solid #e2e8f0', color: '#64748b', fontSize: 12.5, fontStyle: 'italic' }}>
+                                Tidak ada {title.toLowerCase()} yang belum lunas.
+                              </div>
+                            ) : (
+                              <div className="admin-table-wrapper" style={{ width: '100%' }}>
+                                <table className="admin-table" style={{ width: '100%' }}>
+                                  <thead>
+                                    <tr>
+                                      <th style={{ width: 50, textAlign: 'center' }}>Pilih</th>
+                                      <th style={{ width: 200 }}>Pos Pembayaran</th>
+                                      <th>Tipe & Periode Tagihan</th>
+                                      <th style={{ width: 140 }}>Nominal Tagihan</th>
+                                      <th style={{ width: 140 }}>Sisa Tagihan</th>
+                                      <th style={{ width: 180 }}>Nominal Bayar (Rp)</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {items.map((t) => {
+                                      const isChecked = selectedTagihanIds.includes(t.id);
+                                      const sisa = Number(t.nominal_tagihan) - Number(t.nominal_terbayar || 0);
+                                      const isBulanan = t.tipe_pos === 'BULANAN';
+                                      const terbayar = Number(t.nominal_terbayar || 0);
+                                      const percent = Math.min(100, Math.round((terbayar / Number(t.nominal_tagihan)) * 100));
 
-                            return (
-                              <tr key={t.id} style={{ background: isChecked ? '#f0f9ff' : isPastMonth ? '#fff5f5' : 'transparent' }}>
-                                <td style={{ textAlign: 'center' }}>
-                                  <input
-                                    type="checkbox"
-                                    checked={isChecked}
-                                    onChange={() => toggleSelectTagihan(t)}
-                                    style={{ width: 18, height: 18, cursor: 'pointer' }}
-                                  />
-                                </td>
-                                <td>
-                                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 13.5 }}>{t.nama_pos}</div>
-                                  <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
-                                    Kode: {t.kode_tagihan || `INV-${t.id}`}
-                                  </div>
-                                </td>
-                                <td>
-                                  {isBulanan ? (
-                                    <div>
-                                      {isPastMonth ? (
-                                        <>
-                                          <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                            ⚠️ Tunggakan {getBulanLabel(t.bulan)} {t.tahun}
-                                          </span>
-                                          <div style={{ fontSize: 11, color: '#dc2626', fontWeight: 700, marginTop: 4 }}>
-                                            Tagihan SPP Bulan Lalu (Menunggak)
-                                          </div>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                            🗓️ {getBulanLabel(t.bulan)} {t.tahun}
-                                          </span>
-                                          <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
-                                            Tagihan SPP Rutin (Berjalan)
-                                          </div>
-                                        </>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <div>
-                                      <span style={{ background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                        💰 Tipe Bebas (Non-Bulanan)
-                                      </span>
-                                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
-                                        {t.bulan ? `Periode ${getBulanLabel(t.bulan)} ${t.tahun}` : 'Pembayaran Sekali / Cicilan'}
-                                      </div>
-                                      {terbayar > 0 && (
-                                        <div style={{ marginTop: 4 }}>
-                                          <div style={{ fontSize: 10.5, color: '#475569', fontWeight: 600 }}>
-                                            Sudah dicicil: <strong>Rp {terbayar.toLocaleString('id-ID')}</strong> ({percent}%)
-                                          </div>
-                                          <div style={{ width: '100%', height: 4, background: '#e2e8f0', borderRadius: 2, marginTop: 2, overflow: 'hidden' }}>
-                                            <div style={{ width: `${percent}%`, height: '100%', background: '#0284c7' }} />
-                                          </div>
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                                </td>
-                                <td style={{ fontWeight: 600 }}>Rp {Number(t.nominal_tagihan).toLocaleString('id-ID')}</td>
-                                <td style={{ fontWeight: 800, color: '#dc2626', fontSize: 14 }}>
-                                  Rp {sisa.toLocaleString('id-ID')}
-                                </td>
-                                <td>
-                                  {isChecked ? (
-                                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                      <span style={{ position: 'absolute', left: 8, fontSize: 12, fontWeight: 700, color: '#64748b' }}>Rp</span>
-                                      <input
-                                        type="text"
-                                        value={formatRupiahInput(bayarNominal[t.id] !== undefined ? bayarNominal[t.id] : sisa)}
-                                        onChange={(e) => handleNominalChange(t.id, parseRupiahInput(e.target.value))}
-                                        className="form-control-admin"
-                                        placeholder="0"
-                                        style={{ paddingLeft: 28, fontWeight: 800, fontSize: 13, color: '#0284c7', background: '#ffffff', borderColor: '#7dd3fc' }}
-                                      />
-                                    </div>
-                                  ) : (
-                                    <span style={{ color: '#94a3b8', fontSize: 12 }}>-</span>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                                      const now = new Date();
+                                      const curY = now.getFullYear();
+                                      const curM = now.getMonth() + 1;
+                                      const isPastMonth = isBulanan && t.bulan && t.tahun && (Number(t.tahun) < curY || (Number(t.tahun) === curY && Number(t.bulan) < curM));
+
+                                      return (
+                                        <tr key={t.id} style={{ background: isChecked ? '#f0f9ff' : isPastMonth ? '#fff5f5' : 'transparent' }}>
+                                          <td style={{ textAlign: 'center' }}>
+                                            <input
+                                              type="checkbox"
+                                              checked={isChecked}
+                                              onChange={() => toggleSelectTagihan(t)}
+                                              style={{ width: 18, height: 18, cursor: 'pointer' }}
+                                            />
+                                          </td>
+                                          <td>
+                                            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: 13.5 }}>{t.nama_pos}</div>
+                                            <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                                              Kode: {t.kode_tagihan || `INV-${t.id}`}
+                                            </div>
+                                          </td>
+                                          <td>
+                                            {isBulanan ? (
+                                              <div>
+                                                {isPastMonth ? (
+                                                  <>
+                                                    <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                                      ⚠️ Tunggakan {getBulanLabel(t.bulan)} {t.tahun}
+                                                    </span>
+                                                    <div style={{ fontSize: 11, color: '#dc2626', fontWeight: 700, marginTop: 4 }}>
+                                                      Tagihan SPP Bulan Lalu (Menunggak)
+                                                    </div>
+                                                  </>
+                                                ) : (
+                                                  <>
+                                                    <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                                      🗓️ {getBulanLabel(t.bulan)} {t.tahun}
+                                                    </span>
+                                                    <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+                                                      Tagihan SPP Rutin (Berjalan)
+                                                    </div>
+                                                  </>
+                                                )}
+                                              </div>
+                                            ) : (
+                                              <div>
+                                                <span style={{ background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                                  💰 Tipe Bebas (Non-Bulanan)
+                                                </span>
+                                                {terbayar > 0 && (
+                                                  <div style={{ marginTop: 4 }}>
+                                                    <div style={{ fontSize: 10.5, color: '#475569', fontWeight: 600 }}>
+                                                      Sudah dicicil: <strong>Rp {terbayar.toLocaleString('id-ID')}</strong> ({percent}%)
+                                                    </div>
+                                                    <div style={{ width: '100%', height: 4, background: '#e2e8f0', borderRadius: 2, marginTop: 2, overflow: 'hidden' }}>
+                                                      <div style={{ width: `${percent}%`, height: '100%', background: '#0284c7' }} />
+                                                    </div>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            )}
+                                          </td>
+                                          <td style={{ fontWeight: 600 }}>Rp {Number(t.nominal_tagihan).toLocaleString('id-ID')}</td>
+                                          <td style={{ fontWeight: 800, color: '#dc2626', fontSize: 14 }}>
+                                            Rp {sisa.toLocaleString('id-ID')}
+                                          </td>
+                                          <td>
+                                            {isChecked ? (
+                                              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                                <span style={{ position: 'absolute', left: 8, fontSize: 12, fontWeight: 700, color: '#64748b' }}>Rp</span>
+                                                <input
+                                                  type="text"
+                                                  value={formatRupiahInput(bayarNominal[t.id] !== undefined ? bayarNominal[t.id] : sisa)}
+                                                  onChange={(e) => handleNominalChange(t.id, parseRupiahInput(e.target.value))}
+                                                  className="form-control-admin"
+                                                  placeholder="0"
+                                                  style={{ paddingLeft: 28, fontWeight: 800, fontSize: 13, color: '#0284c7', background: '#ffffff', borderColor: '#7dd3fc' }}
+                                                />
+                                              </div>
+                                            ) : (
+                                              <span style={{ color: '#94a3b8', fontSize: 12 }}>-</span>
+                                            )}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        );
+
+                        return (
+                          <>
+                            {renderTagihanTable(unpaidBulanan, 'Tagihan SPP Rutin (Bulanan)', '#0284c7', '🗓️')}
+                            {renderTagihanTable(unpaidBebas, 'Tagihan Tipe Bebas (Non-Bulanan)', '#d97706', '💰')}
+                          </>
+                        );
+                      })()}
 
                   {/* BOTTOM FULL-WIDTH SUMMARY PANEL BELOW TABLE */}
                   <div style={{ background: '#ffffff', padding: 20, borderRadius: 10, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1.2fr 1.5fr 220px', gap: 20, alignItems: 'center' }}>
