@@ -4,7 +4,7 @@ import {
   ClipboardList, Send, Calendar, BookOpen, Package, Settings,
   ChevronDown, ChevronRight, Menu, X, Bell, Clock, LogOut,
   Building2, GraduationCap, Users, ShieldCheck, UserCheck, BookOpenCheck,
-  Fingerprint, Award, FileSpreadsheet, BarChart3, Shield, Megaphone, Trophy, KeyRound
+  Fingerprint, Award, FileSpreadsheet, BarChart3, Shield, Megaphone, Trophy, KeyRound, Wallet
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import ArtanitaLogo from '../../components/ArtanitaLogo';
@@ -35,6 +35,7 @@ import AdminPerpustakaanTab from './AdminPerpustakaanTab';
 import AdminSaprasTab from './AdminSaprasTab';
 import AdminPresensiAbsensiTab from './AdminPresensiAbsensiTab';
 import AdminKenaikanAlumniTab from './AdminKenaikanAlumniTab';
+import AdminKeuanganTab from './AdminKeuanganTab';
 
 const VALID_ADMIN_TABS = [
   'dashboard', 'pengumuman', 'kalender', 'kelas', 'siswa', 'kenaikanAlumni', 'guru', 'mapel', 'jadwal', 'ekskul',
@@ -42,7 +43,7 @@ const VALID_ADMIN_TABS = [
   'rekapPresensi', 'rekapGuru', 'rekapSiswa', 'rekapMapel',
   'laporanRapor', 'laporanSiswa', 'laporanGuru', 'laporanKelas',
   'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel',
-  'laporanSurat', 'perpustakaan', 'sapras',
+  'laporanSurat', 'perpustakaan', 'sapras', 'keuangan',
   'users', 'settings'
 ];
 
@@ -588,6 +589,18 @@ export default function AdminDesktopView({ user, onLogout }) {
             <span className="menu-label">Sarana Prasarana</span>
           </button>
 
+          {/* 11. Keuangan & SPP */}
+          <button
+            type="button"
+            className={`portal-menu-item ${activeTab === 'keuangan' ? 'active' : ''}`}
+            onClick={() => handleSelectTab('keuangan')}
+          >
+            <div className="menu-icon-wrap">
+              <Wallet size={17} />
+            </div>
+            <span className="menu-label">Keuangan & SPP</span>
+          </button>
+
           {/* ----------------- SISTEM ----------------- */}
           <div className="portal-menu-section-label">SISTEM</div>
 
@@ -768,6 +781,7 @@ export default function AdminDesktopView({ user, onLogout }) {
                 {/* 5. SISTEM & AKUN */}
                 {activeTab === 'perpustakaan' && <AdminPerpustakaanTab />}
                 {activeTab === 'sapras' && <AdminSaprasTab />}
+                {activeTab === 'keuangan' && <AdminKeuanganTab />}
                 {activeTab === 'users' && <AdminUsersTab />}
                 {activeTab === 'settings' && <AdminSettingsTab />}
               </>

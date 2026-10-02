@@ -111,6 +111,18 @@ API akan berjalan di `http://localhost:5007/api`.
 ### 7. Dashboard Overview (`/api/dashboard`)
 - `GET /api/dashboard/summary` - Total Guru, Kelas, Mapel, Presensi Hari Ini
 
+### 8. Keuangan & SPP (E-BMS) (`/api/keuangan`)
+- `GET /api/keuangan/pos` - Daftar Pos Pembayaran (SPP, DSP, Seragam)
+- `POST /api/keuangan/pos` - Tambah Pos Pembayaran
+- `GET /api/keuangan/tarif` - Daftar Matrix Tarif Pembayaran
+- `POST /api/keuangan/tarif` - Tambah Tarif per Angkatan/Kelas
+- `POST /api/keuangan/tarif/override` - Setting Beasiswa/Potongan Siswa Khusus
+- `GET /api/keuangan/tagihan/siswa/:siswa_id` - Daftar Tagihan Siswa
+- `POST /api/keuangan/tagihan/generate` - Auto-generate Tagihan SPP Bulanan
+- `POST /api/keuangan/bayar/cash` - Transaksi Pembayaran Kasir TU (Tunai)
+- `POST /api/keuangan/webhook/midtrans` - Receiver Webhook Payment Gateway Online
+- `GET /api/keuangan/rekap/tunggakan` - Laporan Rekapitulasi Tunggakan Siswa
+
 ---
 
 ## 🔑 Format Header Autentikasi
