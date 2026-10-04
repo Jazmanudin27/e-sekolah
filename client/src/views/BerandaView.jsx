@@ -3,7 +3,7 @@ import {
   CheckSquare, Building2, FileText, Clock, Fingerprint,
   Users, GraduationCap, History, UserCheck, BookOpen,
   FileBarChart, PieChart, Award, Calendar, CalendarDays, X, AlertCircle, CheckCircle2,
-  Send, Library, FileSpreadsheet, FileCheck, Edit3
+  Send, Library, FileSpreadsheet, FileCheck, Edit3, ShieldAlert
 } from 'lucide-react';
 import api from '../api/client';
 import TopBar from '../components/TopBar';
@@ -423,6 +423,13 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
               <Building2 size={35} strokeWidth={2.5} color="#ffffff" />
             </div>
             <span>Sapras</span>
+          </button>
+
+          <button className="menu-blue-card menu-item-pelanggaran" onClick={() => onSwitchTab('pelanggaran')}>
+            <div className="menu-icon-circle" style={{ background: 'linear-gradient(135deg, #ef4444, #b91c1c)' }}>
+              <ShieldAlert size={35} strokeWidth={2.5} color="#ffffff" />
+            </div>
+            <span>Tata Tertib</span>
           </button>
         </div>
       </div>

@@ -24,6 +24,7 @@ import PenilaianInputView from './views/PenilaianInputView';
 import PenilaianLaporanView from './views/PenilaianLaporanView';
 import PerpustakaanView from './views/PerpustakaanView';
 import SaprasView from './views/SaprasView';
+import PelanggaranView from './views/PelanggaranView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
 import InstallPwaModal from './components/InstallPwaModal';
 import BirthdayModal from './components/BirthdayModal';
@@ -384,6 +385,14 @@ export default function App() {
         />
       )}
 
+      {activeTab === 'pelanggaran' && (
+        <SubHeader
+          title="Buku Tata Tertib & BK"
+          subtitle="Pencatatan Pelanggaran Siswa & Notifikasi WA"
+          onBack={() => setActiveTab('beranda')}
+        />
+      )}
+
       {/* Main Content Area */}
       <main className="main-content-area">
         {activeTab === 'beranda' && (
@@ -419,6 +428,13 @@ export default function App() {
           <SaprasView
             user={currentUser}
             showToast={showToast}
+          />
+        )}
+        {activeTab === 'pelanggaran' && (
+          <PelanggaranView
+            user={currentUser}
+            showToast={showToast}
+            onSwitchTab={(t) => setActiveTab(t)}
           />
         )}
         {(activeTab === 'penilaianInput' || activeTab === 'penilaian') && <PenilaianInputView onBack={() => setActiveTab('beranda')} />}
