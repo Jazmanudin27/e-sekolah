@@ -35,18 +35,11 @@ async function initBaileys(forceRestart = false) {
     const {
       default: makeWASocket,
       useMultiFileAuthState,
-      DisconnectReason,
-      fetchLatestBaileysVersion
+      DisconnectReason
     } = baileys;
 
     const { state, saveCreds } = await useMultiFileAuthState(SESSIONS_DIR);
-    let version = [2, 3000, 1015901307];
-    try {
-      const v = await fetchLatestBaileysVersion();
-      if (v?.version) version = v.version;
-    } catch (e) {
-      // Use fallback version
-    }
+    const version = [2, 3000, 1017531287];
 
     if (sock) {
       try {
@@ -221,14 +214,14 @@ function getBaileysStatus() {
   };
 }
 
-// Auto-check on module load: if credentials exist, reconnect automatically
-try {
-  if (fs.existsSync(SESSIONS_DIR) && fs.readdirSync(SESSIONS_DIR).length > 0) {
-    initBaileys();
-  }
-} catch (e) {
-  // silent
-}
+// Auto-check on module load: if credentials exist, reconnect in background after 3s
+setTimeout(() => {
+  try {
+    if (fs.existsSync(SESSIONS_DIR) && fs.readdirSync(SESSIONS_DIR).length > 0) {
+      initBaileys();
+    }
+  } catch (e) {}
+}, 3000);
 
 module.exports = {
   initBaileys,

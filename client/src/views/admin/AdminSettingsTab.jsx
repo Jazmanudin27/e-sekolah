@@ -60,7 +60,7 @@ export default function AdminSettingsTab() {
 
   useEffect(() => {
     let interval = null;
-    if (settings.wa_provider === 'qr_scan' && (baileysStatus.status === 'qr_ready' || startingQR || !baileysStatus.isConnected)) {
+    if (settings.wa_provider === 'qr_scan' && (baileysStatus.status === 'qr_ready' || startingQR)) {
       interval = setInterval(() => {
         fetchQRStatus();
       }, 3000);
@@ -68,7 +68,7 @@ export default function AdminSettingsTab() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [settings.wa_provider, baileysStatus.status, startingQR, baileysStatus.isConnected]);
+  }, [settings.wa_provider, baileysStatus.status, startingQR]);
 
   const fetchSekolahSettings = async () => {
     setLoading(true);

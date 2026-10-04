@@ -88,7 +88,7 @@ export default function PelanggaranView({ user, showToast }) {
 
   useEffect(() => {
     let interval = null;
-    if (showWASettingsModal && waSettings.wa_provider === 'qr_scan' && (baileysStatus.status === 'qr_ready' || startingQR || !baileysStatus.isConnected)) {
+    if (showWASettingsModal && waSettings.wa_provider === 'qr_scan' && (baileysStatus.status === 'qr_ready' || startingQR)) {
       fetchQRStatus();
       interval = setInterval(() => {
         fetchQRStatus();
@@ -97,7 +97,7 @@ export default function PelanggaranView({ user, showToast }) {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [showWASettingsModal, waSettings.wa_provider, baileysStatus.status, startingQR, baileysStatus.isConnected]);
+  }, [showWASettingsModal, waSettings.wa_provider, baileysStatus.status, startingQR]);
 
   const [formData, setFormData] = useState({
     kode_siswa: '',

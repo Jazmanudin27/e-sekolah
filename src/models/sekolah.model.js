@@ -1,7 +1,8 @@
-const { query } = require('../config/database');
+let columnsEnsured = false;
 
 class SekolahModel {
   static async ensureColumns() {
+    if (columnsEnsured) return;
     try {
       const cols = await query('DESCRIBE member');
       const colNames = cols.map(c => c.Field);
@@ -19,13 +20,14 @@ class SekolahModel {
       if (!colNames.includes('wa_auto_absen')) await query("ALTER TABLE member ADD COLUMN wa_auto_absen TINYINT(1) DEFAULT 1");
       if (!colNames.includes('wa_auto_pelanggaran')) await query("ALTER TABLE member ADD COLUMN wa_auto_pelanggaran TINYINT(1) DEFAULT 1");
       if (!colNames.includes('wa_sender_phone')) await query("ALTER TABLE member ADD COLUMN wa_sender_phone VARCHAR(30) DEFAULT NULL");
+      columnsEnsured = true;
     } catch (err) {
       console.warn('[SekolahModel.ensureColumns] Warning:', err.message);
     }
   }
 
   static async get(kode_member) {
-    await this.ensureColumns();
+    if (!columnsEnsured) await this.ensureColumns();
     try {
       let sql = 'SELECT * FROM member';
       const params = [];
