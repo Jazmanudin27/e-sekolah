@@ -4,7 +4,7 @@ import {
   ClipboardList, Send, Calendar, BookOpen, Package, Settings,
   ChevronDown, ChevronRight, Menu, X, Bell, Clock, LogOut,
   Building2, GraduationCap, Users, ShieldCheck, UserCheck, BookOpenCheck,
-  Fingerprint, Award, FileSpreadsheet, BarChart3, Shield, Megaphone, Trophy, KeyRound, Wallet
+  Fingerprint, Award, FileSpreadsheet, BarChart3, Shield, ShieldAlert, Megaphone, Trophy, KeyRound, Wallet
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import ArtanitaLogo from '../../components/ArtanitaLogo';
@@ -36,10 +36,12 @@ import AdminSaprasTab from './AdminSaprasTab';
 import AdminPresensiAbsensiTab from './AdminPresensiAbsensiTab';
 import AdminKenaikanAlumniTab from './AdminKenaikanAlumniTab';
 import AdminKeuanganTab from './AdminKeuanganTab';
+import AdminPelanggaranTab from './AdminPelanggaranTab';
 
 const VALID_ADMIN_TABS = [
   'dashboard', 'pengumuman', 'kalender', 'kelas', 'siswa', 'kenaikanAlumni', 'guru', 'mapel', 'jadwal', 'ekskul',
   'izin', 'presensiAbsensi', 'presensiGuru', 'absensiSiswa', 'absensiMapel',
+  'pelanggaran',
   'rekapPresensi', 'rekapGuru', 'rekapSiswa', 'rekapMapel',
   'laporanRapor', 'laporanSiswa', 'laporanGuru', 'laporanKelas',
   'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel',
@@ -418,6 +420,18 @@ export default function AdminDesktopView({ user, onLogout }) {
             <span className="menu-label">Presensi & Absensi</span>
           </button>
 
+          {/* Tata Tertib & Pelanggaran Siswa */}
+          <button
+            type="button"
+            className={`portal-menu-item ${activeTab === 'pelanggaran' ? 'active' : ''}`}
+            onClick={() => handleSelectTab('pelanggaran')}
+          >
+            <div className="menu-icon-wrap">
+              <ShieldAlert size={17} />
+            </div>
+            <span className="menu-label">Tata Tertib & Pelanggaran</span>
+          </button>
+
           {/* Rekapitulasi Presensi & Absensi (Tanpa dropdown, dengan sub-tab internal) */}
           <button
             type="button"
@@ -761,6 +775,7 @@ export default function AdminDesktopView({ user, onLogout }) {
                     }
                   />
                 )}
+                {activeTab === 'pelanggaran' && <AdminPelanggaranTab />}
 
                 {/* 4. LAPORAN & REKAP */}
                 {['laporanSiswa', 'laporanGuru', 'laporanKelas', 'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat'].includes(activeTab) && (

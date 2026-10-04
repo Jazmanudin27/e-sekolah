@@ -100,15 +100,29 @@ class SiswaModel {
     }
   }
 
-  static async create({ nis_nisn, nama_siswa, jk = 'L', kode_kelas, kode_member }) {
+  static async ensureColumns() {
+    try {
+      const cols = await query('DESCRIBE siswa');
+      const colNames = cols.map(c => c.Field);
+      if (!colNames.includes('nama_ortu')) await query("ALTER TABLE siswa ADD COLUMN nama_ortu VARCHAR(100) DEFAULT NULL");
+      if (!colNames.includes('no_wa_ortu')) await query("ALTER TABLE siswa ADD COLUMN no_wa_ortu VARCHAR(30) DEFAULT NULL");
+      if (!colNames.includes('hubungan_wali')) await query("ALTER TABLE siswa ADD COLUMN hubungan_wali VARCHAR(30) DEFAULT 'Orang Tua'");
+    } catch (err) {
+      console.warn('[SiswaModel.ensureColumns] Warning:', err.message);
+    }
+  }
+
+  static async create({ nis_nisn, nama_siswa, jk = 'L', kode_kelas, kode_member, nama_ortu, no_wa_ortu, hubungan_wali }) {
+    await this.ensureColumns();
     const res = await query(
-      'INSERT INTO siswa (nis, nama_siswa, jk, kode_kelas, kode_member) VALUES (?, ?, ?, ?, ?)',
-      [nis_nisn, nama_siswa, jk, kode_kelas, kode_member || null]
+      'INSERT INTO siswa (nis, nama_siswa, jk, kode_kelas, kode_member, nama_ortu, no_wa_ortu, hubungan_wali) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [nis_nisn, nama_siswa, jk, kode_kelas, kode_member || null, nama_ortu || null, no_wa_ortu || null, hubungan_wali || 'Orang Tua']
     );
     return res.insertId;
   }
 
   static async update(id, data) {
+    await this.ensureColumns();
     const fields = [];
     const params = [];
     if (data.nis_nisn !== undefined || data.nis !== undefined) {
@@ -138,6 +152,18 @@ class SiswaModel {
     if (data.catatan_alumni !== undefined) {
       fields.push('catatan_alumni = ?');
       params.push(data.catatan_alumni);
+    }
+    if (data.nama_ortu !== undefined) {
+      fields.push('nama_ortu = ?');
+      params.push(data.nama_ortu);
+    }
+    if (data.no_wa_ortu !== undefined) {
+      fields.push('no_wa_ortu = ?');
+      params.push(data.no_wa_ortu);
+    }
+    if (data.hubungan_wali !== undefined) {
+      fields.push('hubungan_wali = ?');
+      params.push(data.hubungan_wali);
     }
     if (fields.length === 0) return;
     params.push(id);

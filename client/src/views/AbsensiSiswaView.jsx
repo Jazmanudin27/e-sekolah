@@ -162,7 +162,12 @@ export default function AbsensiSiswaView({ user, showToast }) {
         list_absensi
       });
       if (res.data.success) {
-        showToast(res.data.message || 'Absensi siswa berhasil disimpan!', true);
+        const waNotif = res.data?.meta?.wa_notifications;
+        let msg = res.data.message || 'Absensi siswa berhasil disimpan!';
+        if (waNotif?.enabled && waNotif?.sent > 0) {
+          msg += ` (${waNotif.sent} WA terkirim ke orang tua)`;
+        }
+        showToast(msg, true);
         setIsExistingData(true);
       } else {
         showToast(res.data.message || 'Gagal menyimpan absensi.', false);

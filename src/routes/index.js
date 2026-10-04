@@ -23,6 +23,8 @@ const perpustakaanRoutes = require('./perpustakaan.routes');
 const saprasRoutes = require('./sapras.routes');
 const kenaikanAlumniRoutes = require('./kenaikanAlumni.routes');
 const keuanganRoutes = require('./keuangan.routes');
+const pelanggaranRoutes = require('./pelanggaran.routes');
+const whatsappRoutes = require('./whatsapp.routes');
 
 // System Health Check
 router.get('/health', (req, res) => {
@@ -57,5 +59,7 @@ router.use('/perpustakaan', perpustakaanRoutes);
 router.use('/sapras', saprasRoutes);
 router.use('/kenaikan-alumni', kenaikanAlumniRoutes);
 router.use('/keuangan', keuanganRoutes);
+router.use('/pelanggaran', pelanggaranRoutes);
+router.use('/whatsapp', whatsappRoutes);
 
 module.exports = router;

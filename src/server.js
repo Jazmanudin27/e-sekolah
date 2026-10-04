@@ -65,6 +65,8 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const SekolahModel = require('./models/sekolah.model');
+const SiswaModel = require('./models/siswa.model');
+const PelanggaranModel = require('./models/pelanggaran.model');
 const PenilaianModel = require('./models/penilaian.model');
 const PerpustakaanModel = require('./models/perpustakaan.model');
 const SaprasModel = require('./models/sapras.model');
@@ -80,12 +82,14 @@ app.listen(PORT, async () => {
   
   try {
     await SekolahModel.ensureColumns();
+    await SiswaModel.ensureColumns();
+    await PelanggaranModel.ensureTables();
     await TarifPembayaranModel.ensureColumns();
     await PenilaianModel.ensureTables();
     await PerpustakaanModel.ensureTables();
     await SaprasModel.ensureTables();
     await UserModel.ensureDefaultUsers();
-    console.log('[ServerInit] Verified & initialized Perpustakaan, Sapras, TarifPembayaran tables & admin accounts successfully.');
+    console.log('[ServerInit] Verified & initialized Siswa, Pelanggaran, Perpustakaan, Sapras, TarifPembayaran tables & admin accounts successfully.');
   } catch (err) {
     console.warn('[ServerInit] Initialization warning:', err.message);
   }

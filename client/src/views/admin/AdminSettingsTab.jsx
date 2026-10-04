@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Settings, Building, Clock, Save, ShieldCheck, Database, Check, RefreshCw, MapPin, Camera, Navigation
+  Settings, Building, Clock, Save, ShieldCheck, Database, Check, RefreshCw, MapPin, Camera, Navigation,
+  MessageSquare, Send, Smartphone, Eye, EyeOff, KeyRound, AlertTriangle
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
@@ -17,11 +18,22 @@ export default function AdminSettingsTab() {
     radius_gps: '100',
     mode_presensi_guru: 'gps_kamera',
     lat_sekolah: '-7.325205',
-    lng_sekolah: '108.208354'
+    lng_sekolah: '108.208354',
+    wa_provider: 'fonnte',
+    wa_api_token: '',
+    wa_endpoint: '',
+    wa_auto_absen: 1,
+    wa_auto_pelanggaran: 1,
+    wa_sender_phone: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showToken, setShowToken] = useState(false);
+
+  // WhatsApp Testing State
+  const [testPhone, setTestPhone] = useState('');
+  const [testingWA, setTestingWA] = useState(false);
 
   const fetchSekolahSettings = async () => {
     setLoading(true);
@@ -46,7 +58,13 @@ export default function AdminSettingsTab() {
           mode_presensi_guru: d.mode_presensi_guru || 'gps_kamera',
           lat_sekolah: d.lat_sekolah || '-7.325205',
           lng_sekolah: d.lng_sekolah || '108.208354',
-          kode_member: d.kode_member
+          kode_member: d.kode_member,
+          wa_provider: d.wa_provider || 'fonnte',
+          wa_api_token: d.wa_api_token || '',
+          wa_endpoint: d.wa_endpoint || '',
+          wa_auto_absen: d.wa_auto_absen !== undefined ? Number(d.wa_auto_absen) : 1,
+          wa_auto_pelanggaran: d.wa_auto_pelanggaran !== undefined ? Number(d.wa_auto_pelanggaran) : 1,
+          wa_sender_phone: d.wa_sender_phone || ''
         });
       }
     } catch (err) {
@@ -87,6 +105,46 @@ export default function AdminSettingsTab() {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleTestWhatsApp = async () => {
+    if (!testPhone.trim()) {
+      Swal.fire('Nomor Kosong', 'Masukkan nomor WhatsApp tujuan uji coba (contoh: 08123456789).', 'warning');
+      return;
+    }
+    if (!settings.wa_api_token) {
+      Swal.fire('Token Kosong', 'Silakan isi API Token WhatsApp Gateway terlebih dahulu.', 'warning');
+      return;
+    }
+
+    setTestingWA(true);
+    try {
+      const res = await api.post('/whatsapp/test', {
+        target_phone: testPhone,
+        wa_provider: settings.wa_provider,
+        wa_api_token: settings.wa_api_token,
+        wa_endpoint: settings.wa_endpoint
+      });
+
+      if (res.data?.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Tes WhatsApp Berhasil! 📱',
+          text: `Pesan uji coba berhasil terkirim ke ${testPhone}. Gateway aktif dan siap mengirim notifikasi otomatis!`,
+          confirmButtonColor: '#16a34a'
+        });
+      } else {
+        throw new Error(res.data?.message || 'Gagal mengirim pesan tes.');
+      }
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Tes WhatsApp Gagal',
+        text: err.response?.data?.message || err.message || 'Tidak dapat terhubung ke WhatsApp Gateway.'
+      });
+    } finally {
+      setTestingWA(false);
     }
   };
 
@@ -200,6 +258,158 @@ export default function AdminSettingsTab() {
                       value={settings.lng_sekolah}
                       onChange={(e) => setSettings({ ...settings, lng_sekolah: e.target.value })}
                     />
+                  </div>
+                </div>
+              </div>
+
+              {/* INTEGRASI WHATSAPP GATEWAY */}
+              <div style={{ background: '#f0fdf4', padding: 20, borderRadius: 14, border: '1px solid #bbf7d0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 14, color: '#166534', marginBottom: 12 }}>
+                  <MessageSquare size={18} color="#16a34a" /> Integrasi WhatsApp Gateway & Notifikasi Otomatis
+                </div>
+                <p style={{ fontSize: 12, color: '#166534', marginBottom: 16, lineHeight: 1.4 }}>
+                  Kirim pesan WhatsApp otomatis ke nomor orang tua/wali murid saat siswa tidak hadir atau melanggar aturan sekolah.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div className="form-group-admin">
+                    <label>Penyedia Layanan (Gateway Provider)</label>
+                    <select
+                      className="form-control-admin"
+                      value={settings.wa_provider}
+                      onChange={(e) => {
+                        const prov = e.target.value;
+                        let endpoint = '';
+                        if (prov === 'fonnte') endpoint = 'https://api.fonnte.com/send';
+                        else if (prov === 'wablas') endpoint = 'https://kudus.wablas.com/api/send-message';
+                        setSettings({ ...settings, wa_provider: prov, wa_endpoint: endpoint });
+                      }}
+                    >
+                      <option value="fonnte">Fonnte (Rekomendasi - Cepat & Mudah)</option>
+                      <option value="wablas">Wablas Gateway</option>
+                      <option value="generic">Custom REST API / Generic Webhook</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group-admin">
+                    <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>API Token / Secret Key *</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowToken(!showToken)}
+                        style={{ background: 'transparent', border: 'none', color: '#16a34a', cursor: 'pointer', fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                      >
+                        {showToken ? <EyeOff size={12} /> : <Eye size={12} />} {showToken ? 'Sembunyikan' : 'Lihat'}
+                      </button>
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type={showToken ? 'text' : 'password'}
+                        className="form-control-admin"
+                        placeholder="Contoh: token_xxxxxxxxxxxx"
+                        value={settings.wa_api_token}
+                        onChange={(e) => setSettings({ ...settings, wa_api_token: e.target.value })}
+                      />
+                    </div>
+                    <small style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+                      Dapatkan API token ini dari dashboard akun provider WA Gateway Anda (misal fonnte.com).
+                    </small>
+                  </div>
+
+                  {settings.wa_provider === 'generic' && (
+                    <div className="form-group-admin">
+                      <label>Custom Endpoint URL</label>
+                      <input
+                        type="url"
+                        className="form-control-admin"
+                        placeholder="https://api.yourgateway.com/send"
+                        value={settings.wa_endpoint}
+                        onChange={(e) => setSettings({ ...settings, wa_endpoint: e.target.value })}
+                      />
+                    </div>
+                  )}
+
+                  {/* TOGGLES */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
+                    <label style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '10px 12px',
+                      borderRadius: 8,
+                      background: '#ffffff',
+                      border: '1px solid #dcfce7',
+                      cursor: 'pointer'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={Number(settings.wa_auto_absen) === 1}
+                        onChange={(e) => setSettings({ ...settings, wa_auto_absen: e.target.checked ? 1 : 0 })}
+                        style={{ width: 16, height: 16 }}
+                      />
+                      <span style={{ fontSize: 12.5, fontWeight: 700, color: '#0f172a' }}>
+                        Otomatis kirim WA saat Siswa Tidak Hadir (Alpa / Sakit / Izin)
+                      </span>
+                    </label>
+
+                    <label style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '10px 12px',
+                      borderRadius: 8,
+                      background: '#ffffff',
+                      border: '1px solid #dcfce7',
+                      cursor: 'pointer'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={Number(settings.wa_auto_pelanggaran) === 1}
+                        onChange={(e) => setSettings({ ...settings, wa_auto_pelanggaran: e.target.checked ? 1 : 0 })}
+                        style={{ width: 16, height: 16 }}
+                      />
+                      <span style={{ fontSize: 12.5, fontWeight: 700, color: '#0f172a' }}>
+                        Otomatis kirim WA saat Siswa Melanggar Tata Tertib Sekolah
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* LIVE TEST SENDER */}
+                  <div style={{ marginTop: 8, padding: 14, background: '#ffffff', borderRadius: 10, border: '1px dashed #86efac' }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: '#166534', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Smartphone size={14} color="#16a34a" /> Uji Coba Pengiriman Pesan (Test Gateway)
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <input
+                        type="text"
+                        placeholder="Nomor WA Tes (08123456789)"
+                        className="form-control-admin"
+                        style={{ flex: 1, fontSize: 12, padding: '8px 12px' }}
+                        value={testPhone}
+                        onChange={(e) => setTestPhone(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleTestWhatsApp}
+                        disabled={testingWA}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          background: '#16a34a',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: 8,
+                          padding: '8px 14px',
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {testingWA ? <RefreshCw size={13} className="spin" /> : <Send size={13} />}
+                        {testingWA ? 'Mengirim...' : 'Tes Kirim'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

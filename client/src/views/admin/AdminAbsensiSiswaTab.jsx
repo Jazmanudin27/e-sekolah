@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   UserCheck, Search, Filter, Calendar, Save, CheckCircle2,
-  RefreshCw, Building2, Users, AlertCircle, HeartPulse, FileText
+  RefreshCw, Building2, Users, AlertCircle, HeartPulse, FileText, Phone, Send
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
@@ -151,9 +151,15 @@ export default function AdminAbsensiSiswaTab({ activeSubTab = 'siswa', onTabChan
 
       if (res.data?.success) {
         setIsExistingData(true);
+        const waNotif = res.data?.meta?.wa_notifications;
+        let msg = `Data absensi kelas untuk tanggal ${tanggal} berhasil disimpan.`;
+        if (waNotif?.enabled && waNotif?.sent > 0) {
+          msg += `\n\n📱 ${waNotif.sent} notifikasi WhatsApp otomatis telah dikirim ke nomor orang tua siswa yang tidak hadir!`;
+        }
+
         Swal.fire({
           title: 'Berhasil Disimpan!',
-          text: `Data absensi kelas untuk tanggal ${tanggal} berhasil disimpan.`,
+          text: msg,
           icon: 'success',
           confirmButtonColor: '#0066ff'
         });
@@ -162,6 +168,53 @@ export default function AdminAbsensiSiswaTab({ activeSubTab = 'siswa', onTabChan
       Swal.fire('Gagal Menyimpan', err.response?.data?.message || 'Terjadi kesalahan sistem.', 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleManualSendWA = async (siswa, status) => {
+    if (!siswa.no_wa_ortu) {
+      Swal.fire({
+        title: 'Nomor WA Belum Terdaftar',
+        text: `Siswa "${siswa.nama_siswa}" belum memiliki nomor WhatsApp orang tua. Silakan isi di menu Data Siswa.`,
+        icon: 'info',
+        confirmButtonColor: '#0066ff'
+      });
+      return;
+    }
+
+    try {
+      const res = await api.post('/absensi-siswa/send-wa', {
+        kode_siswa: siswa.kode_siswa || siswa.nis || siswa.nis_nisn,
+        tanggal,
+        status,
+        phone: siswa.no_wa_ortu
+      });
+
+      if (res.data?.success && res.data.data?.sent) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Notifikasi WA Terkirim!',
+          text: `Pesan berhasil dikirim ke orang tua (${siswa.no_wa_ortu}).`,
+          confirmButtonColor: '#16a34a'
+        });
+      } else {
+        const waUrl = res.data?.data?.waUrl;
+        Swal.fire({
+          icon: 'info',
+          title: 'Buka WhatsApp Web Langsung',
+          text: 'Kirimkan pesan template resmi kehadiran via WhatsApp Web:',
+          showCancelButton: true,
+          confirmButtonText: '📱 Buka WhatsApp Web',
+          confirmButtonColor: '#25D366',
+          cancelButtonText: 'Tutup'
+        }).then((choice) => {
+          if (choice.isConfirmed && waUrl) {
+            window.open(waUrl, '_blank');
+          }
+        });
+      }
+    } catch (e) {
+      Swal.fire('Gagal Kirim WA', e.response?.data?.message || e.message, 'error');
     }
   };
 
@@ -322,22 +375,23 @@ export default function AdminAbsensiSiswaTab({ activeSubTab = 'siswa', onTabChan
             <thead>
               <tr>
                 <th style={{ width: 50 }}>No</th>
-                <th style={{ width: 140 }}>NISN</th>
+                <th style={{ width: 130 }}>NISN</th>
                 <th>Nama Lengkap Siswa</th>
-                <th style={{ width: 80 }}>L/P</th>
-                <th style={{ width: 340, textAlign: 'center' }}>Status Kehadiran</th>
+                <th style={{ width: 60 }}>L/P</th>
+                <th style={{ width: 310, textAlign: 'center' }}>Status Kehadiran</th>
+                <th style={{ width: 200 }}>Kontak & Notif WA</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                     Memuat daftar siswa...
                   </td>
                 </tr>
               ) : studentList.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                     Tidak ada siswa terdaftar di kelas ini.
                   </td>
                 </tr>
@@ -469,6 +523,52 @@ export default function AdminAbsensiSiswaTab({ activeSubTab = 'siswa', onTabChan
                               A
                             </button>
                           </div>
+                        </td>
+                        <td>
+                          {siswa.no_wa_ortu ? (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                              <div>
+                                <a
+                                  href={`https://wa.me/${String(siswa.no_wa_ortu).replace(/\D/g, '').replace(/^0/, '62')}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#16a34a', textDecoration: 'none', fontWeight: 700, fontSize: 11.5 }}
+                                  title="Buka Chat WhatsApp"
+                                >
+                                  <Phone size={11} /> {siswa.no_wa_ortu}
+                                </a>
+                                {siswa.nama_ortu && (
+                                  <div style={{ fontSize: 10.5, color: '#64748b' }}>{siswa.nama_ortu}</div>
+                                )}
+                              </div>
+                              {['A', 'S', 'I'].includes(currentStatus) && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleManualSendWA(siswa, currentStatus)}
+                                  title={`Kirim Notifikasi WA (${currentStatus}) ke Orang Tua`}
+                                  style={{
+                                    background: '#dcfce7',
+                                    color: '#15803d',
+                                    border: 'none',
+                                    borderRadius: 6,
+                                    padding: '4px 8px',
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 4
+                                  }}
+                                >
+                                  <Send size={11} /> WA
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            <span style={{ fontSize: 11, color: '#94a3b8', fontStyle: 'italic' }}>
+                              Belum ada WA
+                            </span>
+                          )}
                         </td>
                       </tr>
                     );
