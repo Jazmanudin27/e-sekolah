@@ -3,6 +3,8 @@
  * Supports Fonnte, Wablas, and Generic HTTP REST API
  */
 
+const whatsappBaileys = require('./whatsappBaileys.util');
+
 /**
  * Format phone number to international WhatsApp standard (e.g., 628xxxxxxxx)
  * @param {string} phone 
@@ -57,6 +59,33 @@ async function sendWhatsAppMessage({ target, message, config }) {
     };
   }
 
+  const provider = (config?.wa_provider || 'qr_scan').toLowerCase();
+
+  // 1. Direct WhatsApp Multi-Device (QR Scan)
+  if (provider === 'qr_scan') {
+    const baileysStatus = whatsappBaileys.getBaileysStatus();
+    if (!baileysStatus.isConnected) {
+      return {
+        success: false,
+        message: 'WhatsApp Sekolah belum terhubung! Silakan buka menu Pengaturan WA lalu Scan QR Code.'
+      };
+    }
+    try {
+      const res = await whatsappBaileys.sendBaileysMessage(cleanPhone, message);
+      return {
+        success: true,
+        message: 'Pesan WhatsApp berhasil dikirim langsung dari nomor WhatsApp Sekolah',
+        data: res
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: err.message
+      };
+    }
+  }
+
+  // 2. Token-based Providers (Fonnte, Wablas, Generic)
   if (!config || !config.wa_api_token) {
     return {
       success: false,
@@ -64,7 +93,6 @@ async function sendWhatsAppMessage({ target, message, config }) {
     };
   }
 
-  const provider = (config.wa_provider || 'fonnte').toLowerCase();
   const token = String(config.wa_api_token).trim();
 
   try {

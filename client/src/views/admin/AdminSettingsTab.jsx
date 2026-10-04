@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Settings, Building, Clock, Save, ShieldCheck, Database, Check, RefreshCw, MapPin, Camera, Navigation,
-  MessageSquare, Send, Smartphone, Eye, EyeOff, KeyRound, AlertTriangle
+  MessageSquare, Send, Smartphone, Eye, EyeOff, KeyRound, AlertTriangle, QrCode, Wifi, WifiOff, LogOut, CheckCircle2
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
@@ -19,7 +19,7 @@ export default function AdminSettingsTab() {
     mode_presensi_guru: 'gps_kamera',
     lat_sekolah: '-7.325205',
     lng_sekolah: '108.208354',
-    wa_provider: 'fonnte',
+    wa_provider: 'qr_scan',
     wa_api_token: '',
     wa_endpoint: '',
     wa_auto_absen: 1,
@@ -31,9 +31,44 @@ export default function AdminSettingsTab() {
   const [saved, setSaved] = useState(false);
   const [showToken, setShowToken] = useState(false);
 
+  // WhatsApp QR State (Direct Baileys Multi-Device)
+  const [baileysStatus, setBaileysStatus] = useState({
+    status: 'disconnected',
+    qr: null,
+    user: null,
+    isConnected: false
+  });
+  const [startingQR, setStartingQR] = useState(false);
+  const [disconnectingQR, setDisconnectingQR] = useState(false);
+
   // WhatsApp Testing State
   const [testPhone, setTestPhone] = useState('');
   const [testingWA, setTestingWA] = useState(false);
+
+  const fetchQRStatus = async () => {
+    try {
+      const res = await api.get('/whatsapp/qr-status');
+      if (res.data?.success && res.data.data) {
+        setBaileysStatus(res.data.data);
+      }
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    fetchQRStatus();
+  }, []);
+
+  useEffect(() => {
+    let interval = null;
+    if (settings.wa_provider === 'qr_scan' && (baileysStatus.status === 'qr_ready' || startingQR || !baileysStatus.isConnected)) {
+      interval = setInterval(() => {
+        fetchQRStatus();
+      }, 3000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [settings.wa_provider, baileysStatus.status, startingQR, baileysStatus.isConnected]);
 
   const fetchSekolahSettings = async () => {
     setLoading(true);
@@ -59,7 +94,7 @@ export default function AdminSettingsTab() {
           lat_sekolah: d.lat_sekolah || '-7.325205',
           lng_sekolah: d.lng_sekolah || '108.208354',
           kode_member: d.kode_member,
-          wa_provider: d.wa_provider || 'fonnte',
+          wa_provider: d.wa_provider || 'qr_scan',
           wa_api_token: d.wa_api_token || '',
           wa_endpoint: d.wa_endpoint || '',
           wa_auto_absen: d.wa_auto_absen !== undefined ? Number(d.wa_auto_absen) : 1,
@@ -108,12 +143,60 @@ export default function AdminSettingsTab() {
     }
   };
 
+  const handleStartQR = async () => {
+    setStartingQR(true);
+    try {
+      const res = await api.post('/whatsapp/qr-start');
+      if (res.data?.data) {
+        setBaileysStatus(res.data.data);
+      }
+    } catch (e) {
+      Swal.fire('Gagal Menghubungkan', e.response?.data?.message || e.message, 'error');
+    } finally {
+      setStartingQR(false);
+    }
+  };
+
+  const handleDisconnectQR = async () => {
+    const choice = await Swal.fire({
+      title: 'Putuskan Nomor WhatsApp?',
+      text: 'Nomor WhatsApp sekolah akan dikeluarkan dari sistem. Anda perlu scan ulang untuk menghubungkannya kembali.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Putuskan',
+      confirmButtonColor: '#dc2626',
+      cancelButtonText: 'Batal'
+    });
+
+    if (choice.isConfirmed) {
+      setDisconnectingQR(true);
+      try {
+        await api.post('/whatsapp/qr-disconnect');
+        setBaileysStatus({ status: 'disconnected', qr: null, user: null, isConnected: false });
+        Swal.fire({
+          icon: 'success',
+          title: 'Terputus!',
+          text: 'Koneksi nomor WhatsApp berhasil dikeluarkan.',
+          timer: 1500
+        });
+      } catch (e) {
+        Swal.fire('Gagal', e.response?.data?.message || e.message, 'error');
+      } finally {
+        setDisconnectingQR(false);
+      }
+    }
+  };
+
   const handleTestWhatsApp = async () => {
     if (!testPhone.trim()) {
       Swal.fire('Nomor Kosong', 'Masukkan nomor WhatsApp tujuan uji coba (contoh: 08123456789).', 'warning');
       return;
     }
-    if (!settings.wa_api_token) {
+    if (settings.wa_provider === 'qr_scan' && !baileysStatus.isConnected) {
+      Swal.fire('WhatsApp Belum Terhubung', 'Silakan scan QR Code terlebih dahulu sebelum melakukan uji coba pengiriman.', 'warning');
+      return;
+    }
+    if (settings.wa_provider !== 'qr_scan' && !settings.wa_api_token) {
       Swal.fire('Token Kosong', 'Silakan isi API Token WhatsApp Gateway terlebih dahulu.', 'warning');
       return;
     }
@@ -273,7 +356,7 @@ export default function AdminSettingsTab() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div className="form-group-admin">
-                    <label>Penyedia Layanan (Gateway Provider)</label>
+                    <label>Metode Koneksi WhatsApp</label>
                     <select
                       className="form-control-admin"
                       value={settings.wa_provider}
@@ -284,49 +367,188 @@ export default function AdminSettingsTab() {
                         else if (prov === 'wablas') endpoint = 'https://kudus.wablas.com/api/send-message';
                         setSettings({ ...settings, wa_provider: prov, wa_endpoint: endpoint });
                       }}
+                      style={{ fontWeight: 700 }}
                     >
-                      <option value="fonnte">Fonnte (Rekomendasi - Cepat & Mudah)</option>
-                      <option value="wablas">Wablas Gateway</option>
+                      <option value="qr_scan">📱 Scan QR Code WhatsApp (Nomor Sekolah Langsung - GRATIS & OTOMATIS)</option>
+                      <option value="fonnte">Fonnte API Gateway (Pakai Token)</option>
+                      <option value="wablas">Wablas Gateway (Pakai Token)</option>
                       <option value="generic">Custom REST API / Generic Webhook</option>
                     </select>
                   </div>
 
-                  <div className="form-group-admin">
-                    <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>API Token / Secret Key *</span>
-                      <button
-                        type="button"
-                        onClick={() => setShowToken(!showToken)}
-                        style={{ background: 'transparent', border: 'none', color: '#16a34a', cursor: 'pointer', fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                      >
-                        {showToken ? <EyeOff size={12} /> : <Eye size={12} />} {showToken ? 'Sembunyikan' : 'Lihat'}
-                      </button>
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        type={showToken ? 'text' : 'password'}
-                        className="form-control-admin"
-                        placeholder="Contoh: token_xxxxxxxxxxxx"
-                        value={settings.wa_api_token}
-                        onChange={(e) => setSettings({ ...settings, wa_api_token: e.target.value })}
-                      />
+                  {/* KOTAK KHUSUS SCAN QR CODE */}
+                  {settings.wa_provider === 'qr_scan' && (
+                    <div style={{
+                      background: baileysStatus.isConnected ? '#dcfce7' : '#ffffff',
+                      border: baileysStatus.isConnected ? '2px solid #22c55e' : '2px dashed #cbd5e1',
+                      borderRadius: 14,
+                      padding: 18,
+                      textAlign: 'center'
+                    }}>
+                      {baileysStatus.isConnected ? (
+                        <div>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48, borderRadius: '50%', background: '#22c55e', color: '#ffffff', marginBottom: 10 }}>
+                            <CheckCircle2 size={28} />
+                          </div>
+                          <div style={{ fontSize: 15, fontWeight: 800, color: '#15803d' }}>
+                            WhatsApp Sekolah Terhubung!
+                          </div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: '#166534', marginTop: 4 }}>
+                            +{baileysStatus.user?.phone} ({baileysStatus.user?.name || 'Nomor Resmi Sekolah'})
+                          </div>
+                          <p style={{ fontSize: 11.5, color: '#15803d', margin: '8px 0 14px' }}>
+                            Semua notifikasi ketidakhadiran & pelanggaran tata tertib akan terkirim otomatis dari nomor ini.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={handleDisconnectQR}
+                            disabled={disconnectingQR}
+                            style={{
+                              background: '#ef4444',
+                              color: '#ffffff',
+                              border: 'none',
+                              padding: '8px 16px',
+                              borderRadius: 8,
+                              fontSize: 12,
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 6
+                            }}
+                          >
+                            <LogOut size={14} />
+                            {disconnectingQR ? 'Memutuskan...' : 'Putuskan / Ganti Nomor WhatsApp'}
+                          </button>
+                        </div>
+                      ) : baileysStatus.status === 'qr_ready' && baileysStatus.qr ? (
+                        <div>
+                          <div style={{ fontSize: 13.5, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>
+                            Pindai QR Code Menggunakan WhatsApp Sekolah
+                          </div>
+                          <p style={{ fontSize: 11.5, color: '#64748b', marginBottom: 12 }}>
+                            Buka WhatsApp di HP ➔ Titik Tiga (⋮) / Pengaturan ➔ <b>Perangkat Tertaut</b> ➔ <b>Tautkan Perangkat</b>
+                          </p>
+                          <div style={{
+                            display: 'inline-block',
+                            padding: 10,
+                            background: '#ffffff',
+                            borderRadius: 12,
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                            border: '1px solid #e2e8f0'
+                          }}>
+                            <img
+                              src={baileysStatus.qr}
+                              alt="Scan QR WhatsApp"
+                              style={{ width: 220, height: 220, display: 'block', margin: '0 auto' }}
+                            />
+                          </div>
+                          <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 10 }}>
+                            <button
+                              type="button"
+                              onClick={handleStartQR}
+                              disabled={startingQR}
+                              style={{
+                                background: '#16a34a',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '7px 14px',
+                                borderRadius: 8,
+                                fontSize: 11.5,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 6
+                              }}
+                            >
+                              <RefreshCw size={13} className={startingQR ? 'spin' : ''} />
+                              {startingQR ? 'Memperbarui...' : 'Perbarui QR Code'}
+                            </button>
+                          </div>
+                          <small style={{ display: 'block', marginTop: 8, color: '#94a3b8', fontSize: 11 }}>
+                            Status otomatis terdeteksi setelah Anda scan di HP.
+                          </small>
+                        </div>
+                      ) : (
+                        <div>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: '50%', background: '#f1f5f9', color: '#64748b', marginBottom: 8 }}>
+                            <QrCode size={24} />
+                          </div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>
+                            Nomor WhatsApp Sekolah Belum Terhubung
+                          </div>
+                          <p style={{ fontSize: 11.5, color: '#64748b', margin: '6px 0 14px' }}>
+                            Klik tombol di bawah untuk memunculkan QR Code dan hubungkan nomor WhatsApp sekolah.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={handleStartQR}
+                            disabled={startingQR}
+                            style={{
+                              background: '#16a34a',
+                              color: '#ffffff',
+                              border: 'none',
+                              padding: '10px 18px',
+                              borderRadius: 10,
+                              fontSize: 12.5,
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 6,
+                              boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)'
+                            }}
+                          >
+                            <QrCode size={16} />
+                            {startingQR ? 'Menyiapkan QR Code...' : 'Hubungkan Nomor & Tampilkan QR Code'}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <small style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
-                      Dapatkan API token ini dari dashboard akun provider WA Gateway Anda (misal fonnte.com).
-                    </small>
-                  </div>
+                  )}
 
-                  {settings.wa_provider === 'generic' && (
-                    <div className="form-group-admin">
-                      <label>Custom Endpoint URL</label>
-                      <input
-                        type="url"
-                        className="form-control-admin"
-                        placeholder="https://api.yourgateway.com/send"
-                        value={settings.wa_endpoint}
-                        onChange={(e) => setSettings({ ...settings, wa_endpoint: e.target.value })}
-                      />
-                    </div>
+                  {/* FORM TOKEN KHUSUS PROVIDER API (FONNTE / WABLAS / GENERIC) */}
+                  {settings.wa_provider !== 'qr_scan' && (
+                    <>
+                      <div className="form-group-admin">
+                        <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>API Token / Secret Key *</span>
+                          <button
+                            type="button"
+                            onClick={() => setShowToken(!showToken)}
+                            style={{ background: 'transparent', border: 'none', color: '#16a34a', cursor: 'pointer', fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                          >
+                            {showToken ? <EyeOff size={12} /> : <Eye size={12} />} {showToken ? 'Sembunyikan' : 'Lihat'}
+                          </button>
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                          <input
+                            type={showToken ? 'text' : 'password'}
+                            className="form-control-admin"
+                            placeholder="Contoh: token_xxxxxxxxxxxx"
+                            value={settings.wa_api_token}
+                            onChange={(e) => setSettings({ ...settings, wa_api_token: e.target.value })}
+                          />
+                        </div>
+                        <small style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+                          Dapatkan API token ini dari dashboard akun provider WA Gateway Anda.
+                        </small>
+                      </div>
+
+                      {settings.wa_provider === 'generic' && (
+                        <div className="form-group-admin">
+                          <label>Custom Endpoint URL</label>
+                          <input
+                            type="url"
+                            className="form-control-admin"
+                            placeholder="https://api.yourgateway.com/send"
+                            value={settings.wa_endpoint}
+                            onChange={(e) => setSettings({ ...settings, wa_endpoint: e.target.value })}
+                          />
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {/* TOGGLES */}

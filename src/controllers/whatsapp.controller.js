@@ -2,6 +2,7 @@ const SekolahModel = require('../models/sekolah.model');
 const { query } = require('../config/database');
 const { sendSuccess, sendError } = require('../utils/response.util');
 const { sendWhatsAppMessage, formatPhoneNumber } = require('../utils/whatsapp.util');
+const whatsappBaileys = require('../utils/whatsappBaileys.util');
 
 async function getKodeMember(req) {
   let km = req.user?.kode_member || req.query?.kode_member || req.body?.kode_member;
@@ -20,18 +21,58 @@ exports.getStatus = async (req, res, next) => {
   try {
     const kode_member = await getKodeMember(req);
     const sekolah = await SekolahModel.get(kode_member);
+    const baileysStatus = whatsappBaileys.getBaileysStatus();
 
     res.json({
       success: true,
       data: {
-        wa_provider: sekolah.wa_provider || 'fonnte',
+        wa_provider: sekolah.wa_provider || 'qr_scan',
         has_token: Boolean(sekolah.wa_api_token && sekolah.wa_api_token.trim().length > 0),
         wa_endpoint: sekolah.wa_endpoint || '',
         wa_auto_absen: sekolah.wa_auto_absen ?? 1,
         wa_auto_pelanggaran: sekolah.wa_auto_pelanggaran ?? 1,
-        wa_sender_phone: sekolah.wa_sender_phone || ''
+        wa_sender_phone: baileysStatus.user?.phone || sekolah.wa_sender_phone || '',
+        baileys: {
+          status: baileysStatus.status,
+          qr: baileysStatus.qr,
+          user: baileysStatus.user,
+          isConnected: baileysStatus.isConnected
+        }
       }
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getQRStatus = async (req, res, next) => {
+  try {
+    const baileysStatus = whatsappBaileys.getBaileysStatus();
+    res.json({
+      success: true,
+      data: baileysStatus
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.startQR = async (req, res, next) => {
+  try {
+    await whatsappBaileys.initBaileys(true);
+    // Brief delay to allow initial QR generation
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    const baileysStatus = whatsappBaileys.getBaileysStatus();
+    sendSuccess(res, 'Sesi WhatsApp dimulai.', baileysStatus);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.disconnectQR = async (req, res, next) => {
+  try {
+    const result = await whatsappBaileys.disconnectBaileys();
+    sendSuccess(res, 'Koneksi WhatsApp berhasil diputuskan.', result);
   } catch (error) {
     next(error);
   }
@@ -48,14 +89,16 @@ exports.testSend = async (req, res, next) => {
 
     const sekolah = await SekolahModel.get(kode_member);
 
+    const activeProvider = (wa_provider || sekolah.wa_provider || 'qr_scan').toLowerCase();
+
     // Use passed config if testing before saving, otherwise fallback to saved config
     const activeConfig = {
-      wa_provider: wa_provider || sekolah.wa_provider || 'fonnte',
+      wa_provider: activeProvider,
       wa_api_token: wa_api_token || sekolah.wa_api_token,
       wa_endpoint: wa_endpoint || sekolah.wa_endpoint
     };
 
-    if (!activeConfig.wa_api_token) {
+    if (activeProvider !== 'qr_scan' && !activeConfig.wa_api_token) {
       return sendError(res, 'Token API WhatsApp Gateway belum diisi.', 400);
     }
 

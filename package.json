@@ -25,6 +25,9 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.4.0",
-    "mysql2": "^3.9.7"
+    "mysql2": "^3.9.7",
+    "pino": "^10.4.0",
+    "qrcode": "^1.5.4",
+    "@whiskeysockets/baileys": "^6.7.9"
   }
 }

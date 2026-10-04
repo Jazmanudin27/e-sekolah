@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   ShieldAlert, AlertTriangle, Plus, Search, Filter, RefreshCw,
   Send, Phone, MessageSquare, Trash2, Edit2, CheckCircle2,
-  XCircle, Clock, Calendar, User, ChevronRight, X, AlertCircle, Award
+  XCircle, Clock, Calendar, User, ChevronRight, X, AlertCircle, Award,
+  Settings, Eye, EyeOff, Save, Smartphone, QrCode, LogOut
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../api/client';
@@ -54,6 +55,50 @@ export default function PelanggaranView({ user, showToast }) {
   const [submitting, setSubmitting] = useState(false);
   const [sendingWAId, setSendingWAId] = useState(null);
 
+  // WhatsApp Settings Modal State
+  const [showWASettingsModal, setShowWASettingsModal] = useState(false);
+  const [savingWASettings, setSavingWASettings] = useState(false);
+  const [showToken, setShowToken] = useState(false);
+  const [testPhone, setTestPhone] = useState('');
+  const [testingWA, setTestingWA] = useState(false);
+  const [startingQR, setStartingQR] = useState(false);
+  const [disconnectingQR, setDisconnectingQR] = useState(false);
+  const [baileysStatus, setBaileysStatus] = useState({
+    status: 'disconnected',
+    qr: null,
+    user: null,
+    isConnected: false
+  });
+  const [waSettings, setWaSettings] = useState({
+    wa_provider: 'qr_scan',
+    wa_api_token: '',
+    wa_endpoint: '',
+    wa_auto_absen: 1,
+    wa_auto_pelanggaran: 1
+  });
+
+  const fetchQRStatus = async () => {
+    try {
+      const res = await api.get('/whatsapp/qr-status');
+      if (res.data?.success && res.data.data) {
+        setBaileysStatus(res.data.data);
+      }
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    let interval = null;
+    if (showWASettingsModal && waSettings.wa_provider === 'qr_scan' && (baileysStatus.status === 'qr_ready' || startingQR || !baileysStatus.isConnected)) {
+      fetchQRStatus();
+      interval = setInterval(() => {
+        fetchQRStatus();
+      }, 3000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [showWASettingsModal, waSettings.wa_provider, baileysStatus.status, startingQR, baileysStatus.isConnected]);
+
   const [formData, setFormData] = useState({
     kode_siswa: '',
     kode_kelas: '',
@@ -67,6 +112,125 @@ export default function PelanggaranView({ user, showToast }) {
     pelapor: user?.name || user?.nama_guru || 'Guru / BK',
     send_wa: true
   });
+
+  const handleOpenWASettings = async () => {
+    try {
+      const res = await api.get('/sekolah');
+      if (res.data?.success && res.data.data) {
+        const d = res.data.data;
+        setWaSettings({
+          wa_provider: d.wa_provider || 'qr_scan',
+          wa_api_token: d.wa_api_token || '',
+          wa_endpoint: d.wa_endpoint || '',
+          wa_auto_absen: d.wa_auto_absen !== undefined ? Number(d.wa_auto_absen) : 1,
+          wa_auto_pelanggaran: d.wa_auto_pelanggaran !== undefined ? Number(d.wa_auto_pelanggaran) : 1
+        });
+      }
+      await fetchQRStatus();
+    } catch (e) {
+      console.warn('Gagal memuat setting sekolah:', e);
+    }
+    setShowWASettingsModal(true);
+  };
+
+  const handleStartQR = async () => {
+    setStartingQR(true);
+    try {
+      const res = await api.post('/whatsapp/qr-start');
+      if (res.data?.data) {
+        setBaileysStatus(res.data.data);
+      }
+    } catch (e) {
+      Swal.fire('Gagal Menghubungkan', e.response?.data?.message || e.message, 'error');
+    } finally {
+      setStartingQR(false);
+    }
+  };
+
+  const handleDisconnectQR = async () => {
+    const choice = await Swal.fire({
+      title: 'Putuskan Nomor WhatsApp?',
+      text: 'Nomor WhatsApp sekolah akan dikeluarkan dari sistem.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Putuskan',
+      confirmButtonColor: '#dc2626',
+      cancelButtonText: 'Batal'
+    });
+
+    if (choice.isConfirmed) {
+      setDisconnectingQR(true);
+      try {
+        await api.post('/whatsapp/qr-disconnect');
+        setBaileysStatus({ status: 'disconnected', qr: null, user: null, isConnected: false });
+        Swal.fire('Berhasil Terputus', 'Sesi WhatsApp berhasil dikeluarkan.', 'success');
+      } catch (e) {
+        Swal.fire('Gagal Memutuskan', e.response?.data?.message || e.message, 'error');
+      } finally {
+        setDisconnectingQR(false);
+      }
+    }
+  };
+
+  const handleSaveWASettings = async (e) => {
+    e.preventDefault();
+    setSavingWASettings(true);
+    try {
+      const res = await api.put('/sekolah', waSettings);
+      if (res.data?.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Pengaturan WA Disimpan!',
+          text: 'Konfigurasi WhatsApp Gateway berhasil diperbarui.',
+          timer: 1600,
+          confirmButtonColor: '#16a34a'
+        });
+        setShowWASettingsModal(false);
+      } else {
+        throw new Error(res.data?.message || 'Gagal menyimpan');
+      }
+    } catch (err) {
+      Swal.fire('Gagal Menyimpan', err.response?.data?.message || err.message, 'error');
+    } finally {
+      setSavingWASettings(false);
+    }
+  };
+
+  const handleTestWA = async () => {
+    if (!testPhone.trim()) {
+      Swal.fire('Nomor Kosong', 'Masukkan nomor HP tujuan untuk tes (misal: 08123456789).', 'warning');
+      return;
+    }
+    if (waSettings.wa_provider === 'qr_scan' && !baileysStatus.isConnected) {
+      Swal.fire('WhatsApp Belum Terhubung', 'Silakan scan QR Code terlebih dahulu sebelum tes kirim.', 'warning');
+      return;
+    }
+    if (waSettings.wa_provider !== 'qr_scan' && !waSettings.wa_api_token) {
+      Swal.fire('Token Kosong', 'Masukkan API Token terlebih dahulu.', 'warning');
+      return;
+    }
+    setTestingWA(true);
+    try {
+      const res = await api.post('/whatsapp/test', {
+        target_phone: testPhone,
+        wa_provider: waSettings.wa_provider,
+        wa_api_token: waSettings.wa_api_token,
+        wa_endpoint: waSettings.wa_endpoint
+      });
+      if (res.data?.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Tes Terkirim!',
+          text: `Pesan berhasil dikirim ke ${testPhone}. Gateway aktif!`,
+          confirmButtonColor: '#16a34a'
+        });
+      }
+    } catch (e) {
+      Swal.fire('Tes Gagal', e.response?.data?.message || e.message, 'error');
+    } finally {
+      setTestingWA(false);
+    }
+  };
 
   useEffect(() => {
     fetchInitialData();
@@ -463,11 +627,12 @@ export default function PelanggaranView({ user, showToast }) {
           <button
             type="button"
             onClick={() => { fetchPelanggaran(); fetchRekapPoin(); }}
+            title="Muat Ulang Data"
             style={{
               background: '#ffffff',
               border: '1px solid #e2e8f0',
               borderRadius: 10,
-              padding: '0 12px',
+              padding: '0 10px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -475,6 +640,30 @@ export default function PelanggaranView({ user, showToast }) {
             }}
           >
             <RefreshCw size={14} color="#64748b" />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleOpenWASettings}
+            title="Pengaturan WhatsApp Gateway"
+            style={{
+              background: '#16a34a',
+              border: 'none',
+              borderRadius: 10,
+              padding: '0 10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              color: '#ffffff',
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 2px 8px rgba(22, 163, 74, 0.2)'
+            }}
+          >
+            <Settings size={14} color="#ffffff" />
+            <span>WA</span>
           </button>
         </div>
       </div>
@@ -982,6 +1171,321 @@ export default function PelanggaranView({ user, showToast }) {
                   }}
                 >
                   {submitting ? 'Menyimpan...' : isEditing ? 'Simpan Perubahan' : 'Catat & Kirim WA'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* MODAL PENGATURAN WHATSAPP GATEWAY */}
+      {showWASettingsModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 14,
+          zIndex: 1050
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 20,
+            width: '100%',
+            maxWidth: 440,
+            maxHeight: '92vh',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+            overflow: 'hidden'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              padding: '16px 18px',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: '#f0fdf4'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Smartphone size={18} color="#16a34a" />
+                <h3 style={{ margin: 0, fontSize: 14.5, fontWeight: 800, color: '#166534' }}>
+                  Pengaturan WhatsApp Gateway
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowWASettingsModal(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+              >
+                <X size={18} color="#64748b" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSaveWASettings} style={{ padding: '16px 18px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                  Metode Koneksi WhatsApp
+                </label>
+                <select
+                  value={waSettings.wa_provider}
+                  onChange={(e) => setWaSettings({ ...waSettings, wa_provider: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12.5, fontWeight: 700 }}
+                >
+                  <option value="qr_scan">📱 Scan QR Code (Nomor Sekolah Langsung - GRATIS)</option>
+                  <option value="fonnte">Fonnte (Pakai Token)</option>
+                  <option value="wablas">Wablas (Pakai Token)</option>
+                  <option value="generic">Custom / Generic Webhook</option>
+                </select>
+              </div>
+
+              {/* QR SCAN BOX */}
+              {waSettings.wa_provider === 'qr_scan' && (
+                <div style={{
+                  background: baileysStatus.isConnected ? '#f0fdf4' : '#f8fafc',
+                  border: baileysStatus.isConnected ? '2px solid #22c55e' : '2px dashed #cbd5e1',
+                  borderRadius: 14,
+                  padding: 14,
+                  textAlign: 'center'
+                }}>
+                  {baileysStatus.isConnected ? (
+                    <div>
+                      <div style={{ fontSize: 13.5, fontWeight: 800, color: '#15803d' }}>
+                        🟢 WhatsApp Sekolah Terhubung!
+                      </div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#166534', marginTop: 4 }}>
+                        +{baileysStatus.user?.phone} ({baileysStatus.user?.name || 'Nomor Sekolah'})
+                      </div>
+                      <p style={{ fontSize: 11, color: '#15803d', margin: '6px 0 10px' }}>
+                        Pesan absensi & pelanggaran akan dikirim otomatis dari nomor ini.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleDisconnectQR}
+                        disabled={disconnectingQR}
+                        style={{
+                          background: '#ef4444',
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '6px 12px',
+                          borderRadius: 8,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 5
+                        }}
+                      >
+                        <LogOut size={12} />
+                        {disconnectingQR ? 'Memutuskan...' : 'Putuskan / Ganti Nomor'}
+                      </button>
+                    </div>
+                  ) : baileysStatus.status === 'qr_ready' && baileysStatus.qr ? (
+                    <div>
+                      <div style={{ fontSize: 12.5, fontWeight: 800, color: '#0f172a', marginBottom: 4 }}>
+                        Scan QR Code Menggunakan WhatsApp
+                      </div>
+                      <p style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>
+                        Buka WA ➔ Titik Tiga (⋮) ➔ <b>Perangkat Tertaut</b> ➔ <b>Tautkan Perangkat</b>
+                      </p>
+                      <div style={{ display: 'inline-block', padding: 8, background: '#ffffff', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                        <img src={baileysStatus.qr} alt="Scan QR" style={{ width: 180, height: 180, display: 'block', margin: '0 auto' }} />
+                      </div>
+                      <div style={{ marginTop: 8 }}>
+                        <button
+                          type="button"
+                          onClick={handleStartQR}
+                          disabled={startingQR}
+                          style={{
+                            background: '#16a34a',
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '6px 12px',
+                            borderRadius: 8,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {startingQR ? 'Memperbarui...' : '🔄 Perbarui QR Code'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ fontSize: 12.5, fontWeight: 700, color: '#334155' }}>
+                        Nomor WhatsApp Belum Terhubung
+                      </div>
+                      <p style={{ fontSize: 11, color: '#64748b', margin: '4px 0 10px' }}>
+                        Tampilkan QR code untuk menghubungkan nomor sekolah secara gratis.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleStartQR}
+                        disabled={startingQR}
+                        style={{
+                          background: '#16a34a',
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '8px 14px',
+                          borderRadius: 8,
+                          fontSize: 11.5,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 5
+                        }}
+                      >
+                        <QrCode size={14} />
+                        {startingQR ? 'Menyiapkan...' : 'Tampilkan QR Code'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* FORM TOKEN IF NOT QR SCAN */}
+              {waSettings.wa_provider !== 'qr_scan' && (
+                <>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                      API Token / Secret Key
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type={showToken ? 'text' : 'password'}
+                        placeholder="Masukkan token dari dashboard provider..."
+                        value={waSettings.wa_api_token}
+                        onChange={(e) => setWaSettings({ ...waSettings, wa_api_token: e.target.value })}
+                        style={{ width: '100%', padding: '9px 36px 9px 12px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12.5 }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowToken(!showToken)}
+                        style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                      >
+                        {showToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {waSettings.wa_provider === 'generic' && (
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                        Custom Endpoint URL
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="https://api.domain.com/send-message"
+                        value={waSettings.wa_endpoint}
+                        onChange={(e) => setWaSettings({ ...waSettings, wa_endpoint: e.target.value })}
+                        style={{ width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12.5 }}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Toggles */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '10px 12px', background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={Number(waSettings.wa_auto_absen) === 1}
+                    onChange={(e) => setWaSettings({ ...waSettings, wa_auto_absen: e.target.checked ? 1 : 0 })}
+                    style={{ width: 16, height: 16 }}
+                  />
+                  Otomatis kirim saat Siswa Absen / Alpa / Izin
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={Number(waSettings.wa_auto_pelanggaran) === 1}
+                    onChange={(e) => setWaSettings({ ...waSettings, wa_auto_pelanggaran: e.target.checked ? 1 : 0 })}
+                    style={{ width: 16, height: 16 }}
+                  />
+                  Otomatis kirim saat Siswa Melanggar Tata Tertib
+                </label>
+              </div>
+
+              {/* Live Test */}
+              <div style={{ padding: '10px 12px', background: '#f0fdf4', borderRadius: 12, border: '1px solid #bbf7d0' }}>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#166534', marginBottom: 6 }}>
+                  🧪 Tes Pengiriman Langsung
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <input
+                    type="text"
+                    placeholder="08123456789"
+                    value={testPhone}
+                    onChange={(e) => setTestPhone(e.target.value)}
+                    style={{ flex: 1, padding: '7px 10px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 12 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleTestWA}
+                    disabled={testingWA}
+                    style={{
+                      background: '#16a34a',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '7px 12px',
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {testingWA ? 'Menguji...' : 'Tes Kirim'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowWASettingsModal(false)}
+                  style={{
+                    flex: 1,
+                    padding: '10px',
+                    borderRadius: 10,
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#64748b',
+                    fontWeight: 700,
+                    fontSize: 12.5,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Tutup
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingWASettings}
+                  style={{
+                    flex: 2,
+                    padding: '10px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: '#16a34a',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: 12.5,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
+                  }}
+                >
+                  {savingWASettings ? 'Menyimpan...' : 'Simpan Pengaturan'}
                 </button>
               </div>
             </form>
