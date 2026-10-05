@@ -60,15 +60,18 @@ export default function AdminSettingsTab() {
 
   useEffect(() => {
     let interval = null;
-    if (settings.wa_provider === 'qr_scan' && (baileysStatus.status === 'qr_ready' || startingQR)) {
+    if (
+      settings.wa_provider === 'qr_scan' &&
+      (!baileysStatus.isConnected && (baileysStatus.hasSession || baileysStatus.status === 'qr_ready' || startingQR))
+    ) {
       interval = setInterval(() => {
         fetchQRStatus();
-      }, 3000);
+      }, 2500);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [settings.wa_provider, baileysStatus.status, startingQR]);
+  }, [settings.wa_provider, baileysStatus.status, baileysStatus.hasSession, baileysStatus.isConnected, startingQR]);
 
   const fetchSekolahSettings = async () => {
     setLoading(true);
@@ -469,6 +472,55 @@ export default function AdminSettingsTab() {
                           <small style={{ display: 'block', marginTop: 8, color: '#94a3b8', fontSize: 11 }}>
                             Status otomatis terdeteksi setelah Anda scan di HP.
                           </small>
+                        </div>
+                      ) : baileysStatus.hasSession && !baileysStatus.isConnected ? (
+                        <div style={{ padding: '14px 0' }}>
+                          <RefreshCw size={26} className="spin" color="#16a34a" style={{ margin: '0 auto 8px', animation: 'spin 1s linear infinite' }} />
+                          <div style={{ fontSize: 14, fontWeight: 800, color: '#166534' }}>
+                            Menghubungkan ke WhatsApp Sekolah...
+                          </div>
+                          {baileysStatus.user?.phone && (
+                            <div style={{ fontSize: 12, fontWeight: 700, color: '#047857', marginTop: 4 }}>
+                              Nomor: +{baileysStatus.user?.phone}
+                            </div>
+                          )}
+                          <p style={{ fontSize: 11.5, color: '#64748b', margin: '6px 0 12px' }}>
+                            Sesi tersimpan ditemukan. Menghubungkan ulang ke server WhatsApp...
+                          </p>
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
+                            <button
+                              type="button"
+                              onClick={fetchQRStatus}
+                              style={{
+                                background: '#f1f5f9',
+                                color: '#475569',
+                                border: '1px solid #cbd5e1',
+                                padding: '6px 12px',
+                                borderRadius: 8,
+                                fontSize: 11.5,
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Cek Ulang
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleStartQR}
+                              style={{
+                                background: '#16a34a',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '6px 12px',
+                                borderRadius: 8,
+                                fontSize: 11.5,
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Tampilkan QR Baru
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <div>

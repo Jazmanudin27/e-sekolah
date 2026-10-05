@@ -83,6 +83,9 @@ async function initBaileys(forceRestart = false) {
           phone,
           name: sock?.user?.name || 'Nomor Resmi Sekolah'
         };
+        try {
+          fs.writeFileSync(path.join(SESSIONS_DIR, 'session_info.json'), JSON.stringify(connectedUser));
+        } catch (e) {}
         console.log(`[WA Gateway] Terhubung dengan nomor: ${phone}`);
       }
 
@@ -96,7 +99,6 @@ async function initBaileys(forceRestart = false) {
         if (isLoggedOut) {
           connectionStatus = 'disconnected';
           connectedUser = null;
-          // Clean up session folder
           clearSessionFiles();
         } else {
           connectionStatus = 'disconnected';
@@ -104,7 +106,7 @@ async function initBaileys(forceRestart = false) {
           clearTimeout(reconnectTimeout);
           reconnectTimeout = setTimeout(() => {
             initBaileys();
-          }, 4000);
+          }, 3000);
         }
       }
     });
@@ -202,26 +204,45 @@ async function sendBaileysMessage(phoneNumber, messageText) {
   }
 }
 
+function getSavedUser() {
+  try {
+    const infoPath = path.join(SESSIONS_DIR, 'session_info.json');
+    if (fs.existsSync(infoPath)) {
+      return JSON.parse(fs.readFileSync(infoPath, 'utf8'));
+    }
+  } catch (e) {}
+  return null;
+}
+
 /**
  * Get current Gateway status
  */
 function getBaileysStatus() {
+  const credsPath = path.join(SESSIONS_DIR, 'creds.json');
+  const hasCreds = fs.existsSync(credsPath);
+  const user = connectedUser || (hasCreds ? getSavedUser() : null);
+
+  // If credentials exist but not connected and not initializing, trigger reconnect immediately in background
+  if (hasCreds && connectionStatus === 'disconnected' && !isInitializing) {
+    initBaileys().catch(() => {});
+  }
+
   return {
     status: connectionStatus,
     qr: currentQR,
-    user: connectedUser,
+    user,
+    hasSession: hasCreds,
     isConnected: connectionStatus === 'connected'
   };
 }
 
-// Auto-check on module load: if credentials exist, reconnect in background after 3s
-setTimeout(() => {
-  try {
-    if (fs.existsSync(SESSIONS_DIR) && fs.readdirSync(SESSIONS_DIR).length > 0) {
-      initBaileys();
-    }
-  } catch (e) {}
-}, 3000);
+// Auto-check on module load: if credentials exist, reconnect immediately in background
+try {
+  const credsPath = path.join(SESSIONS_DIR, 'creds.json');
+  if (fs.existsSync(credsPath)) {
+    initBaileys().catch(() => {});
+  }
+} catch (e) {}
 
 module.exports = {
   initBaileys,

@@ -88,16 +88,20 @@ export default function PelanggaranView({ user, showToast }) {
 
   useEffect(() => {
     let interval = null;
-    if (showWASettingsModal && waSettings.wa_provider === 'qr_scan' && (baileysStatus.status === 'qr_ready' || startingQR)) {
+    if (
+      showWASettingsModal &&
+      waSettings.wa_provider === 'qr_scan' &&
+      (!baileysStatus.isConnected && (baileysStatus.hasSession || baileysStatus.status === 'qr_ready' || startingQR))
+    ) {
       fetchQRStatus();
       interval = setInterval(() => {
         fetchQRStatus();
-      }, 3000);
+      }, 2500);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [showWASettingsModal, waSettings.wa_provider, baileysStatus.status, startingQR]);
+  }, [showWASettingsModal, waSettings.wa_provider, baileysStatus.status, baileysStatus.hasSession, baileysStatus.isConnected, startingQR]);
 
   const [formData, setFormData] = useState({
     kode_siswa: '',
@@ -1316,6 +1320,52 @@ export default function PelanggaranView({ user, showToast }) {
                           }}
                         >
                           {startingQR ? 'Memperbarui...' : '🔄 Perbarui QR Code'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : baileysStatus.hasSession && !baileysStatus.isConnected ? (
+                    <div style={{ padding: '10px 0' }}>
+                      <RefreshCw size={24} className="spin" color="#16a34a" style={{ margin: '0 auto 6px', animation: 'spin 1s linear infinite' }} />
+                      <div style={{ fontSize: 13, fontWeight: 800, color: '#166534' }}>
+                        Menghubungkan ke WhatsApp...
+                      </div>
+                      {baileysStatus.user?.phone && (
+                        <div style={{ fontSize: 11.5, color: '#047857', marginTop: 2 }}>
+                          +{baileysStatus.user?.phone}
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 8 }}>
+                        <button
+                          type="button"
+                          onClick={fetchQRStatus}
+                          style={{
+                            background: '#f1f5f9',
+                            color: '#475569',
+                            border: '1px solid #cbd5e1',
+                            padding: '5px 10px',
+                            borderRadius: 6,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Cek Ulang
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleStartQR}
+                          style={{
+                            background: '#16a34a',
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '5px 10px',
+                            borderRadius: 6,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Tampilkan QR
                         </button>
                       </div>
                     </div>
