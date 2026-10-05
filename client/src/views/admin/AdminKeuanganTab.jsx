@@ -1954,8 +1954,7 @@ export default function AdminKeuanganTab() {
                     </div>
                   </div>
                 ) : (
-                  /* TIPE BULANAN FORM FIELDS */
-                                      {/* MODE SELECTION */}
+                  <>
                     <div className="form-group-admin" style={{ marginBottom: 16 }}>
                       <label>Mode Generasi Tagihan *</label>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 4 }}>
@@ -2003,7 +2002,6 @@ export default function AdminKeuanganTab() {
                       </div>
                     </div>
 
-                    {/* RENDER DYNAMIC INPUTS BASED ON MODE */}
                     {genFormData.mode === 'RANGE' ? (
                       <div style={{ background: '#ffffff', padding: 16, borderRadius: 10, border: '1px solid #bae6fd', marginBottom: 16 }}>
                         <div style={{ fontSize: 13, fontWeight: 800, color: '#0369a1', marginBottom: 12 }}>
@@ -2078,7 +2076,8 @@ export default function AdminKeuanganTab() {
                         </div>
                       </div>
                     )}
-                                  )}
+                  </>
+                )}
 
                 {/* FILTER KELAS */}
                 <div className="form-group-admin" style={{ marginBottom: 20 }}>
