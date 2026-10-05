@@ -33,10 +33,12 @@ router.put('/transaksi/:id', authenticateToken, keuanganController.updateTransak
 router.delete('/transaksi/:id', authenticateToken, keuanganController.cancelTransaksi);
 
 const bniWebhookController = require('../controllers/bniWebhook.controller');
+const briWebhookController = require('../controllers/briWebhook.controller');
 
 // --- WEBHOOK PAYMENT GATEWAY (Public Endpoint) ---
 router.post('/webhook/midtrans', keuanganController.handleWebhookMidtrans);
 router.post('/webhook/bni', bniWebhookController.handleBniWebhook);
+router.post('/webhook/bri', briWebhookController.handleBriWebhook);
 router.post('/v1.0/transfer-va/payment-notify', bniWebhookController.handleBniWebhook);
 
 // --- REKAP & LAPORAN ---
