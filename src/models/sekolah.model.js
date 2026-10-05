@@ -1,3 +1,5 @@
+const { query } = require('../config/database');
+
 let columnsEnsured = false;
 
 class SekolahModel {
