@@ -1,7 +1,7 @@
 {
-  "short_name": "E-Sekolah",
-  "name": "SIARTAS E-Sekolah Mobile Presensi",
-  "description": "Sistem Informasi & Presensi SMK Artanita",
+  "short_name": "Sekolah",
+  "name": "Ruang",
+  "description": "Aplikasi Presensi dan Sistem Informasi Sekolah Digital",
   "icons": [
     {
       "src": "/logo.png",
@@ -16,9 +16,13 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/",
+  "start_url": "https://mobile.sistemiartas.com/",
   "background_color": "#071633",
   "theme_color": "#071633",
   "display": "standalone",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "id": "com.ruang.sekolah",
+  "categories": [
+    "education"
+  ]
 }

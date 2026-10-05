@@ -7,3 +7,9 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 whatsapp_sessions/
+jdk-17/
+android-build/
+android-sdk/
+*.keystore
+*.aab
+*.apk
