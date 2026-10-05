@@ -237,12 +237,14 @@ async function createMidtransSnapToken(req, res, next) {
     });
 
     // 2. Buat Snap Token di Midtrans Gateway
+    const finishUrl = req.headers.origin ? `${req.headers.origin}/` : (req.headers.referer || process.env.MIDTRANS_FINISH_URL || 'https://sekolah.aspartech.com/');
     const snapResult = await midtransService.createSnapTransaction({
       orderId,
       grossAmount: totalNominal,
       customerName: siswa.nama_siswa,
       email: siswa.email || 'siswa@artanita.sch.id',
-      items
+      items,
+      finishUrl
     });
 
     sendSuccess(res, 'Midtrans Snap Token berhasil dibuat.', snapResult, 201);

@@ -16,7 +16,7 @@ class MidtransService {
   /**
    * Create Snap Payment Transaction & Get Snap Token + Redirect URL
    */
-  async createSnapTransaction({ orderId, grossAmount, customerName = 'Siswa', email = '', items = [] }) {
+  async createSnapTransaction({ orderId, grossAmount, customerName = 'Siswa', email = '', items = [], finishUrl }) {
     const payload = {
       transaction_details: {
         order_id: orderId || `INV-MID-${Date.now()}`,
@@ -31,7 +31,7 @@ class MidtransService {
         'gopay', 'qris', 'shopeepay', 'other_va'
       ],
       callbacks: {
-        finish: process.env.MIDTRANS_FINISH_URL || 'https://mobile.sistemiartas.com/'
+        finish: finishUrl || process.env.MIDTRANS_FINISH_URL || 'https://sekolah.aspartech.com/'
       }
     };
 
