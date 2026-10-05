@@ -1519,14 +1519,6 @@ export default function AdminKeuanganTab() {
                   <button type="button" className="btn-outline-admin" onClick={fetchAllTagihanList} title="Refresh">
                     <RefreshCw size={14} />
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleDeleteBatchTagihan}
-                    style={{ padding: '6px 10px', borderRadius: 6, background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                    title="Hapus Tagihan UNPAID Masal Sesuai Filter"
-                  >
-                    <Trash2 size={13} style={{ marginRight: 4 }} /> Hapus Masal
-                  </button>
                 </div>
               </div>
             </div>
@@ -1543,19 +1535,18 @@ export default function AdminKeuanganTab() {
                     <th style={{ textAlign: 'right' }}>Nominal Tagihan</th>
                     <th style={{ textAlign: 'right' }}>Terbayar / Sisa</th>
                     <th style={{ textAlign: 'center' }}>Status</th>
-                    <th style={{ textAlign: 'center', width: 100 }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {isLoadingAllTagihan ? (
                     <tr>
-                      <td colSpan={8} style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
                         Memuat data tagihan...
                       </td>
                     </tr>
                   ) : allTagihanList.length === 0 ? (
                     <tr>
-                      <td colSpan={8} style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '30px 0', color: '#64748b' }}>
                         Tidak ada data tagihan ditemukan.
                       </td>
                     </tr>
@@ -1599,26 +1590,6 @@ export default function AdminKeuanganTab() {
                             >
                               {t.status}
                             </span>
-                          </td>
-                          <td style={{ textAlign: 'center' }}>
-                            <div style={{ display: 'inline-flex', gap: 6 }}>
-                              <button
-                                type="button"
-                                onClick={() => handleOpenEditTagihan(t)}
-                                style={{ padding: '5px 8px', borderRadius: 6, background: '#fef3c7', color: '#d97706', border: '1px solid #fcd34d', cursor: 'pointer' }}
-                                title="Edit Nominal / Tanggal Tagihan"
-                              >
-                                <Edit2 size={14} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteSingleTagihan(t)}
-                                style={{ padding: '5px 8px', borderRadius: 6, background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', cursor: 'pointer' }}
-                                title="Hapus Tagihan Ini"
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
                           </td>
                         </tr>
                       );
