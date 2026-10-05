@@ -29,7 +29,10 @@ class MidtransService {
       enabled_payments: [
         'bni_va', 'bca_va', 'bri_va', 'mandiri_va', 'permata_va',
         'gopay', 'qris', 'shopeepay', 'other_va'
-      ]
+      ],
+      callbacks: {
+        finish: process.env.MIDTRANS_FINISH_URL || 'https://mobile.sistemiartas.com/'
+      }
     };
 
     if (items && items.length > 0) {
