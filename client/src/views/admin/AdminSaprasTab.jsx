@@ -307,7 +307,7 @@ export default function AdminSaprasTab() {
             onClick={() => { setActiveSubTab('fasilitas'); setFilterKondisi('ALL'); }}
             style={{ fontSize: 13, padding: '7px 15px' }}
           >
-            <Building2 size={15} /> Fasilitas Ruangan ({data.fasilitas?.length || 25})
+            <Building2 size={15} /> Fasilitas Ruangan ({data.fasilitas?.length ?? 0})
           </button>
           <button
             type="button"
@@ -315,7 +315,7 @@ export default function AdminSaprasTab() {
             onClick={() => { setActiveSubTab('sarana'); setFilterKondisi('ALL'); }}
             style={{ fontSize: 13, padding: '7px 15px' }}
           >
-            <Box size={15} /> Sarana & Prasarana ({data.sarana?.length || 31})
+            <Box size={15} /> Sarana & Prasarana ({data.sarana?.length ?? 0})
           </button>
           <button
             type="button"
@@ -323,7 +323,7 @@ export default function AdminSaprasTab() {
             onClick={() => { setActiveSubTab('tanah'); setFilterKondisi('ALL'); }}
             style={{ fontSize: 13, padding: '7px 15px' }}
           >
-            <Layers size={15} /> Penggunaan Tanah ({data.tanah?.length || 3})
+            <Layers size={15} /> Penggunaan Tanah ({data.tanah?.length ?? 0})
           </button>
         </div>
 

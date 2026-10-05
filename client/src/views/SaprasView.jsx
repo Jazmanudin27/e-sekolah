@@ -276,8 +276,8 @@ export default function SaprasView({ user, showToast }) {
             border: '1px solid rgba(255, 255, 255, 0.18)'
           }}>
             <div style={{ fontSize: 10.5, opacity: 0.9, fontWeight: 600 }}>Fasilitas</div>
-            <div style={{ fontSize: 18, fontWeight: 900, marginTop: 2 }}>{data.fasilitas?.length || 25}</div>
-            <div style={{ fontSize: 9.5, opacity: 0.8 }}>45 Unit Ruang</div>
+            <div style={{ fontSize: 18, fontWeight: 900, marginTop: 2 }}>{data.fasilitas?.length ?? 0}</div>
+            <div style={{ fontSize: 9.5, opacity: 0.8 }}>{data.stats?.totalUnitFasilitas ?? 0} Unit Ruang</div>
           </div>
 
           {/* Stat 2 */}
@@ -290,8 +290,8 @@ export default function SaprasView({ user, showToast }) {
             border: '1px solid rgba(255, 255, 255, 0.18)'
           }}>
             <div style={{ fontSize: 10.5, opacity: 0.9, fontWeight: 600 }}>Sarana</div>
-            <div style={{ fontSize: 18, fontWeight: 900, marginTop: 2 }}>{data.sarana?.length || 31}</div>
-            <div style={{ fontSize: 9.5, opacity: 0.8 }}>494 Item Baik</div>
+            <div style={{ fontSize: 18, fontWeight: 900, marginTop: 2 }}>{data.sarana?.length ?? 0}</div>
+            <div style={{ fontSize: 9.5, opacity: 0.8 }}>{data.stats?.totalBaikSarana ?? 0} Item Baik</div>
           </div>
 
           {/* Stat 3 */}
@@ -304,7 +304,7 @@ export default function SaprasView({ user, showToast }) {
             border: '1px solid rgba(255, 255, 255, 0.18)'
           }}>
             <div style={{ fontSize: 10.5, opacity: 0.9, fontWeight: 600 }}>Luas Lahan</div>
-            <div style={{ fontSize: 18, fontWeight: 900, marginTop: 2 }}>1.032</div>
+            <div style={{ fontSize: 18, fontWeight: 900, marginTop: 2 }}>{data.stats?.totalLuasTanah ?? 0}</div>
             <div style={{ fontSize: 9.5, opacity: 0.8 }}>Meter Persegi</div>
           </div>
         </div>
@@ -341,7 +341,7 @@ export default function SaprasView({ user, showToast }) {
           }}
         >
           <Building2 size={15} />
-          <span>Fasilitas ({data.fasilitas?.length || 25})</span>
+          <span>Fasilitas ({data.fasilitas?.length ?? 0})</span>
         </button>
 
         <button
@@ -366,7 +366,7 @@ export default function SaprasView({ user, showToast }) {
           }}
         >
           <Box size={15} />
-          <span>Sarana ({data.sarana?.length || 31})</span>
+          <span>Sarana ({data.sarana?.length ?? 0})</span>
         </button>
 
         <button
@@ -391,7 +391,7 @@ export default function SaprasView({ user, showToast }) {
           }}
         >
           <Layers size={15} />
-          <span>Lahan ({data.tanah?.length || 3})</span>
+          <span>Lahan ({data.tanah?.length ?? 0})</span>
         </button>
       </div>
 
@@ -448,10 +448,10 @@ export default function SaprasView({ user, showToast }) {
         {activeSubTab === 'fasilitas' && (
           <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
             {[
-              { id: 'ALL', label: 'Semua', count: data.fasilitas?.length || 25 },
-              { id: 'BAIK', label: 'Baik', count: data.stats?.fasilitasKondisi?.baik || 14 },
-              { id: 'CUKUP BAIK', label: 'Cukup Baik', count: data.stats?.fasilitasKondisi?.cukupBaik || 10 },
-              { id: 'CUKUP', label: 'Cukup', count: data.stats?.fasilitasKondisi?.cukup || 1 }
+              { id: 'ALL', label: 'Semua', count: data.fasilitas?.length ?? 0 },
+              { id: 'BAIK', label: 'Baik', count: data.stats?.fasilitasKondisi?.baik ?? 0 },
+              { id: 'CUKUP BAIK', label: 'Cukup Baik', count: data.stats?.fasilitasKondisi?.cukupBaik ?? 0 },
+              { id: 'CUKUP', label: 'Cukup', count: data.stats?.fasilitasKondisi?.cukup ?? 0 }
             ].map(f => (
               <button
                 key={f.id}

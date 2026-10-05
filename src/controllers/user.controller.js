@@ -3,7 +3,8 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 
 async function getAllUsers(req, res, next) {
   try {
-    const users = await UserModel.findAll();
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const users = await UserModel.findAll(kode_member);
     sendSuccess(res, 'Data pengguna admin berhasil diambil.', users, 200, { count: users.length });
   } catch (error) {
     next(error);
@@ -25,7 +26,8 @@ async function getUserById(req, res, next) {
 
 async function createUser(req, res, next) {
   try {
-    const id = await UserModel.create(req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member;
+    const id = await UserModel.create({ ...req.body, kode_member });
     sendSuccess(res, 'User admin berhasil ditambahkan.', { id }, 201);
   } catch (error) {
     next(error);

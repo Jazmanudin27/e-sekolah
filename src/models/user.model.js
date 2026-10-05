@@ -153,11 +153,18 @@ class UserModel {
     }
   }
 
-  static async findAll() {
+  static async findAll(kode_member = null) {
     const { tableName, columns } = await resolveUserTableInfo();
     const idCol = columns.includes('id_user') ? 'id_user' : 'id';
     try {
-      const rows = await query(`SELECT * FROM \`${tableName}\` ORDER BY \`${idCol}\` ASC`);
+      let sql = `SELECT * FROM \`${tableName}\``;
+      const params = [];
+      if (kode_member && columns.includes('kode_member')) {
+        sql += ' WHERE kode_member = ?';
+        params.push(kode_member);
+      }
+      sql += ` ORDER BY \`${idCol}\` ASC`;
+      const rows = await query(sql, params);
       return rows.map(r => ({
         id: r[idCol] || r.id,
         name: r.name || r.nama || r.username || 'User',
@@ -165,6 +172,7 @@ class UserModel {
         email: r.email || r.user_email || '-',
         role: r.role || r.level || 'Admin',
         status: r.status || 'Active',
+        kode_member: r.kode_member || null,
         created_at: r.created_at,
         updated_at: r.updated_at
       }));
@@ -174,9 +182,15 @@ class UserModel {
     }
   }
 
-  static async create({ name, username, email, password, role = 'admin', status = 'active' }) {
+  static async create({ name, username, email, password, role = 'admin', status = 'active', kode_member = null }) {
     const { tableName, columns } = await resolveUserTableInfo();
     try {
+      if (!columns.includes('kode_member')) {
+        try {
+          await query(`ALTER TABLE \`${tableName}\` ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL`);
+          columns.push('kode_member');
+        } catch (e) {}
+      }
       const insertData = {};
       if (columns.includes('name')) insertData.name = name || username;
       if (columns.includes('nama')) insertData.nama = name || username;
@@ -188,6 +202,7 @@ class UserModel {
       if (columns.includes('role')) insertData.role = role;
       if (columns.includes('level')) insertData.level = role;
       if (columns.includes('status')) insertData.status = status;
+      if (columns.includes('kode_member')) insertData.kode_member = kode_member || null;
 
       const keys = Object.keys(insertData);
       if (keys.length > 0) {
