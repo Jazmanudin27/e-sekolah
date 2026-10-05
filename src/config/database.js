@@ -13,6 +13,13 @@ const TENANT_CONFIGS = {
     password: 'Jazman@271998',
     database: 'artanita'
   },
+  'mobile.sistemiartas.com': {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT, 10) || 3306,
+    user: 'artanita',
+    password: 'Jazman@271998',
+    database: 'artanita'
+  },
   'demosekolah.devorme.site': {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT, 10) || 3306,
@@ -35,7 +42,7 @@ function getTenantConfig(domain) {
   if (cleanDomain.includes('demosekolah') || cleanDomain.includes('devorme')) {
     return TENANT_CONFIGS['demosekolah.devorme.site'];
   }
-  if (cleanDomain.includes('artanita') || cleanDomain.includes('aspartech')) {
+  if (cleanDomain.includes('artanita') || cleanDomain.includes('aspartech') || cleanDomain.includes('sistemiartas')) {
     return TENANT_CONFIGS['sekolah.aspartech.com'];
   }
 
