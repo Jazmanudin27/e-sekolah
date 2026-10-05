@@ -376,7 +376,6 @@ async function deleteBatchUnpaidTagihan(req, res, next) {
   }
 }
 
-module.exports = {
 async function createDanaPayment(req, res, next) {
   try {
     const { siswa_id, items = [], nominal } = req.body;
