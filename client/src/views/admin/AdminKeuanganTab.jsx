@@ -1112,13 +1112,14 @@ export default function AdminKeuanganTab() {
                                   <span
                                     className="status-badge-active"
                                     style={{
-                                      background: tr.status_transaksi === 'CANCELLED' ? '#fee2e2' : '#dcfce7',
-                                      color: tr.status_transaksi === 'CANCELLED' ? '#dc2626' : '#15803d'
+                                      background: tr.status_transaksi === 'CANCELLED' || tr.status_transaksi === 'EXPIRED' || tr.status_transaksi === 'FAILED' ? '#fee2e2' : (tr.status_transaksi === 'PENDING' ? '#fef3c7' : '#dcfce7'),
+                                      color: tr.status_transaksi === 'CANCELLED' || tr.status_transaksi === 'EXPIRED' || tr.status_transaksi === 'FAILED' ? '#dc2626' : (tr.status_transaksi === 'PENDING' ? '#d97706' : '#15803d'),
+                                      border: tr.status_transaksi === 'CANCELLED' || tr.status_transaksi === 'EXPIRED' || tr.status_transaksi === 'FAILED' ? '1px solid #fca5a5' : (tr.status_transaksi === 'PENDING' ? '1px solid #fcd34d' : '1px solid #86efac')
                                     }}
                                   >
                                     {tr.status_transaksi || 'SUCCESS'}
                                   </span>
-                                   {tr.status_transaksi === 'CANCELLED' && tr.alasan_batal && (
+                                   {(tr.status_transaksi === 'CANCELLED' || tr.status_transaksi === 'EXPIRED' || tr.alasan_batal) && tr.alasan_batal && (
                                      <div style={{ fontSize: 11, color: '#dc2626', marginTop: 4, fontWeight: 600 }}>
                                        Alasan: {tr.alasan_batal}
                                      </div>
@@ -2274,13 +2275,14 @@ export default function AdminKeuanganTab() {
                             <span
                               className="status-badge-active"
                               style={{
-                                background: tr.status_transaksi === 'CANCELLED' ? '#fee2e2' : '#dcfce7',
-                                color: tr.status_transaksi === 'CANCELLED' ? '#dc2626' : '#15803d'
+                                background: tr.status_transaksi === 'CANCELLED' || tr.status_transaksi === 'EXPIRED' || tr.status_transaksi === 'FAILED' ? '#fee2e2' : (tr.status_transaksi === 'PENDING' ? '#fef3c7' : '#dcfce7'),
+                                      color: tr.status_transaksi === 'CANCELLED' || tr.status_transaksi === 'EXPIRED' || tr.status_transaksi === 'FAILED' ? '#dc2626' : (tr.status_transaksi === 'PENDING' ? '#d97706' : '#15803d'),
+                                      border: tr.status_transaksi === 'CANCELLED' || tr.status_transaksi === 'EXPIRED' || tr.status_transaksi === 'FAILED' ? '1px solid #fca5a5' : (tr.status_transaksi === 'PENDING' ? '1px solid #fcd34d' : '1px solid #86efac')
                               }}
                             >
                               {tr.status_transaksi || 'SUCCESS'}
                             </span>
-                            {tr.status_transaksi === 'CANCELLED' && tr.alasan_batal && (
+                            {(tr.status_transaksi === 'CANCELLED' || tr.status_transaksi === 'EXPIRED' || tr.alasan_batal) && tr.alasan_batal && (
                               <div style={{ fontSize: 11, color: '#dc2626', marginTop: 4, fontWeight: 600 }}>
                                 Alasan: {tr.alasan_batal}
                               </div>

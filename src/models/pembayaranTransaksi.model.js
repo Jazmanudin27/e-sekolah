@@ -124,6 +124,14 @@ class PembayaranTransaksiModel {
    * Create Online Pending Transaction (e.g. Midtrans SNAP) with status 'PENDING'
    */
   static async createOnlinePendingTransaction({ order_id, siswa_id, total_bayar, items = [], metode_pembayaran = 'MIDTRANS' }) {
+    // Auto-expire previous uncompleted PENDING transactions for this student
+    if (siswa_id) {
+      await query(
+        "UPDATE pembayaran_transaksi SET status_transaksi = 'EXPIRED', alasan_batal = 'Digantikan transaksi baru' WHERE siswa_id = ? AND status_transaksi = 'PENDING'",
+        [siswa_id]
+      );
+    }
+
     const sqlHeader = `
       INSERT INTO pembayaran_transaksi (no_transaksi, reference_no, siswa_id, total_bayar, metode_pembayaran, channel_pembayaran, status_transaksi)
       VALUES (?, ?, ?, ?, ?, 'ONLINE_GATEWAY', 'PENDING')
