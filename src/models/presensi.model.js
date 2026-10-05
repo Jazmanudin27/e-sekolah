@@ -1,6 +1,12 @@
 const { query } = require('../config/database');
 
 class PresensiModel {
+  static async ensureColumns() {
+    try {
+      await query("ALTER TABLE presensi ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL");
+    } catch (e) {}
+  }
+
   static async findByGuruAndDate(kode_guru, tanggal) {
     const rows = await query(
       'SELECT * FROM presensi WHERE kode_guru = ? AND tanggal = ? LIMIT 1',
@@ -9,12 +15,13 @@ class PresensiModel {
     return rows[0] || null;
   }
 
-  static async createCheckIn({ kode_guru, tanggal, jam_in, lokasi_in, foto_in }) {
+  static async createCheckIn({ kode_guru, tanggal, jam_in, lokasi_in, foto_in, kode_member }) {
+    await this.ensureColumns();
     const now = new Date();
     const result = await query(
-      `INSERT INTO presensi (kode_guru, tanggal, jam_in, lokasi_in, foto_in, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [kode_guru, tanggal, jam_in, lokasi_in || null, foto_in || null, now, now]
+      `INSERT INTO presensi (kode_guru, tanggal, jam_in, lokasi_in, foto_in, kode_member, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [kode_guru, tanggal, jam_in, lokasi_in || null, foto_in || null, kode_member || null, now, now]
     );
     return result.insertId;
   }
@@ -28,7 +35,8 @@ class PresensiModel {
     );
   }
 
-  static async getHistory({ kode_guru, bulan, tahun, limit = 50 }) {
+  static async getHistory({ kode_guru, bulan, tahun, limit = 50, kode_member }) {
+    await this.ensureColumns();
     let sql = `
       SELECT 
         p.id,
@@ -54,6 +62,10 @@ class PresensiModel {
     `;
     const params = [];
 
+    if (kode_member) {
+      sql += ' AND (p.kode_member = ? OR g.kode_member = ?)';
+      params.push(kode_member, kode_member);
+    }
     if (kode_guru) {
       sql += ` AND (
         CONVERT(p.kode_guru USING utf8mb4) = CONVERT(? USING utf8mb4)
@@ -81,8 +93,15 @@ class PresensiModel {
     return await query(sql, params);
   }
 
-  static async countToday(tanggal) {
-    const rows = await query('SELECT COUNT(*) AS total FROM presensi WHERE tanggal = ?', [tanggal]);
+  static async countToday(tanggal, kode_member = null) {
+    await this.ensureColumns();
+    let sql = 'SELECT COUNT(*) AS total FROM presensi p LEFT JOIN guru g ON p.kode_guru = g.kode_guru WHERE p.tanggal = ?';
+    const params = [tanggal];
+    if (kode_member) {
+      sql += ' AND (p.kode_member = ? OR g.kode_member = ?)';
+      params.push(kode_member, kode_member);
+    }
+    const rows = await query(sql, params);
     return rows[0].total || 0;
   }
 }

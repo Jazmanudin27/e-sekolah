@@ -94,11 +94,19 @@ class KalenderModel {
     }
   }
 
-  static async getAll({ tahun_ajaran = '2026/2027', semester, bulan, tahun, kategori }) {
+  static async getAll({ tahun_ajaran = '2026/2027', semester, bulan, tahun, kategori, kode_member }) {
     await this.ensureTable();
+    try {
+      await query("ALTER TABLE kalender_pendidikan ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL");
+    } catch (e) {}
+
     let sql = 'SELECT * FROM kalender_pendidikan WHERE 1=1';
     const params = [];
 
+    if (kode_member) {
+      sql += ' AND (kode_member IS NULL OR kode_member = ?)';
+      params.push(kode_member);
+    }
     if (tahun_ajaran) {
       sql += ' AND tahun_ajaran = ?';
       params.push(tahun_ajaran);

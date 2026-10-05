@@ -114,7 +114,8 @@ async function checkIn(req, res, next) {
       tanggal: today,
       jam_in: timeNow,
       lokasi_in: finalLokasi,
-      foto_in: foto
+      foto_in: foto,
+      kode_member
     });
 
     sendSuccess(res, 'Presensi masuk berhasil dicatat.', {
@@ -193,17 +194,19 @@ async function checkOut(req, res, next) {
 async function getHistory(req, res, next) {
   try {
     const { kode_guru } = req.user;
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
     const { bulan, tahun, limit = 30 } = req.query;
 
     const userRole = String(req.user?.role || req.user?.level || '').toLowerCase();
     const isFullAccess = ['admin', 'superadmin', 'kepala sekolah', 'kepala_sekolah', 'kepsek', 'tu', 'operator'].includes(userRole);
-    const teacherId = isFullAccess ? (req.query.kode_guru || kode_guru) : kode_guru;
+    const teacherId = isFullAccess ? (req.query.kode_guru || null) : kode_guru;
 
     const records = await PresensiModel.getHistory({
       kode_guru: teacherId,
       bulan,
       tahun,
-      limit
+      limit,
+      kode_member
     });
 
     sendSuccess(res, 'Riwayat presensi berhasil diambil.', records, 200, { count: records.length });

@@ -38,7 +38,7 @@ class PembayaranTransaksiModel {
     }
   }
 
-  static async findAll({ siswa_id = null, status = null, limit = 50 }) {
+  static async findAll({ siswa_id = null, status = null, limit = 50, kode_member = null }) {
     await this.ensureColumns().catch(() => {});
     const { selectKasir, joinClause } = await getUserQueryParts();
     let sql = `
@@ -50,6 +50,10 @@ class PembayaranTransaksiModel {
     `;
     const params = [];
 
+    if (kode_member) {
+      sql += ' AND s.kode_member = ?';
+      params.push(kode_member);
+    }
     if (siswa_id) {
       sql += ' AND tr.siswa_id = ?';
       params.push(siswa_id);

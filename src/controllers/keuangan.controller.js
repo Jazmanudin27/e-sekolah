@@ -128,6 +128,7 @@ async function getTagihanSiswa(req, res, next) {
 async function generateTagihan(req, res, next) {
   try {
     const { mode = 'SINGLE', tarif_id, bulan, tahun, bulan_mulai, tahun_mulai, bulan_selesai, tahun_selesai, kode_kelas, tanggal_jatuh_tempo } = req.body;
+    const kode_member = req.user?.kode_member || req.body?.kode_member;
     if (!tarif_id) {
       return sendError(res, 'tarif_id wajib diisi.', 400);
     }
@@ -144,7 +145,8 @@ async function generateTagihan(req, res, next) {
         bulan_selesai,
         tahun_selesai,
         kode_kelas,
-        tanggal_jatuh_tempo
+        tanggal_jatuh_tempo,
+        kode_member
       });
     } else {
       if (!tahun) {
@@ -166,7 +168,8 @@ async function generateTagihan(req, res, next) {
         bulan: bulan || null,
         tahun,
         kode_kelas,
-        tanggal_jatuh_tempo
+        tanggal_jatuh_tempo,
+        kode_member
       });
     }
 
@@ -202,10 +205,11 @@ async function payCash(req, res, next) {
 async function getAllTransaksi(req, res, next) {
   try {
     let { siswa_id, status, limit } = req.query;
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
     if (req.user && (req.user.type === 'Siswa' || req.user.type === 'Ortu')) {
       siswa_id = req.user.kode_siswa;
     }
-    const list = await PembayaranTransaksiModel.findAll({ siswa_id, status, limit });
+    const list = await PembayaranTransaksiModel.findAll({ siswa_id, status, limit, kode_member });
     sendSuccess(res, 'Daftar transaksi berhasil diambil.', list);
   } catch (error) {
     next(error);
@@ -335,7 +339,8 @@ async function createBniVa(req, res, next) {
 async function getRekapTunggakan(req, res, next) {
   try {
     const { kode_kelas } = req.query;
-    const list = await TagihanSiswaModel.getRekapTunggakan(kode_kelas);
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const list = await TagihanSiswaModel.getRekapTunggakan(kode_kelas, kode_member);
     sendSuccess(res, 'Rekapitulasi tunggakan siswa berhasil diambil.', list);
   } catch (error) {
     next(error);
@@ -347,7 +352,8 @@ async function getRekapTunggakan(req, res, next) {
 async function getAllTagihan(req, res, next) {
   try {
     const { search, pos_id, kode_kelas, bulan, tahun, status, limit } = req.query;
-    const list = await TagihanSiswaModel.getAllTagihan({ search, pos_id, kode_kelas, bulan, tahun, status, limit });
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const list = await TagihanSiswaModel.getAllTagihan({ search, pos_id, kode_kelas, bulan, tahun, status, limit, kode_member });
     sendSuccess(res, 'Daftar tagihan berhasil diambil.', list);
   } catch (error) {
     next(error);

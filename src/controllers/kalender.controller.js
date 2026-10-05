@@ -4,7 +4,8 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 async function getKalender(req, res, next) {
   try {
     const { tahun_ajaran, semester, bulan, tahun, kategori } = req.query;
-    const events = await KalenderModel.getAll({ tahun_ajaran, semester, bulan, tahun, kategori });
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const events = await KalenderModel.getAll({ tahun_ajaran, semester, bulan, tahun, kategori, kode_member });
     sendSuccess(res, 'Data kalender pendidikan berhasil diambil.', events, 200, { total: events.length });
   } catch (error) {
     next(error);

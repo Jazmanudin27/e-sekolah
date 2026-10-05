@@ -139,7 +139,10 @@ class TagihanSiswaModel {
   /**
    * Auto generate tagihan SPP / Bebas untuk siswa berdasarkan tarif & override beasiswa
    */
-  static async autoGenerateInvoices({ tarif_id, bulan = null, tahun = null, kode_kelas = null, tanggal_jatuh_tempo = null }) {
+  /**
+   * Auto generate tagihan SPP / Bebas untuk siswa berdasarkan tarif & override beasiswa
+   */
+  static async autoGenerateInvoices({ tarif_id, bulan = null, tahun = null, kode_kelas = null, tanggal_jatuh_tempo = null, kode_member = null }) {
     // 1. Get tarif details
     const tarifRows = await query(
       'SELECT t.*, p.tipe AS tipe_pos FROM tarif_pembayaran t JOIN pos_pembayaran p ON t.pos_id = p.id WHERE t.id = ?',
@@ -151,6 +154,10 @@ class TagihanSiswaModel {
     // 2. Get active students
     let siswaSql = "SELECT s.* FROM siswa s LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas WHERE (s.status = 'Aktif' OR s.status IS NULL OR s.status = '')";
     const siswaParams = [];
+    if (kode_member) {
+      siswaSql += ' AND s.kode_member = ?';
+      siswaParams.push(kode_member);
+    }
     if (kode_kelas) {
       siswaSql += ' AND (s.kode_kelas = ? OR k.nama_kelas = ?)';
       siswaParams.push(kode_kelas, kode_kelas);
@@ -225,7 +232,8 @@ class TagihanSiswaModel {
     bulan_selesai,
     tahun_selesai,
     kode_kelas = null,
-    tanggal_jatuh_tempo = null
+    tanggal_jatuh_tempo = null,
+    kode_member = null
   }) {
     const tarifRows = await query(
       'SELECT t.*, p.tipe AS tipe_pos FROM tarif_pembayaran t JOIN pos_pembayaran p ON t.pos_id = p.id WHERE t.id = ?',
@@ -237,7 +245,8 @@ class TagihanSiswaModel {
         bulan: null,
         tahun: tahun_mulai || new Date().getFullYear(),
         kode_kelas,
-        tanggal_jatuh_tempo
+        tanggal_jatuh_tempo,
+        kode_member
       });
     }
 
@@ -261,7 +270,8 @@ class TagihanSiswaModel {
         bulan: curM,
         tahun: curY,
         kode_kelas,
-        tanggal_jatuh_tempo
+        tanggal_jatuh_tempo,
+        kode_member
       });
 
       totalSiswa = res.total_siswa;
@@ -283,7 +293,7 @@ class TagihanSiswaModel {
 
   // --- REKAPITULASI & LAPORAN ---
 
-  static async getRekapTunggakan(kode_kelas = null) {
+  static async getRekapTunggakan(kode_kelas = null, kode_member = null) {
     let sql = `
       SELECT 
         s.kode_siswa, s.nama_siswa, s.nis, k.nama_kelas,
@@ -296,6 +306,10 @@ class TagihanSiswaModel {
     `;
     const params = [];
 
+    if (kode_member) {
+      sql += ' AND s.kode_member = ?';
+      params.push(kode_member);
+    }
     if (kode_kelas) {
       sql += ' AND s.kode_kelas = ?';
       params.push(kode_kelas);
@@ -307,7 +321,7 @@ class TagihanSiswaModel {
 
   // --- KELOLA & MANAGEMENT TAGIHAN ---
 
-  static async getAllTagihan({ search = '', pos_id = '', kode_kelas = '', bulan = '', tahun = '', status = '', limit = 100 }) {
+  static async getAllTagihan({ search = '', pos_id = '', kode_kelas = '', bulan = '', tahun = '', status = '', limit = 100, kode_member = null }) {
     let sql = `
       SELECT t.*, s.nama_siswa, s.nis, s.kode_kelas, k.nama_kelas, p.nama_pos, p.tipe AS tipe_pos
       FROM tagihan_siswa t
@@ -319,6 +333,10 @@ class TagihanSiswaModel {
     `;
     const params = [];
 
+    if (kode_member) {
+      sql += ' AND s.kode_member = ?';
+      params.push(kode_member);
+    }
     if (search && String(search).trim()) {
       sql += ' AND (s.nama_siswa LIKE ? OR s.nis LIKE ? OR t.kode_tagihan LIKE ?)';
       const q = `%${String(search).trim()}%`;

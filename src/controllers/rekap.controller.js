@@ -4,11 +4,12 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 async function getRekapSiswa(req, res, next) {
   try {
     const { bulan, tahun, kode_kelas } = req.query;
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
     const effectiveKodeKelas = (req.user && req.user.type === 'Kelas' && req.user.kode_kelas) 
       ? req.user.kode_kelas 
       : kode_kelas;
 
-    const records = await RekapModel.getRekapSiswa({ bulan, tahun, kode_kelas: effectiveKodeKelas });
+    const records = await RekapModel.getRekapSiswa({ bulan, tahun, kode_kelas: effectiveKodeKelas, kode_member });
     sendSuccess(res, 'Laporan rekap absensi siswa berhasil diambil.', records, 200, { count: records.length });
   } catch (error) {
     next(error);
@@ -18,11 +19,12 @@ async function getRekapSiswa(req, res, next) {
 async function getRekapMapel(req, res, next) {
   try {
     const { bulan, tahun, kode_kelas, kode_mapel } = req.query;
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
     const effectiveKodeKelas = (req.user && req.user.type === 'Kelas' && req.user.kode_kelas) 
       ? req.user.kode_kelas 
       : kode_kelas;
 
-    const records = await RekapModel.getRekapMapel({ bulan, tahun, kode_kelas: effectiveKodeKelas, kode_mapel });
+    const records = await RekapModel.getRekapMapel({ bulan, tahun, kode_kelas: effectiveKodeKelas, kode_mapel, kode_member });
     sendSuccess(res, 'Laporan rekap absensi mata pelajaran berhasil diambil.', records, 200, { count: records.length });
   } catch (error) {
     next(error);
@@ -32,7 +34,8 @@ async function getRekapMapel(req, res, next) {
 async function getRekapGuru(req, res, next) {
   try {
     const { bulan, tahun, kode_guru } = req.query;
-    let records = await RekapModel.getRekapGuru({ bulan, tahun });
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    let records = await RekapModel.getRekapGuru({ bulan, tahun, kode_member });
 
     const userRole = String(req.user?.role || req.user?.level || '').toLowerCase();
     const isFullAccess = ['admin', 'superadmin', 'kepala sekolah', 'kepala_sekolah', 'kepsek', 'tu', 'operator'].includes(userRole);

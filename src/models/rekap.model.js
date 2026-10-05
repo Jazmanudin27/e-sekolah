@@ -5,7 +5,7 @@ class RekapModel {
    * Rekapitulasi Presensi Siswa
    * Returns ALL students from master table 'siswa' (filtered by class if provided)
    */
-  static async getRekapSiswa({ bulan, tahun, kode_kelas }) {
+  static async getRekapSiswa({ bulan, tahun, kode_kelas, kode_member }) {
     try {
       const aParams = [];
       let dateWhereA = '';
@@ -23,6 +23,10 @@ class RekapModel {
 
       const params = [...aParams];
       let mainWhere = 'WHERE 1=1';
+      if (kode_member) {
+        mainWhere += ' AND s.kode_member = ?';
+        params.push(kode_member);
+      }
       if (kode_kelas) {
         mainWhere += ' AND s.kode_kelas = ?';
         params.push(kode_kelas);
@@ -78,6 +82,10 @@ class RekapModel {
         WHERE 1=1 ${dateWhereA}
       `;
       const fbParams = [...aParams];
+      if (kode_member) {
+        fallbackSql += ' AND a.kode_member = ?';
+        fbParams.push(kode_member);
+      }
       if (kode_kelas) {
         fallbackSql += ' AND a.kode_kelas = ?';
         fbParams.push(kode_kelas);
@@ -96,7 +104,7 @@ class RekapModel {
    * Rekapitulasi Presensi Mapel
    * Returns ALL students from master table 'siswa' (filtered by class and mapel if provided)
    */
-  static async getRekapMapel({ bulan, tahun, kode_kelas, kode_mapel }) {
+  static async getRekapMapel({ bulan, tahun, kode_kelas, kode_mapel, kode_member }) {
     try {
       const aParams = [];
       let dateWhereA = '';
@@ -123,6 +131,10 @@ class RekapModel {
       params.push(...aParams);
 
       let mainWhere = 'WHERE 1=1';
+      if (kode_member) {
+        mainWhere += ' AND s.kode_member = ?';
+        params.push(kode_member);
+      }
       if (kode_kelas) {
         mainWhere += ' AND s.kode_kelas = ?';
         params.push(kode_kelas);
@@ -181,6 +193,10 @@ class RekapModel {
         WHERE 1=1 ${dateWhereA}
       `;
       const fbParams = [...aParams];
+      if (kode_member) {
+        fallbackSql += ' AND a.kode_member = ?';
+        fbParams.push(kode_member);
+      }
       if (kode_kelas) {
         fallbackSql += ' AND a.kode_kelas = ?';
         fbParams.push(kode_kelas);
@@ -199,7 +215,7 @@ class RekapModel {
    * Rekapitulasi Presensi Guru
    * Returns ALL teachers from master table 'guru' and attendance tables
    */
-  static async getRekapGuru({ bulan, tahun } = {}) {
+  static async getRekapGuru({ bulan, tahun, kode_member } = {}) {
     try {
       const currentD = new Date();
       const effBulan = bulan !== undefined && bulan !== '' ? parseInt(bulan, 10) : (currentD.getMonth() + 1);
@@ -228,6 +244,11 @@ class RekapModel {
       }
 
       const params = [...pParams, ...iParams];
+      let gWhere = 'WHERE 1=1';
+      if (kode_member) {
+        gWhere += ' AND g.kode_member = ?';
+        params.push(kode_member);
+      }
 
       // Optimized single-pass query directly from master table 'guru'
       const sqlPrimary = `
@@ -251,6 +272,7 @@ class RekapModel {
               OR CONVERT(i.user_id USING utf8mb4) = CONVERT(g.nip_nuptk USING utf8mb4) 
               OR CONVERT(i.nama_pengaju USING utf8mb4) = CONVERT(g.nama_guru USING utf8mb4))
           ${iWhere}
+        ${gWhere}
         GROUP BY g.kode_guru, g.nama_guru, g.nip_nuptk, g.status_kepegawaian
         ORDER BY g.nama_guru ASC
       `;
@@ -261,7 +283,7 @@ class RekapModel {
       }
 
       // Fallback directly from presensi table if master table 'guru' is empty
-      const sqlFallback = `
+      let sqlFallback = `
         SELECT 
           p.kode_guru,
           COALESCE(g.nama_guru, CONCAT('Guru #', p.kode_guru)) AS nama_guru,
@@ -278,10 +300,14 @@ class RekapModel {
           OR CONVERT(p.kode_guru USING utf8mb4) = CONVERT(g.nip_nuptk USING utf8mb4)
         )
         WHERE 1=1 ${pWhere}
-        GROUP BY p.kode_guru, g.nama_guru, g.nip_nuptk, g.status_kepegawaian
-        ORDER BY nama_guru ASC
       `;
-      return await query(sqlFallback, pParams);
+      const fbPParams = [...pParams];
+      if (kode_member) {
+        sqlFallback += ' AND p.kode_member = ?';
+        fbPParams.push(kode_member);
+      }
+      sqlFallback += ' GROUP BY p.kode_guru, g.nama_guru, g.nip_nuptk, g.status_kepegawaian ORDER BY nama_guru ASC';
+      return await query(sqlFallback, fbPParams);
 
     } catch (e) {
       console.error('[RekapModel.getRekapGuru] Error:', e.message);
