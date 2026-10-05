@@ -245,6 +245,30 @@ async function updateTransaksi(req, res, next) {
   }
 }
 
+async function createBniVa(req, res, next) {
+  try {
+    const { siswa_id, nominal } = req.body;
+    const bniSnapService = require('../services/bniSnap.service');
+    const { query } = require('../config/database');
+
+    const siswaRows = await query('SELECT * FROM siswa WHERE kode_siswa = ?', [siswa_id]);
+    if (!siswaRows || siswaRows.length === 0) return sendError(res, 'Siswa tidak ditemukan', 404);
+    const siswa = siswaRows[0];
+
+    const vaNo = String(siswa.nis || siswa.kode_siswa).replace(/[^0-9]/g, '');
+    const vaResult = await bniSnapService.createVirtualAccount({
+      vaNumber: vaNo,
+      customerName: siswa.nama_siswa,
+      amount: nominal || 350000,
+      description: `Tagihan SPP ${siswa.nama_siswa}`
+    });
+
+    sendSuccess(res, 'Virtual Account BNI berhasil dibuat.', vaResult, 201);
+  } catch (error) {
+    next(error);
+  }
+}
+
 // --- LAPORAN & REKAP CONTROLLERS ---
 
 async function getRekapTunggakan(req, res, next) {
@@ -317,6 +341,7 @@ module.exports = {
   deleteBatchUnpaidTagihan,
   generateTagihan,
   payCash,
+  createBniVa,
   getAllTransaksi,
   getTransaksiDetail,
   cancelTransaksi,
