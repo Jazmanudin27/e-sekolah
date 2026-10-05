@@ -1,10 +1,14 @@
 const { query } = require('../config/database');
 
 class AbsensiSiswaModel {
-  static async findAll({ tanggal, kode_kelas, kode_siswa, siswa_id }) {
+  static async findAll({ tanggal, kode_kelas, kode_siswa, siswa_id, kode_member }) {
     let sql = 'SELECT * FROM absensi_siswa WHERE 1=1';
     const params = [];
 
+    if (kode_member) {
+      sql += ' AND kode_member = ?';
+      params.push(kode_member);
+    }
     if (tanggal) {
       sql += ' AND (DATE(tanggal) = DATE(?) OR tanggal = ?)';
       params.push(tanggal, tanggal);

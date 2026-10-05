@@ -4,7 +4,8 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 async function getJadwal(req, res, next) {
   try {
     const { hari, kode_kelas, kode_guru } = req.query;
-    const schedules = await JadwalModel.findSchedules({ hari, kode_kelas, kode_guru });
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const schedules = await JadwalModel.findSchedules({ hari, kode_kelas, kode_guru, kode_member });
     sendSuccess(res, 'Data jadwal pelajaran berhasil diambil.', schedules, 200, { count: schedules.length });
   } catch (error) {
     next(error);

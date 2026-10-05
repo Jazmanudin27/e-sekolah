@@ -58,7 +58,7 @@ class PelanggaranModel {
       const params = [];
 
       if (kode_member) {
-        sql += ' AND (p.kode_member = ? OR p.kode_member IS NULL)';
+        sql += ' AND p.kode_member = ?';
         params.push(kode_member);
       }
 
@@ -232,7 +232,7 @@ class PelanggaranModel {
       const params = [];
 
       if (kode_member) {
-        sql += ' AND (p.kode_member = ? OR p.kode_member IS NULL)';
+        sql += ' AND p.kode_member = ?';
         params.push(kode_member);
       }
 
@@ -267,7 +267,7 @@ class PelanggaranModel {
       `;
       const params = [];
       if (kode_member) {
-        sql += ' AND (kode_member = ? OR kode_member IS NULL)';
+        sql += ' AND kode_member = ?';
         params.push(kode_member);
       }
 

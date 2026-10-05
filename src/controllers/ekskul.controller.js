@@ -5,7 +5,8 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 
 async function getAllEkskul(req, res, next) {
   try {
-    const list = await EkskulModel.findAll();
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const list = await EkskulModel.findAll(kode_member);
     sendSuccess(res, 'Data ekstrakurikuler berhasil diambil.', list, 200, { count: list.length });
   } catch (error) {
     next(error);
@@ -16,7 +17,8 @@ async function createEkskul(req, res, next) {
   try {
     const { nama_ekskul, pembina } = req.body;
     if (!nama_ekskul) return sendError(res, 'Nama ekskul wajib diisi.', 400);
-    const id = await EkskulModel.create({ nama_ekskul, pembina });
+    const kode_member = req.user?.kode_member || req.body?.kode_member;
+    const id = await EkskulModel.create({ nama_ekskul, pembina, kode_member });
     sendSuccess(res, 'Ekstrakurikuler berhasil ditambahkan.', { id }, 201);
   } catch (error) {
     next(error);

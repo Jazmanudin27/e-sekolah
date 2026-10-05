@@ -32,11 +32,13 @@ async function getAbsensiSiswa(req, res, next) {
     const effectiveKodeKelas = (req.user && req.user.type === 'Kelas' && req.user.kode_kelas) 
       ? req.user.kode_kelas 
       : kode_kelas;
+    const kode_member = await getKodeMember(req);
 
     const records = await AbsensiSiswaModel.findAll({
       tanggal,
       kode_kelas: effectiveKodeKelas,
-      kode_siswa: effectiveKodeSiswa
+      kode_siswa: effectiveKodeSiswa,
+      kode_member
     });
     sendSuccess(res, 'Data absensi harian siswa berhasil diambil.', records, 200, { count: records.length });
   } catch (error) {

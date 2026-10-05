@@ -28,10 +28,10 @@ const TAHUN_OPTIONS = ['2024', '2025', '2026', '2027'];
 export default function AdminDashboardTab({ onSwitchTab }) {
   const currentDateObj = new Date();
   const [stats, setStats] = useState({
-    aktif: 158,
+    aktif: 0,
     tidakAktif: 0,
-    lakiLaki: 57,
-    perempuan: 101
+    lakiLaki: 0,
+    perempuan: 0
   });
 
   // Filter States for Rekap Absensi
@@ -101,10 +101,10 @@ export default function AdminDashboardTab({ onSwitchTab }) {
         const perempuan = allSiswa.filter(isPerempuan).length;
 
         setStats({
-          aktif: aktif || 158,
-          tidakAktif: tidakAktif || 0,
-          lakiLaki: lakiLaki || 57,
-          perempuan: perempuan || 101
+          aktif: aktif,
+          tidakAktif: tidakAktif,
+          lakiLaki: lakiLaki,
+          perempuan: perempuan
         });
       }
     } catch (e) {
@@ -125,23 +125,7 @@ export default function AdminDashboardTab({ onSwitchTab }) {
       const siswaList = resSiswa.data?.success && Array.isArray(resSiswa.data.data) ? resSiswa.data.data : [];
       const rekapList = resRekap.data?.success && Array.isArray(resRekap.data.data) ? resRekap.data.data : [];
 
-      // Fallback default classes if DB empty
-      const defaultClassNames = [
-        { kode_kelas: '1', nama_kelas: 'X AKL', jurusan: 'AKL' },
-        { kode_kelas: '2', nama_kelas: 'X MPLB', jurusan: 'MPLB' },
-        { kode_kelas: '3', nama_kelas: 'X PM', jurusan: 'PM' },
-        { kode_kelas: '4', nama_kelas: 'X PPLG', jurusan: 'PPLG' },
-        { kode_kelas: '5', nama_kelas: 'XI AKL', jurusan: 'AKL' },
-        { kode_kelas: '6', nama_kelas: 'XI MPLB', jurusan: 'MPLB' },
-        { kode_kelas: '7', nama_kelas: 'XI PM', jurusan: 'PM' },
-        { kode_kelas: '8', nama_kelas: 'XI PPLG', jurusan: 'PPLG' },
-        { kode_kelas: '9', nama_kelas: 'XII AKL', jurusan: 'AKL' },
-        { kode_kelas: '10', nama_kelas: 'XII MPLG', jurusan: 'MPLG' },
-        { kode_kelas: '11', nama_kelas: 'XII PM', jurusan: 'PM' },
-        { kode_kelas: '12', nama_kelas: 'XII PPLG', jurusan: 'PPLG' }
-      ];
-
-      const classesToProcess = kelasList.length > 0 ? kelasList : defaultClassNames;
+      const classesToProcess = kelasList;
 
       // Group per class
       const processedRows = classesToProcess.map((k, index) => {

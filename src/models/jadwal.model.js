@@ -1,7 +1,7 @@
 const { query } = require('../config/database');
 
 class JadwalModel {
-  static async findSchedules({ hari, kode_kelas, kode_guru }) {
+  static async findSchedules({ hari, kode_kelas, kode_guru, kode_member }) {
     let sql = `
       SELECT j.kode_jadwal, j.hari, j.kode_jam, jj.jam_ke, jj.jam,
              j.kode_kelas, k.nama_kelas, k.jurusan,
@@ -17,6 +17,10 @@ class JadwalModel {
     `;
     const params = [];
 
+    if (kode_member) {
+      sql += ' AND (k.kode_member = ? OR g.kode_member = ?)';
+      params.push(kode_member, kode_member);
+    }
     if (hari) {
       sql += ' AND j.hari = ?';
       params.push(hari);

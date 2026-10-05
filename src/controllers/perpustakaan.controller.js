@@ -5,7 +5,8 @@ class PerpustakaanController {
   static async getAllBuku(req, res) {
     try {
       const { search, kategori, lokasi_rak } = req.query;
-      const data = await PerpustakaanModel.getAllBuku({ search, kategori, lokasi_rak });
+      const kode_member = req.user?.kode_member || req.query?.kode_member;
+      const data = await PerpustakaanModel.getAllBuku({ search, kategori, lokasi_rak, kode_member });
       res.json({ success: true, data });
     } catch (error) {
       console.error('Error getAllBuku:', error);
@@ -67,7 +68,8 @@ class PerpustakaanController {
   static async getAllPeminjaman(req, res) {
     try {
       const { search, status, peminjam_type, date_from, date_to } = req.query;
-      const data = await PerpustakaanModel.getAllPeminjaman({ search, status, peminjam_type, date_from, date_to });
+      const kode_member = req.user?.kode_member || req.query?.kode_member;
+      const data = await PerpustakaanModel.getAllPeminjaman({ search, status, peminjam_type, date_from, date_to, kode_member });
       res.json({ success: true, data });
     } catch (error) {
       console.error('Error getAllPeminjaman:', error);
@@ -81,7 +83,8 @@ class PerpustakaanController {
       if (!buku_id || !peminjam_id || !nama_peminjam || !tgl_pinjam || !tgl_tenggat) {
         return res.status(400).json({ success: false, message: 'Mohon lengkapi semua field peminjaman' });
       }
-      const insertId = await PerpustakaanModel.createPeminjaman(req.body);
+      const kode_member = req.user?.kode_member || req.body?.kode_member;
+      const insertId = await PerpustakaanModel.createPeminjaman({ ...req.body, kode_member });
       res.status(201).json({ success: true, message: 'Transaksi peminjaman berhasil dicatat', insertId });
     } catch (error) {
       console.error('Error createPeminjaman:', error);
@@ -114,7 +117,8 @@ class PerpustakaanController {
   // ============ STATISTIK ============
   static async getStats(req, res) {
     try {
-      const data = await PerpustakaanModel.getStats();
+      const kode_member = req.user?.kode_member || req.query?.kode_member;
+      const data = await PerpustakaanModel.getStats(kode_member);
       res.json({ success: true, data });
     } catch (error) {
       console.error('Error getStats:', error);

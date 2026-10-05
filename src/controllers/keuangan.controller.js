@@ -8,7 +8,8 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 
 async function getAllPos(req, res, next) {
   try {
-    const list = await PosPembayaranModel.findAll();
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const list = await PosPembayaranModel.findAll(kode_member);
     sendSuccess(res, 'Daftar pos pembayaran berhasil diambil.', list);
   } catch (error) {
     next(error);
@@ -21,7 +22,8 @@ async function createPos(req, res, next) {
     if (!kode_pos || !nama_pos) {
       return sendError(res, 'Kode pos dan Nama pos wajib diisi.', 400);
     }
-    const id = await PosPembayaranModel.create({ kode_pos, nama_pos, tipe, deskripsi });
+    const kode_member = req.user?.kode_member || req.body?.kode_member;
+    const id = await PosPembayaranModel.create({ kode_pos, nama_pos, tipe, deskripsi, kode_member });
     sendSuccess(res, 'Pos pembayaran berhasil dibuat.', { id, kode_pos, nama_pos }, 201);
   } catch (error) {
     next(error);
@@ -53,7 +55,8 @@ async function deletePos(req, res, next) {
 async function getAllTarif(req, res, next) {
   try {
     const { pos_id, tahun_ajaran } = req.query;
-    const list = await TarifPembayaranModel.findAll({ pos_id, tahun_ajaran });
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const list = await TarifPembayaranModel.findAll({ pos_id, tahun_ajaran, kode_member });
     sendSuccess(res, 'Daftar tarif pembayaran berhasil diambil.', list);
   } catch (error) {
     next(error);

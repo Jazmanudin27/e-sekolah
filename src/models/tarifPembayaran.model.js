@@ -14,7 +14,7 @@ class TarifPembayaranModel {
     }
   }
 
-  static async findAll({ pos_id = null, tahun_ajaran = null }) {
+  static async findAll({ pos_id = null, tahun_ajaran = null, kode_member = null } = {}) {
     await this.ensureColumns().catch(() => {});
     let sql = `
       SELECT t.*, p.nama_pos, p.tipe, k.nama_kelas
@@ -25,6 +25,10 @@ class TarifPembayaranModel {
     `;
     const params = [];
 
+    if (kode_member) {
+      sql += ' AND (p.kode_member = ? OR k.kode_member = ? OR t.kode_member = ?)';
+      params.push(kode_member, kode_member, kode_member);
+    }
     if (pos_id) {
       sql += ' AND t.pos_id = ?';
       params.push(pos_id);

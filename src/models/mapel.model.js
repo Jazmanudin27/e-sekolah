@@ -10,13 +10,26 @@ class MapelModel {
     } catch (e) {}
   }
 
-  static async findAll() {
+  static async findAll(kode_member = null) {
     await this.ensureColumns();
-    return await query('SELECT kode_mapel, nama_mapel, singkatan, kkm, kelompok FROM mapel ORDER BY nama_mapel ASC');
+    let sql = 'SELECT kode_mapel, nama_mapel, singkatan, kkm, kelompok, kode_member FROM mapel';
+    const params = [];
+    if (kode_member) {
+      sql += ' WHERE kode_member = ?';
+      params.push(kode_member);
+    }
+    sql += ' ORDER BY nama_mapel ASC';
+    return await query(sql, params);
   }
 
-  static async countAll() {
-    const rows = await query('SELECT COUNT(*) AS total FROM mapel');
+  static async countAll(kode_member = null) {
+    let sql = 'SELECT COUNT(*) AS total FROM mapel';
+    const params = [];
+    if (kode_member) {
+      sql += ' WHERE kode_member = ?';
+      params.push(kode_member);
+    }
+    const rows = await query(sql, params);
     return rows[0].total || 0;
   }
 

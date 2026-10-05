@@ -159,15 +159,22 @@ class SaprasModel {
   // ==========================================
   // FASILITAS METHODS
   // ==========================================
-  static async getAllFasilitas() {
-    return await query('SELECT * FROM sapras_fasilitas ORDER BY no_urut ASC, id ASC');
+  static async getAllFasilitas(kode_member = null) {
+    let sql = 'SELECT * FROM sapras_fasilitas';
+    const params = [];
+    if (kode_member) {
+      sql += ' WHERE kode_member = ?';
+      params.push(kode_member);
+    }
+    sql += ' ORDER BY no_urut ASC, id ASC';
+    return await query(sql, params);
   }
 
   static async createFasilitas(data) {
-    const { no_urut, fasilitas, jumlah, keterangan } = data;
+    const { no_urut, fasilitas, jumlah, keterangan, kode_member } = data;
     const result = await query(
-      'INSERT INTO sapras_fasilitas (no_urut, fasilitas, jumlah, keterangan) VALUES (?, ?, ?, ?)',
-      [no_urut || 99, fasilitas, jumlah || 1, keterangan || 'BAIK']
+      'INSERT INTO sapras_fasilitas (no_urut, fasilitas, jumlah, keterangan, kode_member) VALUES (?, ?, ?, ?, ?)',
+      [no_urut || 99, fasilitas, jumlah || 1, keterangan || 'BAIK', kode_member || null]
     );
     return result.insertId;
   }
@@ -189,15 +196,22 @@ class SaprasModel {
   // ==========================================
   // SARANA PRASARANA METHODS
   // ==========================================
-  static async getAllSarana() {
-    return await query('SELECT * FROM sapras_sarana ORDER BY no_urut ASC, id ASC');
+  static async getAllSarana(kode_member = null) {
+    let sql = 'SELECT * FROM sapras_sarana';
+    const params = [];
+    if (kode_member) {
+      sql += ' WHERE kode_member = ?';
+      params.push(kode_member);
+    }
+    sql += ' ORDER BY no_urut ASC, id ASC';
+    return await query(sql, params);
   }
 
   static async createSarana(data) {
-    const { no_urut, jenis_sapras, jumlah, baik, rusak, keterangan } = data;
+    const { no_urut, jenis_sapras, jumlah, baik, rusak, keterangan, kode_member } = data;
     const result = await query(
-      'INSERT INTO sapras_sarana (no_urut, jenis_sapras, jumlah, baik, rusak, keterangan) VALUES (?, ?, ?, ?, ?, ?)',
-      [no_urut || 99, jenis_sapras, jumlah || 1, baik !== undefined ? baik : (jumlah || 1), rusak || 0, keterangan || null]
+      'INSERT INTO sapras_sarana (no_urut, jenis_sapras, jumlah, baik, rusak, keterangan, kode_member) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [no_urut || 99, jenis_sapras, jumlah || 1, baik !== undefined ? baik : (jumlah || 1), rusak || 0, keterangan || null, kode_member || null]
     );
     return result.insertId;
   }
@@ -219,15 +233,22 @@ class SaprasModel {
   // ==========================================
   // PENGGUNAAN TANAH METHODS
   // ==========================================
-  static async getAllTanah() {
-    return await query('SELECT * FROM sapras_tanah ORDER BY no_urut ASC, id ASC');
+  static async getAllTanah(kode_member = null) {
+    let sql = 'SELECT * FROM sapras_tanah';
+    const params = [];
+    if (kode_member) {
+      sql += ' WHERE kode_member = ?';
+      params.push(kode_member);
+    }
+    sql += ' ORDER BY no_urut ASC, id ASC';
+    return await query(sql, params);
   }
 
   static async createTanah(data) {
-    const { no_urut, penggunaan_tanah, luas_tanah, satuan, keterangan } = data;
+    const { no_urut, penggunaan_tanah, luas_tanah, satuan, keterangan, kode_member } = data;
     const result = await query(
-      'INSERT INTO sapras_tanah (no_urut, penggunaan_tanah, luas_tanah, satuan, keterangan) VALUES (?, ?, ?, ?, ?)',
-      [no_urut || 99, penggunaan_tanah, luas_tanah || 0, satuan || 'M2', keterangan || null]
+      'INSERT INTO sapras_tanah (no_urut, penggunaan_tanah, luas_tanah, satuan, keterangan, kode_member) VALUES (?, ?, ?, ?, ?, ?)',
+      [no_urut || 99, penggunaan_tanah, luas_tanah || 0, satuan || 'M2', keterangan || null, kode_member || null]
     );
     return result.insertId;
   }

@@ -220,7 +220,7 @@ class KenaikanAlumniModel {
   /**
    * Ambil daftar Alumni
    */
-  static async getAlumniList({ search, tahun_lulus, limit = 100, offset = 0 }) {
+  static async getAlumniList({ search, tahun_lulus, limit = 100, offset = 0, kode_member }) {
     await this.ensureSchema();
 
     let sql = `
@@ -234,6 +234,10 @@ class KenaikanAlumniModel {
     `;
     const params = [];
 
+    if (kode_member) {
+      sql += ' AND s.kode_member = ?';
+      params.push(kode_member);
+    }
     if (tahun_lulus && tahun_lulus !== 'ALL') {
       sql += ' AND s.tahun_lulus = ?';
       params.push(tahun_lulus);
@@ -280,23 +284,48 @@ class KenaikanAlumniModel {
   /**
    * Ambil Riwayat Kenaikan & Kelulusan
    */
-  static async getRiwayat(limit = 100) {
+  static async getRiwayat(limit = 100, kode_member = null) {
     await this.ensureSchema();
-    return await query(
-      'SELECT * FROM riwayat_kenaikan_siswa ORDER BY id DESC LIMIT ?',
-      [Number(limit)]
-    );
+    let sql = 'SELECT * FROM riwayat_kenaikan_siswa';
+    const params = [];
+    if (kode_member) {
+      sql += ' WHERE kode_member = ?';
+      params.push(kode_member);
+    }
+    sql += ' ORDER BY id DESC LIMIT ?';
+    params.push(Number(limit));
+    return await query(sql, params);
   }
 
   /**
    * Ambil ringkasan statistik siswa & alumni
    */
-  static async getStatistik() {
+  static async getStatistik(kode_member = null) {
     await this.ensureSchema();
-    const [aktifRows] = await query("SELECT COUNT(*) AS total FROM siswa WHERE status = 'Aktif' OR status IS NULL");
-    const [alumniRows] = await query("SELECT COUNT(*) AS total FROM siswa WHERE status = 'Alumni'");
-    const [kelasRows] = await query('SELECT COUNT(*) AS total FROM kelas');
-    const [riwayatRows] = await query('SELECT COUNT(*) AS total FROM riwayat_kenaikan_siswa');
+    let sWhere = "WHERE (status = 'Aktif' OR status IS NULL OR status = '')";
+    let aWhere = "WHERE status = 'Alumni'";
+    let kWhere = "";
+    let rWhere = "";
+    const sParams = [];
+    const aParams = [];
+    const kParams = [];
+    const rParams = [];
+
+    if (kode_member) {
+      sWhere += " AND kode_member = ?";
+      sParams.push(kode_member);
+      aWhere += " AND kode_member = ?";
+      aParams.push(kode_member);
+      kWhere += "WHERE kode_member = ?";
+      kParams.push(kode_member);
+      rWhere += "WHERE kode_member = ?";
+      rParams.push(kode_member);
+    }
+
+    const [aktifRows] = await query(`SELECT COUNT(*) AS total FROM siswa ${sWhere}`, sParams);
+    const [alumniRows] = await query(`SELECT COUNT(*) AS total FROM siswa ${aWhere}`, aParams);
+    const [kelasRows] = await query(`SELECT COUNT(*) AS total FROM kelas ${kWhere}`, kParams);
+    const [riwayatRows] = await query(`SELECT COUNT(*) AS total FROM riwayat_kenaikan_siswa ${rWhere}`, rParams);
 
     return {
       total_aktif: aktifRows.total || 0,

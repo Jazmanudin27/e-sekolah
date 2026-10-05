@@ -2,7 +2,8 @@ const PengumumanModel = require('../models/pengumuman.model');
 
 exports.getActiveAnnouncements = async (req, res, next) => {
   try {
-    const list = await PengumumanModel.getAllActive();
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const list = await PengumumanModel.getAllActive(kode_member);
     res.json({
       success: true,
       data: list
@@ -14,7 +15,8 @@ exports.getActiveAnnouncements = async (req, res, next) => {
 
 exports.getAdminAnnouncements = async (req, res, next) => {
   try {
-    const list = await PengumumanModel.getAllAdmin();
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const list = await PengumumanModel.getAllAdmin(kode_member);
     res.json({
       success: true,
       data: list
@@ -33,7 +35,8 @@ exports.createAnnouncement = async (req, res, next) => {
         message: 'Judul dan isi pengumuman wajib diisi.'
       });
     }
-    const id = await PengumumanModel.create(req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member;
+    const id = await PengumumanModel.create({ ...req.body, kode_member });
     res.json({
       success: true,
       message: 'Pengumuman berhasil diterbitkan!',

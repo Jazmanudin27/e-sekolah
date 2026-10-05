@@ -1,14 +1,26 @@
 const { query } = require('../config/database');
 
 class PosPembayaranModel {
-  static async findAll() {
-    const sql = 'SELECT * FROM pos_pembayaran ORDER BY created_at DESC';
-    return await query(sql);
+  static async findAll(kode_member = null) {
+    let sql = 'SELECT * FROM pos_pembayaran';
+    const params = [];
+    if (kode_member) {
+      sql += ' WHERE kode_member = ?';
+      params.push(kode_member);
+    }
+    sql += ' ORDER BY created_at DESC';
+    return await query(sql, params);
   }
 
-  static async findActive() {
-    const sql = 'SELECT * FROM pos_pembayaran WHERE is_active = 1 ORDER BY nama_pos ASC';
-    return await query(sql);
+  static async findActive(kode_member = null) {
+    let sql = 'SELECT * FROM pos_pembayaran WHERE is_active = 1';
+    const params = [];
+    if (kode_member) {
+      sql += ' AND kode_member = ?';
+      params.push(kode_member);
+    }
+    sql += ' ORDER BY nama_pos ASC';
+    return await query(sql, params);
   }
 
   static async findById(id) {

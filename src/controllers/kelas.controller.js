@@ -3,7 +3,8 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 
 async function getAllKelas(req, res, next) {
   try {
-    const classes = await KelasModel.findAll();
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const classes = await KelasModel.findAll(kode_member);
     sendSuccess(res, 'Data kelas berhasil diambil.', classes, 200, { count: classes.length });
   } catch (error) {
     next(error);

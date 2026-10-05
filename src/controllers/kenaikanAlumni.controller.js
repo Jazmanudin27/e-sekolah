@@ -68,11 +68,13 @@ async function batalAlumni(req, res, next) {
 async function getAlumniList(req, res, next) {
   try {
     const { search, tahun_lulus, limit, offset } = req.query;
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
     const data = await KenaikanAlumniModel.getAlumniList({
       search,
       tahun_lulus,
       limit: limit ? Number(limit) : 100,
-      offset: offset ? Number(offset) : 0
+      offset: offset ? Number(offset) : 0,
+      kode_member
     });
     sendSuccess(res, 'Data alumni berhasil diambil.', data);
   } catch (error) {
@@ -92,7 +94,8 @@ async function getTahunLulus(req, res, next) {
 async function getRiwayat(req, res, next) {
   try {
     const limit = req.query.limit ? Number(req.query.limit) : 100;
-    const logs = await KenaikanAlumniModel.getRiwayat(limit);
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const logs = await KenaikanAlumniModel.getRiwayat(limit, kode_member);
     sendSuccess(res, 'Riwayat kenaikan dan kelulusan berhasil diambil.', logs);
   } catch (error) {
     next(error);
@@ -101,7 +104,8 @@ async function getRiwayat(req, res, next) {
 
 async function getStats(req, res, next) {
   try {
-    const stats = await KenaikanAlumniModel.getStatistik();
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const stats = await KenaikanAlumniModel.getStatistik(kode_member);
     sendSuccess(res, 'Statistik siswa dan alumni berhasil diambil.', stats);
   } catch (error) {
     next(error);

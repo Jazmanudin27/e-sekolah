@@ -5,11 +5,12 @@ class SaprasController {
   static async getSummary(req, res) {
     try {
       await SaprasModel.ensureTables();
+      const kode_member = req.user?.kode_member || req.query?.kode_member;
 
       const [fasilitas, sarana, tanah] = await Promise.all([
-        SaprasModel.getAllFasilitas(),
-        SaprasModel.getAllSarana(),
-        SaprasModel.getAllTanah()
+        SaprasModel.getAllFasilitas(kode_member),
+        SaprasModel.getAllSarana(kode_member),
+        SaprasModel.getAllTanah(kode_member)
       ]);
 
       // Metrics Fasilitas

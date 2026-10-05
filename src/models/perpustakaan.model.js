@@ -80,11 +80,15 @@ class PerpustakaanModel {
   }
 
   // ============ BUKU ============
-  static async getAllBuku({ search, kategori, lokasi_rak }) {
+  static async getAllBuku({ search, kategori, lokasi_rak, kode_member } = {}) {
     await this.ensureTables();
     let sql = 'SELECT * FROM perpustakaan_buku WHERE 1=1';
     const params = [];
 
+    if (kode_member) {
+      sql += ' AND kode_member = ?';
+      params.push(kode_member);
+    }
     if (search) {
       sql += ' AND (judul LIKE ? OR pengarang LIKE ? OR kode_buku LIKE ? OR isbn LIKE ?)';
       const s = `%${search}%`;
@@ -207,7 +211,7 @@ class PerpustakaanModel {
   }
 
   // ============ PEMINJAMAN ============
-  static async getAllPeminjaman({ search, status, peminjam_type, date_from, date_to }) {
+  static async getAllPeminjaman({ search, status, peminjam_type, date_from, date_to, kode_member } = {}) {
     await this.ensureTables();
     let sql = `
       SELECT p.*, b.judul as judul_buku, b.kode_buku, b.kategori, b.lokasi_rak
@@ -217,6 +221,10 @@ class PerpustakaanModel {
     `;
     const params = [];
 
+    if (kode_member) {
+      sql += ' AND (p.kode_member = ? OR b.kode_member = ?)';
+      params.push(kode_member, kode_member);
+    }
     if (search) {
       sql += ' AND (p.kode_transaksi LIKE ? OR p.nama_peminjam LIKE ? OR b.judul LIKE ? OR p.peminjam_id LIKE ?)';
       const s = `%${search}%`;
@@ -341,12 +349,32 @@ class PerpustakaanModel {
   }
 
   // ============ STATISTIK ============
-  static async getStats() {
+  static async getStats(kode_member = null) {
     await this.ensureTables();
-    const totalBuku = await query('SELECT COUNT(*) as total_judul, IFNULL(SUM(stok), 0) as total_eksemplar, IFNULL(SUM(tersedia), 0) as total_tersedia FROM perpustakaan_buku');
-    const activeBorrow = await query('SELECT COUNT(*) as total_dipinjam FROM perpustakaan_peminjaman WHERE status = "Dipinjam"');
-    const lateBorrow = await query('SELECT COUNT(*) as total_terlambat FROM perpustakaan_peminjaman WHERE status = "Dipinjam" AND tgl_tenggat < CURDATE()');
-    const categories = await query('SELECT kategori, COUNT(*) as count FROM perpustakaan_buku GROUP BY kategori');
+    let bWhere = '';
+    let pWhere = 'WHERE status = "Dipinjam"';
+    let lWhere = 'WHERE status = "Dipinjam" AND tgl_tenggat < CURDATE()';
+    let cWhere = '';
+    const bParams = [];
+    const pParams = [];
+    const lParams = [];
+    const cParams = [];
+
+    if (kode_member) {
+      bWhere = 'WHERE kode_member = ?';
+      bParams.push(kode_member);
+      pWhere += ' AND kode_member = ?';
+      pParams.push(kode_member);
+      lWhere += ' AND kode_member = ?';
+      lParams.push(kode_member);
+      cWhere = 'WHERE kode_member = ?';
+      cParams.push(kode_member);
+    }
+
+    const totalBuku = await query(`SELECT COUNT(*) as total_judul, IFNULL(SUM(stok), 0) as total_eksemplar, IFNULL(SUM(tersedia), 0) as total_tersedia FROM perpustakaan_buku ${bWhere}`, bParams);
+    const activeBorrow = await query(`SELECT COUNT(*) as total_dipinjam FROM perpustakaan_peminjaman ${pWhere}`, pParams);
+    const lateBorrow = await query(`SELECT COUNT(*) as total_terlambat FROM perpustakaan_peminjaman ${lWhere}`, lParams);
+    const categories = await query(`SELECT kategori, COUNT(*) as count FROM perpustakaan_buku ${cWhere} GROUP BY kategori`, cParams);
 
     return {
       total_judul: totalBuku[0]?.total_judul || 0,

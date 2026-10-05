@@ -15,7 +15,7 @@ class SiswaModel {
       const params = [];
 
       if (kode_member) {
-        sql += ' AND (s.kode_member = ? OR s.kode_member IS NULL)';
+        sql += ' AND s.kode_member = ?';
         params.push(kode_member);
       }
 
@@ -54,7 +54,7 @@ class SiswaModel {
       let sql = 'SELECT * FROM siswa WHERE 1=1';
       const params = [];
       if (kode_member) {
-        sql += ' AND (kode_member = ? OR kode_member IS NULL)';
+        sql += ' AND kode_member = ?';
         params.push(kode_member);
       }
       if (kode_kelas) {
@@ -157,7 +157,7 @@ class SiswaModel {
       let sql = 'SELECT COUNT(*) AS total FROM siswa WHERE 1=1';
       const params = [];
       if (kode_member) {
-        sql += ' AND (kode_member = ? OR kode_member IS NULL)';
+        sql += ' AND kode_member = ?';
         params.push(kode_member);
       }
       const rows = await query(sql, params);

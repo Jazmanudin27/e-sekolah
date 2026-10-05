@@ -154,12 +154,12 @@ class PenilaianModel {
   }
 
   // Get full Spreadsheet Matrix for Class & Mapel
-  static async getMatrixNilai({ mapel_id, kelas_id, tahun_ajaran = '2026/2027', semester = '1' }) {
+  static async getMatrixNilai({ mapel_id, kelas_id, tahun_ajaran = '2026/2027', semester = '1', kode_member }) {
     await this.ensureTables();
 
     // 1. Get Students in Class using SiswaModel
     const SiswaModel = require('./siswa.model');
-    const studentsRaw = await SiswaModel.findAll(kelas_id);
+    const studentsRaw = await SiswaModel.findAll(kelas_id, kode_member);
 
     const students = (studentsRaw || []).map(s => ({
       id: s.kode_siswa || s.id,
@@ -203,10 +203,10 @@ class PenilaianModel {
   }
 
   // Get Transkrip Nilai Siswa (Account Siswa)
-  static async getTranskripSiswa({ siswa_id, tahun_ajaran = '2026/2027', semester = '1' }) {
+  static async getTranskripSiswa({ siswa_id, tahun_ajaran = '2026/2027', semester = '1', kode_member }) {
     await this.ensureTables();
 
-    const sql = `
+    let sql = `
       SELECT
         m.id as mapel_id,
         m.nama_mapel,
@@ -220,10 +220,16 @@ class PenilaianModel {
         ra.nilai_uas
       FROM mapel m
       LEFT JOIN \`rapor_akhir\` ra ON m.id = ra.mapel_id AND ra.siswa_id = ? AND ra.tahun_ajaran = ? AND ra.semester = ?
-      ORDER BY m.nama_mapel ASC
+      WHERE 1=1
     `;
+    const params = [siswa_id, tahun_ajaran, semester];
+    if (kode_member) {
+      sql += ' AND m.kode_member = ?';
+      params.push(kode_member);
+    }
+    sql += ' ORDER BY m.nama_mapel ASC';
 
-    return await query(sql, [siswa_id, tahun_ajaran, semester]);
+    return await query(sql, params);
   }
 }
 

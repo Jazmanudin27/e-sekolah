@@ -23,28 +23,38 @@ class PengumumanModel {
     }
   }
 
-  static async getAllActive() {
+  static async getAllActive(kode_member = null) {
     await this.ensureTable();
-    const rows = await query(
-      `SELECT * FROM pengumuman WHERE is_active = 1 ORDER BY created_at DESC LIMIT 20`
-    );
+    let sql = 'SELECT * FROM pengumuman WHERE is_active = 1';
+    const params = [];
+    if (kode_member) {
+      sql += ' AND kode_member = ?';
+      params.push(kode_member);
+    }
+    sql += ' ORDER BY created_at DESC LIMIT 20';
+    const rows = await query(sql, params);
     return rows || [];
   }
 
-  static async getAllAdmin() {
+  static async getAllAdmin(kode_member = null) {
     await this.ensureTable();
-    const rows = await query(
-      `SELECT * FROM pengumuman ORDER BY created_at DESC`
-    );
+    let sql = 'SELECT * FROM pengumuman';
+    const params = [];
+    if (kode_member) {
+      sql += ' WHERE kode_member = ?';
+      params.push(kode_member);
+    }
+    sql += ' ORDER BY created_at DESC';
+    const rows = await query(sql, params);
     return rows || [];
   }
 
   static async create(data) {
     await this.ensureTable();
-    const { judul, kategori, isi, gambar_url, penulis, target_role, is_active } = data;
+    const { judul, kategori, isi, gambar_url, penulis, target_role, is_active, kode_member } = data;
     const res = await query(
-      `INSERT INTO pengumuman (judul, kategori, isi, gambar_url, penulis, target_role, is_active)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO pengumuman (judul, kategori, isi, gambar_url, penulis, target_role, is_active, kode_member)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         judul,
         kategori || 'Umum',
@@ -52,7 +62,8 @@ class PengumumanModel {
         gambar_url || null,
         penulis || 'Administrator',
         target_role || 'Semua',
-        is_active !== undefined ? is_active : 1
+        is_active !== undefined ? is_active : 1,
+        kode_member || null
       ]
     );
     return res ? res.insertId : null;

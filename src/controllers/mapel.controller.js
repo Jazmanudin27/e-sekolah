@@ -3,7 +3,8 @@ const { sendSuccess } = require('../utils/response.util');
 
 async function getAllMapel(req, res, next) {
   try {
-    const subjects = await MapelModel.findAll();
+    const kode_member = req.user?.kode_member || req.query?.kode_member;
+    const subjects = await MapelModel.findAll(kode_member);
     sendSuccess(res, 'Data mata pelajaran berhasil diambil.', subjects, 200, { count: subjects.length });
   } catch (error) {
     next(error);

@@ -62,7 +62,7 @@ class IzinModel {
       `;
       const params = [];
       if (targetKodeMember) {
-        sql += ` WHERE (p.kode_member = ? OR p.kode_member IS NULL)`;
+        sql += ` WHERE p.kode_member = ?`;
         params.push(targetKodeMember);
       }
       sql += ` ORDER BY p.id DESC`;

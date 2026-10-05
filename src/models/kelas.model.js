@@ -1,13 +1,19 @@
 const { query } = require('../config/database');
 
 class KelasModel {
-  static async findAll() {
-    return await query(`
-      SELECT k.kode_kelas, k.nama_kelas, k.jurusan, k.kode_guru, g.nama_guru AS wali_kelas
+  static async findAll(kode_member = null) {
+    let sql = `
+      SELECT k.kode_kelas, k.nama_kelas, k.jurusan, k.kode_guru, g.nama_guru AS wali_kelas, k.kode_member
       FROM kelas k
       LEFT JOIN guru g ON k.kode_guru = g.kode_guru
-      ORDER BY k.nama_kelas ASC
-    `);
+    `;
+    const params = [];
+    if (kode_member) {
+      sql += ' WHERE k.kode_member = ?';
+      params.push(kode_member);
+    }
+    sql += ' ORDER BY k.nama_kelas ASC';
+    return await query(sql, params);
   }
 
   static async findById(id) {
@@ -33,8 +39,14 @@ class KelasModel {
     }
   }
 
-  static async countAll() {
-    const rows = await query('SELECT COUNT(*) AS total FROM kelas');
+  static async countAll(kode_member = null) {
+    let sql = 'SELECT COUNT(*) AS total FROM kelas';
+    const params = [];
+    if (kode_member) {
+      sql += ' WHERE kode_member = ?';
+      params.push(kode_member);
+    }
+    const rows = await query(sql, params);
     return rows[0].total || 0;
   }
 

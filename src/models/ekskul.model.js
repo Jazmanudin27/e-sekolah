@@ -35,16 +35,23 @@ class EkskulModel {
 
   // ============ MASTER EKSKUL ============
 
-  static async findAll() {
+  static async findAll(kode_member = null) {
     await this.ensureTables();
-    return await query('SELECT * FROM ekstrakurikuler ORDER BY nama_ekskul ASC');
+    let sql = 'SELECT * FROM ekstrakurikuler';
+    const params = [];
+    if (kode_member) {
+      sql += ' WHERE kode_member = ?';
+      params.push(kode_member);
+    }
+    sql += ' ORDER BY nama_ekskul ASC';
+    return await query(sql, params);
   }
 
-  static async create({ nama_ekskul, pembina }) {
+  static async create({ nama_ekskul, pembina, kode_member }) {
     await this.ensureTables();
     const res = await query(
-      'INSERT INTO ekstrakurikuler (nama_ekskul, pembina) VALUES (?, ?)',
-      [nama_ekskul, pembina || null]
+      'INSERT INTO ekstrakurikuler (nama_ekskul, pembina, kode_member) VALUES (?, ?, ?)',
+      [nama_ekskul, pembina || null, kode_member || null]
     );
     return res.insertId;
   }

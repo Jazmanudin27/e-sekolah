@@ -71,11 +71,12 @@ class PenilaianController {
   static async getMatrix(req, res) {
     try {
       const { mapel_id, kelas_id, tahun_ajaran, semester } = req.query;
+      const kode_member = req.user?.kode_member || req.query?.kode_member;
       if (!mapel_id || !kelas_id) {
         return res.status(400).json({ success: false, message: 'mapel_id dan kelas_id wajib diisi' });
       }
 
-      const matrix = await PenilaianModel.getMatrixNilai({ mapel_id, kelas_id, tahun_ajaran, semester });
+      const matrix = await PenilaianModel.getMatrixNilai({ mapel_id, kelas_id, tahun_ajaran, semester, kode_member });
       return res.json({ success: true, data: matrix });
     } catch (err) {
       console.error(err);
@@ -104,12 +105,13 @@ class PenilaianController {
     try {
       const siswa_id = req.user?.siswa_id || req.user?.id || req.query.siswa_id;
       const { tahun_ajaran, semester } = req.query;
+      const kode_member = req.user?.kode_member || req.query?.kode_member;
 
       if (!siswa_id) {
         return res.status(400).json({ success: false, message: 'ID siswa tidak ditemukan' });
       }
 
-      const transkrip = await PenilaianModel.getTranskripSiswa({ siswa_id, tahun_ajaran, semester });
+      const transkrip = await PenilaianModel.getTranskripSiswa({ siswa_id, tahun_ajaran, semester, kode_member });
       return res.json({ success: true, data: transkrip });
     } catch (err) {
       console.error(err);
