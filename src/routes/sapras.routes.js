@@ -4,8 +4,8 @@ const SaprasController = require('../controllers/sapras.controller');
 const { authenticateToken } = require('../middleware/auth.middleware');
 
 // Public/App user route for summary and data viewing
-router.get('/summary', SaprasController.getSummary);
-router.get('/', SaprasController.getSummary);
+router.get('/summary', authenticateToken, SaprasController.getSummary);
+router.get('/', authenticateToken, SaprasController.getSummary);
 
 // Fasilitas CRUD
 router.post('/fasilitas', authenticateToken, SaprasController.addFasilitas);

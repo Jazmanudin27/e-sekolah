@@ -15,12 +15,13 @@ async function getJadwal(req, res, next) {
 async function saveJadwal(req, res, next) {
   try {
     const { schedules, hari, kode_jam, kode_kelas, kode_guru, kode_mapel } = req.body;
+    const kode_member = req.user?.kode_member || req.body?.kode_member;
     if (Array.isArray(schedules)) {
-      await JadwalModel.saveBatchSchedules(schedules);
+      await JadwalModel.saveBatchSchedules(schedules, kode_member);
       return sendSuccess(res, 'Batch jadwal pelajaran berhasil disimpan.', null);
     }
     if (hari && kode_jam && kode_kelas) {
-      await JadwalModel.saveSchedule({ hari, kode_jam, kode_kelas, kode_guru, kode_mapel });
+      await JadwalModel.saveSchedule({ hari, kode_jam, kode_kelas, kode_guru, kode_mapel, kode_member });
       return sendSuccess(res, 'Jadwal pelajaran berhasil diperbarui.', null);
     }
     return sendError(res, 'Parameter jadwal tidak lengkap', 400);

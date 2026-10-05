@@ -29,14 +29,14 @@ export default function SaprasView({ user, showToast }) {
     sarana: [],
     tanah: [],
     stats: {
-      totalFasilitas: 25,
-      totalUnitFasilitas: 45,
-      fasilitasKondisi: { baik: 14, cukupBaik: 10, cukup: 1, rusak: 0 },
-      totalJenisSarana: 31,
-      totalUnitSarana: 494,
-      totalBaikSarana: 494,
+      totalFasilitas: 0,
+      totalUnitFasilitas: 0,
+      fasilitasKondisi: { baik: 0, cukupBaik: 0, cukup: 0, rusak: 0 },
+      totalJenisSarana: 0,
+      totalUnitSarana: 0,
+      totalBaikSarana: 0,
       totalRusakSarana: 0,
-      totalLuasTanah: 1032
+      totalLuasTanah: 0
     }
   });
 

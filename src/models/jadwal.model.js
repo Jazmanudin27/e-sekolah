@@ -25,8 +25,8 @@ class JadwalModel {
     const params = [];
 
     if (kode_member) {
-      sql += ' AND (j.kode_member = ? OR k.kode_member = ? OR g.kode_member = ?)';
-      params.push(kode_member, kode_member, kode_member);
+      sql += ' AND (j.kode_member = ? OR (j.kode_member IS NULL AND k.kode_member = ?))';
+      params.push(kode_member, kode_member);
     }
     if (hari) {
       sql += ' AND j.hari = ?';
@@ -54,13 +54,17 @@ class JadwalModel {
     }
   }
 
-  static async saveSchedule({ hari, kode_jam, kode_kelas, kode_guru, kode_mapel }) {
+  static async saveSchedule({ hari, kode_jam, kode_kelas, kode_guru, kode_mapel, kode_member }) {
     try {
       if (!hari || !kode_jam || !kode_kelas) return null;
 
       if (!kode_guru || kode_guru === '-' || !kode_mapel || kode_mapel === '-') {
         // Clear schedule entry
-        await query('DELETE FROM jadwal WHERE hari = ? AND kode_jam = ? AND kode_kelas = ?', [hari, kode_jam, kode_kelas]);
+        if (kode_member) {
+          await query('DELETE FROM jadwal WHERE hari = ? AND kode_jam = ? AND kode_kelas = ? AND kode_member = ?', [hari, kode_jam, kode_kelas, kode_member]);
+        } else {
+          await query('DELETE FROM jadwal WHERE hari = ? AND kode_jam = ? AND kode_kelas = ?', [hari, kode_jam, kode_kelas]);
+        }
         return { message: 'Jadwal dikosongkan' };
       }
 
@@ -76,12 +80,18 @@ class JadwalModel {
       }
 
       // 2. Check if schedule exists
-      const existing = await query('SELECT kode_jadwal FROM jadwal WHERE hari = ? AND kode_jam = ? AND kode_kelas = ? LIMIT 1', [hari, kode_jam, kode_kelas]);
+      let existingSql = 'SELECT kode_jadwal FROM jadwal WHERE hari = ? AND kode_jam = ? AND kode_kelas = ?';
+      const existingParams = [hari, kode_jam, kode_kelas];
+      if (kode_member) {
+        existingSql += ' AND kode_member = ?';
+        existingParams.push(kode_member);
+      }
+      const existing = await query(existingSql, existingParams);
 
       if (existing && existing.length > 0) {
-        await query('UPDATE jadwal SET kode_guru_mapel = ? WHERE kode_jadwal = ?', [kode_guru_mapel, existing[0].kode_jadwal]);
+        await query('UPDATE jadwal SET kode_guru_mapel = ?, kode_member = COALESCE(?, kode_member) WHERE kode_jadwal = ?', [kode_guru_mapel, kode_member || null, existing[0].kode_jadwal]);
       } else {
-        await query('INSERT INTO jadwal (hari, kode_jam, kode_kelas, kode_guru_mapel) VALUES (?, ?, ?, ?)', [hari, kode_jam, kode_kelas, kode_guru_mapel]);
+        await query('INSERT INTO jadwal (hari, kode_jam, kode_kelas, kode_guru_mapel, kode_member) VALUES (?, ?, ?, ?, ?)', [hari, kode_jam, kode_kelas, kode_guru_mapel, kode_member || null]);
       }
 
       return { success: true };
@@ -91,10 +101,10 @@ class JadwalModel {
     }
   }
 
-  static async saveBatchSchedules(schedules) {
+  static async saveBatchSchedules(schedules, kode_member = null) {
     if (!Array.isArray(schedules)) return;
     for (const item of schedules) {
-      await this.saveSchedule(item);
+      await this.saveSchedule({ ...item, kode_member: item.kode_member || kode_member });
     }
     return { success: true };
   }

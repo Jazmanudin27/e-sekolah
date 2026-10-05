@@ -95,22 +95,7 @@ export default function JadwalView({ user }) {
     }
   };
 
-  const demoJadwal = [
-    { kode_jadwal: 1, hari: 'Senin', jam_ke: 1, jam: '07:30 - 09:00', nama_mapel: 'Pemrograman Web & Perangkat Bergerak', kode_kelas: '1', nama_kelas: 'X RPL 1', nama_guru: 'Citra Dewi, S.Pd.' },
-    { kode_jadwal: 2, hari: 'Senin', jam_ke: 2, jam: '09:15 - 10:45', nama_mapel: 'Basis Data Lanjutan', kode_kelas: '2', nama_kelas: 'XI RPL 2', nama_guru: 'Budi Santoso, M.Kom.' },
-    { kode_jadwal: 3, hari: 'Selasa', jam_ke: 1, jam: '07:30 - 09:00', nama_mapel: 'Administrasi Infrastruktur Jaringan', kode_kelas: '3', nama_kelas: 'XI TKJ 1', nama_guru: 'Ahmad Fauzi, S.ST.' },
-    { kode_jadwal: 4, hari: 'Rabu', jam_ke: 1, jam: '07:30 - 09:00', nama_mapel: 'Desain Grafis & Multimedia', kode_kelas: '4', nama_kelas: 'XII MM 1', nama_guru: 'Eko Prasetyo, S.Kom.' },
-    { kode_jadwal: 5, hari: 'Sabtu', jam_ke: 1, jam: '07:30 - 09:00', nama_mapel: 'Project Kreatif & Kewirausahaan', kode_kelas: '1', nama_kelas: 'X RPL 1', nama_guru: 'Citra Dewi, S.Pd.' }
-  ];
-
-  const targetKelas = isClassAccount && userClassId ? userClassId : selectedKelas;
-  const filteredDemo = demoJadwal.filter(j => {
-    const matchHari = j.hari === activeHari;
-    const matchKelas = String(j.kode_kelas) === String(targetKelas) || j.nama_kelas === targetKelas || j.nama_kelas === userClassName;
-    return matchHari && matchKelas;
-  });
-
-  const displayJadwal = jadwalList.length > 0 ? jadwalList : filteredDemo;
+  const displayJadwal = jadwalList;
 
   return (
     <div className="inner-page-wrapper" style={{ paddingBottom: 36, paddingTop: 4 }}>

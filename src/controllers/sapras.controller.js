@@ -60,10 +60,11 @@ class SaprasController {
   static async addFasilitas(req, res) {
     try {
       const { no_urut, fasilitas, jumlah, keterangan } = req.body;
+      const kode_member = req.user?.kode_member || req.body?.kode_member;
       if (!fasilitas) {
         return res.status(400).json({ success: false, message: 'Nama fasilitas wajib diisi' });
       }
-      const id = await SaprasModel.createFasilitas({ no_urut, fasilitas, jumlah, keterangan });
+      const id = await SaprasModel.createFasilitas({ no_urut, fasilitas, jumlah, keterangan, kode_member });
       res.json({ success: true, message: 'Fasilitas berhasil ditambahkan', data: { id } });
     } catch (err) {
       res.status(500).json({ success: false, message: err.message });
@@ -94,10 +95,11 @@ class SaprasController {
   static async addSarana(req, res) {
     try {
       const { no_urut, jenis_sapras, jumlah, baik, rusak, keterangan } = req.body;
+      const kode_member = req.user?.kode_member || req.body?.kode_member;
       if (!jenis_sapras) {
         return res.status(400).json({ success: false, message: 'Jenis sarana wajib diisi' });
       }
-      const id = await SaprasModel.createSarana({ no_urut, jenis_sapras, jumlah, baik, rusak, keterangan });
+      const id = await SaprasModel.createSarana({ no_urut, jenis_sapras, jumlah, baik, rusak, keterangan, kode_member });
       res.json({ success: true, message: 'Sarana & prasarana berhasil ditambahkan', data: { id } });
     } catch (err) {
       res.status(500).json({ success: false, message: err.message });
@@ -128,10 +130,11 @@ class SaprasController {
   static async addTanah(req, res) {
     try {
       const { no_urut, penggunaan_tanah, luas_tanah, satuan, keterangan } = req.body;
+      const kode_member = req.user?.kode_member || req.body?.kode_member;
       if (!penggunaan_tanah) {
         return res.status(400).json({ success: false, message: 'Penggunaan tanah wajib diisi' });
       }
-      const id = await SaprasModel.createTanah({ no_urut, penggunaan_tanah, luas_tanah, satuan, keterangan });
+      const id = await SaprasModel.createTanah({ no_urut, penggunaan_tanah, luas_tanah, satuan, keterangan, kode_member });
       res.json({ success: true, message: 'Penggunaan tanah berhasil ditambahkan', data: { id } });
     } catch (err) {
       res.status(500).json({ success: false, message: err.message });

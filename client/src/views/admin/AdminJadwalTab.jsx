@@ -42,135 +42,10 @@ export default function AdminJadwalTab() {
   const [kelasList, setKelasList] = useState([]);
   const [guruList, setGuruList] = useState([]);
   const [mapelList, setMapelList] = useState([]);
-  const [mapelGuruOptions, setMapelGuruOptions] = useState(DEFAULT_MAPEL_GURU_LIST);
-
-  const [selectedHari, setSelectedHari] = useState('Senin');
-  const [selectedKelasFilter, setSelectedKelasFilter] = useState('ALL');
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  // Active cell popover for changing schedule
-  const [activeCell, setActiveCell] = useState(null); // { jam, className, rect, currentVal }
-  const [cellSearchQuery, setCellSearchQuery] = useState('');
-  const popoverRef = useRef(null);
-
-  // Pagination for list view
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  const daftarHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-
-  const classColumns = [
-    'X AKL', 'X MPLB', 'X PM', 'X PPLG',
-    'XI AKL', 'XI MPLB', 'XI PM', 'XI PPLG',
-    'XII AKL', 'XII MPLB', 'XII PM', 'XII PPLG'
-  ];
-
-  const getTimeSlots = (hari) => {
-    if (hari === 'Jumat') {
-      return [
-        { jam: 1, range: '07.00 - 07.35', isBreak: false },
-        { jam: 2, range: '07.35 - 08.10', isBreak: false },
-        { jam: 3, range: '08.10 - 08.45', isBreak: false },
-        { jam: 4, range: '08.45 - 09.20', isBreak: false },
-        { jam: 5, range: '09.20 - 09.45', isBreak: true, label: 'ISTIRAHAT 1' },
-        { jam: 6, range: '09.45 - 10.20', isBreak: false },
-        { jam: 7, range: '10.20 - 10.55', isBreak: false },
-        { jam: 8, range: '10.55 - 13.00', isBreak: true, label: 'ISTIRAHAT & SHOLAT JUM\'AT' },
-        { jam: 9, range: '13.00 - 13.35', isBreak: false },
-        { jam: 10, range: '13.35 - 14.10', isBreak: false }
-      ];
-    }
-    // Senin - Kamis & Sabtu
-    return [
-      { jam: 1, range: '07.00 - 07.40', isBreak: false },
-      { jam: 2, range: '07.40 - 08.20', isBreak: false },
-      { jam: 3, range: '08.20 - 09.00', isBreak: false },
-      { jam: 4, range: '09.00 - 09.40', isBreak: false },
-      { jam: 5, range: '09.40 - 10.10', isBreak: true, label: 'ISTIRAHAT 1' },
-      { jam: 6, range: '10.10 - 10.50', isBreak: false },
-      { jam: 7, range: '10.50 - 11.30', isBreak: false },
-      { jam: 8, range: '11.30 - 12.10', isBreak: false },
-      { jam: 9, range: '12.10 - 12.40', isBreak: true, label: 'ISTIRAHAT / SHOLAT DZUHUR' },
-      { jam: 10, range: '12.40 - 13.20', isBreak: false },
-      { jam: 11, range: '13.20 - 14.00', isBreak: false }
-    ];
-  };
-
-  const timeSlots = useMemo(() => getTimeSlots(selectedHari), [selectedHari]);
-
-  // Full Weekly Schedule Matrix State: { [hari]: { [jam]: { [className]: optionObj } } }
+  const [mapelGuruOptions, setMapelGuruOptions] = useState([]);
   const [scheduleState, setScheduleState] = useState(() => {
-    // Initial demo matrix matching user screenshot
     const init = {};
-    daftarHari.forEach(h => {
-      init[h] = {
-        1: {
-          'X AKL': { kode_guru: '4', nama_mapel: 'Sejarah Indonesia' },
-          'X MPLB': { kode_guru: '1', nama_mapel: 'Pendidikan Pancasila' },
-          'XI AKL': { kode_guru: '7', nama_mapel: 'Kreatif Kewirausahaan' }
-        },
-        2: {
-          'X AKL': { kode_guru: '4', nama_mapel: 'Pengelolaan bisnis ritel' },
-          'X MPLB': { kode_guru: '17', nama_mapel: 'Korespondensi' },
-          'X PM': { kode_guru: '7', nama_mapel: 'Kreatif Kewirausahaan' },
-          'X PPLG': { kode_guru: '8', nama_mapel: 'Bahasa Indonesia' }
-        },
-        3: {
-          'X AKL': { kode_guru: '7', nama_mapel: 'Praktikum Ak Perusahaan' },
-          'X MPLB': { kode_guru: '17', nama_mapel: 'Korespondensi' },
-          'X PM': { kode_guru: '6', nama_mapel: 'PAI & Budi Pekerti' },
-          'X PPLG': { kode_guru: '7', nama_mapel: 'Dasar Pemasaran' }
-        },
-        4: {
-          'X AKL': { kode_guru: '8', nama_mapel: 'Bahasa Indonesia' },
-          'X MPLB': { kode_guru: '3', nama_mapel: 'Bahasa Inggris' },
-          'X PM': { kode_guru: '7', nama_mapel: 'Kreatif Kewirausahaan' },
-          'X PPLG': { kode_guru: '6', nama_mapel: 'PAI & Budi Pekerti' }
-        },
-        5: {}, // Istirahat
-        6: {
-          'X AKL': { kode_guru: '4', nama_mapel: 'Penataan Produk' },
-          'X MPLB': { kode_guru: '4', nama_mapel: 'Otomatisasi sarpras' },
-          'X PM': { kode_guru: '7', nama_mapel: 'Praktikum Akuntasi' },
-          'X PPLG': { kode_guru: '7', nama_mapel: 'Kreatif Kewirausahaan' }
-        },
-        7: {
-          'X AKL': { kode_guru: '4', nama_mapel: 'Sejarah Indonesia' },
-          'X MPLB': { kode_guru: '6', nama_mapel: 'PAI & Budi Pekerti' },
-          'X PM': { kode_guru: '4', nama_mapel: 'Otomatisasi humas' },
-          'X PPLG': { kode_guru: '7', nama_mapel: 'Kreatif Kewirausahaan' }
-        },
-        8: {
-          'X AKL': { kode_guru: '4', nama_mapel: 'Pengelolaan bisnis ritel' },
-          'X MPLB': { kode_guru: '6', nama_mapel: 'PAI & Budi Pekerti' },
-          'X PM': { kode_guru: '4', nama_mapel: 'Otomatisasi humas' },
-          'X PPLG': { kode_guru: '7', nama_mapel: 'Dasar Pemasaran' }
-        },
-        9: {}, // Istirahat
-        10: {
-          'X AKL': { kode_guru: '7', nama_mapel: 'Praktikum Ak Perusahaan' },
-          'X MPLB': { kode_guru: '13', nama_mapel: 'Bimbingan Konseling' },
-          'XI AKL': { kode_guru: '6', nama_mapel: 'PAI' },
-          'XI MPLB': { kode_guru: '8', nama_mapel: 'Bahasa Sunda' },
-          'XI PM': { kode_guru: '17', nama_mapel: 'OTKP' },
-          'XI PPLG': { kode_guru: '11', nama_mapel: 'Matematika' },
-          'XII AKL': { kode_guru: '7', nama_mapel: 'Kreatif Kewirausahaan' },
-          'XII MPLB': { kode_guru: '15', nama_mapel: 'Basis Data' },
-          'XII PM': { kode_guru: '4', nama_mapel: 'Otomatisasi sarpras' }
-        },
-        11: {
-          'X AKL': { kode_guru: '7', nama_mapel: 'Praktikum Ak Perusahaan' },
-          'X MPLB': { kode_guru: '5', nama_mapel: 'Bahasa Indonesia' },
-          'X PPLG': { kode_guru: '6', nama_mapel: 'PAI' },
-          'XI AKL': { kode_guru: '8', nama_mapel: 'Bahasa Sunda' },
-          'XI MPLB': { kode_guru: '19', nama_mapel: 'Administrasi Pajak' },
-          'XI PPLG': { kode_guru: '2', nama_mapel: 'Pemrograman Web' },
-          'XII AKL': { kode_guru: '21', nama_mapel: 'PKK Digital' },
-          'XII MPLB': { kode_guru: '7', nama_mapel: 'Praktikum Akuntansi' }
-        }
-      };
-    });
+    daftarHari.forEach(h => { init[h] = {}; });
     return init;
   });
 
@@ -199,7 +74,7 @@ export default function AdminJadwalTab() {
       if (gData.length > 0) setGuruList(gData);
       if (mData.length > 0) setMapelList(mData);
 
-      // Build options from API or combine with default
+      // Build options from API
       if (gData.length > 0 && mData.length > 0) {
         const combined = [];
         gData.forEach((g, idx) => {
@@ -214,15 +89,15 @@ export default function AdminJadwalTab() {
             });
           });
         });
-        if (combined.length > 0) {
-          setMapelGuruOptions(combined);
-        }
+        setMapelGuruOptions(combined);
+      } else {
+        setMapelGuruOptions([]);
       }
 
       // Build live matrix from DB schedules
+      const matrix = {};
+      daftarHari.forEach(h => { matrix[h] = {}; });
       if (jData.length > 0) {
-        const matrix = {};
-        daftarHari.forEach(h => { matrix[h] = {}; });
         jData.forEach(item => {
           const h = item.hari;
           const jam = item.jam_ke || item.kode_jam;
@@ -241,8 +116,8 @@ export default function AdminJadwalTab() {
             };
           }
         });
-        setScheduleState(matrix);
       }
+      setScheduleState(matrix);
     } catch (err) {
       console.error('Error loading initial jadwal data:', err);
     } finally {
