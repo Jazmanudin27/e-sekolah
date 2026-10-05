@@ -121,11 +121,39 @@ class PembayaranTransaksiModel {
   }
 
   /**
+   * Create Online Pending Transaction (e.g. Midtrans SNAP) with status 'PENDING'
+   */
+  static async createOnlinePendingTransaction({ order_id, siswa_id, total_bayar, items = [], metode_pembayaran = 'MIDTRANS' }) {
+    const sqlHeader = `
+      INSERT INTO pembayaran_transaksi (no_transaksi, reference_no, siswa_id, total_bayar, metode_pembayaran, channel_pembayaran, status_transaksi)
+      VALUES (?, ?, ?, ?, ?, 'ONLINE_GATEWAY', 'PENDING')
+    `;
+    const resHeader = await query(sqlHeader, [order_id, order_id, siswa_id, total_bayar, metode_pembayaran]);
+    const transaksi_id = resHeader.insertId;
+
+    if (items && items.length > 0) {
+      for (const item of items) {
+        await query(
+          'INSERT INTO pembayaran_detail (transaksi_id, tagihan_id, nominal_dibayar) VALUES (?, ?, ?)',
+          [transaksi_id, item.tagihan_id || item.id, item.nominal_bayar || item.price || total_bayar]
+        );
+      }
+    }
+    return await this.findById(transaksi_id);
+  }
+
+  /**
    * Update Payment Gateway Online Status (e.g. via Midtrans Webhook)
    */
   static async updateOnlinePaymentStatus(reference_no, status_transaksi) {
-    const trx = await this.findByReferenceNo(reference_no);
-    if (!trx) throw new Error('Transaksi reference tidak ditemukan');
+    let trx = await this.findByReferenceNo(reference_no);
+    if (!trx) {
+      trx = await this.findByNoTransaksi(reference_no);
+    }
+    if (!trx) {
+      console.warn(`⚠️ Transaksi reference_no ${reference_no} tidak ditemukan di database.`);
+      return null;
+    }
 
     await query('UPDATE pembayaran_transaksi SET status_transaksi = ? WHERE id = ?', [status_transaksi, trx.id]);
 

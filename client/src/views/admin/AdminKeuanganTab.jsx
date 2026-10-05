@@ -1428,8 +1428,13 @@ export default function AdminKeuanganTab() {
                           if (!selectedSiswa || selectedTagihanIds.length === 0) return;
                           setIsProcessingPayment(true);
                           try {
+                            const items = selectedTagihanIds.map(id => ({
+                              tagihan_id: id,
+                              nominal_bayar: bayarNominal[id] || 0
+                            }));
                             const res = await api.post('/keuangan/midtrans/snap-token', {
                               siswa_id: selectedSiswa.kode_siswa,
+                              items,
                               nominal: totalBayar
                             });
                             if (res.data?.success && res.data.data?.redirect_url) {

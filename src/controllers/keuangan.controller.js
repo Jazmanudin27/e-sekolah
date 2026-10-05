@@ -205,7 +205,7 @@ async function getTransaksiDetail(req, res, next) {
 
 async function createMidtransSnapToken(req, res, next) {
   try {
-    const { siswa_id, nominal } = req.body;
+    const { siswa_id, items = [], nominal } = req.body;
     const midtransService = require('../services/midtrans.service');
     const { query } = require('../config/database');
 
@@ -213,12 +213,25 @@ async function createMidtransSnapToken(req, res, next) {
     if (!siswaRows || siswaRows.length === 0) return sendError(res, 'Siswa tidak ditemukan', 404);
     const siswa = siswaRows[0];
 
+    const totalNominal = nominal || items.reduce((acc, item) => acc + Number(item.nominal_bayar || 0), 0);
     const orderId = `INV-${Date.now()}`;
+
+    // 1. Simpan Transaksi Online PENDING ke DB
+    await PembayaranTransaksiModel.createOnlinePendingTransaction({
+      order_id: orderId,
+      siswa_id,
+      total_bayar: totalNominal,
+      items,
+      metode_pembayaran: 'MIDTRANS'
+    });
+
+    // 2. Buat Snap Token di Midtrans Gateway
     const snapResult = await midtransService.createSnapTransaction({
       orderId,
-      grossAmount: nominal || 350000,
+      grossAmount: totalNominal,
       customerName: siswa.nama_siswa,
-      email: siswa.email || 'siswa@artanita.sch.id'
+      email: siswa.email || 'siswa@artanita.sch.id',
+      items
     });
 
     sendSuccess(res, 'Midtrans Snap Token berhasil dibuat.', snapResult, 201);
