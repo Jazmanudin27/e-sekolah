@@ -415,7 +415,6 @@ async function createDanaPayment(req, res, next) {
 }
 
 module.exports = {
-  getStats,
   getAllPos,
   createPos,
   updatePos,
