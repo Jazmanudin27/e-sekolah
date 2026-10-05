@@ -27,7 +27,19 @@ async function getUserQueryParts() {
 }
 
 class PembayaranTransaksiModel {
+  static async ensureColumns() {
+    try {
+      const cols = await query("SHOW COLUMNS FROM pembayaran_transaksi LIKE 'alasan_batal'");
+      if (!cols || cols.length === 0) {
+        await query("ALTER TABLE pembayaran_transaksi ADD COLUMN alasan_batal TEXT NULL AFTER status_transaksi");
+      }
+    } catch (e) {
+      console.warn('[PembayaranTransaksiModel.ensureColumns]', e.message);
+    }
+  }
+
   static async findAll({ siswa_id = null, status = null, limit = 50 }) {
+    await this.ensureColumns().catch(() => {});
     const { selectKasir, joinClause } = await getUserQueryParts();
     let sql = `
       SELECT tr.*, s.nama_siswa, s.nis, ${selectKasir}
@@ -124,12 +136,20 @@ class PembayaranTransaksiModel {
    * Create Online Pending Transaction (e.g. Midtrans SNAP) with status 'PENDING'
    */
   static async createOnlinePendingTransaction({ order_id, siswa_id, total_bayar, items = [], metode_pembayaran = 'MIDTRANS' }) {
+    await this.ensureColumns().catch(() => {});
     // Auto-expire previous uncompleted PENDING transactions for this student
     if (siswa_id) {
-      await query(
-        "UPDATE pembayaran_transaksi SET status_transaksi = 'EXPIRED', alasan_batal = 'Digantikan transaksi baru' WHERE siswa_id = ? AND status_transaksi = 'PENDING'",
-        [siswa_id]
-      );
+      try {
+        await query(
+          "UPDATE pembayaran_transaksi SET status_transaksi = 'EXPIRED', alasan_batal = 'Digantikan transaksi baru' WHERE siswa_id = ? AND status_transaksi = 'PENDING'",
+          [siswa_id]
+        );
+      } catch (e) {
+        await query(
+          "UPDATE pembayaran_transaksi SET status_transaksi = 'EXPIRED' WHERE siswa_id = ? AND status_transaksi = 'PENDING'",
+          [siswa_id]
+        );
+      }
     }
 
     const sqlHeader = `
