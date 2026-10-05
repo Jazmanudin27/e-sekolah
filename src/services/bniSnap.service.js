@@ -1,12 +1,11 @@
 const crypto = require('crypto');
-const axios = require('axios');
 
 class BniSnapService {
   constructor() {
     this.clientId = process.env.BNI_CLIENT_ID || '';
     this.clientSecret = process.env.BNI_CLIENT_SECRET || '';
     this.partnerId = process.env.BNI_PARTNER_ID || process.env.BNI_CLIENT_ID || '';
-    this.baseUrl = process.env.BNI_BASE_URL || 'https://sandbox.bni.co.id';
+    this.baseUrl = process.env.BNI_BASE_URL || 'https://digitalservices.bni.co.id';
     this.privateKey = (process.env.BNI_PRIVATE_KEY || '').replace(/\\n/g, '\n');
     this.bniPublicKey = (process.env.BNI_PUBLIC_KEY || '').replace(/\\n/g, '\n');
   }
@@ -54,17 +53,23 @@ class BniSnapService {
     };
 
     try {
-      const res = await axios.post(`${this.baseUrl}/api/v1.0/access-token/b2b`, payload, { headers });
-      if (res.data && res.data.accessToken) {
+      const response = await fetch(`${this.baseUrl}/api/v1.0/access-token/b2b`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+
+      if (data && data.accessToken) {
         return {
-          accessToken: res.data.accessToken,
-          expiresIn: res.data.expiresIn
+          accessToken: data.accessToken,
+          expiresIn: data.expiresIn
         };
       }
-      throw new Error(res.data?.responseDescription || 'Gagal mendapatkan Access Token dari BNI');
+      throw new Error(data?.responseDescription || data?.responseMessage || 'Gagal mendapatkan Access Token dari BNI');
     } catch (err) {
-      console.error('BNI Get Access Token Error:', err.response?.data || err.message);
-      throw new Error(err.response?.data?.responseDescription || err.message);
+      console.error('BNI Get Access Token Error:', err.message);
+      throw err;
     }
   }
 
@@ -119,11 +124,16 @@ class BniSnapService {
     };
 
     try {
-      const res = await axios.post(`${this.baseUrl}${endpoint}`, body, { headers });
-      return res.data;
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body)
+      });
+      const data = await response.json();
+      return data;
     } catch (err) {
-      console.error('BNI Create VA Error:', err.response?.data || err.message);
-      throw new Error(err.response?.data?.responseDescription || err.message);
+      console.error('BNI Create VA Error:', err.message);
+      throw err;
     }
   }
 
