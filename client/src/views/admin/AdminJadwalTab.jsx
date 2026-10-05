@@ -36,6 +36,43 @@ const DEFAULT_MAPEL_GURU_LIST = [
   { id: '22_seni', kode_guru: '22', nama_guru: 'Maya Anggraini, S.Sn.', nama_mapel: 'Seni Budaya & Desain Grafis', kode_mapel: 'SENI' }
 ];
 
+const daftarHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+const classColumns = [
+  'X AKL', 'X MPLB', 'X PM', 'X PPLG',
+  'XI AKL', 'XI MPLB', 'XI PM', 'XI PPLG',
+  'XII AKL', 'XII MPLB', 'XII PM', 'XII PPLG'
+];
+
+const getTimeSlots = (hari) => {
+  if (hari === 'Jumat') {
+    return [
+      { jam: 1, range: '07.00 - 07.35', isBreak: false },
+      { jam: 2, range: '07.35 - 08.10', isBreak: false },
+      { jam: 3, range: '08.10 - 08.45', isBreak: false },
+      { jam: 4, range: '08.45 - 09.20', isBreak: false },
+      { jam: 5, range: '09.20 - 09.45', isBreak: true, label: 'ISTIRAHAT 1' },
+      { jam: 6, range: '09.45 - 10.20', isBreak: false },
+      { jam: 7, range: '10.20 - 10.55', isBreak: false },
+      { jam: 8, range: '10.55 - 13.00', isBreak: true, label: 'ISTIRAHAT & SHOLAT JUM\'AT' },
+      { jam: 9, range: '13.00 - 13.35', isBreak: false },
+      { jam: 10, range: '13.35 - 14.10', isBreak: false }
+    ];
+  }
+  return [
+    { jam: 1, range: '07.00 - 07.40', isBreak: false },
+    { jam: 2, range: '07.40 - 08.20', isBreak: false },
+    { jam: 3, range: '08.20 - 09.00', isBreak: false },
+    { jam: 4, range: '09.00 - 09.40', isBreak: false },
+    { jam: 5, range: '09.40 - 10.10', isBreak: true, label: 'ISTIRAHAT 1' },
+    { jam: 6, range: '10.10 - 10.50', isBreak: false },
+    { jam: 7, range: '10.50 - 11.30', isBreak: false },
+    { jam: 8, range: '11.30 - 12.10', isBreak: false },
+    { jam: 9, range: '12.10 - 12.40', isBreak: true, label: 'ISTIRAHAT / SHOLAT DZUHUR' },
+    { jam: 10, range: '12.40 - 13.20', isBreak: false },
+    { jam: 11, range: '13.20 - 14.00', isBreak: false }
+  ];
+};
+
 export default function AdminJadwalTab() {
   const [viewMode, setViewMode] = useState('matrix'); // 'matrix' or 'list'
   const [jadwalList, setJadwalList] = useState([]);
@@ -43,6 +80,22 @@ export default function AdminJadwalTab() {
   const [guruList, setGuruList] = useState([]);
   const [mapelList, setMapelList] = useState([]);
   const [mapelGuruOptions, setMapelGuruOptions] = useState([]);
+  const [selectedHari, setSelectedHari] = useState('Senin');
+  const [selectedKelasFilter, setSelectedKelasFilter] = useState('ALL');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Active cell popover for changing schedule
+  const [activeCell, setActiveCell] = useState(null); // { jam, className, rect, currentVal }
+  const [cellSearchQuery, setCellSearchQuery] = useState('');
+  const popoverRef = useRef(null);
+
+  // Pagination for list view
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const timeSlots = useMemo(() => getTimeSlots(selectedHari), [selectedHari]);
+
   const [scheduleState, setScheduleState] = useState(() => {
     const init = {};
     daftarHari.forEach(h => { init[h] = {}; });
