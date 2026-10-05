@@ -1,7 +1,7 @@
 const { query } = require('../config/database');
 
 class AbsensiSiswaModel {
-  static async findAll({ tanggal, kode_kelas }) {
+  static async findAll({ tanggal, kode_kelas, kode_siswa, siswa_id }) {
     let sql = 'SELECT * FROM absensi_siswa WHERE 1=1';
     const params = [];
 
@@ -13,8 +13,20 @@ class AbsensiSiswaModel {
       sql += ' AND kode_kelas = ?';
       params.push(kode_kelas);
     }
+    const targetSiswa = kode_siswa || siswa_id;
+    if (targetSiswa) {
+      sql += ` AND (
+        CONVERT(kode_siswa USING utf8mb4) = CONVERT(? USING utf8mb4)
+        OR CONVERT(kode_siswa USING utf8mb4) IN (
+          SELECT CONVERT(nis USING utf8mb4) FROM siswa WHERE CONVERT(kode_siswa USING utf8mb4) = CONVERT(? USING utf8mb4)
+          UNION
+          SELECT CONVERT(nisn USING utf8mb4) FROM siswa WHERE CONVERT(kode_siswa USING utf8mb4) = CONVERT(? USING utf8mb4)
+        )
+      )`;
+      params.push(targetSiswa, targetSiswa, targetSiswa);
+    }
 
-    sql += ' ORDER BY id ASC';
+    sql += ' ORDER BY tanggal DESC, id DESC';
     return await query(sql, params);
   }
 

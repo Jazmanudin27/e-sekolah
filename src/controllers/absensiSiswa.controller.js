@@ -24,13 +24,21 @@ async function getKodeMember(req) {
 
 async function getAbsensiSiswa(req, res, next) {
   try {
-    const { tanggal, kode_kelas } = req.query;
+    let { tanggal, kode_kelas, siswa_id, kode_siswa } = req.query;
+    if (req.user && (req.user.type === 'Siswa' || req.user.type === 'Ortu')) {
+      kode_siswa = req.user.kode_siswa;
+    }
+    const effectiveKodeSiswa = kode_siswa || siswa_id;
     const effectiveKodeKelas = (req.user && req.user.type === 'Kelas' && req.user.kode_kelas) 
       ? req.user.kode_kelas 
       : kode_kelas;
 
-    const records = await AbsensiSiswaModel.findAll({ tanggal, kode_kelas: effectiveKodeKelas });
-    sendSuccess(res, 'Data absensi siswa berhasil diambil.', records, 200, { count: records.length });
+    const records = await AbsensiSiswaModel.findAll({
+      tanggal,
+      kode_kelas: effectiveKodeKelas,
+      kode_siswa: effectiveKodeSiswa
+    });
+    sendSuccess(res, 'Data absensi harian siswa berhasil diambil.', records, 200, { count: records.length });
   } catch (error) {
     next(error);
   }
