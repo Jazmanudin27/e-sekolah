@@ -37,11 +37,22 @@ class MidtransService {
 
     if (items && items.length > 0) {
       payload.item_details = items.map((item, idx) => ({
-        id: item.id || `ITEM-${idx + 1}`,
-        price: Number(item.price || item.nominal_tagihan || grossAmount),
+        id: String(item.tagihan_id || item.id || `ITEM-${idx + 1}`),
+        price: Number(item.price || item.nominal_bayar || item.nominal_tagihan || item.nominal || 0),
         quantity: Number(item.quantity || 1),
-        name: String(item.name || item.nama_pos || 'Pembayaran SPP Sekolah').substring(0, 50)
+        name: String(item.name || item.nama_pos || item.keterangan || `Pembayaran Tagihan #${idx + 1}`).substring(0, 50)
       }));
+
+      // Validate sum of item_details against gross_amount
+      const sumItems = payload.item_details.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+      if (sumItems !== payload.transaction_details.gross_amount || payload.item_details.some(i => i.price <= 0)) {
+        payload.item_details = [{
+          id: String(orderId),
+          price: Number(grossAmount),
+          quantity: 1,
+          name: `Pembayaran ${items.length} Tagihan Sekolah`
+        }];
+      }
     }
 
     try {

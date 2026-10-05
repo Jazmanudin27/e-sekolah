@@ -141,12 +141,23 @@ async function generateTagihan(req, res, next) {
         tanggal_jatuh_tempo
       });
     } else {
-      if (!bulan || !tahun) {
-        return sendError(res, 'bulan dan tahun wajib diisi.', 400);
+      if (!tahun) {
+        return sendError(res, 'Tahun tagihan wajib diisi.', 400);
+      }
+      if (!bulan) {
+        const { query } = require('../config/database');
+        const tarifRows = await query(
+          'SELECT p.tipe AS tipe_pos FROM tarif_pembayaran t JOIN pos_pembayaran p ON t.pos_id = p.id WHERE t.id = ?',
+          [tarif_id]
+        );
+        const isBebas = (tarifRows?.[0]?.tipe_pos === 'BEBAS');
+        if (!isBebas) {
+          return sendError(res, 'Bulan dan tahun wajib diisi untuk tagihan bulanan.', 400);
+        }
       }
       result = await TagihanSiswaModel.autoGenerateInvoices({
         tarif_id,
-        bulan,
+        bulan: bulan || null,
         tahun,
         kode_kelas,
         tanggal_jatuh_tempo
