@@ -60,8 +60,15 @@ exports.getQRStatus = async (req, res, next) => {
 exports.startQR = async (req, res, next) => {
   try {
     await whatsappBaileys.initBaileys(true);
-    // Brief delay to allow initial QR generation
-    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Wait until QR is generated or status changes (max 7s)
+    const startTime = Date.now();
+    while (Date.now() - startTime < 7000) {
+      const s = whatsappBaileys.getBaileysStatus();
+      if (s.qr || s.isConnected) break;
+      await new Promise(r => setTimeout(r, 400));
+    }
+
     const baileysStatus = whatsappBaileys.getBaileysStatus();
     sendSuccess(res, 'Sesi WhatsApp dimulai.', baileysStatus);
   } catch (error) {

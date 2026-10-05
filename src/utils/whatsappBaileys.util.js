@@ -35,11 +35,16 @@ async function initBaileys(forceRestart = false) {
     const {
       default: makeWASocket,
       useMultiFileAuthState,
-      DisconnectReason
+      DisconnectReason,
+      fetchLatestBaileysVersion
     } = baileys;
 
     const { state, saveCreds } = await useMultiFileAuthState(SESSIONS_DIR);
-    const version = [2, 3000, 1017531287];
+    let version = [2, 3000, 1043857760];
+    try {
+      const v = await fetchLatestBaileysVersion();
+      if (v?.version) version = v.version;
+    } catch (e) {}
 
     if (sock) {
       try {
