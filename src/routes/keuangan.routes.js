@@ -27,6 +27,7 @@ router.post('/tagihan/delete-batch', authenticateToken, keuanganController.delet
 // --- TRANSAKSI & KASIR ROUTES ---
 router.post('/bayar/cash', authenticateToken, keuanganController.payCash);
 router.post('/bni/create-va', authenticateToken, keuanganController.createBniVa);
+router.post('/midtrans/snap-token', authenticateToken, keuanganController.createMidtransSnapToken);
 router.get('/transaksi', authenticateToken, keuanganController.getAllTransaksi);
 router.get('/transaksi/:id', authenticateToken, keuanganController.getTransaksiDetail);
 router.put('/transaksi/:id', authenticateToken, keuanganController.updateTransaksi);

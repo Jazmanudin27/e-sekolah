@@ -203,6 +203,30 @@ async function getTransaksiDetail(req, res, next) {
   }
 }
 
+async function createMidtransSnapToken(req, res, next) {
+  try {
+    const { siswa_id, nominal } = req.body;
+    const midtransService = require('../services/midtrans.service');
+    const { query } = require('../config/database');
+
+    const siswaRows = await query('SELECT * FROM siswa WHERE kode_siswa = ?', [siswa_id]);
+    if (!siswaRows || siswaRows.length === 0) return sendError(res, 'Siswa tidak ditemukan', 404);
+    const siswa = siswaRows[0];
+
+    const orderId = `INV-${Date.now()}`;
+    const snapResult = await midtransService.createSnapTransaction({
+      orderId,
+      grossAmount: nominal || 350000,
+      customerName: siswa.nama_siswa,
+      email: siswa.email || 'siswa@artanita.sch.id'
+    });
+
+    sendSuccess(res, 'Midtrans Snap Token berhasil dibuat.', snapResult, 201);
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function handleWebhookMidtrans(req, res, next) {
   try {
     const { order_id, transaction_status } = req.body;
@@ -347,5 +371,6 @@ module.exports = {
   cancelTransaksi,
   updateTransaksi,
   handleWebhookMidtrans,
+  createMidtransSnapToken,
   getRekapTunggakan
 };
