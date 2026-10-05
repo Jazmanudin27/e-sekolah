@@ -174,7 +174,7 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
               <div className="menu-icon-circle">
                 <UserCheck size={35} strokeWidth={2.5} />
               </div>
-              <span>Presensi</span>
+              <span>Absensi</span>
             </button>
 
             <button className="menu-blue-card menu-item-kalender" onClick={() => onSwitchTab('pelanggaran')}>
@@ -191,22 +191,6 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
               <span>Kalender</span>
             </button>
           </div>
-        </div>
-
-        {/* INFO BOX KHUSUS SISWA */}
-        <div style={{
-          margin: '0 16px 20px',
-          padding: '14px 16px',
-          borderRadius: 14,
-          background: '#eff6ff',
-          border: '1px solid #bfdbfe',
-          color: '#1e40af',
-          fontSize: 13,
-          fontWeight: 600,
-          lineHeight: 1.6
-        }}>
-          <div style={{ fontWeight: 800, marginBottom: 4 }}>ℹ️ Informasi Akun Siswa & Wali Murid</div>
-          Pembayaran tagihan sekolah dilakukan secara <strong>Tunai (Cash)</strong> melalui Kasir TU Sekolah. Data tersaji khusus untuk siswa ini tanpa melihat data siswa lain.
         </div>
 
         {/* PENGUMUMAN SLIDER BANNER (PALING BAWAH) */}

@@ -33,7 +33,7 @@ export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user
             {activeTab === 'tagihanSiswa' && <span className="active-dot" />}
           </button>
 
-          {/* 3. PRESENSI */}
+          {/* 3. ABSENSI */}
           <button
             className={`nav-link-item ${activeTab === 'absensiSiswa' || activeTab === 'riwayat' ? 'active' : ''}`}
             onClick={() => onTabChange('absensiSiswa')}
@@ -41,7 +41,7 @@ export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user
             <div className="nav-icon-wrapper">
               <UserCheck size={21} />
             </div>
-            <span>Presensi</span>
+            <span>Absensi</span>
             {(activeTab === 'absensiSiswa' || activeTab === 'riwayat') && <span className="active-dot" />}
           </button>
 

@@ -129,7 +129,7 @@ export default function PortalOrtuSiswaView({ user, onLogout, onUserUpdated }) {
             onClick={() => setActiveSubTab('presensi')}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 10, border: 'none', background: activeSubTab === 'presensi' ? '#0284c7' : '#ffffff', color: activeSubTab === 'presensi' ? '#ffffff' : '#64748b', fontWeight: 700, fontSize: 13, cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.04)' }}
           >
-            <Calendar size={15} /> Presensi
+            <Calendar size={15} /> Absensi
           </button>
           <button
             onClick={() => setActiveSubTab('pelanggaran')}
