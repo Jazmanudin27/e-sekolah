@@ -275,6 +275,14 @@ export default function AdminKeuanganTab() {
       title: 'Batalkan Pembayaran Ini?',
       text: 'Status transaksi akan diubah menjadi CANCELLED dan nominal tagihan siswa akan dikembalikan menjadi BELUM LUNAS.',
       icon: 'warning',
+      input: 'textarea',
+      inputLabel: 'Alasan Pembatalan Transaksi *',
+      inputPlaceholder: 'Masukkan alasan pembatalan (misal: salah input nominal / ralat kasir)...',
+      inputValidator: (value) => {
+        if (!value || !value.trim()) {
+          return 'Alasan pembatalan transaksi wajib diisi!';
+        }
+      },
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#64748b',
@@ -282,10 +290,12 @@ export default function AdminKeuanganTab() {
       cancelButtonText: 'Batal'
     });
 
-    if (!confirm.isConfirmed) return;
+    if (!confirm.isConfirmed || !confirm.value) return;
 
     try {
-      const res = await api.delete(`/keuangan/transaksi/${transaksiId}`);
+      const res = await api.delete(`/keuangan/transaksi/${transaksiId}`, {
+        data: { alasan_batal: confirm.value }
+      });
       if (res.data?.success) {
         Swal.fire('Sukses', 'Transaksi berhasil dibatalkan dan tagihan siswa dikembalikan.', 'success');
         fetchTransaksiList();
@@ -1108,6 +1118,11 @@ export default function AdminKeuanganTab() {
                                   >
                                     {tr.status_transaksi || 'SUCCESS'}
                                   </span>
+                                   {tr.status_transaksi === 'CANCELLED' && tr.alasan_batal && (
+                                     <div style={{ fontSize: 11, color: '#dc2626', marginTop: 4, fontWeight: 600 }}>
+                                       Alasan: {tr.alasan_batal}
+                                     </div>
+                                   )}
                                 </td>
                                 <td style={{ textAlign: 'center' }}>
                                   <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
@@ -1255,15 +1270,15 @@ export default function AdminKeuanganTab() {
                                             {isBulanan ? (
                                               <div>
                                                 {isPastMonth ? (
-                                                  <>
-                                                    <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                                      ⚠️ Tunggakan {getBulanLabel(t.bulan)} {t.tahun}
-                                                    </span>
-                                                    <div style={{ fontSize: 11, color: '#dc2626', fontWeight: 700, marginTop: 4 }}>
-                                                      Tagihan SPP Bulan Lalu (Menunggak)
-                                                    </div>
-                                                  </>
-                                                ) : (
+                                                   <>
+                                                     <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                                       ⚠️ Tunggakan {getBulanLabel(t.bulan)} {t.tahun}
+                                                     </span>
+                                                     <div style={{ fontSize: 11, color: '#dc2626', fontWeight: 700, marginTop: 4 }}>
+                                                       Tagihan SPP Bulan Lalu (Menunggak)
+                                                     </div>
+                                                   </>
+                                                 ) : (
                                                   <>
                                                     <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                                                       🗓️ {getBulanLabel(t.bulan)} {t.tahun}
@@ -2265,6 +2280,11 @@ export default function AdminKeuanganTab() {
                             >
                               {tr.status_transaksi || 'SUCCESS'}
                             </span>
+                            {tr.status_transaksi === 'CANCELLED' && tr.alasan_batal && (
+                              <div style={{ fontSize: 11, color: '#dc2626', marginTop: 4, fontWeight: 600 }}>
+                                Alasan: {tr.alasan_batal}
+                              </div>
+                            )}
                           </td>
                           <td style={{ textAlign: 'center' }}>
                             <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
@@ -2277,24 +2297,14 @@ export default function AdminKeuanganTab() {
                                 <Printer size={15} />
                               </button>
                               {tr.status_transaksi !== 'CANCELLED' && (
-                                <>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenEditTransaksi(tr.id)}
-                                    style={{ padding: '6px 8px', borderRadius: 6, background: '#fef3c7', color: '#d97706', border: '1px solid #fcd34d', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
-                                    title="Edit Nominal / Detail Pembayaran"
-                                  >
-                                    <Edit2 size={15} />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleCancelTransaksi(tr.id)}
-                                    style={{ padding: '6px 8px', borderRadius: 6, background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
-                                    title="Batalkan Pembayaran Ini"
-                                  >
-                                    <Trash2 size={15} />
-                                  </button>
-                                </>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCancelTransaksi(tr.id)}
+                                  style={{ padding: '6px 8px', borderRadius: 6, background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+                                  title="Batalkan Pembayaran Ini"
+                                >
+                                  <Trash2 size={15} />
+                                </button>
                               )}
                             </div>
                           </td>

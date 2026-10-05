@@ -171,7 +171,13 @@ class PembayaranTransaksiModel {
   /**
    * Cancel / Void payment transaction and restore invoice balance
    */
-  static async cancelTransaction(id) {
+  static async cancelTransaction(id, alasan_batal = null) {
+    try {
+      await query("ALTER TABLE pembayaran_transaksi ADD COLUMN IF NOT EXISTS alasan_batal TEXT NULL AFTER status_transaksi");
+    } catch (e) {
+      // Ignore if column exists
+    }
+
     const trx = await this.findById(id);
     if (!trx) throw new Error('Transaksi tidak ditemukan');
     if (trx.status_transaksi === 'CANCELLED') throw new Error('Transaksi ini sudah dibatalkan sebelumnya');
@@ -183,8 +189,8 @@ class PembayaranTransaksiModel {
       }
     }
 
-    // Mark header status as CANCELLED
-    await query("UPDATE pembayaran_transaksi SET status_transaksi = 'CANCELLED' WHERE id = ?", [id]);
+    // Mark header status as CANCELLED with reason
+    await query("UPDATE pembayaran_transaksi SET status_transaksi = 'CANCELLED', alasan_batal = ? WHERE id = ?", [alasan_batal || 'Dibatalkan oleh Kasir/TU', id]);
     return await this.findById(id);
   }
 
