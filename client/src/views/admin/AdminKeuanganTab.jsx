@@ -1688,7 +1688,8 @@ export default function AdminKeuanganTab() {
             </div>
 
             {masterSubTab === 'pos' && (
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Daftar Pos Pembayaran</div>
                   <button
                     className="btn-primary-admin"
@@ -1750,10 +1751,12 @@ export default function AdminKeuanganTab() {
                     </tbody>
                   </table>
                 </div>
-                          )}
+              </>
+            )}
 
             {masterSubTab === 'tarif' && (
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Matrix Tarif Pembayaran</div>
                   <button className="btn-primary-admin" onClick={handleOpenAddTarif}>
                     <Plus size={15} /> Tambah Tarif Baru
@@ -1856,7 +1859,8 @@ export default function AdminKeuanganTab() {
                     </tbody>
                   </table>
                 </div>
-                          )}
+              </>
+            )}
           </div>
         )}
 
