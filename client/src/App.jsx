@@ -26,6 +26,7 @@ import PerpustakaanView from './views/PerpustakaanView';
 import SaprasView from './views/SaprasView';
 import PelanggaranView from './views/PelanggaranView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
+import PortalOrtuSiswaView from './views/PortalOrtuSiswaView';
 import InstallPwaModal from './components/InstallPwaModal';
 import BirthdayModal from './components/BirthdayModal';
 import SplashScreen from './components/SplashScreen';
@@ -230,6 +231,16 @@ export default function App() {
         <InstallPwaModal />
         <BirthdayModal user={currentUser} />
         <AdminDesktopView user={currentUser} onLogout={handleLogout} onUserUpdated={(u) => setCurrentUser(u)} />
+      </>
+    );
+  }
+
+  // DEDICATED PARENT & STUDENT PORTAL (Only for logged-in Siswa / Ortu)
+  if (currentUser?.type === 'Siswa' || currentUser?.role === 'Siswa') {
+    return (
+      <>
+        <InstallPwaModal />
+        <PortalOrtuSiswaView user={currentUser} onLogout={handleLogout} onUserUpdated={(u) => setCurrentUser(u)} />
       </>
     );
   }

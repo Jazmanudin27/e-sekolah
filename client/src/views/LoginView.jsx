@@ -159,7 +159,7 @@ export default function LoginView({ onLoginSuccess, showToast }) {
             {/* USERNAME INPUT FIELD */}
             <div>
               <label style={{ display: 'block', color: '#cbd5e1', fontSize: 11.5, fontWeight: 700, marginBottom: 6, letterSpacing: '0.3px' }}>
-                USERNAME / NIP / EMAIL
+                USERNAME / NIP / NIS / NISN / EMAIL
               </label>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <User size={18} style={{ position: 'absolute', left: 14, color: '#38bdf8', pointerEvents: 'none' }} />
@@ -167,7 +167,7 @@ export default function LoginView({ onLoginSuccess, showToast }) {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Masukkan NIP, Email, atau Username"
+                  placeholder="NIP / NIS / NISN / Username"
                   required
                   style={{
                     width: '100%',

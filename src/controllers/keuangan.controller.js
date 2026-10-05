@@ -110,7 +110,10 @@ async function setTarifOverride(req, res, next) {
 
 async function getTagihanSiswa(req, res, next) {
   try {
-    const { siswa_id } = req.params;
+    let { siswa_id } = req.params;
+    if (req.user && (req.user.type === 'Siswa' || req.user.type === 'Ortu')) {
+      siswa_id = req.user.kode_siswa;
+    }
     const { status } = req.query;
     const list = await TagihanSiswaModel.findBySiswa(siswa_id, status);
     sendSuccess(res, 'Daftar tagihan siswa berhasil diambil.', list);
@@ -195,7 +198,10 @@ async function payCash(req, res, next) {
 
 async function getAllTransaksi(req, res, next) {
   try {
-    const { siswa_id, status, limit } = req.query;
+    let { siswa_id, status, limit } = req.query;
+    if (req.user && (req.user.type === 'Siswa' || req.user.type === 'Ortu')) {
+      siswa_id = req.user.kode_siswa;
+    }
     const list = await PembayaranTransaksiModel.findAll({ siswa_id, status, limit });
     sendSuccess(res, 'Daftar transaksi berhasil diambil.', list);
   } catch (error) {

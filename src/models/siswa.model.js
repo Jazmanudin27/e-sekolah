@@ -85,6 +85,73 @@ class SiswaModel {
     return this.findAll(kode_kelas, kode_member);
   }
 
+  static async findById(kode_siswa) {
+    if (!kode_siswa) return null;
+    await this.ensureColumns();
+    try {
+      const sql = `
+        SELECT s.*, k.nama_kelas, k.jurusan
+        FROM siswa s
+        LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas
+        WHERE s.kode_siswa = ?
+        LIMIT 1
+      `;
+      const rows = await query(sql, [kode_siswa]);
+      if (rows && rows.length > 0) {
+        return {
+          ...rows[0],
+          nis_nisn: rows[0].nis_nisn || rows[0].nis || rows[0].nisn || `NIS-${rows[0].kode_siswa}`
+        };
+      }
+    } catch (e) {
+      console.warn('[SiswaModel.findById] Error:', e.message);
+    }
+    return null;
+  }
+
+  static async findByUsernameOrNis(identifier) {
+    if (!identifier) return null;
+    await this.ensureColumns();
+    const clean = String(identifier).trim();
+    try {
+      const sql = `
+        SELECT s.*, k.nama_kelas, k.jurusan
+        FROM siswa s
+        LEFT JOIN kelas k ON s.kode_kelas = k.kode_kelas
+        WHERE (
+          s.nis = ? OR s.nisn = ? OR s.nis_nisn = ? 
+          OR s.username = ? OR s.email = ? OR s.kode_siswa = ?
+          OR s.nama_siswa = ?
+        )
+        LIMIT 1
+      `;
+      const rows = await query(sql, [clean, clean, clean, clean, clean, clean, clean]);
+      if (rows && rows.length > 0) {
+        return {
+          ...rows[0],
+          nis_nisn: rows[0].nis_nisn || rows[0].nis || rows[0].nisn || `NIS-${rows[0].kode_siswa}`
+        };
+      }
+    } catch (e) {
+      console.warn('[SiswaModel.findByUsernameOrNis] Error:', e.message);
+    }
+
+    // Fallback: search with SELECT * FROM siswa
+    try {
+      const rows = await query('SELECT * FROM siswa WHERE nis = ? OR kode_siswa = ? OR nama_siswa = ? LIMIT 1', [clean, clean, clean]);
+      if (rows && rows.length > 0) {
+        return {
+          ...rows[0],
+          nis_nisn: rows[0].nis_nisn || rows[0].nis || rows[0].nisn || `NIS-${rows[0].kode_siswa}`
+        };
+      }
+    } catch (e) {
+      console.warn('[SiswaModel.findByUsernameOrNis] Fallback error:', e.message);
+    }
+
+    return null;
+  }
+
   static async countAll(kode_member = null) {
     try {
       let sql = 'SELECT COUNT(*) AS total FROM siswa WHERE 1=1';
@@ -107,16 +174,21 @@ class SiswaModel {
       if (!colNames.includes('nama_ortu')) await query("ALTER TABLE siswa ADD COLUMN nama_ortu VARCHAR(100) DEFAULT NULL");
       if (!colNames.includes('no_wa_ortu')) await query("ALTER TABLE siswa ADD COLUMN no_wa_ortu VARCHAR(30) DEFAULT NULL");
       if (!colNames.includes('hubungan_wali')) await query("ALTER TABLE siswa ADD COLUMN hubungan_wali VARCHAR(30) DEFAULT 'Orang Tua'");
+      if (!colNames.includes('username')) await query("ALTER TABLE siswa ADD COLUMN username VARCHAR(50) DEFAULT NULL");
+      if (!colNames.includes('password')) await query("ALTER TABLE siswa ADD COLUMN password VARCHAR(255) DEFAULT NULL");
+      if (!colNames.includes('nisn')) await query("ALTER TABLE siswa ADD COLUMN nisn VARCHAR(30) DEFAULT NULL");
+      if (!colNames.includes('nis_nisn')) await query("ALTER TABLE siswa ADD COLUMN nis_nisn VARCHAR(50) DEFAULT NULL");
+      if (!colNames.includes('email')) await query("ALTER TABLE siswa ADD COLUMN email VARCHAR(100) DEFAULT NULL");
     } catch (err) {
       console.warn('[SiswaModel.ensureColumns] Warning:', err.message);
     }
   }
 
-  static async create({ nis_nisn, nama_siswa, jk = 'L', kode_kelas, kode_member, nama_ortu, no_wa_ortu, hubungan_wali }) {
+  static async create({ nis_nisn, nama_siswa, jk = 'L', kode_kelas, kode_member, nama_ortu, no_wa_ortu, hubungan_wali, username, password }) {
     await this.ensureColumns();
     const res = await query(
-      'INSERT INTO siswa (nis, nama_siswa, jk, kode_kelas, kode_member, nama_ortu, no_wa_ortu, hubungan_wali) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [nis_nisn, nama_siswa, jk, kode_kelas, kode_member || null, nama_ortu || null, no_wa_ortu || null, hubungan_wali || 'Orang Tua']
+      'INSERT INTO siswa (nis, nama_siswa, jk, kode_kelas, kode_member, nama_ortu, no_wa_ortu, hubungan_wali, username, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [nis_nisn, nama_siswa, jk, kode_kelas, kode_member || null, nama_ortu || null, no_wa_ortu || null, hubungan_wali || 'Orang Tua', username || null, password || null]
     );
     return res.insertId;
   }
@@ -164,6 +236,14 @@ class SiswaModel {
     if (data.hubungan_wali !== undefined) {
       fields.push('hubungan_wali = ?');
       params.push(data.hubungan_wali);
+    }
+    if (data.username !== undefined) {
+      fields.push('username = ?');
+      params.push(data.username);
+    }
+    if (data.password !== undefined) {
+      fields.push('password = ?');
+      params.push(data.password);
     }
     if (fields.length === 0) return;
     params.push(id);

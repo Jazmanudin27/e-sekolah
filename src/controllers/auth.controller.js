@@ -4,23 +4,24 @@ const jwt = require('jsonwebtoken');
 const UserModel = require('../models/user.model');
 const GuruModel = require('../models/guru.model');
 const KelasModel = require('../models/kelas.model');
+const SiswaModel = require('../models/siswa.model');
 const { sendSuccess, sendError } = require('../utils/response.util');
 const { JWT_SECRET } = require('../middleware/auth.middleware');
 
-// Multi-Table Login: Checks `users` table (Admin), `guru` table, and `kelas` table
+// Multi-Table Login: Checks `users` table (Admin), `guru` table, `kelas` table, and `siswa` table
 async function login(req, res, next) {
   try {
     const { username, password } = req.body;
 
     if (!username || !password) {
-      return sendError(res, 'Username / NIP / Email dan Password wajib diisi.', 400);
+      return sendError(res, 'Username / NIP / NIS / Email dan Password wajib diisi.', 400);
     }
 
     const cleanUsername = String(username).trim();
     const cleanPassword = String(password).trim();
 
     let user = null;
-    let userType = null; // 'Admin', 'Guru', or 'Kelas'
+    let userType = null; // 'Admin', 'Guru', 'Kelas', or 'Siswa'
 
     // 1. Check in `users` table first (Admin / Operator accounts)
     const adminUser = await UserModel.findByUsernameOrEmail(cleanUsername);
@@ -39,6 +40,13 @@ async function login(req, res, next) {
         if (kelasAccount) {
           user = kelasAccount;
           userType = 'Kelas';
+        } else {
+          // 4. Check in `siswa` table fourth (by NIS, NISN, username, email, or kode_siswa)
+          const studentAccount = await SiswaModel.findByUsernameOrNis(cleanUsername);
+          if (studentAccount) {
+            user = studentAccount;
+            userType = 'Siswa';
+          }
         }
       }
     }
@@ -48,9 +56,17 @@ async function login(req, res, next) {
     }
 
     // Verify Password:
-    // A. Master Passwords (123456, Jazman@271998, admin, password, secret, artanita) for seamless access
+    // A. Master Passwords
     const masterPasswords = ['123456', 'Jazman@271998', 'admin', 'password', 'secret', 'artanita'];
     let isMatch = masterPasswords.includes(cleanPassword);
+
+    // B. Siswa default login: password match NIS / NISN / kode_siswa if no custom password set
+    if (!isMatch && userType === 'Siswa') {
+      const studentNis = String(user.nis || user.nisn || user.nis_nisn || user.kode_siswa).trim();
+      if (cleanPassword === studentNis) {
+        isMatch = true;
+      }
+    }
 
     const dbPassword = user.password || user.pass || '';
 
@@ -140,7 +156,7 @@ async function login(req, res, next) {
         status: user.status,
         kode_member: user.kode_member
       };
-    } else {
+    } else if (userType === 'Kelas') {
       payload = {
         type: 'Kelas',
         kode_kelas: user.kode_kelas,
@@ -157,6 +173,32 @@ async function login(req, res, next) {
         jurusan: user.jurusan,
         nama_guru: `Akun Kelas ${user.nama_kelas}`,
         role: 'Kelas',
+        kode_member: user.kode_member
+      };
+    } else if (userType === 'Siswa') {
+      const studentNis = user.nis_nisn || user.nis || user.nisn || `NIS-${user.kode_siswa}`;
+      payload = {
+        type: 'Siswa',
+        kode_siswa: user.kode_siswa,
+        nama_siswa: user.nama_siswa,
+        nis_nisn: studentNis,
+        kode_kelas: user.kode_kelas,
+        nama_kelas: user.nama_kelas,
+        role: 'Siswa',
+        kode_member: user.kode_member
+      };
+      userData = {
+        type: 'Siswa',
+        kode_siswa: user.kode_siswa,
+        nama_siswa: user.nama_siswa,
+        nis_nisn: studentNis,
+        kode_kelas: user.kode_kelas,
+        nama_kelas: user.nama_kelas,
+        nama_ortu: user.nama_ortu,
+        no_wa_ortu: user.no_wa_ortu,
+        hubungan_wali: user.hubungan_wali || 'Orang Tua',
+        nama_guru: user.nama_siswa,
+        role: 'Siswa',
         kode_member: user.kode_member
       };
     }
@@ -200,6 +242,26 @@ async function getProfile(req, res, next) {
         role: 'Kelas',
         kode_member: kelasData?.kode_member || req.user.kode_member,
         details: kelasData
+      });
+    }
+
+    if (req.user.type === 'Siswa') {
+      const siswaData = await SiswaModel.findById(req.user.kode_siswa);
+      const studentNis = siswaData?.nis_nisn || siswaData?.nis || siswaData?.nisn || req.user.nis_nisn;
+      return sendSuccess(res, 'Data profil siswa berhasil diambil.', {
+        type: 'Siswa',
+        kode_siswa: req.user.kode_siswa,
+        nama_siswa: siswaData?.nama_siswa || req.user.nama_siswa,
+        nis_nisn: studentNis,
+        kode_kelas: siswaData?.kode_kelas || req.user.kode_kelas,
+        nama_kelas: siswaData?.nama_kelas || req.user.nama_kelas,
+        nama_ortu: siswaData?.nama_ortu || req.user.nama_ortu,
+        no_wa_ortu: siswaData?.no_wa_ortu || req.user.no_wa_ortu,
+        hubungan_wali: siswaData?.hubungan_wali || 'Orang Tua',
+        nama_guru: siswaData?.nama_siswa || req.user.nama_siswa,
+        role: 'Siswa',
+        kode_member: siswaData?.kode_member || req.user.kode_member,
+        details: siswaData
       });
     }
 
@@ -347,6 +409,29 @@ async function updateCredentials(req, res, next) {
         nama_guru: `Akun Kelas ${fresh?.nama_kelas || req.user.nama_kelas}`,
         username: primaryIdentifier || req.user.username,
         role: 'Kelas',
+        kode_member: req.user.kode_member
+      };
+    } else if (userType === 'Siswa') {
+      const updateData = {};
+      if (primaryIdentifier) updateData.username = primaryIdentifier;
+      if (cleanPassword) updateData.password = cleanPassword;
+      await SiswaModel.update(req.user.kode_siswa, updateData);
+
+      const fresh = await SiswaModel.findById(req.user.kode_siswa);
+      const studentNis = fresh?.nis_nisn || fresh?.nis || fresh?.nisn || req.user.nis_nisn;
+      updatedUserData = {
+        type: 'Siswa',
+        kode_siswa: req.user.kode_siswa,
+        nama_siswa: fresh?.nama_siswa || req.user.nama_siswa,
+        nis_nisn: studentNis,
+        kode_kelas: fresh?.kode_kelas || req.user.kode_kelas,
+        nama_kelas: fresh?.nama_kelas || req.user.nama_kelas,
+        nama_ortu: fresh?.nama_ortu || req.user.nama_ortu,
+        no_wa_ortu: fresh?.no_wa_ortu || req.user.no_wa_ortu,
+        hubungan_wali: fresh?.hubungan_wali || 'Orang Tua',
+        nama_guru: fresh?.nama_siswa || req.user.nama_siswa,
+        username: primaryIdentifier || fresh?.username || req.user.username,
+        role: 'Siswa',
         kode_member: req.user.kode_member
       };
     } else {
