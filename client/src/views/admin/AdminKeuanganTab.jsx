@@ -1490,7 +1490,9 @@ export default function AdminKeuanganTab() {
                     </div>
                   </div>
                 </>
-              ) : (
+              )}
+            </>
+          ) : (
                 <div style={{ textAlign: 'center', padding: '50px 20px', color: '#94a3b8', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
                   <Search size={40} style={{ marginBottom: 10, opacity: 0.5 }} />
                   <div style={{ fontWeight: 700, color: '#64748b' }}>Ketik NIS atau nama siswa pada pencarian di atas.</div>
