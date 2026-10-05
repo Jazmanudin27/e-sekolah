@@ -25,39 +25,22 @@ export default function AdminRaporTab() {
 
   // Rapor Components State
   const [nilaiGrouped, setNilaiGrouped] = useState({
-    'Kelompok A (Umum)': [
-      { id: 1, nama_mapel: "Pendidikan Agama Islam", nilai: 90, deskripsi: "Sangat Baik dalam memahami aqidah dan akhlak terpuji." },
-      { id: 2, nama_mapel: "Pendidikan Pancasila", nilai: 90, deskripsi: "Sangat Baik dalam Mengamalkan nilai-nilai demokrasi." },
-      { id: 3, nama_mapel: "Bahasa Indonesia", nilai: 90, deskripsi: "Sangat Baik dalam Menyusun opini." },
-      { id: 4, nama_mapel: "Matematika", nilai: 90, deskripsi: "Sangat Baik dalam Menemukan konsep dan penyelesaian masalah matematika." },
-      { id: 5, nama_mapel: "Geografi", nilai: 90, deskripsi: "Sangat Baik dalam menganalisis fenomena geosfer." },
-      { id: 6, nama_mapel: "Bahasa Inggris", nilai: 80, deskripsi: "Baik dalam Memperkenalkan diri dengan menggunakan bahasa Inggris." },
-      { id: 7, nama_mapel: "PJOK", nilai: 90, deskripsi: "Sangat Baik dalam kebugaran jasmani." }
-    ],
-    'Kelompok B (Umum)': [
-      { id: 8, nama_mapel: "Pendidikan Seni dan Budaya", nilai: 90, deskripsi: "Sangat Baik dalam apresiasi karya seni." },
-      { id: 9, nama_mapel: "Ekonomi", nilai: 90, deskripsi: "Sangat Baik dalam menganalisis prinsip ekonomi." },
-      { id: 10, nama_mapel: "Sejarah", nilai: 80, deskripsi: "Baik dalam Menganalisis konsep berpikir sejarah (Sinkronik - Diakronik)." },
-      { id: 11, nama_mapel: "Sosiologi", nilai: 90, deskripsi: "Sangat Baik dalam interaksi sosial." },
-      { id: 12, nama_mapel: "Akuntansi", nilai: 90, deskripsi: "Sangat Baik dalam penyusunan laporan keuangan." }
-    ],
-    'Kelompok C (Peminatan)': [
-      { id: 13, nama_mapel: "Bahasa Arab", nilai: 90, deskripsi: "Sangat Baik dalam percakapan sehari-hari." },
-      { id: 14, nama_mapel: "Bahasa Jawa", nilai: 80, deskripsi: "Baik dalam memperkenalkan diri dengan menggunakan bahasa daerah yang fasih dan benar." }
-    ]
+    'Kelompok A (Umum)': [],
+    'Kelompok B (Umum)': [],
+    'Kelompok C (Peminatan)': []
   });
 
   const [ekstraList, setEkstraList] = useState([]);
 
   const [absensi, setAbsensi] = useState({ sakit: 0, izin: 0, alpha: 0 });
-  const [catatanWali, setCatatanWali] = useState("Tingkatkan terus konsistensi belajar dan kedisiplinan di kelas.");
+  const [catatanWali, setCatatanWali] = useState("-");
 
   // Signature Metadata
   const [kotaSekolah, setKotaSekolah] = useState("Kota Sekolah");
-  const [namaWaliKelas, setNamaWaliKelas] = useState("Nani Wijaya, S.Pd");
-  const [nipWaliKelas, setNipWaliKelas] = useState("19800101 200501 2 003");
-  const [namaKepsek, setNamaKepsek] = useState("Dr. H. Supriyadi, M.Pd");
-  const [nipKepsek, setNipKepsek] = useState("19700202 199503 1 001");
+  const [namaWaliKelas, setNamaWaliKelas] = useState("-");
+  const [nipWaliKelas, setNipWaliKelas] = useState("-");
+  const [namaKepsek, setNamaKepsek] = useState("-");
+  const [nipKepsek, setNipKepsek] = useState("-");
 
   useEffect(() => {
     fetchInitialData();
@@ -120,12 +103,14 @@ export default function AdminRaporTab() {
         } else {
           setSiswaList([]);
           setSelectedSiswaId('');
+          setCurrentSiswa(null);
         }
       }
     } catch (err) {
       console.error(err);
       setSiswaList([]);
       setSelectedSiswaId('');
+      setCurrentSiswa(null);
     }
   };
 
@@ -133,18 +118,13 @@ export default function AdminRaporTab() {
     const sFound = siswaList.find(s => String(s.kode_siswa || s.id) === String(siswaId));
     if (sFound) {
       setCurrentSiswa({
-        nama: sFound.nama_siswa || sFound.nama || 'Ahmad Fauzi',
-        nis: sFound.nis || sFound.nis_nisn || '22231001',
-        nisn: sFound.nisn || '0071234567',
-        kelas: sFound.nama_kelas || sFound.kelas || selectedKelas || 'X-1'
+        nama: sFound.nama_siswa || sFound.nama || '-',
+        nis: sFound.nis || sFound.nis_nisn || '-',
+        nisn: sFound.nisn || '-',
+        kelas: sFound.nama_kelas || sFound.kelas || selectedKelas || '-'
       });
     } else {
-      setCurrentSiswa({
-        nama: 'Ahmad Fauzi',
-        nis: '22231001',
-        nisn: '0071234567',
-        kelas: selectedKelas || 'X-1'
-      });
+      setCurrentSiswa(null);
     }
 
     try {
@@ -165,21 +145,7 @@ export default function AdminRaporTab() {
       }
 
       if (!Array.isArray(dbMapel) || dbMapel.length === 0) {
-        dbMapel = [
-          { nama_mapel: "Pendidikan Agama Islam", kelompok: "Kelompok A (Umum)" },
-          { nama_mapel: "Pendidikan Pancasila", kelompok: "Kelompok A (Umum)" },
-          { nama_mapel: "Bahasa Indonesia", kelompok: "Kelompok A (Umum)" },
-          { nama_mapel: "Matematika", kelompok: "Kelompok A (Umum)" },
-          { nama_mapel: "Bahasa Inggris", kelompok: "Kelompok A (Umum)" },
-          { nama_mapel: "Sejarah", kelompok: "Kelompok A (Umum)" },
-          { nama_mapel: "PJOK", kelompok: "Kelompok A (Umum)" },
-          { nama_mapel: "Pendidikan Seni dan Budaya", kelompok: "Kelompok B (Umum)" },
-          { nama_mapel: "Informatika / Prakarya", kelompok: "Kelompok B (Umum)" },
-          { nama_mapel: "Bahasa Jawa / Daerah", kelompok: "Kelompok B (Umum)" },
-          { nama_mapel: "Geografi", kelompok: "Kelompok C (Peminatan)" },
-          { nama_mapel: "Ekonomi", kelompok: "Kelompok C (Peminatan)" },
-          { nama_mapel: "Sosiologi", kelompok: "Kelompok C (Peminatan)" }
-        ];
+        dbMapel = [];
       }
 
       const rawKomponen = resMatrix?.data?.data?.komponen || [];
