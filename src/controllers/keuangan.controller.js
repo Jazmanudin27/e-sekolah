@@ -377,6 +377,46 @@ async function deleteBatchUnpaidTagihan(req, res, next) {
 }
 
 module.exports = {
+async function createDanaPayment(req, res, next) {
+  try {
+    const { siswa_id, items = [], nominal } = req.body;
+    const danaService = require('../services/dana.service');
+    const { query } = require('../config/database');
+
+    const siswaRows = await query('SELECT * FROM siswa WHERE kode_siswa = ?', [siswa_id]);
+    if (!siswaRows || siswaRows.length === 0) return sendError(res, 'Siswa tidak ditemukan', 404);
+    const siswa = siswaRows[0];
+
+    const totalNominal = nominal || items.reduce((acc, item) => acc + Number(item.nominal_bayar || 0), 0);
+    const orderId = `INV-DANA-${Date.now()}`;
+
+    // 1. Simpan Transaksi Online PENDING ke DB
+    await PembayaranTransaksiModel.createOnlinePendingTransaction({
+      order_id: orderId,
+      siswa_id,
+      total_bayar: totalNominal,
+      items,
+      metode_pembayaran: 'DANA'
+    });
+
+    // 2. Buat DANA Transaction / QRIS
+    const finishUrl = req.headers.origin ? `${req.headers.origin}/` : (req.headers.referer || process.env.MIDTRANS_FINISH_URL || 'https://sekolah.aspartech.com/');
+    const danaResult = await danaService.createTransaction({
+      orderId,
+      grossAmount: totalNominal,
+      customerName: siswa.nama_siswa,
+      items,
+      finishUrl
+    });
+
+    sendSuccess(res, 'DANA Payment QRIS / Order berhasil dibuat.', danaResult, 201);
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = {
+  getStats,
   getAllPos,
   createPos,
   updatePos,
@@ -400,5 +440,6 @@ module.exports = {
   updateTransaksi,
   handleWebhookMidtrans,
   createMidtransSnapToken,
+  createDanaPayment,
   getRekapTunggakan
 };

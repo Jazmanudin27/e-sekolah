@@ -46,6 +46,8 @@ export default function AdminKeuanganTab() {
   const [totalBayar, setTotalBayar] = useState(0);
   const [cashReceived, setCashReceived] = useState('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [showDanaModal, setShowDanaModal] = useState(false);
+  const [danaModalData, setDanaModalData] = useState(null);
   const [lastReceipt, setLastReceipt] = useState(null);
   const [kasirViewMode, setKasirViewMode] = useState('tagihan'); // 'tagihan' vs 'riwayat_siswa'
   const [siswaRiwayatTransaksi, setSiswaRiwayatTransaksi] = useState([]);
@@ -57,8 +59,6 @@ export default function AdminKeuanganTab() {
   const [transaksiPage, setTransaksiPage] = useState(1);
   const [showKwitansiModal, setShowKwitansiModal] = useState(false);
   const [selectedTransaksiDetail, setSelectedTransaksiDetail] = useState(null);
-  const [showEditTransaksiModal, setShowEditTransaksiModal] = useState(false);
-  const [editTransaksiData, setEditTransaksiData] = useState(null);
 
   // --- MASTER POS & TARIF STATE ---
   const [posList, setPosList] = useState([]);
@@ -309,47 +309,6 @@ export default function AdminKeuanganTab() {
     }
   };
 
-  const handleOpenEditTransaksi = async (transaksiId) => {
-    try {
-      const res = await api.get(`/keuangan/transaksi/${transaksiId}`);
-      if (res.data?.success) {
-        setEditTransaksiData(res.data.data);
-        setShowEditTransaksiModal(true);
-      }
-    } catch (e) {
-      Swal.fire('Error', 'Gagal mengambil detail transaksi.', 'error');
-    }
-  };
-
-  const handleSaveEditTransaksi = async (e) => {
-    e.preventDefault();
-    if (!editTransaksiData) return;
-
-    try {
-      const items = (editTransaksiData.details || []).map(d => ({
-        tagihan_id: d.tagihan_id,
-        nominal_bayar: Number(d.nominal_dibayar) || 0
-      }));
-
-      const res = await api.put(`/keuangan/transaksi/${editTransaksiData.id}`, {
-        metode_pembayaran: editTransaksiData.metode_pembayaran,
-        items
-      });
-
-      if (res.data?.success) {
-        Swal.fire('Berhasil', 'Data transaksi pembayaran berhasil diperbarui.', 'success');
-        setShowEditTransaksiModal(false);
-        setEditTransaksiData(null);
-        fetchTransaksiList();
-        if (selectedSiswa) {
-          fetchSiswaTagihan(selectedSiswa.kode_siswa);
-          fetchSiswaRiwayatTransaksi(selectedSiswa.kode_siswa);
-        }
-      }
-    } catch (err) {
-      Swal.fire('Error', err.response?.data?.message || 'Gagal memperbarui transaksi.', 'error');
-    }
-  };
 
   const toggleSelectTagihan = (t) => {
     const isSelected = selectedTagihanIds.includes(t.id);
@@ -418,6 +377,12 @@ export default function AdminKeuanganTab() {
     }
     if (totalBayar <= 0) {
       Swal.fire('Peringatan', 'Nominal bayar harus lebih besar dari Rp 0.', 'warning');
+      return;
+    }
+
+    const cashVal = parseRupiahInput(cashReceived);
+    if (!cashReceived || cashVal < totalBayar) {
+      Swal.fire('Peringatan', 'Uang Diterima (Cash In) belum diisi atau kurang dari total pembayaran.', 'warning');
       return;
     }
 
@@ -1136,16 +1101,7 @@ export default function AdminKeuanganTab() {
                                       <Printer size={15} />
                                     </button>
                                     {tr.status_transaksi !== 'CANCELLED' && (
-                                      <>
-                                        <button
-                                          type="button"
-                                          onClick={() => handleOpenEditTransaksi(tr.id)}
-                                          style={{ padding: '6px 8px', borderRadius: 6, background: '#fef3c7', color: '#d97706', border: '1px solid #fcd34d', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
-                                          title="Edit Nominal / Detail Pembayaran"
-                                        >
-                                          <Edit2 size={15} />
-                                        </button>
-                                        <button
+                                                                              <button
                                           type="button"
                                           onClick={() => handleCancelTransaksi(tr.id)}
                                           style={{ padding: '6px 8px', borderRadius: 6, background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
@@ -1153,8 +1109,7 @@ export default function AdminKeuanganTab() {
                                         >
                                           <Trash2 size={15} />
                                         </button>
-                                      </>
-                                    )}
+                                                                          )}
                                   </div>
                                 </td>
                               </tr>
@@ -1164,8 +1119,8 @@ export default function AdminKeuanganTab() {
                       </table>
                     </div>
                   ) : (
-                    <>
-                      {(() => {
+                      <>
+                        {(() => {
                         const unpaidList = siswaTagihan.filter(t => t.status !== 'PAID');
                         const unpaidBulanan = unpaidList.filter(t => t.tipe_pos === 'BULANAN');
                         const unpaidBebas = unpaidList.filter(t => t.tipe_pos !== 'BULANAN');
@@ -1269,8 +1224,8 @@ export default function AdminKeuanganTab() {
                                           </td>
                                           <td>
                                             {isBulanan ? (
-                                              <div>
-                                                {isPastMonth ? (
+                                               <div>
+                                                 {isPastMonth ? (
                                                    <>
                                                      <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                                                        ⚠️ Tunggakan {getBulanLabel(t.bulan)} {t.tahun}
@@ -1280,16 +1235,16 @@ export default function AdminKeuanganTab() {
                                                      </div>
                                                    </>
                                                  ) : (
-                                                  <>
-                                                    <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                                      🗓️ {getBulanLabel(t.bulan)} {t.tahun}
-                                                    </span>
-                                                    <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
-                                                      Tagihan SPP Rutin (Berjalan)
-                                                    </div>
-                                                  </>
-                                                )}
-                                              </div>
+                                                   <>
+                                                     <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                                       🗓️ {getBulanLabel(t.bulan)} {t.tahun}
+                                                     </span>
+                                                     <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+                                                       Tagihan SPP Rutin (Berjalan)
+                                                     </div>
+                                                   </>
+                                                 )}
+                                               </div>
                                             ) : (
                                               <div>
                                                 <span style={{ background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -1426,12 +1381,13 @@ export default function AdminKeuanganTab() {
                     <div>
                       <button
                         type="button"
-                        disabled={isProcessingPayment || selectedTagihanIds.length === 0}
+                        disabled={isProcessingPayment || selectedTagihanIds.length === 0 || !cashReceived || parseRupiahInput(cashReceived) < totalBayar}
                         onClick={handleProcessPayment}
                         className="btn-primary-admin"
                         style={{
                           width: '100%', padding: '12px',
-                          opacity: selectedTagihanIds.length === 0 ? 0.6 : 1,
+                          opacity: (selectedTagihanIds.length === 0 || !cashReceived || parseRupiahInput(cashReceived) < totalBayar) ? 0.6 : 1,
+                          cursor: (selectedTagihanIds.length === 0 || !cashReceived || parseRupiahInput(cashReceived) < totalBayar) ? 'not-allowed' : 'pointer',
                           background: '#16a34a', borderColor: '#16a34a', fontSize: 13, fontWeight: 800
                         }}
                       >
@@ -1476,12 +1432,65 @@ export default function AdminKeuanganTab() {
                       >
                         💳 Bayar Midtrans (VA/QRIS)
                       </button>
+                      <button
+                        type="button"
+                        disabled={isProcessingPayment || selectedTagihanIds.length === 0}
+                        onClick={async () => {
+                          if (!selectedSiswa || selectedTagihanIds.length === 0) return;
+                          setIsProcessingPayment(true);
+                          try {
+                            const items = selectedTagihanIds.map(id => ({
+                              tagihan_id: id,
+                              nominal_bayar: bayarNominal[id] || 0
+                            }));
+                            const res = await api.post('/keuangan/dana/create-order', {
+                              siswa_id: selectedSiswa.kode_siswa,
+                              items,
+                              nominal: totalBayar
+                            });
+                            if (res.data?.success && res.data.data) {
+                              const d = res.data.data;
+                              Swal.fire({
+                                title: '📱 Pembayaran DANA (QRIS/Transfer)',
+                                html: `
+                                  <div style="text-align:center; font-size:13px;">
+                                    <p>Order Pembayaran DANA berhasil dibuat:</p>
+                                    <div style="background:#108ee9; color:white; padding:12px; border-radius:8px; font-weight:800; font-size:18px; margin:12px 0;">
+                                      Total: Rp ${totalBayar.toLocaleString('id-ID')}
+                                    </div>
+                                    <p style="font-size:12px; color:#475569;">Merchant ID: <strong>${d.merchant_id}</strong></p>
+                                    <p style="font-size:11px; color:#64748b; margin-top:4px;">Order ID: <strong>${d.order_id}</strong></p>
+                                  </div>
+                                `,
+                                icon: 'info',
+                                showCancelButton: true,
+                                confirmButtonText: '⚡ Buka Pembayaran DANA',
+                                cancelButtonText: 'Tutup'
+                              }).then((result) => {
+                                if (result.isConfirmed && d.checkout_url) {
+                                  window.open(d.checkout_url, '_blank');
+                                }
+                              });
+                            }
+                          } catch (err) {
+                            Swal.fire('Gagal', err.response?.data?.message || 'Gagal membuat Order DANA.', 'error');
+                          } finally {
+                            setIsProcessingPayment(false);
+                          }
+                        }}
+                        className="btn-primary-admin"
+                        style={{
+                          width: '100%', padding: '10px', marginTop: 8,
+                          opacity: selectedTagihanIds.length === 0 ? 0.6 : 1,
+                          background: '#108ee9', borderColor: '#108ee9', fontSize: 12, fontWeight: 800
+                        }}
+                      >
+                        📱 Bayar DANA (QRIS / Transfer)
+                      </button>
                     </div>
                   </div>
                 </>
-              )}
-            </>
-          ) : (
+              ) : (
                 <div style={{ textAlign: 'center', padding: '50px 20px', color: '#94a3b8', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
                   <Search size={40} style={{ marginBottom: 10, opacity: 0.5 }} />
                   <div style={{ fontWeight: 700, color: '#64748b' }}>Ketik NIS atau nama siswa pada pencarian di atas.</div>
@@ -1677,8 +1686,7 @@ export default function AdminKeuanganTab() {
             </div>
 
             {masterSubTab === 'pos' && (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Daftar Pos Pembayaran</div>
                   <button
                     className="btn-primary-admin"
@@ -1740,12 +1748,10 @@ export default function AdminKeuanganTab() {
                     </tbody>
                   </table>
                 </div>
-              </>
-            )}
+                          )}
 
             {masterSubTab === 'tarif' && (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Matrix Tarif Pembayaran</div>
                   <button className="btn-primary-admin" onClick={handleOpenAddTarif}>
                     <Plus size={15} /> Tambah Tarif Baru
@@ -1848,8 +1854,7 @@ export default function AdminKeuanganTab() {
                     </tbody>
                   </table>
                 </div>
-              </>
-            )}
+                          )}
           </div>
         )}
 
@@ -1944,8 +1949,7 @@ export default function AdminKeuanganTab() {
                   </div>
                 ) : (
                   /* TIPE BULANAN FORM FIELDS */
-                  <>
-                    {/* MODE SELECTION */}
+                                      {/* MODE SELECTION */}
                     <div className="form-group-admin" style={{ marginBottom: 16 }}>
                       <label>Mode Generasi Tagihan *</label>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 4 }}>
@@ -2068,8 +2072,7 @@ export default function AdminKeuanganTab() {
                         </div>
                       </div>
                     )}
-                  </>
-                )}
+                                  )}
 
                 {/* FILTER KELAS */}
                 <div className="form-group-admin" style={{ marginBottom: 20 }}>
@@ -2803,77 +2806,6 @@ export default function AdminKeuanganTab() {
         </div>
       )}
 
-      {/* --- MODAL EDIT TRANSAKSI PEMBAYARAN --- */}
-      {showEditTransaksiModal && editTransaksiData && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal-box" style={{ maxWidth: 540 }}>
-            <div className="admin-modal-header">
-              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                Edit Transaksi ({editTransaksiData.no_transaksi})
-              </h3>
-              <button onClick={() => setShowEditTransaksiModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveEditTransaksi}>
-              <div className="admin-modal-body">
-                <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 16, fontSize: 12 }}>
-                  <div>Siswa: <strong>{editTransaksiData.nama_siswa} ({editTransaksiData.nis || '-'})</strong></div>
-                  <div>Kelas: <strong>{editTransaksiData.nama_kelas || '-'}</strong></div>
-                  <div>Tanggal: <strong>{new Date(editTransaksiData.tanggal_bayar).toLocaleString('id-ID')}</strong></div>
-                </div>
-
-                <div className="form-group-admin">
-                  <label>Metode Pembayaran</label>
-                  <SearchableSelect
-                    value={editTransaksiData.metode_pembayaran}
-                    onChange={(e) => setEditTransaksiData({ ...editTransaksiData, metode_pembayaran: e.target.value })}
-                    options={[
-                      { value: 'CASH', label: 'CASH / Tunai (Kasir TU)' },
-                      { value: 'TRANSFER', label: 'Transfer Bank' },
-                      { value: 'ONLINE', label: 'Payment Gateway Online' }
-                    ]}
-                  />
-                </div>
-
-                <div style={{ marginTop: 16 }}>
-                  <label style={{ fontSize: 13, fontWeight: 700, color: '#334155', display: 'block', marginBottom: 8 }}>
-                    Nominal Dibayar per Tagihan:
-                  </label>
-                  {(editTransaksiData.details || []).map((detail, index) => (
-                    <div key={index} style={{ background: '#ffffff', border: '1px solid #cbd5e1', padding: 10, borderRadius: 6, marginBottom: 10 }}>
-                      <div style={{ fontWeight: 700, fontSize: 12.5, color: '#0f172a', marginBottom: 4 }}>
-                        {detail.nama_pos} ({detail.bulan ? `${getBulanLabel(detail.bulan)} ${detail.tahun}` : 'Sekali Bayar'})
-                      </div>
-                      <input
-                        type="number"
-                        className="form-control-admin"
-                        value={detail.nominal_dibayar}
-                        onChange={(e) => {
-                          const newDetails = [...editTransaksiData.details];
-                          newDetails[index].nominal_dibayar = e.target.value;
-                          setEditTransaksiData({ ...editTransaksiData, details: newDetails });
-                        }}
-                        placeholder="Nominal Dibayar (Rp)"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="admin-modal-footer">
-                <button type="button" className="btn-outline-admin" onClick={() => setShowEditTransaksiModal(false)}>
-                  Batal
-                </button>
-                <button type="submit" className="btn-primary-admin">
-                  Simpan Perubahan
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* MODAL EDIT TAGIHAN SISWA */}
       {showEditTagihanModal && editTagihanData && (
