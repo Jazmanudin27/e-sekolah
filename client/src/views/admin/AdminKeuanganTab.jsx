@@ -1414,12 +1414,46 @@ export default function AdminKeuanganTab() {
                         onClick={handleProcessPayment}
                         className="btn-primary-admin"
                         style={{
-                          width: '100%', padding: '14px',
+                          width: '100%', padding: '12px',
                           opacity: selectedTagihanIds.length === 0 ? 0.6 : 1,
-                          background: '#16a34a', borderColor: '#16a34a', fontSize: 14, fontWeight: 800
+                          background: '#16a34a', borderColor: '#16a34a', fontSize: 13, fontWeight: 800
                         }}
                       >
-                        {isProcessingPayment ? 'Memproses...' : 'Proses & Cetak Kuitansi'}
+                        {isProcessingPayment ? 'Memproses...' : '💵 Bayar Tunai (Kasir)'}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isProcessingPayment || selectedTagihanIds.length === 0}
+                        onClick={async () => {
+                          if (!selectedSiswa || selectedTagihanIds.length === 0) return;
+                          setIsProcessingPayment(true);
+                          try {
+                            const res = await api.post('/keuangan/midtrans/snap-token', {
+                              siswa_id: selectedSiswa.kode_siswa,
+                              nominal: totalBayar
+                            });
+                            if (res.data?.success && res.data.data?.redirect_url) {
+                              window.open(res.data.data.redirect_url, '_blank');
+                              Swal.fire({
+                                title: 'Halaman Pembayaran Terbuka',
+                                html: `Halaman pembayaran Midtrans telah dibuka di tab baru.<br>Order ID: <strong>${res.data.data.order_id}</strong>`,
+                                icon: 'success'
+                              });
+                            }
+                          } catch (err) {
+                            Swal.fire('Gagal', err.response?.data?.message || 'Gagal membuat Snap Token Midtrans.', 'error');
+                          } finally {
+                            setIsProcessingPayment(false);
+                          }
+                        }}
+                        className="btn-primary-admin"
+                        style={{
+                          width: '100%', padding: '10px', marginTop: 8,
+                          opacity: selectedTagihanIds.length === 0 ? 0.6 : 1,
+                          background: '#0284c7', borderColor: '#0284c7', fontSize: 12, fontWeight: 800
+                        }}
+                      >
+                        💳 Bayar Midtrans (VA/QRIS)
                       </button>
                     </div>
                   </div>
