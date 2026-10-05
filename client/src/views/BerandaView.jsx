@@ -11,6 +11,7 @@ import PengumumanSlider from '../components/PengumumanSlider';
 
 export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwitchTab, onUserUpdated }) {
   const isClassAccount = user?.type === 'Kelas' || user?.role === 'Kelas';
+  const isSiswaAccount = user?.type === 'Siswa' || user?.role === 'Siswa';
   const [todayStatus, setTodayStatus] = useState(null);
   const [historyItems, setHistoryItems] = useState([]);
   const [izinItems, setIzinItems] = useState([]);
@@ -22,12 +23,12 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
   const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][now.getMonth()];
 
   useEffect(() => {
-    if (!isClassAccount) {
+    if (!isClassAccount && !isSiswaAccount) {
       fetchTodayStatus();
       fetchHistory();
       fetchIzin();
     }
-  }, [isClassAccount]);
+  }, [isClassAccount, isSiswaAccount]);
 
   const fetchTodayStatus = async () => {
     try {
@@ -128,6 +129,93 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
     if (selectedCategory === 'Cuti') return cutiList;
     return [];
   };
+
+  // ========================
+  // BERANDA KHUSUS AKUN SISWA / ORTU (TAMPILAN MIRIP AKUN KELAS)
+  // ========================
+  if (isSiswaAccount) {
+    const studentName = user?.nama_siswa || user?.name || 'Siswa';
+    return (
+      <div className="beranda-view-container">
+        {/* HERO BLUE HEADER */}
+        <TopBar user={user} onLogout={onLogout} onUserUpdated={onUserUpdated} />
+
+        {/* WELCOME CARD SISWA */}
+        <div className="summary-overlap-card">
+          <div style={{ textAlign: 'center', padding: '6px 0 2px 0' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#0284c7', marginBottom: 4 }}>
+              🎓 Akun Siswa & Ortu
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a' }}>
+              {studentName}
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#475569', marginTop: 2 }}>
+              NIS: {user?.nis_nisn || '-'} &bull; Kelas: {user?.nama_kelas || '-'}
+            </div>
+            {user?.nama_ortu && (
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginTop: 2 }}>
+                Orang Tua: {user.nama_ortu} ({user.no_wa_ortu || '-'})
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* MENU GRID KHUSUS SISWA / ORTU (SAMA SEPERTI AKUN KELAS) */}
+        <div className="grid-8-menu-wrapper">
+          <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+            <button className="menu-blue-card menu-item-rekap-siswa" onClick={() => onSwitchTab('tagihanSiswa')}>
+              <div className="menu-icon-circle">
+                <FileBarChart size={35} strokeWidth={2.5} />
+              </div>
+              <span>Tagihan</span>
+            </button>
+
+            <button className="menu-blue-card menu-item-absen-siswa" onClick={() => onSwitchTab('absensiSiswa')}>
+              <div className="menu-icon-circle">
+                <UserCheck size={35} strokeWidth={2.5} />
+              </div>
+              <span>Presensi</span>
+            </button>
+
+            <button className="menu-blue-card menu-item-kalender" onClick={() => onSwitchTab('pelanggaran')}>
+              <div className="menu-icon-circle">
+                <ShieldAlert size={35} strokeWidth={2.5} />
+              </div>
+              <span>Catatan BK</span>
+            </button>
+
+            <button className="menu-blue-card menu-item-jadwal" onClick={() => onSwitchTab('kalender')}>
+              <div className="menu-icon-circle">
+                <CalendarDays size={35} strokeWidth={2.5} />
+              </div>
+              <span>Kalender</span>
+            </button>
+          </div>
+        </div>
+
+        {/* INFO BOX KHUSUS SISWA */}
+        <div style={{
+          margin: '0 16px 20px',
+          padding: '14px 16px',
+          borderRadius: 14,
+          background: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          color: '#1e40af',
+          fontSize: 13,
+          fontWeight: 600,
+          lineHeight: 1.6
+        }}>
+          <div style={{ fontWeight: 800, marginBottom: 4 }}>ℹ️ Informasi Akun Siswa & Wali Murid</div>
+          Pembayaran tagihan sekolah dilakukan secara <strong>Tunai (Cash)</strong> melalui Kasir TU Sekolah. Data tersaji khusus untuk siswa ini tanpa melihat data siswa lain.
+        </div>
+
+        {/* PENGUMUMAN SLIDER BANNER (PALING BAWAH) */}
+        <div style={{ padding: '0 16px', marginTop: 8, marginBottom: 20 }}>
+          <PengumumanSlider />
+        </div>
+      </div>
+    );
+  }
 
   // ========================
   // BERANDA KHUSUS AKUN KELAS

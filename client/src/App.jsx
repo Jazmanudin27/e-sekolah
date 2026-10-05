@@ -235,16 +235,6 @@ export default function App() {
     );
   }
 
-  // DEDICATED PARENT & STUDENT PORTAL (Only for logged-in Siswa / Ortu)
-  if (currentUser?.type === 'Siswa' || currentUser?.role === 'Siswa') {
-    return (
-      <>
-        <InstallPwaModal />
-        <PortalOrtuSiswaView user={currentUser} onLogout={handleLogout} onUserUpdated={(u) => setCurrentUser(u)} />
-      </>
-    );
-  }
-
   return (
     <div className="app-shell">
       <InstallPwaModal />
@@ -439,6 +429,13 @@ export default function App() {
           <SaprasView
             user={currentUser}
             showToast={showToast}
+          />
+        )}
+        {activeTab === 'tagihanSiswa' && (
+          <PortalOrtuSiswaView
+            user={currentUser}
+            onLogout={handleLogout}
+            onUserUpdated={(u) => setCurrentUser(u)}
           />
         )}
         {activeTab === 'pelanggaran' && (

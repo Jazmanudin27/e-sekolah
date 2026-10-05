@@ -1,8 +1,65 @@
 import React from 'react';
-import { Home, FileText, Fingerprint, History, User, UserCheck, BookOpen, FileBarChart, Calendar } from 'lucide-react';
+import { Home, FileText, Fingerprint, History, User, UserCheck, BookOpen, FileBarChart, Calendar, CreditCard } from 'lucide-react';
 
 export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user }) {
   const isClassAccount = user?.type === 'Kelas' || user?.role === 'Kelas';
+  const isSiswaAccount = user?.type === 'Siswa' || user?.role === 'Siswa';
+
+  if (isSiswaAccount) {
+    return (
+      <nav className="bottom-nav-white">
+        <div className="bottom-nav-inner">
+          {/* 1. BERANDA SISWA */}
+          <button
+            className={`nav-link-item ${activeTab === 'beranda' ? 'active' : ''}`}
+            onClick={() => onTabChange('beranda')}
+          >
+            <div className="nav-icon-wrapper">
+              <Home size={21} />
+            </div>
+            <span>Beranda</span>
+            {activeTab === 'beranda' && <span className="active-dot" />}
+          </button>
+
+          {/* 2. TAGIHAN */}
+          <button
+            className={`nav-link-item ${activeTab === 'tagihanSiswa' ? 'active' : ''}`}
+            onClick={() => onTabChange('tagihanSiswa')}
+          >
+            <div className="nav-icon-wrapper">
+              <CreditCard size={21} />
+            </div>
+            <span>Tagihan</span>
+            {activeTab === 'tagihanSiswa' && <span className="active-dot" />}
+          </button>
+
+          {/* 3. PRESENSI */}
+          <button
+            className={`nav-link-item ${activeTab === 'absensiSiswa' || activeTab === 'riwayat' ? 'active' : ''}`}
+            onClick={() => onTabChange('absensiSiswa')}
+          >
+            <div className="nav-icon-wrapper">
+              <UserCheck size={21} />
+            </div>
+            <span>Presensi</span>
+            {(activeTab === 'absensiSiswa' || activeTab === 'riwayat') && <span className="active-dot" />}
+          </button>
+
+          {/* 4. PROFIL */}
+          <button
+            className={`nav-link-item ${activeTab === 'profil' ? 'active' : ''}`}
+            onClick={() => onTabChange('profil')}
+          >
+            <div className="nav-icon-wrapper">
+              <User size={21} />
+            </div>
+            <span>Profil</span>
+            {activeTab === 'profil' && <span className="active-dot" />}
+          </button>
+        </div>
+      </nav>
+    );
+  }
 
   if (isClassAccount) {
     return (
