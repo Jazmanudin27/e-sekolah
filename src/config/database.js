@@ -4,60 +4,53 @@ require('dotenv').config();
 
 const tenantStorage = new AsyncLocalStorage();
 
-// Multi-Tenant Domain-to-Database Configuration Mapping
-const TENANT_CONFIGS = {
-  'sekolah.aspartech.com': {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT, 10) || 3306,
-    user: 'artanita',
-    password: 'Jazman@271998',
-    database: 'artanita'
-  },
-  'mobile.sistemiartas.com': {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT, 10) || 3306,
-    user: 'artanita',
-    password: 'Jazman@271998',
-    database: 'artanita'
-  },
-  'demosekolah.devorme.site': {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT, 10) || 3306,
-    user: 'artanita',
-    password: 'Jazman@271998',
-    database: 'demo_sekolah'
-  }
+const defaultDomain = process.env.APP_DOMAIN || 'sekolah.aspartech.com';
+const allowedDomains = (process.env.TENANT_DOMAINS || defaultDomain)
+  .split(',')
+  .map(d => d.trim().toLowerCase())
+  .filter(Boolean);
+
+const tenantDbConfig = {
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT, 10) || 3306,
+  user: process.env.DB_USER || 'artanita',
+  password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : 'Jazman@271998',
+  database: process.env.DB_NAME || 'artanita'
 };
+
+// Multi-Tenant Domain-to-Database Configuration Mapping
+const TENANT_CONFIGS = {};
+allowedDomains.forEach(domain => {
+  TENANT_CONFIGS[domain] = tenantDbConfig;
+});
 
 const pools = {};
 
 function getTenantConfig(domain) {
-  if (!domain) return null;
+  if (!domain) return tenantDbConfig;
   const cleanDomain = String(domain).split(':')[0].toLowerCase().trim();
 
   if (TENANT_CONFIGS[cleanDomain]) {
     return TENANT_CONFIGS[cleanDomain];
   }
 
-  if (cleanDomain.includes('demosekolah') || cleanDomain.includes('devorme')) {
-    return TENANT_CONFIGS['demosekolah.devorme.site'];
-  }
-  if (cleanDomain.includes('artanita') || cleanDomain.includes('aspartech') || cleanDomain.includes('sistemiartas')) {
-    return TENANT_CONFIGS['sekolah.aspartech.com'];
+  const matched = allowedDomains.find(d => cleanDomain.includes(d) || d.includes(cleanDomain));
+  if (matched && TENANT_CONFIGS[matched]) {
+    return TENANT_CONFIGS[matched];
   }
 
-  return null;
+  return tenantDbConfig;
 }
 
 function getPool(customHost) {
   const currentHost = customHost || tenantStorage.getStore();
   const config = getTenantConfig(currentHost);
 
-  const dbHost = (config && config.host) ? config.host : (process.env.DB_HOST || 'localhost');
-  const dbPort = (config && config.port) ? config.port : (parseInt(process.env.DB_PORT, 10) || 3306);
-  const dbUser = (config && config.user) ? config.user : (process.env.DB_USER || 'artanita');
-  const dbPassword = (config && config.password !== undefined) ? config.password : (process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : 'Jazman@271998');
-  const dbName = (config && config.database) ? config.database : (process.env.DB_NAME || 'artanita');
+  const dbHost = process.env.DB_HOST || (config ? config.host : 'localhost');
+  const dbPort = parseInt(process.env.DB_PORT, 10) || (config ? config.port : 3306);
+  const dbUser = process.env.DB_USER || (config ? config.user : 'artanita');
+  const dbPassword = process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : (config ? config.password : 'Jazman@271998');
+  const dbName = process.env.DB_NAME || (config ? config.database : 'artanita');
 
   const poolKey = `${dbHost}:${dbPort}:${dbUser}:${dbName}`;
 
