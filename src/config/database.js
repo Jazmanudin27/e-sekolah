@@ -23,7 +23,7 @@ const TENANT_CONFIGS = {
   'demosekolah.devorme.site': {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT, 10) || 3306,
-    user: 'user_demo',
+    user: 'artanita',
     password: 'Jazman@271998',
     database: 'demo_sekolah'
   }
@@ -53,11 +53,11 @@ function getPool(customHost) {
   const currentHost = customHost || tenantStorage.getStore();
   const config = getTenantConfig(currentHost);
 
-  const dbHost = process.env.DB_HOST || (config ? config.host : 'localhost');
-  const dbPort = parseInt(process.env.DB_PORT, 10) || (config ? config.port : 3306);
-  const dbUser = process.env.DB_USER || (config ? config.user : 'artanita');
-  const dbPassword = process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : (config ? config.password : 'Jazman@271998');
-  const dbName = process.env.DB_NAME || (config ? config.database : 'artanita');
+  const dbHost = (config && config.host) ? config.host : (process.env.DB_HOST || 'localhost');
+  const dbPort = (config && config.port) ? config.port : (parseInt(process.env.DB_PORT, 10) || 3306);
+  const dbUser = (config && config.user) ? config.user : (process.env.DB_USER || 'artanita');
+  const dbPassword = (config && config.password !== undefined) ? config.password : (process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : 'Jazman@271998');
+  const dbName = (config && config.database) ? config.database : (process.env.DB_NAME || 'artanita');
 
   const poolKey = `${dbHost}:${dbPort}:${dbUser}:${dbName}`;
 
