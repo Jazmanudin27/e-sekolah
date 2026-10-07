@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  GraduationCap, Plus, Search, Edit2, Trash2, RefreshCw, X, Filter, Award, TrendingUp, Phone, MessageCircle
+  GraduationCap, Plus, Search, Edit2, Trash2, RefreshCw, X, Filter, Award, TrendingUp, Phone, MessageCircle, Printer
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
+import { printMasterData } from '../../utils/printReport';
 
 export default function AdminSiswaTab({ onSwitchTab }) {
   const [siswaList, setSiswaList] = useState([]);
@@ -158,6 +159,27 @@ export default function AdminSiswaTab({ onSwitchTab }) {
     })
     .sort((a, b) => (a.nama_siswa || '').localeCompare(b.nama_siswa || '', 'id', { sensitivity: 'base' }));
 
+  const handlePrintReport = () => {
+    const columns = [
+      { key: 'no', label: 'No', style: 'width: 40px; text-align: center;' },
+      { key: 'nis_nisn', label: 'NIS / NISN', style: 'width: 120px; text-align: center;', render: (s) => s.nis || s.nis_nisn || '-' },
+      { key: 'nama_siswa', label: 'Nama Lengkap Siswa', style: 'text-align: left; padding-left: 8px;' },
+      { key: 'jk', label: 'L/P', style: 'width: 60px; text-align: center;' },
+      { key: 'nama_kelas', label: 'Kelas', style: 'width: 110px; text-align: center;', render: (s) => s.nama_kelas || s.kode_kelas || '-' },
+      { key: 'status', label: 'Status', style: 'width: 90px; text-align: center;', render: (s) => s.status || 'Aktif' },
+      { key: 'nama_ortu', label: 'Nama Ortu / Wali', style: 'text-align: left; padding-left: 8px;', render: (s) => s.nama_ortu || '-' },
+      { key: 'no_wa_ortu', label: 'No WA Ortu', style: 'width: 120px; text-align: center;', render: (s) => s.no_wa_ortu || '-' }
+    ];
+
+    printMasterData({
+      title: 'LAPORAN DATA SISWA',
+      subtitle: `SMK ARTANITA • FILTER STATUS: ${filterStatus.toUpperCase()} • KELAS: ${filterKelas === 'ALL' ? 'SEMUA KELAS' : filterKelas}`,
+      columns,
+      data: filteredList,
+      orientation: 'landscape'
+    });
+  };
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
 
@@ -175,6 +197,15 @@ export default function AdminSiswaTab({ onSwitchTab }) {
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              type="button"
+              className="btn-outline-admin"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
+              onClick={handlePrintReport}
+              title="Cetak Laporan Data Siswa"
+            >
+              <Printer size={16} color="#0284c7" /> Cetak Laporan
+            </button>
             {onSwitchTab && (
               <button
                 type="button"

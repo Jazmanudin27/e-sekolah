@@ -218,7 +218,7 @@ class UserModel {
     return null;
   }
 
-  static async update(id, { name, username, email, password, role, status }) {
+  static async update(id, { name, username, email, password, role, status, kode_member }) {
     const { tableName, columns } = await resolveUserTableInfo();
     const idCol = columns.includes('id_user') ? 'id_user' : 'id';
     try {
@@ -233,6 +233,7 @@ class UserModel {
       if (password && columns.includes('pass')) { updates.push('`pass` = ?'); values.push(password); }
       if (role && columns.includes('role')) { updates.push('`role` = ?'); values.push(role); }
       if (status && columns.includes('status')) { updates.push('`status` = ?'); values.push(status); }
+      if (kode_member !== undefined && columns.includes('kode_member')) { updates.push('`kode_member` = ?'); values.push(kode_member); }
 
       if (updates.length > 0) {
         values.push(id);

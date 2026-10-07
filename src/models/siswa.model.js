@@ -179,6 +179,7 @@ class SiswaModel {
       if (!colNames.includes('nisn')) await query("ALTER TABLE siswa ADD COLUMN nisn VARCHAR(30) DEFAULT NULL");
       if (!colNames.includes('nis_nisn')) await query("ALTER TABLE siswa ADD COLUMN nis_nisn VARCHAR(50) DEFAULT NULL");
       if (!colNames.includes('email')) await query("ALTER TABLE siswa ADD COLUMN email VARCHAR(100) DEFAULT NULL");
+      if (!colNames.includes('kode_member')) await query("ALTER TABLE siswa ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL");
     } catch (err) {
       console.warn('[SiswaModel.ensureColumns] Warning:', err.message);
     }
@@ -244,6 +245,10 @@ class SiswaModel {
     if (data.password !== undefined) {
       fields.push('password = ?');
       params.push(data.password);
+    }
+    if (data.kode_member !== undefined) {
+      fields.push('kode_member = ?');
+      params.push(data.kode_member);
     }
     if (fields.length === 0) return;
     params.push(id);

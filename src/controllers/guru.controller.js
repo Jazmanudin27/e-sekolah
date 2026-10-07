@@ -38,7 +38,12 @@ async function createGuru(req, res, next) {
 async function updateGuru(req, res, next) {
   try {
     const { id } = req.params;
-    await GuruModel.update(id, req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member || req.query?.kode_member;
+    const updateData = { ...req.body };
+    if (kode_member && updateData.kode_member === undefined) {
+      updateData.kode_member = kode_member;
+    }
+    await GuruModel.update(id, updateData);
     sendSuccess(res, 'Data guru berhasil diperbarui.', { kode_guru: id });
   } catch (error) {
     next(error);

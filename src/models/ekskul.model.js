@@ -16,6 +16,9 @@ class EkskulModel {
       `);
     } catch (e) {}
     try {
+      await query("ALTER TABLE ekstrakurikuler ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL");
+    } catch (e) {}
+    try {
       await query(`
         CREATE TABLE IF NOT EXISTS ekskul_siswa (
           id INT AUTO_INCREMENT PRIMARY KEY,
@@ -57,6 +60,7 @@ class EkskulModel {
   }
 
   static async update(id, data) {
+    await this.ensureTables();
     const fields = [];
     const params = [];
     if (data.nama_ekskul !== undefined) {
@@ -66,6 +70,10 @@ class EkskulModel {
     if (data.pembina !== undefined) {
       fields.push('pembina = ?');
       params.push(data.pembina);
+    }
+    if (data.kode_member !== undefined) {
+      fields.push('kode_member = ?');
+      params.push(data.kode_member);
     }
     if (fields.length === 0) return;
     params.push(id);

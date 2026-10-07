@@ -14,11 +14,13 @@ async function getAllMapel(req, res, next) {
 async function createMapel(req, res, next) {
   try {
     const { nama_mapel, singkatan, kkm, kelompok } = req.body;
+    const kode_member = req.user?.kode_member || req.body?.kode_member || req.query?.kode_member || null;
     const id = await MapelModel.create({
       nama_mapel: nama_mapel ? String(nama_mapel).trim() : '',
       singkatan: singkatan ? String(singkatan).trim() : '',
       kkm: kkm !== undefined ? parseInt(kkm, 10) : 75,
-      kelompok: kelompok ? String(kelompok).trim() : 'Kelompok A (Umum)'
+      kelompok: kelompok ? String(kelompok).trim() : 'Kelompok A (Umum)',
+      kode_member
     });
     sendSuccess(res, 'Data mapel berhasil ditambahkan.', { kode_mapel: id }, 201);
   } catch (error) {
@@ -30,11 +32,13 @@ async function updateMapel(req, res, next) {
   try {
     const { id } = req.params;
     const { nama_mapel, singkatan, kkm, kelompok } = req.body;
+    const kode_member = req.user?.kode_member || req.body?.kode_member || req.query?.kode_member;
     const updateData = {};
     if (nama_mapel !== undefined) updateData.nama_mapel = String(nama_mapel).trim();
     if (singkatan !== undefined) updateData.singkatan = String(singkatan).trim();
     if (kkm !== undefined) updateData.kkm = parseInt(kkm, 10);
     if (kelompok !== undefined) updateData.kelompok = String(kelompok).trim();
+    if (kode_member !== undefined) updateData.kode_member = kode_member;
 
     await MapelModel.update(id, updateData);
     sendSuccess(res, 'Data mapel berhasil diperbarui.', { kode_mapel: id });

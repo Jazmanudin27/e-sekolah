@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Trophy, Plus, Search, Edit2, Trash2, RefreshCw, X, Users, UserPlus, CheckSquare
+  Trophy, Plus, Search, Edit2, Trash2, RefreshCw, X, Users, UserPlus, CheckSquare, Printer
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import { printMasterData } from '../../utils/printReport';
 
 export default function AdminEkskulTab() {
   const [ekskulList, setEkskulList] = useState([]);
@@ -218,6 +219,24 @@ export default function AdminEkskulTab() {
     (ek.pembina || '').toLowerCase().includes(search.toLowerCase())
   );
 
+  const handlePrintReport = () => {
+    const columns = [
+      { key: 'no', label: 'No', style: 'width: 40px; text-align: center;' },
+      { key: 'nama_ekskul', label: 'Nama Ekstrakurikuler', style: 'text-align: left; padding-left: 8px; font-weight: 700;' },
+      { key: 'pembina', label: 'Pembina / Pelatih', style: 'text-align: left; padding-left: 8px;', render: (ek) => ek.pembina || '-' },
+      { key: 'jadwal', label: 'Jadwal Kegiatan', style: 'text-align: left; padding-left: 8px;', render: (ek) => ek.jadwal || '-' },
+      { key: 'jumlah_anggota', label: 'Jumlah Anggota', style: 'width: 120px; text-align: center;', render: (ek) => ek.jumlah_anggota || '0' }
+    ];
+
+    printMasterData({
+      title: 'LAPORAN DATA EKSTRAKURIKULER',
+      subtitle: `SMK ARTANITA • DAFTAR KEGIATAN EKSTRAKURIKULER SEKOAH`,
+      columns,
+      data: filteredList,
+      orientation: 'portrait'
+    });
+  };
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
 
@@ -234,6 +253,15 @@ export default function AdminEkskulTab() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              type="button"
+              className="btn-outline-admin"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
+              onClick={handlePrintReport}
+              title="Cetak Laporan Data Ekskul"
+            >
+              <Printer size={16} color="#0284c7" /> Cetak Laporan
+            </button>
             <button className="btn-primary-admin" onClick={handleOpenAdd}>
               <Plus size={16} /> Tambah Ekskul Baru
             </button>

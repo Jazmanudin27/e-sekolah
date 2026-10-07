@@ -21,6 +21,9 @@ class PengumumanModel {
     } catch (err) {
       console.error('[PengumumanModel.ensureTable] Error:', err.message);
     }
+    try {
+      await query("ALTER TABLE pengumuman ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL");
+    } catch (e) {}
   }
 
   static async getAllActive(kode_member = null) {
@@ -71,13 +74,22 @@ class PengumumanModel {
 
   static async update(id, data) {
     await this.ensureTable();
-    const { judul, kategori, isi, gambar_url, penulis, target_role, is_active } = data;
-    await query(
-      `UPDATE pengumuman
-       SET judul = ?, kategori = ?, isi = ?, gambar_url = ?, penulis = ?, target_role = ?, is_active = ?
-       WHERE id = ?`,
-      [judul, kategori, isi, gambar_url, penulis, target_role, is_active, id]
-    );
+    const { judul, kategori, isi, gambar_url, penulis, target_role, is_active, kode_member } = data;
+    if (kode_member !== undefined) {
+      await query(
+        `UPDATE pengumuman
+         SET judul = ?, kategori = ?, isi = ?, gambar_url = ?, penulis = ?, target_role = ?, is_active = ?, kode_member = ?
+         WHERE id = ?`,
+        [judul, kategori, isi, gambar_url, penulis, target_role, is_active, kode_member, id]
+      );
+    } else {
+      await query(
+        `UPDATE pengumuman
+         SET judul = ?, kategori = ?, isi = ?, gambar_url = ?, penulis = ?, target_role = ?, is_active = ?
+         WHERE id = ?`,
+        [judul, kategori, isi, gambar_url, penulis, target_role, is_active, id]
+      );
+    }
     return true;
   }
 

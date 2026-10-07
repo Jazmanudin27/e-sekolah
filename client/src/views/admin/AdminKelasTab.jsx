@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Building2, Plus, Search, Edit2, Trash2, RefreshCw, X, Key, UserCheck, BookOpen, CheckSquare
+  Building2, Plus, Search, Edit2, Trash2, RefreshCw, X, Key, UserCheck, BookOpen, CheckSquare, Printer
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
+import { printMasterData } from '../../utils/printReport';
 
 export default function AdminKelasTab() {
   const [kelasList, setKelasList] = useState([]);
@@ -213,6 +214,24 @@ export default function AdminKelasTab() {
     })
     .sort((a, b) => (a.nama_kelas || '').localeCompare(b.nama_kelas || '', 'id', { numeric: true }));
 
+  const handlePrintReport = () => {
+    const columns = [
+      { key: 'no', label: 'No', style: 'width: 40px; text-align: center;' },
+      { key: 'nama_kelas', label: 'Nama Kelas', style: 'text-align: left; padding-left: 8px; font-weight: 700;' },
+      { key: 'jurusan', label: 'Jurusan / Program Keahlian', style: 'text-align: left; padding-left: 8px;', render: (k) => k.jurusan || '-' },
+      { key: 'wali_kelas', label: 'Wali Kelas', style: 'text-align: left; padding-left: 8px;', render: (k) => k.wali_kelas || '-' },
+      { key: 'total_siswa', label: 'Jumlah Siswa', style: 'width: 120px; text-align: center;', render: (k) => k.total_siswa || k.jumlah_siswa || '0' }
+    ];
+
+    printMasterData({
+      title: 'LAPORAN DATA KELAS & WALI KELAS',
+      subtitle: `SMK ARTANITA • DAFTAR KELAS TERDAFTAR`,
+      columns,
+      data: filteredList,
+      orientation: 'portrait'
+    });
+  };
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
 
@@ -230,6 +249,15 @@ export default function AdminKelasTab() {
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              type="button"
+              className="btn-outline-admin"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
+              onClick={handlePrintReport}
+              title="Cetak Laporan Data Kelas"
+            >
+              <Printer size={16} color="#0284c7" /> Cetak Laporan
+            </button>
             <button className="btn-primary-admin" onClick={handleOpenAdd}>
               <Plus size={16} /> Tambah Kelas Baru
             </button>

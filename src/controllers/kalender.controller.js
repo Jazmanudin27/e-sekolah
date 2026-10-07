@@ -31,7 +31,8 @@ async function createKalender(req, res, next) {
     if (!nama_kegiatan || !tanggal_mulai) {
       return sendError(res, 'Nama kegiatan dan tanggal mulai wajib diisi.', 400);
     }
-    const id = await KalenderModel.create(req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member || req.query?.kode_member || null;
+    const id = await KalenderModel.create({ ...req.body, kode_member });
     sendSuccess(res, 'Agenda kalender berhasil ditambahkan.', { id, ...req.body }, 201);
   } catch (error) {
     next(error);
@@ -41,7 +42,12 @@ async function createKalender(req, res, next) {
 async function updateKalender(req, res, next) {
   try {
     const { id } = req.params;
-    await KalenderModel.update(id, req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member || req.query?.kode_member;
+    const updateData = { ...req.body };
+    if (kode_member && updateData.kode_member === undefined) {
+      updateData.kode_member = kode_member;
+    }
+    await KalenderModel.update(id, updateData);
     sendSuccess(res, 'Agenda kalender berhasil diperbarui.', { id });
   } catch (error) {
     next(error);

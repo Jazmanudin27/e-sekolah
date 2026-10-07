@@ -33,7 +33,12 @@ async function createPos(req, res, next) {
 async function updatePos(req, res, next) {
   try {
     const { id } = req.params;
-    await PosPembayaranModel.update(id, req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member || req.query?.kode_member;
+    const updateData = { ...req.body };
+    if (kode_member && updateData.kode_member === undefined) {
+      updateData.kode_member = kode_member;
+    }
+    await PosPembayaranModel.update(id, updateData);
     sendSuccess(res, 'Pos pembayaran berhasil diperbarui.');
   } catch (error) {
     next(error);
@@ -69,7 +74,8 @@ async function createTarif(req, res, next) {
     if (!pos_id || !tahun_ajaran || nominal === undefined) {
       return sendError(res, 'pos_id, tahun_ajaran, dan nominal wajib diisi.', 400);
     }
-    const id = await TarifPembayaranModel.create({ pos_id, tahun_ajaran, tingkat, kode_kelas, nominal });
+    const kode_member = req.user?.kode_member || req.body?.kode_member || req.query?.kode_member || null;
+    const id = await TarifPembayaranModel.create({ pos_id, tahun_ajaran, tingkat, kode_kelas, nominal, kode_member });
     sendSuccess(res, 'Tarif pembayaran berhasil ditambahkan.', { id }, 201);
   } catch (error) {
     next(error);
@@ -79,7 +85,12 @@ async function createTarif(req, res, next) {
 async function updateTarif(req, res, next) {
   try {
     const { id } = req.params;
-    await TarifPembayaranModel.update(id, req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member || req.query?.kode_member;
+    const updateData = { ...req.body };
+    if (kode_member && updateData.kode_member === undefined) {
+      updateData.kode_member = kode_member;
+    }
+    await TarifPembayaranModel.update(id, updateData);
     sendSuccess(res, 'Tarif pembayaran berhasil diperbarui.');
   } catch (error) {
     next(error);

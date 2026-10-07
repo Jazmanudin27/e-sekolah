@@ -8,6 +8,7 @@ class TarifPembayaranModel {
       await query("ALTER TABLE pembayaran_transaksi MODIFY COLUMN total_bayar BIGINT NOT NULL DEFAULT 0");
       await query("ALTER TABLE pembayaran_detail MODIFY COLUMN nominal_dibayar BIGINT NOT NULL DEFAULT 0");
       await query("ALTER TABLE tarif_siswa_override MODIFY COLUMN nilai_potongan BIGINT NOT NULL DEFAULT 0");
+      await query("ALTER TABLE tarif_pembayaran ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL");
       console.log('[TarifPembayaranModel] Successfully ensured BIGINT column types for financial nominals.');
     } catch (e) {
       console.warn('[TarifPembayaranModel.ensureColumns] Column migration notice:', e.message);
@@ -72,7 +73,8 @@ class TarifPembayaranModel {
     return rows[0] || null;
   }
 
-  static async create({ pos_id, tahun_ajaran, tingkat = null, kode_kelas = null, nominal }) {
+  static async create({ pos_id, tahun_ajaran, tingkat = null, kode_kelas = null, nominal, kode_member = null }) {
+    await this.ensureColumns().catch(() => {});
     let existingSql = 'SELECT id FROM tarif_pembayaran WHERE pos_id = ? AND tahun_ajaran = ?';
     const params = [pos_id, tahun_ajaran];
     if (kode_kelas) {
@@ -85,20 +87,26 @@ class TarifPembayaranModel {
       existingSql += ' AND kode_kelas IS NULL AND tingkat IS NULL';
     }
 
+    if (kode_member) {
+      existingSql += ' AND kode_member = ?';
+      params.push(kode_member);
+    }
+
     const existing = await query(existingSql, params);
     if (existing && existing.length > 0) {
-      await query('UPDATE tarif_pembayaran SET nominal = ? WHERE id = ?', [nominal, existing[0].id]);
+      await query('UPDATE tarif_pembayaran SET nominal = ?, kode_member = COALESCE(?, kode_member) WHERE id = ?', [nominal, kode_member || null, existing[0].id]);
       return existing[0].id;
     }
 
     const res = await query(
-      'INSERT INTO tarif_pembayaran (pos_id, tahun_ajaran, tingkat, kode_kelas, nominal) VALUES (?, ?, ?, ?, ?)',
-      [pos_id, tahun_ajaran, tingkat, kode_kelas, nominal]
+      'INSERT INTO tarif_pembayaran (pos_id, tahun_ajaran, tingkat, kode_kelas, nominal, kode_member) VALUES (?, ?, ?, ?, ?, ?)',
+      [pos_id, tahun_ajaran, tingkat, kode_kelas, nominal, kode_member || null]
     );
     return res.insertId;
   }
 
-  static async update(id, { pos_id, tahun_ajaran, tingkat, kode_kelas, nominal }) {
+  static async update(id, { pos_id, tahun_ajaran, tingkat, kode_kelas, nominal, kode_member }) {
+    await this.ensureColumns().catch(() => {});
     const fields = [];
     const params = [];
 
@@ -107,6 +115,7 @@ class TarifPembayaranModel {
     if (tingkat !== undefined) { fields.push('tingkat = ?'); params.push(tingkat); }
     if (kode_kelas !== undefined) { fields.push('kode_kelas = ?'); params.push(kode_kelas); }
     if (nominal !== undefined) { fields.push('nominal = ?'); params.push(nominal); }
+    if (kode_member !== undefined) { fields.push('kode_member = ?'); params.push(kode_member); }
 
     if (fields.length === 0) return false;
 

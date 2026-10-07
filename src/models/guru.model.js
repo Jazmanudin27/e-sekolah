@@ -98,7 +98,14 @@ class GuruModel {
     return rows[0].total || 0;
   }
 
+  static async ensureColumns() {
+    try {
+      await query("ALTER TABLE guru ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL");
+    } catch (e) {}
+  }
+
   static async create({ nip_nuptk, nama_guru, jk = 'L', tempat_lahir, tgl_lahir, agama, alamat, no_hp, email, pendidikan_terakhir, tmt, status_kepegawaian = 'PNS', status = 'Aktif', role = 'Guru', username, password, kode_member }) {
+    await this.ensureColumns();
     const res = await query(
       `INSERT INTO guru (nip_nuptk, nama_guru, jk, tempat_lahir, tgl_lahir, agama, alamat, no_hp, email, pendidikan_terakhir, tmt, status_kepegawaian, status, role, username, password, kode_member)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -126,12 +133,13 @@ class GuruModel {
   }
 
   static async update(id, data) {
+    await this.ensureColumns();
     const fields = [];
     const params = [];
     const allowed = [
       'nip_nuptk', 'nama_guru', 'jk', 'tempat_lahir', 'tgl_lahir', 'agama', 'alamat',
       'no_hp', 'email', 'pendidikan_terakhir', 'tmt', 'status_kepegawaian', 'status',
-      'role', 'username', 'password'
+      'role', 'username', 'password', 'kode_member'
     ];
     for (const key of allowed) {
       if (data[key] !== undefined) {

@@ -39,6 +39,12 @@ class KelasModel {
     }
   }
 
+  static async ensureColumns() {
+    try {
+      await query("ALTER TABLE kelas ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL");
+    } catch (e) {}
+  }
+
   static async countAll(kode_member = null) {
     let sql = 'SELECT COUNT(*) AS total FROM kelas';
     const params = [];
@@ -50,15 +56,17 @@ class KelasModel {
     return rows[0].total || 0;
   }
 
-  static async create({ nama_kelas, jurusan, kode_guru, username, password }) {
+  static async create({ nama_kelas, jurusan, kode_guru, username, password, kode_member }) {
+    await this.ensureColumns();
     const res = await query(
-      'INSERT INTO kelas (nama_kelas, jurusan, kode_guru, username, password) VALUES (?, ?, ?, ?, ?)',
-      [nama_kelas, jurusan || '-', kode_guru || null, username || nama_kelas.toLowerCase().replace(/\s+/g, ''), password || '123456']
+      'INSERT INTO kelas (nama_kelas, jurusan, kode_guru, username, password, kode_member) VALUES (?, ?, ?, ?, ?, ?)',
+      [nama_kelas, jurusan || '-', kode_guru || null, username || nama_kelas.toLowerCase().replace(/\s+/g, ''), password || '123456', kode_member || null]
     );
     return res.insertId;
   }
 
   static async update(id, data) {
+    await this.ensureColumns();
     const fields = [];
     const params = [];
     if (data.nama_kelas !== undefined) {
@@ -80,6 +88,10 @@ class KelasModel {
     if (data.password !== undefined) {
       fields.push('password = ?');
       params.push(data.password);
+    }
+    if (data.kode_member !== undefined) {
+      fields.push('kode_member = ?');
+      params.push(data.kode_member);
     }
     if (fields.length === 0) return;
     params.push(id);

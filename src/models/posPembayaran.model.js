@@ -33,15 +33,23 @@ class PosPembayaranModel {
     return rows[0] || null;
   }
 
-  static async create({ kode_pos, nama_pos, tipe = 'BULANAN', deskripsi = null }) {
+  static async ensureColumns() {
+    try {
+      await query("ALTER TABLE pos_pembayaran ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL");
+    } catch (e) {}
+  }
+
+  static async create({ kode_pos, nama_pos, tipe = 'BULANAN', deskripsi = null, kode_member = null }) {
+    await this.ensureColumns();
     const res = await query(
-      'INSERT INTO pos_pembayaran (kode_pos, nama_pos, tipe, deskripsi) VALUES (?, ?, ?, ?)',
-      [kode_pos, nama_pos, tipe, deskripsi]
+      'INSERT INTO pos_pembayaran (kode_pos, nama_pos, tipe, deskripsi, kode_member) VALUES (?, ?, ?, ?, ?)',
+      [kode_pos, nama_pos, tipe, deskripsi, kode_member || null]
     );
     return res.insertId;
   }
 
-  static async update(id, { kode_pos, nama_pos, tipe, deskripsi, is_active }) {
+  static async update(id, { kode_pos, nama_pos, tipe, deskripsi, is_active, kode_member }) {
+    await this.ensureColumns();
     const fields = [];
     const params = [];
 
@@ -50,6 +58,7 @@ class PosPembayaranModel {
     if (tipe !== undefined) { fields.push('tipe = ?'); params.push(tipe); }
     if (deskripsi !== undefined) { fields.push('deskripsi = ?'); params.push(deskripsi); }
     if (is_active !== undefined) { fields.push('is_active = ?'); params.push(is_active); }
+    if (kode_member !== undefined) { fields.push('kode_member = ?'); params.push(kode_member); }
 
     if (fields.length === 0) return false;
 

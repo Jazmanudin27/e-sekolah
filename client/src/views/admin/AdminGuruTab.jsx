@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Users, Plus, Search, Edit2, Trash2, RefreshCw, X, Check, Eye
+  Users, Plus, Search, Edit2, Trash2, RefreshCw, X, Check, Eye, Printer
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
+import { printMasterData } from '../../utils/printReport';
 
 export default function AdminGuruTab() {
   const [guruList, setGuruList] = useState([]);
@@ -177,6 +178,27 @@ export default function AdminGuruTab() {
     })
     .sort((a, b) => (a.nama_guru || '').localeCompare(b.nama_guru || '', 'id', { sensitivity: 'base' }));
 
+  const handlePrintReport = () => {
+    const columns = [
+      { key: 'no', label: 'No', style: 'width: 40px; text-align: center;' },
+      { key: 'nip_nuptk', label: 'NIP / NUPTK', style: 'width: 140px; text-align: center;', render: (g) => g.nip_nuptk || g.kode_guru || '-' },
+      { key: 'nama_guru', label: 'Nama Lengkap Guru', style: 'text-align: left; padding-left: 8px;' },
+      { key: 'jk', label: 'L/P', style: 'width: 60px; text-align: center;' },
+      { key: 'status_kepegawaian', label: 'Status Kepegawaian', style: 'width: 130px; text-align: center;', render: (g) => g.status_kepegawaian || 'PNS' },
+      { key: 'pendidikan_terakhir', label: 'Pendidikan', style: 'width: 90px; text-align: center;', render: (g) => g.pendidikan_terakhir || '-' },
+      { key: 'no_hp', label: 'No HP / Telepon', style: 'width: 120px; text-align: center;', render: (g) => g.no_hp || '-' },
+      { key: 'status', label: 'Status', style: 'width: 80px; text-align: center;', render: (g) => g.status || 'Aktif' }
+    ];
+
+    printMasterData({
+      title: 'LAPORAN DATA GURU & TENAGA PENDIDIK',
+      subtitle: `SMK ARTANITA • FILTER STATUS: ${filterStatus.toUpperCase()}`,
+      columns,
+      data: filteredList,
+      orientation: 'landscape'
+    });
+  };
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
 
@@ -194,6 +216,15 @@ export default function AdminGuruTab() {
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              type="button"
+              className="btn-outline-admin"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
+              onClick={handlePrintReport}
+              title="Cetak Laporan Data Guru"
+            >
+              <Printer size={16} color="#0284c7" /> Cetak Laporan
+            </button>
             <button className="btn-primary-admin" onClick={handleOpenAdd}>
               <Plus size={16} /> Tambah Guru Baru
             </button>

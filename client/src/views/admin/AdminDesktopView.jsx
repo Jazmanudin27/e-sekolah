@@ -447,46 +447,6 @@ export default function AdminDesktopView({ user, onLogout }) {
           {/* ----------------- LAPORAN & REKAP ----------------- */}
           <div className="portal-menu-section-label">LAPORAN & REKAP</div>
 
-          {/* 5. Laporan Master */}
-          <div className="portal-menu-group">
-            <button
-              type="button"
-              className={`portal-menu-item has-submenu ${['laporanSiswa', 'laporanGuru', 'laporanKelas'].includes(activeTab) ? 'has-active' : ''}`}
-              onClick={() => toggleSubMenu('laporanMaster')}
-            >
-              <div className="menu-icon-wrap">
-                <FileText size={17} />
-              </div>
-              <span className="menu-label">Laporan Master</span>
-              {openMenus.laporanMaster ? <ChevronDown size={14} className="submenu-arrow" /> : <ChevronRight size={14} className="submenu-arrow" />}
-            </button>
-            {openMenus.laporanMaster && (
-              <div className="portal-submenu-list">
-                <button
-                  type="button"
-                  className={`portal-submenu-item ${activeTab === 'laporanSiswa' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('laporanSiswa')}
-                >
-                  <span>Laporan Siswa</span>
-                </button>
-                <button
-                  type="button"
-                  className={`portal-submenu-item ${activeTab === 'laporanGuru' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('laporanGuru')}
-                >
-                  <span>Laporan Guru</span>
-                </button>
-                <button
-                  type="button"
-                  className={`portal-submenu-item ${activeTab === 'laporanKelas' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('laporanKelas')}
-                >
-                  <span>Laporan Kelas</span>
-                </button>
-              </div>
-            )}
-          </div>
-
           {/* 6. Laporan Absensi */}
           <div className="portal-menu-group">
             <button

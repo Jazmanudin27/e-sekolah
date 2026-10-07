@@ -19,7 +19,7 @@ async function getSiswaByKelas(req, res, next) {
 
 async function createSiswa(req, res, next) {
   try {
-    const kode_member = req.user?.kode_member || req.body?.kode_member;
+    const kode_member = req.user?.kode_member || req.body?.kode_member || req.query?.kode_member || null;
     const id = await SiswaModel.create({ ...req.body, kode_member });
     sendSuccess(res, 'Data siswa berhasil ditambahkan.', { kode_siswa: id }, 201);
   } catch (error) {
@@ -30,7 +30,12 @@ async function createSiswa(req, res, next) {
 async function updateSiswa(req, res, next) {
   try {
     const { id } = req.params;
-    await SiswaModel.update(id, req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member || req.query?.kode_member;
+    const updateData = { ...req.body };
+    if (kode_member && updateData.kode_member === undefined) {
+      updateData.kode_member = kode_member;
+    }
+    await SiswaModel.update(id, updateData);
     sendSuccess(res, 'Data siswa berhasil diperbarui.', { kode_siswa: id });
   } catch (error) {
     next(error);

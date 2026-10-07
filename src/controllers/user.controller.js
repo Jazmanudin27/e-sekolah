@@ -37,7 +37,12 @@ async function createUser(req, res, next) {
 async function updateUser(req, res, next) {
   try {
     const { id } = req.params;
-    await UserModel.update(id, req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member || req.query?.kode_member;
+    const updateData = { ...req.body };
+    if (kode_member && updateData.kode_member === undefined) {
+      updateData.kode_member = kode_member;
+    }
+    await UserModel.update(id, updateData);
     sendSuccess(res, 'User admin berhasil diperbarui.', { id });
   } catch (error) {
     next(error);

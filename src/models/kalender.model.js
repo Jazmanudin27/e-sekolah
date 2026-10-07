@@ -139,6 +139,10 @@ class KalenderModel {
 
   static async create(data) {
     await this.ensureTable();
+    try {
+      await query("ALTER TABLE kalender_pendidikan ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL");
+    } catch (e) {}
+
     const {
       tahun_ajaran = '2026/2027',
       semester = 1,
@@ -148,12 +152,13 @@ class KalenderModel {
       tanggal_selesai,
       keterangan,
       warna = '#0066ff',
-      tingkat_target = 'Semua'
+      tingkat_target = 'Semua',
+      kode_member
     } = data;
 
     const res = await query(
-      `INSERT INTO kalender_pendidikan (tahun_ajaran, semester, kategori, nama_kegiatan, tanggal_mulai, tanggal_selesai, keterangan, warna, tingkat_target)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO kalender_pendidikan (tahun_ajaran, semester, kategori, nama_kegiatan, tanggal_mulai, tanggal_selesai, keterangan, warna, tingkat_target, kode_member)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         tahun_ajaran,
         semester,
@@ -163,7 +168,8 @@ class KalenderModel {
         tanggal_selesai || tanggal_mulai,
         keterangan || null,
         warna,
-        tingkat_target
+        tingkat_target,
+        kode_member || null
       ]
     );
     return res ? res.insertId : null;
@@ -171,6 +177,10 @@ class KalenderModel {
 
   static async update(id, data) {
     await this.ensureTable();
+    try {
+      await query("ALTER TABLE kalender_pendidikan ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL");
+    } catch (e) {}
+
     const {
       tahun_ajaran,
       semester,
@@ -180,26 +190,48 @@ class KalenderModel {
       tanggal_selesai,
       keterangan,
       warna,
-      tingkat_target
+      tingkat_target,
+      kode_member
     } = data;
 
-    await query(
-      `UPDATE kalender_pendidikan
-       SET tahun_ajaran = ?, semester = ?, kategori = ?, nama_kegiatan = ?, tanggal_mulai = ?, tanggal_selesai = ?, keterangan = ?, warna = ?, tingkat_target = ?
-       WHERE id = ?`,
-      [
-        tahun_ajaran,
-        semester,
-        kategori,
-        nama_kegiatan,
-        tanggal_mulai,
-        tanggal_selesai || tanggal_mulai,
-        keterangan,
-        warna,
-        tingkat_target,
-        id
-      ]
-    );
+    if (kode_member !== undefined) {
+      await query(
+        `UPDATE kalender_pendidikan
+         SET tahun_ajaran = ?, semester = ?, kategori = ?, nama_kegiatan = ?, tanggal_mulai = ?, tanggal_selesai = ?, keterangan = ?, warna = ?, tingkat_target = ?, kode_member = ?
+         WHERE id = ?`,
+        [
+          tahun_ajaran,
+          semester,
+          kategori,
+          nama_kegiatan,
+          tanggal_mulai,
+          tanggal_selesai || tanggal_mulai,
+          keterangan,
+          warna,
+          tingkat_target,
+          kode_member,
+          id
+        ]
+      );
+    } else {
+      await query(
+        `UPDATE kalender_pendidikan
+         SET tahun_ajaran = ?, semester = ?, kategori = ?, nama_kegiatan = ?, tanggal_mulai = ?, tanggal_selesai = ?, keterangan = ?, warna = ?, tingkat_target = ?
+         WHERE id = ?`,
+        [
+          tahun_ajaran,
+          semester,
+          kategori,
+          nama_kegiatan,
+          tanggal_mulai,
+          tanggal_selesai || tanggal_mulai,
+          keterangan,
+          warna,
+          tingkat_target,
+          id
+        ]
+      );
+    }
     return true;
   }
 

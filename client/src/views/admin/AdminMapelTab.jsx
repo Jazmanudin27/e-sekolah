@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
-  BookOpen, Plus, Search, Edit2, Trash2, RefreshCw, X
+  BookOpen, Plus, Search, Edit2, Trash2, RefreshCw, X, Printer
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
+import { printMasterData } from '../../utils/printReport';
 
 export default function AdminMapelTab() {
   const [mapelList, setMapelList] = useState([]);
@@ -131,6 +132,25 @@ export default function AdminMapelTab() {
     )
     .sort((a, b) => (a.nama_mapel || '').localeCompare(b.nama_mapel || '', 'id', { sensitivity: 'base' }));
 
+  const handlePrintReport = () => {
+    const columns = [
+      { key: 'no', label: 'No', style: 'width: 40px; text-align: center;' },
+      { key: 'kode_mapel', label: 'Kode Mapel', style: 'width: 110px; text-align: center;' },
+      { key: 'nama_mapel', label: 'Nama Mata Pelajaran', style: 'text-align: left; padding-left: 8px; font-weight: 700;' },
+      { key: 'singkatan', label: 'Singkatan', style: 'width: 100px; text-align: center;', render: (m) => m.singkatan || '-' },
+      { key: 'kelompok', label: 'Kelompok / Kategori', style: 'text-align: left; padding-left: 8px;', render: (m) => m.kelompok || 'Kelompok A (Umum)' },
+      { key: 'kkm', label: 'KKM', style: 'width: 70px; text-align: center;', render: (m) => m.kkm || 75 }
+    ];
+
+    printMasterData({
+      title: 'LAPORAN DATA MATA PELAJARAN',
+      subtitle: `SMK ARTANITA • DAFTAR MATERI DAN KURIKULUM SEKOAH`,
+      columns,
+      data: filteredList,
+      orientation: 'portrait'
+    });
+  };
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
 
@@ -148,6 +168,15 @@ export default function AdminMapelTab() {
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              type="button"
+              className="btn-outline-admin"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
+              onClick={handlePrintReport}
+              title="Cetak Laporan Data Mapel"
+            >
+              <Printer size={16} color="#0284c7" /> Cetak Laporan
+            </button>
             <button className="btn-primary-admin" onClick={handleOpenAdd}>
               <Plus size={16} /> Tambah Mapel Baru
             </button>

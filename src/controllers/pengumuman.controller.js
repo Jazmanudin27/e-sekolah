@@ -50,7 +50,12 @@ exports.createAnnouncement = async (req, res, next) => {
 exports.updateAnnouncement = async (req, res, next) => {
   try {
     const { id } = req.params;
-    await PengumumanModel.update(id, req.body);
+    const kode_member = req.user?.kode_member || req.body?.kode_member || req.query?.kode_member;
+    const updateData = { ...req.body };
+    if (kode_member && updateData.kode_member === undefined) {
+      updateData.kode_member = kode_member;
+    }
+    await PengumumanModel.update(id, updateData);
     res.json({
       success: true,
       message: 'Pengumuman berhasil diperbarui!'
