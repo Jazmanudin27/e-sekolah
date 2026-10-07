@@ -314,6 +314,18 @@ export default function AdminDesktopView({ user, onLogout }) {
             <span className="menu-label">Kalender Pendidikan</span>
           </button>
 
+          {/* 1.7 Kenaikan & Kelulusan (Alumni) */}
+          <button
+            type="button"
+            className={`portal-menu-item ${activeTab === 'kenaikanAlumni' ? 'active' : ''}`}
+            onClick={() => handleSelectTab('kenaikanAlumni')}
+          >
+            <div className="menu-icon-wrap">
+              <GraduationCap size={17} />
+            </div>
+            <span className="menu-label">Kenaikan & Kelulusan</span>
+          </button>
+
           {/* 2. Data Master (Expandable) */}
           <div className="portal-menu-group">
             <button
@@ -342,13 +354,6 @@ export default function AdminDesktopView({ user, onLogout }) {
                   onClick={() => handleSelectTab('siswa')}
                 >
                   <span>Data Siswa</span>
-                </button>
-                <button
-                  type="button"
-                  className={`portal-submenu-item ${activeTab === 'kenaikanAlumni' ? 'active' : ''}`}
-                  onClick={() => handleSelectTab('kenaikanAlumni')}
-                >
-                  <span>Kenaikan & Kelulusan</span>
                 </button>
                 <button
                   type="button"
