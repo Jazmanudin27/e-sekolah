@@ -35,6 +35,10 @@ import api from './api/client';
 
 const getInitialTab = () => {
   try {
+    const path = window.location.pathname.toLowerCase();
+    const host = window.location.hostname.toLowerCase();
+    if (path.startsWith('/ppdb') || host.startsWith('ppdb.')) return 'ppdb';
+
     const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
     if (hash) return hash;
     const stored = localStorage.getItem('esekolah_active_tab');
@@ -217,6 +221,18 @@ export default function App() {
   }
 
   if (!currentUser) {
+    const isPpdbDirect = window.location.pathname.toLowerCase().startsWith('/ppdb') ||
+                         window.location.hash === '#ppdb' ||
+                         window.location.hostname.toLowerCase().startsWith('ppdb.');
+    if (isPpdbDirect) {
+      return (
+        <>
+          <InstallPwaModal />
+          <PpdbView currentUser={null} />
+        </>
+      );
+    }
+
     return (
       <>
         <InstallPwaModal />
