@@ -124,10 +124,12 @@ export default function App() {
       if (res.data.success) {
         setCurrentUser(res.data.data);
       } else {
-        handleLogout();
+        localStorage.removeItem('esekolah_token');
+        setCurrentUser(null);
       }
     } catch (err) {
-      handleLogout();
+      localStorage.removeItem('esekolah_token');
+      setCurrentUser(null);
     } finally {
       setLoading(false);
     }
