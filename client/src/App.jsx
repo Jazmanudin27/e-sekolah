@@ -26,6 +26,7 @@ import PerpustakaanView from './views/PerpustakaanView';
 import SaprasView from './views/SaprasView';
 import PelanggaranView from './views/PelanggaranView';
 import PpdbView from './views/PpdbView';
+import PublicPpdbPortalView from './views/PublicPpdbPortalView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
 import PortalOrtuSiswaView from './views/PortalOrtuSiswaView';
 import InstallPwaModal from './components/InstallPwaModal';
@@ -228,7 +229,11 @@ export default function App() {
       return (
         <>
           <InstallPwaModal />
-          <PpdbView currentUser={null} />
+          <PublicPpdbPortalView onLoginClick={() => {
+            window.location.hash = '';
+            window.history.pushState('', '', '/');
+            setActiveTab('beranda');
+          }} />
         </>
       );
     }
