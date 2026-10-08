@@ -25,6 +25,7 @@ const kenaikanAlumniRoutes = require('./kenaikanAlumni.routes');
 const keuanganRoutes = require('./keuangan.routes');
 const pelanggaranRoutes = require('./pelanggaran.routes');
 const whatsappRoutes = require('./whatsapp.routes');
+const ppdbRoutes = require('./ppdb.routes');
 
 // System Health Check
 router.get('/health', (req, res) => {
@@ -61,5 +62,6 @@ router.use('/kenaikan-alumni', kenaikanAlumniRoutes);
 router.use('/keuangan', keuanganRoutes);
 router.use('/pelanggaran', pelanggaranRoutes);
 router.use('/whatsapp', whatsappRoutes);
+router.use('/ppdb', ppdbRoutes);
 
 module.exports = router;

@@ -25,6 +25,7 @@ import PenilaianLaporanView from './views/PenilaianLaporanView';
 import PerpustakaanView from './views/PerpustakaanView';
 import SaprasView from './views/SaprasView';
 import PelanggaranView from './views/PelanggaranView';
+import PpdbView from './views/PpdbView';
 import AdminDesktopView from './views/admin/AdminDesktopView';
 import PortalOrtuSiswaView from './views/PortalOrtuSiswaView';
 import InstallPwaModal from './components/InstallPwaModal';
@@ -443,6 +444,11 @@ export default function App() {
             user={currentUser}
             showToast={showToast}
             onSwitchTab={(t) => setActiveTab(t)}
+          />
+        )}
+        {activeTab === 'ppdb' && (
+          <PpdbView
+            currentUser={currentUser}
           />
         )}
         {(activeTab === 'penilaianInput' || activeTab === 'penilaian') && <PenilaianInputView onBack={() => setActiveTab('beranda')} />}
