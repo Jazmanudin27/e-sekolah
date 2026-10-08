@@ -221,23 +221,24 @@ export default function App() {
     );
   }
 
-  if (!currentUser) {
-    const isPpdbDirect = window.location.pathname.toLowerCase().startsWith('/ppdb') ||
-                         window.location.hash === '#ppdb' ||
-                         window.location.hostname.toLowerCase().startsWith('ppdb.');
-    if (isPpdbDirect) {
-      return (
-        <>
-          <InstallPwaModal />
-          <PublicPpdbPortalView onLoginClick={() => {
-            window.location.hash = '';
-            window.history.pushState('', '', '/');
-            setActiveTab('beranda');
-          }} />
-        </>
-      );
-    }
+  const isPpdbDirect = window.location.pathname.toLowerCase().startsWith('/ppdb') ||
+                       window.location.hash === '#ppdb' ||
+                       window.location.hostname.toLowerCase().startsWith('ppdb.');
 
+  if (isPpdbDirect) {
+    return (
+      <>
+        <InstallPwaModal />
+        <PublicPpdbPortalView onLoginClick={() => {
+          window.location.hash = '';
+          window.history.pushState('', '', '/');
+          window.location.href = '/';
+        }} />
+      </>
+    );
+  }
+
+  if (!currentUser) {
     return (
       <>
         <InstallPwaModal />
