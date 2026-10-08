@@ -101,8 +101,28 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
 
   const handleSubmitRegister = async (e) => {
     e.preventDefault();
-    if (!formData.nama_lengkap || !formData.no_hp_ortu) {
-      Swal.fire('Peringatan', 'Nama Lengkap dan Nomor WhatsApp Ortu wajib diisi!', 'warning');
+    const requiredFields = [
+      { key: 'nama_lengkap', label: 'Nama Lengkap Siswa' },
+      { key: 'nik', label: 'NIK' },
+      { key: 'nisn', label: 'NISN' },
+      { key: 'tempat_lahir', label: 'Tempat Lahir' },
+      { key: 'tanggal_lahir', label: 'Tanggal Lahir' },
+      { key: 'agama', label: 'Agama' },
+      { key: 'alamat', label: 'Alamat Tempat Tinggal' },
+      { key: 'sekolah_asal', label: 'Sekolah Asal' },
+      { key: 'nama_ayah', label: 'Nama Ayah' },
+      { key: 'nama_ibu', label: 'Nama Ibu' },
+      { key: 'no_hp_ortu', label: 'Nomor WhatsApp Ortu' }
+    ];
+
+    const missing = requiredFields.filter(f => !formData[f.key] || !String(formData[f.key]).trim());
+    if (missing.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Form Belum Lengkap',
+        text: `Mohon lengkapi data wajib berikut: ${missing.map(m => m.label).join(', ')}`,
+        confirmButtonColor: '#0066ff'
+      });
       return;
     }
 
@@ -411,12 +431,15 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>NIK (Nomor Induk Kependudukan)</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      NIK (Nomor Induk Kependudukan) <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
                       name="nik" 
                       value={formData.nik} 
                       onChange={handleInputChange} 
+                      required
                       placeholder="16 Digit NIK di Kartu Keluarga" 
                       maxLength={16}
                       className="ppdb-input-field" 
@@ -424,23 +447,29 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>NISN (Nomor Induk Siswa Nasional)</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      NISN (Nomor Induk Siswa Nasional) <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
                       name="nisn" 
                       value={formData.nisn} 
                       onChange={handleInputChange} 
+                      required
                       placeholder="Nomor NISN 10 Digit" 
                       className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Jenis Kelamin</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      Jenis Kelamin <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <select 
                       name="jenis_kelamin" 
                       value={formData.jenis_kelamin} 
                       onChange={handleInputChange} 
+                      required
                       className="ppdb-input-field"
                     >
                       <option value="L">Laki-laki</option>
@@ -449,34 +478,43 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Tempat Lahir</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      Tempat Lahir <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
                       name="tempat_lahir" 
                       value={formData.tempat_lahir} 
                       onChange={handleInputChange} 
+                      required
                       placeholder="Kota / Kabupaten Lahir" 
                       className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Tanggal Lahir</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      Tanggal Lahir <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <input 
                       type="date" 
                       name="tanggal_lahir" 
                       value={formData.tanggal_lahir} 
                       onChange={handleInputChange} 
+                      required
                       className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Agama</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      Agama <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <select 
                       name="agama" 
                       value={formData.agama} 
                       onChange={handleInputChange} 
+                      required
                       className="ppdb-input-field"
                     >
                       <option value="Islam">Islam</option>
@@ -489,11 +527,14 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                   </div>
 
                   <div className="ppdb-grid-full">
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Alamat Tempat Tinggal Lengkap</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      Alamat Tempat Tinggal Lengkap <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <textarea 
                       name="alamat" 
                       value={formData.alamat} 
                       onChange={handleInputChange} 
+                      required
                       rows={2} 
                       placeholder="Jalan, RT/RW, Kelurahan, Kecamatan, Kota/Kabupaten" 
                       className="ppdb-input-field"
@@ -517,35 +558,44 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
 
                 <div className="ppdb-grid-2">
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Nama Sekolah Asal</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      Nama Sekolah Asal <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
                       name="sekolah_asal" 
                       value={formData.sekolah_asal} 
                       onChange={handleInputChange} 
+                      required
                       placeholder="Contoh: SMPN 1 Kota / MTs Negeri 2" 
                       className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Tahun Lulus</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      Tahun Lulus <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
                       name="tahun_lulus" 
                       value={formData.tahun_lulus} 
                       onChange={handleInputChange} 
+                      required
                       placeholder="2026" 
                       className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Jalur Pendaftaran</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      Jalur Pendaftaran <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <select 
                       name="jalur_pendaftaran" 
                       value={formData.jalur_pendaftaran} 
                       onChange={handleInputChange} 
+                      required
                       className="ppdb-input-field"
                     >
                       <option value="Reguler">Jalur Reguler / Umum</option>
@@ -556,11 +606,14 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Pilihan Jurusan / Program</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      Pilihan Jurusan / Program <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <select 
                       name="pilihan_jurusan" 
                       value={formData.pilihan_jurusan} 
                       onChange={handleInputChange} 
+                      required
                       className="ppdb-input-field"
                     >
                       <option value="Umum">Umum / Reguler</option>
@@ -587,12 +640,15 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
 
                 <div className="ppdb-grid-2">
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Nama Ayah Kandung / Wali</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      Nama Ayah Kandung / Wali <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
                       name="nama_ayah" 
                       value={formData.nama_ayah} 
                       onChange={handleInputChange} 
+                      required
                       placeholder="Nama lengkap Ayah" 
                       className="ppdb-input-field" 
                     />
@@ -611,12 +667,15 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Nama Ibu Kandung</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      Nama Ibu Kandung <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
                       name="nama_ibu" 
                       value={formData.nama_ibu} 
                       onChange={handleInputChange} 
+                      required
                       placeholder="Nama lengkap Ibu" 
                       className="ppdb-input-field" 
                     />
