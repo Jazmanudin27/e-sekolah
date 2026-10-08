@@ -200,43 +200,6 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#0f172a', fontFamily: 'Inter, system-ui, sans-serif' }}>
-      {/* PUBLIC NAVBAR TOP */}
-      <header style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '14px 24px', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg, #0066ff, #1d4ed8)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-              <UserPlus size={24} />
-            </div>
-            <div>
-              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>PORTAL PPDB ONLINE</h2>
-              <p style={{ margin: 0, fontSize: 12, color: '#64748b', fontWeight: 600 }}>Penerimaan Peserta Didik Baru 2026/2027</p>
-            </div>
-          </div>
-
-          {onLoginClick && (
-            <button
-              onClick={onLoginClick}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '8px 16px',
-                borderRadius: 12,
-                border: '1px solid #cbd5e1',
-                background: '#ffffff',
-                color: '#0f172a',
-                fontSize: 13,
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <LogIn size={15} color="#0066ff" /> Login Panitia
-            </button>
-          )}
-        </div>
-      </header>
-
       {/* HERO BANNER & TABS */}
       <div style={{ maxWidth: 1100, margin: '24px auto', padding: '0 16px' }}>
         <div style={{
