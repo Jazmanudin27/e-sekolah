@@ -144,6 +144,10 @@ class PpdbModel {
         nominal_daftar_ulang = ?,
         status_pembayaran_du = ?,
         bukti_pembayaran_du = ?,
+        berkas_ijazah = COALESCE(?, berkas_ijazah),
+        berkas_kk = COALESCE(?, berkas_kk),
+        berkas_akta = COALESCE(?, berkas_akta),
+        pas_foto = COALESCE(?, pas_foto),
         tanggal_daftar_ulang = NOW(),
         status = 'Daftar Ulang'
       WHERE id = ?
@@ -153,6 +157,10 @@ class PpdbModel {
       data.nominal_daftar_ulang || 0,
       data.status_pembayaran_du || 'Belum',
       data.bukti_pembayaran_du || null,
+      data.berkas_ijazah || null,
+      data.berkas_kk || null,
+      data.berkas_akta || null,
+      data.pas_foto || null,
       id
     ];
     return await query(sql, params);

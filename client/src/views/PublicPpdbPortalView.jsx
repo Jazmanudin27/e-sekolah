@@ -722,73 +722,6 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                 </div>
               </div>
 
-              {/* SEKSI 4: UPLOAD BERKAS DOKUMEN (OPTIONAL LINK / DRIVE) */}
-              <div className="ppdb-section-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                  <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13 }}>
-                    4
-                  </div>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Lampiran Berkas & Dokumen (Opsional)</h3>
-                    <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Masukkan link Google Drive / Cloud Storage dokumen pendukung</p>
-                  </div>
-                </div>
-
-                <div className="ppdb-grid-2">
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Ijazah / SKL</label>
-                    <input 
-                      type="text" 
-                      name="berkas_ijazah" 
-                      value={formData.berkas_ijazah} 
-                      onChange={handleInputChange} 
-                      placeholder="URL Google Drive / Link File" 
-                      className="ppdb-input-field" 
-                      style={{ fontSize: 12 }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Kartu Keluarga</label>
-                    <input 
-                      type="text" 
-                      name="berkas_kk" 
-                      value={formData.berkas_kk} 
-                      onChange={handleInputChange} 
-                      placeholder="URL Google Drive / Link File" 
-                      className="ppdb-input-field" 
-                      style={{ fontSize: 12 }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Akta Kelahiran</label>
-                    <input 
-                      type="text" 
-                      name="berkas_akta" 
-                      value={formData.berkas_akta} 
-                      onChange={handleInputChange} 
-                      placeholder="URL Google Drive / Link File" 
-                      className="ppdb-input-field" 
-                      style={{ fontSize: 12 }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Pas Foto (3x4)</label>
-                    <input 
-                      type="text" 
-                      name="pas_foto" 
-                      value={formData.pas_foto} 
-                      onChange={handleInputChange} 
-                      placeholder="URL Google Drive / Link File" 
-                      className="ppdb-input-field" 
-                      style={{ fontSize: 12 }}
-                    />
-                  </div>
-                </div>
-              </div>
-
               {/* SUBMIT BUTTON & WA ALERT NOTICE */}
               <button 
                 type="submit" 
@@ -849,8 +782,38 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                   </select>
                 </div>
                 <div className="ppdb-grid-full">
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Nominal Bayar (Rp)</label>
+                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Nominal Bayar / Bukti Transfer (Rp)</label>
                   <input type="number" name="nominal_daftar_ulang" value={duForm.nominal_daftar_ulang} onChange={handleDuChange} placeholder="Contoh: 500000" className="ppdb-input-field" />
+                </div>
+              </div>
+
+              {/* SEKSI BERKAS DOKUMEN SAAT DAFTAR ULANG */}
+              <div className="ppdb-section-card" style={{ marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                  <FileUp size={18} color="#059669" />
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#0f172a' }}>Upload Berkas & Dokumen Pendaftaran Ulang</h4>
+                    <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>Link Google Drive / Cloud Storage kelengkapan berkas</p>
+                  </div>
+                </div>
+
+                <div className="ppdb-grid-2">
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Ijazah / SKL</label>
+                    <input type="text" name="berkas_ijazah" value={duForm.berkas_ijazah || ''} onChange={handleDuChange} placeholder="URL Google Drive / Link File" className="ppdb-input-field" style={{ fontSize: 12 }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Kartu Keluarga (KK)</label>
+                    <input type="text" name="berkas_kk" value={duForm.berkas_kk || ''} onChange={handleDuChange} placeholder="URL Google Drive / Link File" className="ppdb-input-field" style={{ fontSize: 12 }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Akta Kelahiran</label>
+                    <input type="text" name="berkas_akta" value={duForm.berkas_akta || ''} onChange={handleDuChange} placeholder="URL Google Drive / Link File" className="ppdb-input-field" style={{ fontSize: 12 }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Pas Foto (3x4)</label>
+                    <input type="text" name="pas_foto" value={duForm.pas_foto || ''} onChange={handleDuChange} placeholder="URL Google Drive / Link File" className="ppdb-input-field" style={{ fontSize: 12 }} />
+                  </div>
                 </div>
               </div>
 

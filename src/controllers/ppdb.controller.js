@@ -54,7 +54,10 @@ class PpdbController {
   // Public/Calon: Submit Form Daftar Ulang
   static async submitDaftarUlang(req, res) {
     try {
-      const { no_pendaftaran, ukuran_seragam, nominal_daftar_ulang, bukti_pembayaran_du } = req.body;
+      const { 
+        no_pendaftaran, ukuran_seragam, nominal_daftar_ulang, bukti_pembayaran_du,
+        berkas_ijazah, berkas_kk, berkas_akta, pas_foto
+      } = req.body;
       if (!no_pendaftaran) {
         return res.status(400).json({ success: false, message: 'Nomor Pendaftaran wajib disertakan' });
       }
@@ -72,7 +75,11 @@ class PpdbController {
         ukuran_seragam: ukuran_seragam || 'M',
         nominal_daftar_ulang: nominal_daftar_ulang || 0,
         status_pembayaran_du: nominal_daftar_ulang > 0 ? 'Cicilan' : 'Belum',
-        bukti_pembayaran_du: bukti_pembayaran_du || null
+        bukti_pembayaran_du: bukti_pembayaran_du || null,
+        berkas_ijazah: berkas_ijazah || null,
+        berkas_kk: berkas_kk || null,
+        berkas_akta: berkas_akta || null,
+        pas_foto: pas_foto || null
       });
 
       // WA Notification Daftar Ulang
