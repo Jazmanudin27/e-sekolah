@@ -37,11 +37,12 @@ import AdminPresensiAbsensiTab from './AdminPresensiAbsensiTab';
 import AdminKenaikanAlumniTab from './AdminKenaikanAlumniTab';
 import AdminKeuanganTab from './AdminKeuanganTab';
 import AdminPelanggaranTab from './AdminPelanggaranTab';
+import PpdbView from '../PpdbView';
 
 const VALID_ADMIN_TABS = [
   'dashboard', 'pengumuman', 'kalender', 'kelas', 'siswa', 'kenaikanAlumni', 'guru', 'mapel', 'jadwal', 'ekskul',
   'izin', 'presensiAbsensi', 'presensiGuru', 'absensiSiswa', 'absensiMapel',
-  'pelanggaran',
+  'pelanggaran', 'ppdb',
   'rekapPresensi', 'rekapGuru', 'rekapSiswa', 'rekapMapel',
   'laporanRapor', 'laporanSiswa', 'laporanGuru', 'laporanKelas',
   'laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel',
@@ -580,6 +581,18 @@ export default function AdminDesktopView({ user, onLogout }) {
             <span className="menu-label">Keuangan & SPP</span>
           </button>
 
+          {/* 12. PPDB & Daftar Ulang */}
+          <button
+            type="button"
+            className={`portal-menu-item ${activeTab === 'ppdb' ? 'active' : ''}`}
+            onClick={() => handleSelectTab('ppdb')}
+          >
+            <div className="menu-icon-wrap">
+              <UserCheck size={17} />
+            </div>
+            <span className="menu-label">PPDB & Daftar Ulang</span>
+          </button>
+
           {/* ----------------- SISTEM ----------------- */}
           <div className="portal-menu-section-label">SISTEM</div>
 
@@ -759,6 +772,7 @@ export default function AdminDesktopView({ user, onLogout }) {
                 )}
 
                 {/* 5. SISTEM & AKUN */}
+                {activeTab === 'ppdb' && <PpdbView currentUser={user} />}
                 {activeTab === 'perpustakaan' && <AdminPerpustakaanTab />}
                 {activeTab === 'sapras' && <AdminSaprasTab />}
                 {activeTab === 'keuangan' && <AdminKeuanganTab />}
