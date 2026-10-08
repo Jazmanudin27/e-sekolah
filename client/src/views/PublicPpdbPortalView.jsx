@@ -283,100 +283,410 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
           </div>
         )}
 
-        {/* TAB CONTENT 1: FORM PENDAFTARAN */}
+        {/* TAB CONTENT 1: FORM PENDAFTARAN (PREMIUM & STUNNING DESIGN) */}
         {tab === 'daftar' && (
-          <form onSubmit={handleSubmitRegister} style={{ background: '#ffffff', padding: 24, borderRadius: 24, border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
-            <div style={{ marginBottom: 24 }}>
-              <h3 style={{ margin: '0 0 16px 0', fontSize: 17, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <User size={20} color="#0066ff" /> Data Calon Siswa & Lampiran Berkas
-              </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
+          <form 
+            onSubmit={handleSubmitRegister} 
+            style={{ 
+              background: '#ffffff', 
+              borderRadius: 24, 
+              border: '1px solid #e2e8f0', 
+              boxShadow: '0 20px 40px rgba(15,23,42,0.06)', 
+              overflow: 'hidden',
+              marginBottom: 32
+            }}
+          >
+            {/* GRADIENT ACCENT BAR */}
+            <div style={{ height: 6, background: 'linear-gradient(90deg, #0066ff 0%, #00c6ff 50%, #6366f1 100%)' }} />
+
+            <div style={{ padding: '28px 32px' }}>
+              {/* FORM HEADER TITLE */}
+              <div style={{ marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Nama Lengkap *</label>
-                  <input type="text" name="nama_lengkap" value={formData.nama_lengkap} onChange={handleInputChange} required placeholder="Nama lengkap siswa" style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }} />
+                  <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
+                    Formulir Pendaftaran Siswa Baru (PPDB)
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: 13 }}>
+                    Lengkapi seluruh data calon siswa & orang tua secara teliti dan tepat.
+                  </p>
                 </div>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>NIK Calon Siswa</label>
-                  <input type="text" name="nik" value={formData.nik} onChange={handleInputChange} placeholder="16 digit NIK" style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>NISN</label>
-                  <input type="text" name="nisn" value={formData.nisn} onChange={handleInputChange} placeholder="Nomor NISN" style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Jenis Kelamin</label>
-                  <select name="jenis_kelamin" value={formData.jenis_kelamin} onChange={handleInputChange} style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }}>
-                    <option value="L">Laki-laki</option>
-                    <option value="P">Perempuan</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Tempat Lahir</label>
-                  <input type="text" name="tempat_lahir" value={formData.tempat_lahir} onChange={handleInputChange} placeholder="Kota/Kabupaten" style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Tanggal Lahir</label>
-                  <input type="date" name="tanggal_lahir" value={formData.tanggal_lahir} onChange={handleInputChange} style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Sekolah Asal</label>
-                  <input type="text" name="sekolah_asal" value={formData.sekolah_asal} onChange={handleInputChange} placeholder="SMPN 1 / SD Negeri 2" style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Jalur Pendaftaran</label>
-                  <select name="jalur_pendaftaran" value={formData.jalur_pendaftaran} onChange={handleInputChange} style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }}>
-                    <option value="Reguler">Reguler</option>
-                    <option value="Prestasi">Prestasi</option>
-                    <option value="Tahfidz">Tahfidz / Beasiswa</option>
-                    <option value="Afirmasi">Afirmasi / Kurang Mampu</option>
-                  </select>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '6px 14px', borderRadius: 20, fontSize: 12, color: '#15803d', fontWeight: 700 }}>
+                  <ShieldCheck size={16} /> Data Terenkripsi & Aman
                 </div>
               </div>
 
-              <div style={{ marginTop: 16, background: '#f8fafc', padding: 16, borderRadius: 16, border: '1px solid #e2e8f0' }}>
-                <h4 style={{ margin: '0 0 10px 0', fontSize: 13, fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <FileUp size={16} color="#0066ff" /> Link Upload Berkas Dokumen (Opsional)
-                </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-                  <div>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>Link Scan Ijazah</label>
-                    <input type="text" name="berkas_ijazah" value={formData.berkas_ijazah} onChange={handleInputChange} placeholder="URL Google Drive / File" style={{ width: '100%', padding: '10px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, background: '#ffffff' }} />
+              {/* SEKSI 1: DATA PRIBADI CALON SISWA */}
+              <div style={{ background: '#f8fafc', padding: 22, borderRadius: 20, border: '1px solid #f1f5f9', marginBottom: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+                    1
                   </div>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>Link Scan Kartu Keluarga</label>
-                    <input type="text" name="berkas_kk" value={formData.berkas_kk} onChange={handleInputChange} placeholder="URL Google Drive / File" style={{ width: '100%', padding: '10px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, background: '#ffffff' }} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>Link Pas Foto 3x4</label>
-                    <input type="text" name="pas_foto" value={formData.pas_foto} onChange={handleInputChange} placeholder="URL Google Drive / File" style={{ width: '100%', padding: '10px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, background: '#ffffff' }} />
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Data Diri Calon Peserta Didik</h3>
+                    <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Informasi identitas resmi sesuai Akta / Kartu Keluarga</p>
                   </div>
                 </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>
+                      Nama Lengkap Siswa <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      name="nama_lengkap" 
+                      value={formData.nama_lengkap} 
+                      onChange={handleInputChange} 
+                      required 
+                      placeholder="Masukkan nama lengkap calon siswa sesuai ijazah/akta" 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff', outline: 'none' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>NIK (Nomor Induk Kependudukan)</label>
+                    <input 
+                      type="text" 
+                      name="nik" 
+                      value={formData.nik} 
+                      onChange={handleInputChange} 
+                      placeholder="16 Digit NIK di Kartu Keluarga" 
+                      maxLength={16}
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>NISN (Nomor Induk Siswa Nasional)</label>
+                    <input 
+                      type="text" 
+                      name="nisn" 
+                      value={formData.nisn} 
+                      onChange={handleInputChange} 
+                      placeholder="Nomor NISN 10 Digit" 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Jenis Kelamin</label>
+                    <select 
+                      name="jenis_kelamin" 
+                      value={formData.jenis_kelamin} 
+                      onChange={handleInputChange} 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }}
+                    >
+                      <option value="L">Laki-laki</option>
+                      <option value="P">Perempuan</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Tempat Lahir</label>
+                    <input 
+                      type="text" 
+                      name="tempat_lahir" 
+                      value={formData.tempat_lahir} 
+                      onChange={handleInputChange} 
+                      placeholder="Kota / Kabupaten Lahir" 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Tanggal Lahir</label>
+                    <input 
+                      type="date" 
+                      name="tanggal_lahir" 
+                      value={formData.tanggal_lahir} 
+                      onChange={handleInputChange} 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Agama</label>
+                    <select 
+                      name="agama" 
+                      value={formData.agama} 
+                      onChange={handleInputChange} 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }}
+                    >
+                      <option value="Islam">Islam</option>
+                      <option value="Kristen">Kristen</option>
+                      <option value="Katolik">Katolik</option>
+                      <option value="Hindu">Hindu</option>
+                      <option value="Buddha">Buddha</option>
+                      <option value="Konghucu">Konghucu</option>
+                    </select>
+                  </div>
+
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Alamat Tempat Tinggal Lengkap</label>
+                    <textarea 
+                      name="alamat" 
+                      value={formData.alamat} 
+                      onChange={handleInputChange} 
+                      rows={2} 
+                      placeholder="Jalan, RT/RW, Kelurahan, Kecamatan, Kota/Kabupaten" 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff', fontFamily: 'inherit' }} 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SEKSI 2: DATA AKADEMIK & JALUR SELEKSI */}
+              <div style={{ background: '#f8fafc', padding: 22, borderRadius: 20, border: '1px solid #f1f5f9', marginBottom: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+                    2
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Data Sekolah Asal & Pilihan Jalur</h3>
+                    <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Informasi sekolah terdahulu dan kategori pendaftaran</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Nama Sekolah Asal</label>
+                    <input 
+                      type="text" 
+                      name="sekolah_asal" 
+                      value={formData.sekolah_asal} 
+                      onChange={handleInputChange} 
+                      placeholder="Contoh: SMPN 1 Kota / MTs Negeri 2" 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Tahun Lulus</label>
+                    <input 
+                      type="text" 
+                      name="tahun_lulus" 
+                      value={formData.tahun_lulus} 
+                      onChange={handleInputChange} 
+                      placeholder="2026" 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Jalur Pendaftaran</label>
+                    <select 
+                      name="jalur_pendaftaran" 
+                      value={formData.jalur_pendaftaran} 
+                      onChange={handleInputChange} 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }}
+                    >
+                      <option value="Reguler">Jalur Reguler / Umum</option>
+                      <option value="Prestasi">Jalur Prestasi Akademik/Non-Akademik</option>
+                      <option value="Tahfidz">Jalur Tahfidz Al-Qur'an / Beasiswa</option>
+                      <option value="Afirmasi">Jalur Afirmasi / Kurang Mampu</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Pilihan Jurusan / Program</label>
+                    <select 
+                      name="pilihan_jurusan" 
+                      value={formData.pilihan_jurusan} 
+                      onChange={handleInputChange} 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }}
+                    >
+                      <option value="Umum">Umum / Reguler</option>
+                      <option value="IPA">MIPA (Matematika & IPA)</option>
+                      <option value="IPS">IPS (Ilmu Pengetahuan Sosial)</option>
+                      <option value="Keagamaan">Keagamaan / Keislaman</option>
+                      <option value="Komputer">Teknik Komputer & Informatika</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* SEKSI 3: DATA ORANG TUA / WALI & WHATSAPP NOTIFIKASI */}
+              <div style={{ background: '#f8fafc', padding: 22, borderRadius: 20, border: '1px solid #f1f5f9', marginBottom: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+                    3
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Data Orang Tua / Wali & WhatsApp Notifikasi</h3>
+                    <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Nomor WhatsApp wajib aktif untuk pengiriman bukti pendaftaran & kartu peserta</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Nama Ayah Kandung / Wali</label>
+                    <input 
+                      type="text" 
+                      name="nama_ayah" 
+                      value={formData.nama_ayah} 
+                      onChange={handleInputChange} 
+                      placeholder="Nama lengkap Ayah" 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Pekerjaan Ayah</label>
+                    <input 
+                      type="text" 
+                      name="pekerjaan_ayah" 
+                      value={formData.pekerjaan_ayah} 
+                      onChange={handleInputChange} 
+                      placeholder="PNS / Swasta / Wiraswasta / Lainnya" 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Nama Ibu Kandung</label>
+                    <input 
+                      type="text" 
+                      name="nama_ibu" 
+                      value={formData.nama_ibu} 
+                      onChange={handleInputChange} 
+                      placeholder="Nama lengkap Ibu" 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Pekerjaan Ibu</label>
+                    <input 
+                      type="text" 
+                      name="pekerjaan_ibu" 
+                      value={formData.pekerjaan_ibu} 
+                      onChange={handleInputChange} 
+                      placeholder="Ibu Rumah Tangga / PNS / Swasta" 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>
+                      No. WhatsApp Ortu / Wali <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      name="no_hp_ortu" 
+                      value={formData.no_hp_ortu} 
+                      onChange={handleInputChange} 
+                      required 
+                      placeholder="Contoh: 081234567890" 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Email Ortu (Opsional)</label>
+                    <input 
+                      type="email" 
+                      name="email_ortu" 
+                      value={formData.email_ortu} 
+                      onChange={handleInputChange} 
+                      placeholder="email@gmail.com" 
+                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SEKSI 4: UPLOAD BERKAS DOKUMEN (OPTIONAL LINK / DRIVE) */}
+              <div style={{ background: '#f8fafc', padding: 22, borderRadius: 20, border: '1px solid #f1f5f9', marginBottom: 28 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+                    4
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Lampiran Berkas & Dokumen (Opsional)</h3>
+                    <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Masukkan link Google Drive / Cloud Storage dokumen pendukung</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Ijazah / SKL</label>
+                    <input 
+                      type="text" 
+                      name="berkas_ijazah" 
+                      value={formData.berkas_ijazah} 
+                      onChange={handleInputChange} 
+                      placeholder="URL Google Drive / Link File" 
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Kartu Keluarga</label>
+                    <input 
+                      type="text" 
+                      name="berkas_kk" 
+                      value={formData.berkas_kk} 
+                      onChange={handleInputChange} 
+                      placeholder="URL Google Drive / Link File" 
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Akta Kelahiran</label>
+                    <input 
+                      type="text" 
+                      name="berkas_akta" 
+                      value={formData.berkas_akta} 
+                      onChange={handleInputChange} 
+                      placeholder="URL Google Drive / Link File" 
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, background: '#ffffff' }} 
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Pas Foto (3x4)</label>
+                    <input 
+                      type="text" 
+                      name="pas_foto" 
+                      value={formData.pas_foto} 
+                      onChange={handleInputChange} 
+                      placeholder="URL Google Drive / Link File" 
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, background: '#ffffff' }} 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SUBMIT BUTTON & WA ALERT NOTICE */}
+              <button 
+                type="submit" 
+                disabled={loading} 
+                style={{ 
+                  width: '100%', 
+                  padding: '18px 24px', 
+                  borderRadius: 16, 
+                  border: 'none', 
+                  background: 'linear-gradient(135deg, #0066ff 0%, #0284c7 100%)', 
+                  color: '#ffffff', 
+                  fontWeight: 800, 
+                  fontSize: 16, 
+                  cursor: 'pointer', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  gap: 10, 
+                  boxShadow: '0 8px 25px rgba(0,102,255,0.3)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <Send size={20} /> {loading ? 'Mengirim Data Pendaftaran...' : 'Kirim Pendaftaran PPDB Online'}
+              </button>
+
+              <div style={{ marginTop: 14, textAlign: 'center', color: '#64748b', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <Phone size={14} color="#059669" /> Bukti pendaftaran & nomor registrasi akan dikirim otomatis via WhatsApp setelah formulir terkirim.
               </div>
             </div>
-
-            <div style={{ marginBottom: 24 }}>
-              <h3 style={{ margin: '0 0 16px 0', fontSize: 17, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Phone size={20} color="#0066ff" /> Data Orang Tua & WhatsApp Notifikasi
-              </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Nama Ayah</label>
-                  <input type="text" name="nama_ayah" value={formData.nama_ayah} onChange={handleInputChange} placeholder="Nama lengkap Ayah" style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Nama Ibu</label>
-                  <input type="text" name="nama_ibu" value={formData.nama_ibu} onChange={handleInputChange} placeholder="Nama lengkap Ibu" style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>No. WhatsApp Ortu *</label>
-                  <input type="text" name="no_hp_ortu" value={formData.no_hp_ortu} onChange={handleInputChange} required placeholder="Contoh: 081234567890" style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }} />
-                </div>
-              </div>
-            </div>
-
-            <button type="submit" disabled={loading} style={{ width: '100%', padding: 16, borderRadius: 16, border: 'none', background: '#0066ff', color: '#ffffff', fontWeight: 800, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 4px 16px rgba(0,102,255,0.3)' }}>
-              <Send size={18} /> {loading ? 'Mengirim Pendaftaran...' : 'Kirim Pendaftaran PPDB'}
-            </button>
           </form>
         )}
 
