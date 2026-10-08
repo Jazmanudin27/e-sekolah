@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "seed:keuangan": "node src/seeders/keuangan.seeder.js"
+    "seed:keuangan": "node src/seeders/keuangan.seeder.js",
+    "build": "cd client && npm install && npm run build",
+    "deploy": "git pull origin main && npm run build && pm2 restart all"
   },
   "keywords": [
     "express",
