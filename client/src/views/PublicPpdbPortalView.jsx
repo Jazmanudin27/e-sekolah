@@ -1,14 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { 
   UserPlus, Search, CheckCircle, Clock, FileText, 
-  Send, User, Phone, MapPin, School, BookOpen, CheckSquare, Printer, FileUp, Award, LogIn, ShieldCheck
+  Send, User, Phone, MapPin, School, BookOpen, CheckSquare, Printer, FileUp, Award, LogIn, ShieldCheck, Calendar
 } from 'lucide-react';
 import api from '../api/client';
 
 export default function PublicPpdbPortalView({ onLoginClick }) {
   const [tab, setTab] = useState('daftar'); // 'daftar' | 'daftar_ulang' | 'status'
+  const [schedule, setSchedule] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchSchedule();
+  }, []);
+
+  const isScheduleActive = (openFlag, startStr, endStr) => {
+    if (openFlag === 0 || openFlag === false) return false;
+    const now = new Date();
+    if (startStr) {
+      const startDate = new Date(startStr);
+      if (!isNaN(startDate.getTime()) && now < startDate) return false;
+    }
+    if (endStr) {
+      const endDate = new Date(endStr);
+      if (!isNaN(endDate.getTime()) && now > endDate) return false;
+    }
+    return true;
+  };
+
+  const fetchSchedule = async () => {
+    try {
+      const res = await api.get('/ppdb/jadwal');
+      if (res.data.success && res.data.data) {
+        const s = res.data.data;
+        setSchedule(s);
+
+        const openDaftar = isScheduleActive(s.is_pendaftaran_open, s.pendaftaran_buka, s.pendaftaran_tutup);
+        const openDU = isScheduleActive(s.is_daftar_ulang_open, s.daftar_ulang_buka, s.daftar_ulang_tutup);
+        const openPengumuman = isScheduleActive(s.is_pengumuman_open, s.pengumuman_buka, s.pengumuman_tutup);
+
+        if (openDaftar) setTab('daftar');
+        else if (openPengumuman) setTab('status');
+        else if (openDU) setTab('daftar_ulang');
+        else setTab('closed');
+      }
+    } catch (e) {
+      console.error('Failed fetching schedule:', e);
+    }
+  };
 
   // Form State Pendaftaran Baru
   const [formData, setFormData] = useState({
@@ -198,9 +238,16 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
     }
   };
 
+  // Determine open status for each tab
+  const canDaftar = !schedule || isScheduleActive(schedule.is_pendaftaran_open, schedule.pendaftaran_buka, schedule.pendaftaran_tutup);
+  const canDU = !schedule || isScheduleActive(schedule.is_daftar_ulang_open, schedule.daftar_ulang_buka, schedule.daftar_ulang_tutup);
+  const canPengumuman = !schedule || isScheduleActive(schedule.is_pengumuman_open, schedule.pengumuman_buka, schedule.pengumuman_tutup);
+
+  const activeCount = [canDaftar, canDU, canPengumuman].filter(Boolean).length;
+
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#0f172a', fontFamily: 'Inter, system-ui, sans-serif' }}>
-      {/* HERO BANNER & TABS */}
+      {/* HERO BANNER */}
       <div style={{ maxWidth: 1100, margin: '24px auto', padding: '0 16px' }}>
         <div style={{
           background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
@@ -223,61 +270,80 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
               Silakan mendaftar secara online, melakukan konfirmasi pendaftaran ulang, atau memeriksa status hasil seleksi ujian masuk secara langsung.
             </p>
 
-            {/* TAB BUTTONS */}
-            <div style={{ display: 'flex', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
-              <button
-                onClick={() => setTab('daftar')}
-                style={{
-                  padding: '10px 20px',
-                  borderRadius: 14,
-                  border: 'none',
-                  fontWeight: 800,
-                  fontSize: 13,
-                  cursor: 'pointer',
-                  background: tab === 'daftar' ? '#0066ff' : 'rgba(255,255,255,0.1)',
-                  color: tab === 'daftar' ? '#ffffff' : '#cbd5e1',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                Form Pendaftaran
-              </button>
+            {/* CONDITIONAL TAB BUTTONS - Only shown if multiple schedules are active */}
+            {activeCount > 1 && (
+              <div style={{ display: 'flex', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
+                {canDaftar && (
+                  <button
+                    onClick={() => setTab('daftar')}
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: 14,
+                      border: 'none',
+                      fontWeight: 800,
+                      fontSize: 13,
+                      cursor: 'pointer',
+                      background: tab === 'daftar' ? '#0066ff' : 'rgba(255,255,255,0.1)',
+                      color: tab === 'daftar' ? '#ffffff' : '#cbd5e1',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    Form Pendaftaran
+                  </button>
+                )}
 
-              <button
-                onClick={() => setTab('daftar_ulang')}
-                style={{
-                  padding: '10px 20px',
-                  borderRadius: 14,
-                  border: 'none',
-                  fontWeight: 800,
-                  fontSize: 13,
-                  cursor: 'pointer',
-                  background: tab === 'daftar_ulang' ? '#0066ff' : 'rgba(255,255,255,0.1)',
-                  color: tab === 'daftar_ulang' ? '#ffffff' : '#cbd5e1',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                Pendaftaran Ulang
-              </button>
+                {canPengumuman && (
+                  <button
+                    onClick={() => setTab('status')}
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: 14,
+                      border: 'none',
+                      fontWeight: 800,
+                      fontSize: 13,
+                      cursor: 'pointer',
+                      background: tab === 'status' ? '#0066ff' : 'rgba(255,255,255,0.1)',
+                      color: tab === 'status' ? '#ffffff' : '#cbd5e1',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    Cek Status Kelulusan
+                  </button>
+                )}
 
-              <button
-                onClick={() => setTab('status')}
-                style={{
-                  padding: '10px 20px',
-                  borderRadius: 14,
-                  border: 'none',
-                  fontWeight: 800,
-                  fontSize: 13,
-                  cursor: 'pointer',
-                  background: tab === 'status' ? '#0066ff' : 'rgba(255,255,255,0.1)',
-                  color: tab === 'status' ? '#ffffff' : '#cbd5e1',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                Cek Status Kelulusan
-              </button>
-            </div>
+                {canDU && (
+                  <button
+                    onClick={() => setTab('daftar_ulang')}
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: 14,
+                      border: 'none',
+                      fontWeight: 800,
+                      fontSize: 13,
+                      cursor: 'pointer',
+                      background: tab === 'daftar_ulang' ? '#0066ff' : 'rgba(255,255,255,0.1)',
+                      color: tab === 'daftar_ulang' ? '#ffffff' : '#cbd5e1',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    Pendaftaran Ulang
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
+
+        {/* TAB CLOSED VIEW */}
+        {tab === 'closed' && (
+          <div style={{ background: '#ffffff', padding: 40, borderRadius: 24, textAlign: 'center', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+            <Calendar size={48} color="#94a3b8" style={{ marginBottom: 16 }} />
+            <h3 style={{ margin: '0 0 8px 0', fontSize: 20, fontWeight: 800, color: '#0f172a' }}>Pendaftaran PPDB Belum Dibuka / Telah Ditutup</h3>
+            <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>
+              Silakan hubungi panitia sekolah atau cek jadwal resmi pendaftaran secara berkala.
+            </p>
+          </div>
+        )}
 
         {/* TAB CONTENT 1: FORM PENDAFTARAN */}
         {tab === 'daftar' && (

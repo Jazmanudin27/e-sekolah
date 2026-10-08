@@ -234,6 +234,26 @@ class PpdbController {
     }
   }
 
+  // Admin/Public: Get Schedule Settings
+  static async getJadwal(req, res) {
+    try {
+      const data = await PpdbModel.getJadwal();
+      return res.json({ success: true, data });
+    } catch (e) {
+      return res.status(500).json({ success: false, message: e.message });
+    }
+  }
+
+  // Admin: Save Schedule Settings
+  static async saveJadwal(req, res) {
+    try {
+      await PpdbModel.saveJadwal(req.body);
+      return res.json({ success: true, message: 'Setting jadwal PPDB berhasil disimpan' });
+    } catch (e) {
+      return res.status(500).json({ success: false, message: e.message });
+    }
+  }
+
   // Admin: Delete Pendaftaran
   static async delete(idReq, res) {
     try {

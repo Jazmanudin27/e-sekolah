@@ -243,6 +243,77 @@ class PpdbModel {
     };
   }
 
+  static async ensureJadwalTable() {
+    try {
+      const sql = `
+        CREATE TABLE IF NOT EXISTS ppdb_setting_jadwal (
+          id INT PRIMARY KEY DEFAULT 1,
+          pendaftaran_buka DATETIME NULL,
+          pendaftaran_tutup DATETIME NULL,
+          is_pendaftaran_open TINYINT(1) DEFAULT 1,
+          daftar_ulang_buka DATETIME NULL,
+          daftar_ulang_tutup DATETIME NULL,
+          is_daftar_ulang_open TINYINT(1) DEFAULT 1,
+          pengumuman_buka DATETIME NULL,
+          pengumuman_tutup DATETIME NULL,
+          is_pengumuman_open TINYINT(1) DEFAULT 1,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      `;
+      await query(sql);
+      const rows = await query("SELECT id FROM ppdb_setting_jadwal WHERE id = 1");
+      if (!rows || rows.length === 0) {
+        await query("INSERT INTO ppdb_setting_jadwal (id, is_pendaftaran_open, is_daftar_ulang_open, is_pengumuman_open) VALUES (1, 1, 1, 1)");
+      }
+    } catch (e) {
+      console.error('[PpdbModel] ensureJadwalTable error:', e.message);
+    }
+  }
+
+  static async getJadwal() {
+    await this.ensureJadwalTable();
+    const rows = await query("SELECT * FROM ppdb_setting_jadwal WHERE id = 1 LIMIT 1");
+    if (rows && rows.length > 0) return rows[0];
+    return {
+      is_pendaftaran_open: 1,
+      is_daftar_ulang_open: 1,
+      is_pengumuman_open: 1
+    };
+  }
+
+  static async saveJadwal(data) {
+    await this.ensureJadwalTable();
+    const sql = `
+      INSERT INTO ppdb_setting_jadwal (
+        id, pendaftaran_buka, pendaftaran_tutup, is_pendaftaran_open,
+        daftar_ulang_buka, daftar_ulang_tutup, is_daftar_ulang_open,
+        pengumuman_buka, pengumuman_tutup, is_pengumuman_open
+      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        pendaftaran_buka = VALUES(pendaftaran_buka),
+        pendaftaran_tutup = VALUES(pendaftaran_tutup),
+        is_pendaftaran_open = VALUES(is_pendaftaran_open),
+        daftar_ulang_buka = VALUES(daftar_ulang_buka),
+        daftar_ulang_tutup = VALUES(daftar_ulang_tutup),
+        is_daftar_ulang_open = VALUES(is_daftar_ulang_open),
+        pengumuman_buka = VALUES(pengumuman_buka),
+        pengumuman_tutup = VALUES(pengumuman_tutup),
+        is_pengumuman_open = VALUES(is_pengumuman_open)
+    `;
+    return await query(sql, [
+      data.pendaftaran_buka || null,
+      data.pendaftaran_tutup || null,
+      data.is_pendaftaran_open ? 1 : 0,
+      data.daftar_ulang_buka || null,
+      data.daftar_ulang_tutup || null,
+      data.is_daftar_ulang_open ? 1 : 0,
+      data.pengumuman_buka || null,
+      data.pengumuman_tutup || null,
+      data.is_pengumuman_open ? 1 : 0
+    ]);
+  }
+
   static async delete(id) {
     await this.ensureTable();
     return await query('DELETE FROM ppdb_pendaftaran WHERE id = ?', [id]);

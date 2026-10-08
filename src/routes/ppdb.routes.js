@@ -4,11 +4,13 @@ const ppdbController = require('../controllers/ppdb.controller');
 const { authenticateToken } = require('../middleware/auth.middleware');
 
 // Public routes (Calon siswa / Wali Murid)
+router.get('/jadwal', ppdbController.getJadwal);
 router.post('/register', ppdbController.register);
 router.get('/check/:no', ppdbController.checkStatus);
 router.post('/daftar-ulang', ppdbController.submitDaftarUlang);
 
 // Admin routes
+router.post('/jadwal', authenticateToken, ppdbController.saveJadwal);
 router.get('/', authenticateToken, ppdbController.getAll);
 router.get('/statistik', authenticateToken, ppdbController.getStatistik);
 router.get('/:id', ppdbController.getById);

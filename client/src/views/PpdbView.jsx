@@ -64,6 +64,18 @@ export default function PpdbView({ currentUser, onSwitchTab }) {
   const [kelasList, setKelasList] = useState([]);
   const [statistikData, setStatistikData] = useState(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showJadwalModal, setShowJadwalModal] = useState(false);
+  const [jadwalForm, setJadwalForm] = useState({
+    pendaftaran_buka: '',
+    pendaftaran_tutup: '',
+    is_pendaftaran_open: true,
+    daftar_ulang_buka: '',
+    daftar_ulang_tutup: '',
+    is_daftar_ulang_open: true,
+    pengumuman_buka: '',
+    pengumuman_tutup: '',
+    is_pengumuman_open: true
+  });
 
   // State Input Tes Admin
   const [tesForm, setTesForm] = useState({
@@ -80,7 +92,48 @@ export default function PpdbView({ currentUser, onSwitchTab }) {
     fetchAdminData();
     fetchKelas();
     fetchStatistik();
+    fetchJadwal();
   }, []);
+
+  const fetchJadwal = async () => {
+    try {
+      const res = await api.get('/ppdb/jadwal');
+      if (res.data.success && res.data.data) {
+        const d = res.data.data;
+        const formatDT = (dtStr) => {
+          if (!dtStr) return '';
+          const date = new Date(dtStr);
+          if (isNaN(date.getTime())) return '';
+          const pad = (n) => String(n).padStart(2, '0');
+          return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        };
+        setJadwalForm({
+          pendaftaran_buka: formatDT(d.pendaftaran_buka),
+          pendaftaran_tutup: formatDT(d.pendaftaran_tutup),
+          is_pendaftaran_open: d.is_pendaftaran_open === undefined ? true : Boolean(d.is_pendaftaran_open),
+          daftar_ulang_buka: formatDT(d.daftar_ulang_buka),
+          daftar_ulang_tutup: formatDT(d.daftar_ulang_tutup),
+          is_daftar_ulang_open: d.is_daftar_ulang_open === undefined ? true : Boolean(d.is_daftar_ulang_open),
+          pengumuman_buka: formatDT(d.pengumuman_buka),
+          pengumuman_tutup: formatDT(d.pengumuman_tutup),
+          is_pengumuman_open: d.is_pengumuman_open === undefined ? true : Boolean(d.is_pengumuman_open)
+        });
+      }
+    } catch (e) {}
+  };
+
+  const handleSaveJadwal = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await api.post('/ppdb/jadwal', jadwalForm);
+      if (res.data.success) {
+        Swal.fire('Berhasil', 'Setting Jadwal PPDB telah disimpan!', 'success');
+        setShowJadwalModal(false);
+      }
+    } catch (err) {
+      Swal.fire('Gagal', err.response?.data?.message || 'Gagal menyimpan jadwal', 'error');
+    }
+  };
 
   useEffect(() => {
     setCurrentPage(1);
@@ -450,6 +503,16 @@ export default function PpdbView({ currentUser, onSwitchTab }) {
               type="button"
               className="btn-outline-admin"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
+              onClick={() => setShowJadwalModal(true)}
+              title="Setting Jadwal PPDB"
+            >
+              <Calendar size={16} color="#0284c7" /> Setting Jadwal
+            </button>
+
+            <button
+              type="button"
+              className="btn-outline-admin"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
               onClick={() => setMode(mode === 'statistik' ? 'admin' : 'statistik')}
               title="Statistik & Rekap PPDB"
             >
@@ -790,6 +853,93 @@ export default function PpdbView({ currentUser, onSwitchTab }) {
                 Tutup
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL SETTING JADWAL PPDB */}
+      {showJadwalModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 16 }}>
+          <div style={{ background: '#ffffff', padding: 24, borderRadius: 20, maxWidth: 650, width: '100%', maxHeight: '90vh', overflowY: 'auto', border: '1px solid #e2e8f0', boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Calendar size={20} color="#0284c7" /> Setting Jadwal & Status PPDB Portal
+              </h3>
+              <button onClick={() => setShowJadwalModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#64748b' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveJadwal} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* GELOMBANG PENDAFTARAN */}
+              <div style={{ background: '#f8fafc', padding: 16, borderRadius: 14, border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <label style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>1. Form Pendaftaran Calon Siswa</label>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={jadwalForm.is_pendaftaran_open} onChange={(e) => setJadwalForm(p => ({ ...p, is_pendaftaran_open: e.target.checked }))} /> Status Aktif
+                  </label>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 12 }}>
+                  <div>
+                    <label style={{ fontWeight: 700, color: '#475569' }}>Tanggal Buka Pendaftaran</label>
+                    <input type="datetime-local" value={jadwalForm.pendaftaran_buka} onChange={(e) => setJadwalForm(p => ({ ...p, pendaftaran_buka: e.target.value }))} style={{ width: '100%', padding: 8, borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12 }} />
+                  </div>
+                  <div>
+                    <label style={{ fontWeight: 700, color: '#475569' }}>Tanggal Tutup Pendaftaran</label>
+                    <input type="datetime-local" value={jadwalForm.pendaftaran_tutup} onChange={(e) => setJadwalForm(p => ({ ...p, pendaftaran_tutup: e.target.value }))} style={{ width: '100%', padding: 8, borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12 }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* CEK STATUS KELULUSAN */}
+              <div style={{ background: '#f8fafc', padding: 16, borderRadius: 14, border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <label style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>2. Pengumuman & Cek Status Kelulusan</label>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={jadwalForm.is_pengumuman_open} onChange={(e) => setJadwalForm(p => ({ ...p, is_pengumuman_open: e.target.checked }))} /> Status Aktif
+                  </label>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 12 }}>
+                  <div>
+                    <label style={{ fontWeight: 700, color: '#475569' }}>Tanggal Buka Pengumuman</label>
+                    <input type="datetime-local" value={jadwalForm.pengumuman_buka} onChange={(e) => setJadwalForm(p => ({ ...p, pengumuman_buka: e.target.value }))} style={{ width: '100%', padding: 8, borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12 }} />
+                  </div>
+                  <div>
+                    <label style={{ fontWeight: 700, color: '#475569' }}>Tanggal Tutup Pengumuman</label>
+                    <input type="datetime-local" value={jadwalForm.pengumuman_tutup} onChange={(e) => setJadwalForm(p => ({ ...p, pengumuman_tutup: e.target.value }))} style={{ width: '100%', padding: 8, borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12 }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* PENDAFTARAN ULANG */}
+              <div style={{ background: '#f8fafc', padding: 16, borderRadius: 14, border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <label style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>3. Form Pendaftaran Ulang & Seragam</label>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={jadwalForm.is_daftar_ulang_open} onChange={(e) => setJadwalForm(p => ({ ...p, is_daftar_ulang_open: e.target.checked }))} /> Status Aktif
+                  </label>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 12 }}>
+                  <div>
+                    <label style={{ fontWeight: 700, color: '#475569' }}>Tanggal Buka Daftar Ulang</label>
+                    <input type="datetime-local" value={jadwalForm.daftar_ulang_buka} onChange={(e) => setJadwalForm(p => ({ ...p, daftar_ulang_buka: e.target.value }))} style={{ width: '100%', padding: 8, borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12 }} />
+                  </div>
+                  <div>
+                    <label style={{ fontWeight: 700, color: '#475569' }}>Tanggal Tutup Daftar Ulang</label>
+                    <input type="datetime-local" value={jadwalForm.daftar_ulang_tutup} onChange={(e) => setJadwalForm(p => ({ ...p, daftar_ulang_tutup: e.target.value }))} style={{ width: '100%', padding: 8, borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12 }} />
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
+                <button type="button" onClick={() => setShowJadwalModal(false)} className="btn-outline-admin">
+                  Batal
+                </button>
+                <button type="submit" className="btn-primary-admin">
+                  Simpan Setting Jadwal
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
