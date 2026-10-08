@@ -269,68 +269,6 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
             <p style={{ margin: 0, color: '#94a3b8', fontSize: 14, maxWidth: 600 }}>
               Silakan mendaftar secara online, melakukan konfirmasi pendaftaran ulang, atau memeriksa status hasil seleksi ujian masuk secara langsung.
             </p>
-
-            {/* CONDITIONAL TAB BUTTONS - Only shown if multiple schedules are active */}
-            {activeCount > 1 && (
-              <div style={{ display: 'flex', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
-                {canDaftar && (
-                  <button
-                    onClick={() => setTab('daftar')}
-                    style={{
-                      padding: '10px 20px',
-                      borderRadius: 14,
-                      border: 'none',
-                      fontWeight: 800,
-                      fontSize: 13,
-                      cursor: 'pointer',
-                      background: tab === 'daftar' ? '#0066ff' : 'rgba(255,255,255,0.1)',
-                      color: tab === 'daftar' ? '#ffffff' : '#cbd5e1',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    Form Pendaftaran
-                  </button>
-                )}
-
-                {canPengumuman && (
-                  <button
-                    onClick={() => setTab('status')}
-                    style={{
-                      padding: '10px 20px',
-                      borderRadius: 14,
-                      border: 'none',
-                      fontWeight: 800,
-                      fontSize: 13,
-                      cursor: 'pointer',
-                      background: tab === 'status' ? '#0066ff' : 'rgba(255,255,255,0.1)',
-                      color: tab === 'status' ? '#ffffff' : '#cbd5e1',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    Cek Status Kelulusan
-                  </button>
-                )}
-
-                {canDU && (
-                  <button
-                    onClick={() => setTab('daftar_ulang')}
-                    style={{
-                      padding: '10px 20px',
-                      borderRadius: 14,
-                      border: 'none',
-                      fontWeight: 800,
-                      fontSize: 13,
-                      cursor: 'pointer',
-                      background: tab === 'daftar_ulang' ? '#0066ff' : 'rgba(255,255,255,0.1)',
-                      color: tab === 'daftar_ulang' ? '#ffffff' : '#cbd5e1',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    Pendaftaran Ulang
-                  </button>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
