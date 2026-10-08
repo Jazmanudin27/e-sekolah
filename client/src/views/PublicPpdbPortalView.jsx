@@ -246,27 +246,104 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
   const activeCount = [canDaftar, canDU, canPengumuman].filter(Boolean).length;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#0f172a', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#eef2f6', color: '#0f172a', fontFamily: 'Inter, system-ui, -apple-system, sans-serif', paddingBottom: 40 }}>
+      <style>{`
+        .ppdb-wrapper {
+          max-width: 1060px;
+          margin: 24px auto;
+          padding: 0 16px;
+        }
+        .ppdb-hero-box {
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+          color: #ffffff;
+          border-radius: 20px;
+          padding: 32px 24px;
+          margin-bottom: 24px;
+          box-shadow: 0 12px 30px rgba(15,23,42,0.15);
+          position: relative;
+          overflow: hidden;
+        }
+        .ppdb-card {
+          background: #ffffff;
+          border-radius: 20px;
+          border: 1px solid #cbd5e1;
+          box-shadow: 0 12px 32px rgba(15,23,42,0.08);
+          overflow: hidden;
+          margin-bottom: 32px;
+        }
+        .ppdb-card-body {
+          padding: 28px 32px;
+        }
+        .ppdb-section-card {
+          background: #f8fafc;
+          padding: 22px;
+          border-radius: 16px;
+          border: 1px solid #e2e8f0;
+          border-left: 4px solid #0066ff;
+          margin-bottom: 24px;
+        }
+        .ppdb-grid-2 {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+        }
+        .ppdb-grid-full {
+          grid-column: span 2;
+        }
+        .ppdb-input-field {
+          width: 100%;
+          padding: 12px 14px;
+          border-radius: 10px;
+          border: 1px solid #cbd5e1;
+          font-size: 13px;
+          background: #ffffff;
+          color: #0f172a;
+          box-sizing: border-box;
+          transition: all 0.2s ease;
+        }
+        .ppdb-input-field:focus {
+          outline: none;
+          border-color: #0066ff;
+          box-shadow: 0 0 0 3px rgba(0,102,255,0.15);
+        }
+        @media (max-width: 640px) {
+          .ppdb-wrapper {
+            margin: 12px auto;
+            padding: 0 12px;
+          }
+          .ppdb-hero-box {
+            padding: 20px 16px;
+            border-radius: 16px;
+          }
+          .ppdb-card-body {
+            padding: 16px;
+          }
+          .ppdb-section-card {
+            padding: 16px 12px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+          }
+          .ppdb-grid-2 {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+          .ppdb-grid-full {
+            grid-column: span 1;
+          }
+        }
+      `}</style>
+
       {/* HERO BANNER */}
-      <div style={{ maxWidth: 1100, margin: '24px auto', padding: '0 16px' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-          color: '#ffffff',
-          borderRadius: 24,
-          padding: '32px 24px',
-          marginBottom: 24,
-          boxShadow: '0 12px 30px rgba(15,23,42,0.15)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
+      <div className="ppdb-wrapper">
+        <div className="ppdb-hero-box">
           <div style={{ position: 'relative', zIndex: 1 }}>
             <span style={{ background: 'rgba(59,130,246,0.2)', color: '#60a5fa', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800, letterSpacing: '0.5px' }}>
               REKREASI AKADEMIK 2026/2027
             </span>
-            <h1 style={{ margin: '12px 0 6px 0', fontSize: 26, fontWeight: 800, letterSpacing: '-0.5px' }}>
+            <h1 style={{ margin: '12px 0 6px 0', fontSize: 24, fontWeight: 800, letterSpacing: '-0.5px' }}>
               Selamat Datang Calon Siswa & Wali Murid
             </h1>
-            <p style={{ margin: 0, color: '#94a3b8', fontSize: 14, maxWidth: 600 }}>
+            <p style={{ margin: 0, color: '#94a3b8', fontSize: 13, maxWidth: 600 }}>
               Silakan mendaftar secara online, melakukan konfirmasi pendaftaran ulang, atau memeriksa status hasil seleksi ujian masuk secara langsung.
             </p>
           </div>
@@ -274,7 +351,7 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
 
         {/* TAB CLOSED VIEW */}
         {tab === 'closed' && (
-          <div style={{ background: '#ffffff', padding: 40, borderRadius: 24, textAlign: 'center', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+          <div style={{ background: '#ffffff', padding: 40, borderRadius: 20, textAlign: 'center', border: '1px solid #cbd5e1', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
             <Calendar size={48} color="#94a3b8" style={{ marginBottom: 16 }} />
             <h3 style={{ margin: '0 0 8px 0', fontSize: 20, fontWeight: 800, color: '#0f172a' }}>Pendaftaran PPDB Belum Dibuka / Telah Ditutup</h3>
             <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>
@@ -285,25 +362,15 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
 
         {/* TAB CONTENT 1: FORM PENDAFTARAN (PREMIUM & STUNNING DESIGN) */}
         {tab === 'daftar' && (
-          <form 
-            onSubmit={handleSubmitRegister} 
-            style={{ 
-              background: '#ffffff', 
-              borderRadius: 24, 
-              border: '1px solid #e2e8f0', 
-              boxShadow: '0 20px 40px rgba(15,23,42,0.06)', 
-              overflow: 'hidden',
-              marginBottom: 32
-            }}
-          >
+          <form onSubmit={handleSubmitRegister} className="ppdb-card">
             {/* GRADIENT ACCENT BAR */}
             <div style={{ height: 6, background: 'linear-gradient(90deg, #0066ff 0%, #00c6ff 50%, #6366f1 100%)' }} />
 
-            <div style={{ padding: '28px 32px' }}>
+            <div className="ppdb-card-body">
               {/* FORM HEADER TITLE */}
-              <div style={{ marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div>
-                  <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
+                  <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
                     Formulir Pendaftaran Siswa Baru (PPDB)
                   </h2>
                   <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: 13 }}>
@@ -316,20 +383,20 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
               </div>
 
               {/* SEKSI 1: DATA PRIBADI CALON SISWA */}
-              <div style={{ background: '#f8fafc', padding: 22, borderRadius: 20, border: '1px solid #f1f5f9', marginBottom: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+              <div className="ppdb-section-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13 }}>
                     1
                   </div>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Data Diri Calon Peserta Didik</h3>
+                    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Data Diri Calon Peserta Didik</h3>
                     <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Informasi identitas resmi sesuai Akta / Kartu Keluarga</p>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
-                  <div style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>
+                <div className="ppdb-grid-2">
+                  <div className="ppdb-grid-full">
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
                       Nama Lengkap Siswa <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <input 
@@ -339,12 +406,12 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                       onChange={handleInputChange} 
                       required 
                       placeholder="Masukkan nama lengkap calon siswa sesuai ijazah/akta" 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff', outline: 'none' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>NIK (Nomor Induk Kependudukan)</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>NIK (Nomor Induk Kependudukan)</label>
                     <input 
                       type="text" 
                       name="nik" 
@@ -352,29 +419,29 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                       onChange={handleInputChange} 
                       placeholder="16 Digit NIK di Kartu Keluarga" 
                       maxLength={16}
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>NISN (Nomor Induk Siswa Nasional)</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>NISN (Nomor Induk Siswa Nasional)</label>
                     <input 
                       type="text" 
                       name="nisn" 
                       value={formData.nisn} 
                       onChange={handleInputChange} 
                       placeholder="Nomor NISN 10 Digit" 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Jenis Kelamin</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Jenis Kelamin</label>
                     <select 
                       name="jenis_kelamin" 
                       value={formData.jenis_kelamin} 
                       onChange={handleInputChange} 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }}
+                      className="ppdb-input-field"
                     >
                       <option value="L">Laki-laki</option>
                       <option value="P">Perempuan</option>
@@ -382,35 +449,35 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Tempat Lahir</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Tempat Lahir</label>
                     <input 
                       type="text" 
                       name="tempat_lahir" 
                       value={formData.tempat_lahir} 
                       onChange={handleInputChange} 
                       placeholder="Kota / Kabupaten Lahir" 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Tanggal Lahir</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Tanggal Lahir</label>
                     <input 
                       type="date" 
                       name="tanggal_lahir" 
                       value={formData.tanggal_lahir} 
                       onChange={handleInputChange} 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Agama</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Agama</label>
                     <select 
                       name="agama" 
                       value={formData.agama} 
                       onChange={handleInputChange} 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }}
+                      className="ppdb-input-field"
                     >
                       <option value="Islam">Islam</option>
                       <option value="Kristen">Kristen</option>
@@ -421,64 +488,65 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                     </select>
                   </div>
 
-                  <div style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Alamat Tempat Tinggal Lengkap</label>
+                  <div className="ppdb-grid-full">
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Alamat Tempat Tinggal Lengkap</label>
                     <textarea 
                       name="alamat" 
                       value={formData.alamat} 
                       onChange={handleInputChange} 
                       rows={2} 
                       placeholder="Jalan, RT/RW, Kelurahan, Kecamatan, Kota/Kabupaten" 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff', fontFamily: 'inherit' }} 
+                      className="ppdb-input-field"
+                      style={{ fontFamily: 'inherit' }}
                     />
                   </div>
                 </div>
               </div>
 
               {/* SEKSI 2: DATA AKADEMIK & JALUR SELEKSI */}
-              <div style={{ background: '#f8fafc', padding: 22, borderRadius: 20, border: '1px solid #f1f5f9', marginBottom: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+              <div className="ppdb-section-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13 }}>
                     2
                   </div>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Data Sekolah Asal & Pilihan Jalur</h3>
+                    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Data Sekolah Asal & Pilihan Jalur</h3>
                     <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Informasi sekolah terdahulu dan kategori pendaftaran</p>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+                <div className="ppdb-grid-2">
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Nama Sekolah Asal</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Nama Sekolah Asal</label>
                     <input 
                       type="text" 
                       name="sekolah_asal" 
                       value={formData.sekolah_asal} 
                       onChange={handleInputChange} 
                       placeholder="Contoh: SMPN 1 Kota / MTs Negeri 2" 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Tahun Lulus</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Tahun Lulus</label>
                     <input 
                       type="text" 
                       name="tahun_lulus" 
                       value={formData.tahun_lulus} 
                       onChange={handleInputChange} 
                       placeholder="2026" 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Jalur Pendaftaran</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Jalur Pendaftaran</label>
                     <select 
                       name="jalur_pendaftaran" 
                       value={formData.jalur_pendaftaran} 
                       onChange={handleInputChange} 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }}
+                      className="ppdb-input-field"
                     >
                       <option value="Reguler">Jalur Reguler / Umum</option>
                       <option value="Prestasi">Jalur Prestasi Akademik/Non-Akademik</option>
@@ -488,12 +556,12 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Pilihan Jurusan / Program</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Pilihan Jurusan / Program</label>
                     <select 
                       name="pilihan_jurusan" 
                       value={formData.pilihan_jurusan} 
                       onChange={handleInputChange} 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }}
+                      className="ppdb-input-field"
                     >
                       <option value="Umum">Umum / Reguler</option>
                       <option value="IPA">MIPA (Matematika & IPA)</option>
@@ -506,68 +574,68 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
               </div>
 
               {/* SEKSI 3: DATA ORANG TUA / WALI & WHATSAPP NOTIFIKASI */}
-              <div style={{ background: '#f8fafc', padding: 22, borderRadius: 20, border: '1px solid #f1f5f9', marginBottom: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+              <div className="ppdb-section-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13 }}>
                     3
                   </div>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Data Orang Tua / Wali & WhatsApp Notifikasi</h3>
+                    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Data Orang Tua / Wali & WhatsApp Notifikasi</h3>
                     <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Nomor WhatsApp wajib aktif untuk pengiriman bukti pendaftaran & kartu peserta</p>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+                <div className="ppdb-grid-2">
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Nama Ayah Kandung / Wali</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Nama Ayah Kandung / Wali</label>
                     <input 
                       type="text" 
                       name="nama_ayah" 
                       value={formData.nama_ayah} 
                       onChange={handleInputChange} 
                       placeholder="Nama lengkap Ayah" 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Pekerjaan Ayah</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Pekerjaan Ayah</label>
                     <input 
                       type="text" 
                       name="pekerjaan_ayah" 
                       value={formData.pekerjaan_ayah} 
                       onChange={handleInputChange} 
                       placeholder="PNS / Swasta / Wiraswasta / Lainnya" 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Nama Ibu Kandung</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Nama Ibu Kandung</label>
                     <input 
                       type="text" 
                       name="nama_ibu" 
                       value={formData.nama_ibu} 
                       onChange={handleInputChange} 
                       placeholder="Nama lengkap Ibu" 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Pekerjaan Ibu</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Pekerjaan Ibu</label>
                     <input 
                       type="text" 
                       name="pekerjaan_ibu" 
                       value={formData.pekerjaan_ibu} 
                       onChange={handleInputChange} 
                       placeholder="Ibu Rumah Tangga / PNS / Swasta" 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
                       No. WhatsApp Ortu / Wali <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <input 
@@ -577,37 +645,37 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                       onChange={handleInputChange} 
                       required 
                       placeholder="Contoh: 081234567890" 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#334155', marginBottom: 6 }}>Email Ortu (Opsional)</label>
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Email Ortu (Opsional)</label>
                     <input 
                       type="email" 
                       name="email_ortu" 
                       value={formData.email_ortu} 
                       onChange={handleInputChange} 
                       placeholder="email@gmail.com" 
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
                     />
                   </div>
                 </div>
               </div>
 
               {/* SEKSI 4: UPLOAD BERKAS DOKUMEN (OPTIONAL LINK / DRIVE) */}
-              <div style={{ background: '#f8fafc', padding: 22, borderRadius: 20, border: '1px solid #f1f5f9', marginBottom: 28 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+              <div className="ppdb-section-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13 }}>
                     4
                   </div>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Lampiran Berkas & Dokumen (Opsional)</h3>
+                    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Lampiran Berkas & Dokumen (Opsional)</h3>
                     <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Masukkan link Google Drive / Cloud Storage dokumen pendukung</p>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+                <div className="ppdb-grid-2">
                   <div>
                     <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Ijazah / SKL</label>
                     <input 
@@ -616,7 +684,8 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                       value={formData.berkas_ijazah} 
                       onChange={handleInputChange} 
                       placeholder="URL Google Drive / Link File" 
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
+                      style={{ fontSize: 12 }}
                     />
                   </div>
 
@@ -628,7 +697,8 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                       value={formData.berkas_kk} 
                       onChange={handleInputChange} 
                       placeholder="URL Google Drive / Link File" 
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
+                      style={{ fontSize: 12 }}
                     />
                   </div>
 
@@ -640,7 +710,8 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                       value={formData.berkas_akta} 
                       onChange={handleInputChange} 
                       placeholder="URL Google Drive / Link File" 
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
+                      style={{ fontSize: 12 }}
                     />
                   </div>
 
@@ -652,7 +723,8 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
                       value={formData.pas_foto} 
                       onChange={handleInputChange} 
                       placeholder="URL Google Drive / Link File" 
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 12, background: '#ffffff' }} 
+                      className="ppdb-input-field" 
+                      style={{ fontSize: 12 }}
                     />
                   </div>
                 </div>
@@ -692,75 +764,81 @@ export default function PublicPpdbPortalView({ onLoginClick }) {
 
         {/* TAB CONTENT 2: FORM DAFTAR ULANG */}
         {tab === 'daftar_ulang' && (
-          <form onSubmit={handleSubmitDaftarUlang} style={{ background: '#ffffff', padding: 24, borderRadius: 24, border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
-            <h3 style={{ margin: '0 0 16px 0', fontSize: 17, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <CheckSquare size={20} color="#0066ff" /> Form Pendaftaran Ulang Siswa Lulus
-            </h3>
-            <p style={{ color: '#64748b', fontSize: 13, marginBottom: 20 }}>
-              Form ini khusus untuk calon siswa yang telah dinyatakan <b>LULUS SELEKSI</b>.
-            </p>
+          <form onSubmit={handleSubmitDaftarUlang} className="ppdb-card">
+            <div style={{ height: 6, background: 'linear-gradient(90deg, #059669 0%, #10b981 100%)' }} />
+            <div className="ppdb-card-body">
+              <h3 style={{ margin: '0 0 8px 0', fontSize: 18, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <CheckSquare size={20} color="#059669" /> Form Pendaftaran Ulang Siswa Lulus
+              </h3>
+              <p style={{ color: '#64748b', fontSize: 13, marginBottom: 20 }}>
+                Form ini khusus untuk calon siswa yang telah dinyatakan <b>LULUS SELEKSI</b>.
+              </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginBottom: 20 }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Nomor Pendaftaran *</label>
-                <input type="text" name="no_pendaftaran" value={duForm.no_pendaftaran} onChange={handleDuChange} required placeholder="Contoh: PPDB-2026-0001" style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }} />
+              <div className="ppdb-grid-2" style={{ marginBottom: 20 }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Nomor Pendaftaran *</label>
+                  <input type="text" name="no_pendaftaran" value={duForm.no_pendaftaran} onChange={handleDuChange} required placeholder="Contoh: PPDB-2026-0001" className="ppdb-input-field" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Ukuran Seragam</label>
+                  <select name="ukuran_seragam" value={duForm.ukuran_seragam} onChange={handleDuChange} className="ppdb-input-field">
+                    <option value="S">S (Small)</option>
+                    <option value="M">M (Medium)</option>
+                    <option value="L">L (Large)</option>
+                    <option value="XL">XL (Extra Large)</option>
+                    <option value="XXL">XXL (Double Extra Large)</option>
+                  </select>
+                </div>
+                <div className="ppdb-grid-full">
+                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Nominal Bayar (Rp)</label>
+                  <input type="number" name="nominal_daftar_ulang" value={duForm.nominal_daftar_ulang} onChange={handleDuChange} placeholder="Contoh: 500000" className="ppdb-input-field" />
+                </div>
               </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Ukuran Seragam</label>
-                <select name="ukuran_seragam" value={duForm.ukuran_seragam} onChange={handleDuChange} style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }}>
-                  <option value="S">S (Small)</option>
-                  <option value="M">M (Medium)</option>
-                  <option value="L">L (Large)</option>
-                  <option value="XL">XL (Extra Large)</option>
-                  <option value="XXL">XXL (Double Extra Large)</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Nominal Bayar (Rp)</label>
-                <input type="number" name="nominal_daftar_ulang" value={duForm.nominal_daftar_ulang} onChange={handleDuChange} placeholder="500000" style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc' }} />
-              </div>
+
+              <button type="submit" disabled={loading} style={{ width: '100%', padding: '16px 24px', borderRadius: 14, border: 'none', background: '#059669', color: '#ffffff', fontWeight: 800, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 4px 16px rgba(5,150,105,0.3)' }}>
+                <CheckSquare size={18} /> {loading ? 'Memproses...' : 'Kirim Pendaftaran Ulang'}
+              </button>
             </div>
-
-            <button type="submit" disabled={loading} style={{ width: '100%', padding: 16, borderRadius: 16, border: 'none', background: '#059669', color: '#ffffff', fontWeight: 800, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 4px 16px rgba(5,150,105,0.3)' }}>
-              <CheckSquare size={18} /> {loading ? 'Memproses...' : 'Kirim Pendaftaran Ulang'}
-            </button>
           </form>
         )}
 
         {/* TAB CONTENT 3: CEK STATUS */}
         {tab === 'status' && (
-          <div style={{ background: '#ffffff', padding: 24, borderRadius: 24, border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
-            <h3 style={{ margin: '0 0 16px 0', fontSize: 17, fontWeight: 800, color: '#0f172a' }}>Cek Status Seleksi & Cetak Kartu Peserta</h3>
-            <form onSubmit={handleCheckStatus} style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-              <input type="text" value={searchNo} onChange={(e) => setSearchNo(e.target.value)} placeholder="Nomor Pendaftaran (Contoh: PPDB-2026-0001)" style={{ flex: 1, padding: '14px', borderRadius: 14, border: '1px solid #cbd5e1', fontSize: 14, background: '#f8fafc' }} />
-              <button type="submit" disabled={loading} style={{ padding: '14px 24px', background: '#0066ff', color: '#ffffff', border: 'none', borderRadius: 14, fontWeight: 800, cursor: 'pointer', fontSize: 14 }}>Cek Status</button>
-            </form>
+          <div className="ppdb-card">
+            <div style={{ height: 6, background: 'linear-gradient(90deg, #0284c7 0%, #38bdf8 100%)' }} />
+            <div className="ppdb-card-body">
+              <h3 style={{ margin: '0 0 16px 0', fontSize: 18, fontWeight: 800, color: '#0f172a' }}>Cek Status Seleksi & Cetak Kartu Peserta</h3>
+              <form onSubmit={handleCheckStatus} style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+                <input type="text" value={searchNo} onChange={(e) => setSearchNo(e.target.value)} placeholder="Nomor Pendaftaran (Contoh: PPDB-2026-0001)" className="ppdb-input-field" style={{ flex: 1, minWidth: 220 }} />
+                <button type="submit" disabled={loading} style={{ padding: '12px 24px', background: '#0066ff', color: '#ffffff', border: 'none', borderRadius: 12, fontWeight: 800, cursor: 'pointer', fontSize: 14 }}>Cek Status</button>
+              </form>
 
-            {statusResult && (
-              <div style={{ background: '#f8fafc', padding: 20, borderRadius: 20, border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                  <div>
-                    <h4 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0f172a' }}>{statusResult.nama_lengkap}</h4>
-                    <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: 13 }}>No: <b>{statusResult.no_pendaftaran}</b> | Jalur: {statusResult.jalur_pendaftaran}</p>
+              {statusResult && (
+                <div style={{ background: '#f8fafc', padding: 20, borderRadius: 16, border: '1px solid #cbd5e1' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0f172a' }}>{statusResult.nama_lengkap}</h4>
+                      <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: 13 }}>No: <b>{statusResult.no_pendaftaran}</b> | Jalur: {statusResult.jalur_pendaftaran}</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                      {getStatusBadge(statusResult.status)}
+                      <button onClick={() => handlePrintKartu(statusResult)} style={{ padding: '8px 16px', background: '#0f172a', color: '#ffffff', border: 'none', borderRadius: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700 }}>
+                        <Printer size={16} /> Cetak Kartu Peserta
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    {getStatusBadge(statusResult.status)}
-                    <button onClick={() => handlePrintKartu(statusResult)} style={{ padding: '8px 16px', background: '#0f172a', color: '#ffffff', border: 'none', borderRadius: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700 }}>
-                      <Printer size={16} /> Cetak Kartu Peserta
-                    </button>
+
+                  <hr style={{ margin: '16px 0', borderColor: '#cbd5e1' }} />
+
+                  <div className="ppdb-grid-2" style={{ fontSize: 13 }}>
+                    <div><b>Jadwal Ujian:</b> {statusResult.jadwal_tes ? new Date(statusResult.jadwal_tes).toLocaleString('id-ID') : 'Belum Dijadwalkan'}</div>
+                    <div><b>Nilai Ujian Tulis:</b> {statusResult.nilai_tes_tulis || '-'}</div>
+                    <div><b>Nilai Baca Al-Qur'an:</b> {statusResult.nilai_baca_quran || '-'}</div>
+                    <div><b>Ukuran Seragam:</b> {statusResult.ukuran_seragam || 'Belum Diisi'}</div>
                   </div>
                 </div>
-
-                <hr style={{ margin: '16px 0', borderColor: '#e2e8f0' }} />
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, fontSize: 13 }}>
-                  <div><b>Jadwal Ujian:</b> {statusResult.jadwal_tes ? new Date(statusResult.jadwal_tes).toLocaleString('id-ID') : 'Belum Dijadwalkan'}</div>
-                  <div><b>Nilai Ujian Tulis:</b> {statusResult.nilai_tes_tulis || '-'}</div>
-                  <div><b>Nilai Baca Al-Qur'an:</b> {statusResult.nilai_baca_quran || '-'}</div>
-                  <div><b>Ukuran Seragam:</b> {statusResult.ukuran_seragam || 'Belum Diisi'}</div>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>
