@@ -617,16 +617,14 @@ export default function PpdbView({ currentUser, onSwitchTab }) {
                     <td style={{ textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
                         <button
-                          className="btn-action-icon btn-action-view"
-                          style={{ background: '#0284c7', color: '#fff' }}
+                          className="btn-action-icon btn-edit"
                           title="Cetak Kartu / Detail"
                           onClick={() => handlePrintKartu(s)}
                         >
-                          <Printer size={13} />
+                          <Printer size={13} color="#ffffff" />
                         </button>
                         <button
-                          className="btn-action-icon btn-action-edit"
-                          style={{ background: '#0284c7', color: '#fff' }}
+                          className="btn-action-icon btn-edit"
                           title="Kelola & Input Nilai Ujian"
                           onClick={() => {
                             setSelectedDetail(s);
@@ -639,14 +637,14 @@ export default function PpdbView({ currentUser, onSwitchTab }) {
                             });
                           }}
                         >
-                          <Edit2 size={13} />
+                          <Edit2 size={13} color="#ffffff" />
                         </button>
                         <button
-                          className="btn-action-icon btn-action-delete"
+                          className="btn-action-icon btn-delete"
                           title="Hapus Data PPDB"
                           onClick={() => handleDelete(s)}
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={13} color="#ffffff" />
                         </button>
                       </div>
                     </td>
