@@ -672,27 +672,6 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                 </button>
 
                 <button 
-                  onClick={() => setTab('status')}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    color: '#ffffff',
-                    border: '1px solid rgba(255, 255, 255, 0.22)',
-                    padding: '9px 15px',
-                    borderRadius: 10,
-                    fontWeight: 700,
-                    fontSize: 12.5,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 7,
-                    backdropFilter: 'blur(8px)',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <Search size={15} /> Cek Hasil Seleksi & Kartu
-                </button>
-
-                <button 
                   onClick={() => setTab('daftar_ulang')}
                   style={{
                     background: 'rgba(16, 185, 129, 0.15)',
