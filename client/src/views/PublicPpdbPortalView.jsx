@@ -3,14 +3,16 @@ import Swal from 'sweetalert2';
 import { 
   UserPlus, Search, CheckCircle, Clock, FileText, 
   Send, User, Phone, MapPin, School, BookOpen, CheckSquare, Printer, FileUp, Award, LogIn, ShieldCheck, Calendar,
-  HelpCircle, ChevronRight, AlertCircle, Info, ExternalLink, Check, Sparkles, MessageCircle, HeartHandshake, Layers
+  HelpCircle, ChevronRight, ChevronDown, AlertCircle, Info, ExternalLink, Check, Sparkles, MessageCircle, HeartHandshake, Layers,
+  Compass, Laptop, Users, Star, ArrowRight, Shield, Bell, CheckCircle2
 } from 'lucide-react';
 import api from '../api/client';
 
 export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
-  const [tab, setTab] = useState('beranda'); // 'beranda' | 'daftar' | 'daftar_ulang' | 'status'
+  const [tab, setTab] = useState('beranda'); // 'beranda' | 'daftar' | 'status' | 'daftar_ulang'
   const [schedule, setSchedule] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [activeFaq, setActiveFaq] = useState(0);
 
   useEffect(() => {
     fetchSchedule();
@@ -42,9 +44,9 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
   };
 
   const schoolData = schedule?.sekolah || sekolahInfo || {
-    nama_sekolah: 'SMK ARTANITA TASIKMALAYA',
+    nama_sekolah: 'SMA YAB SUKARATU',
     npsn: '20279876',
-    alamat: 'Jl. Cienteung No. 112 A, Kota Tasikmalaya',
+    alamat: 'Sukaratu, Kabupaten Tasikmalaya, Jawa Barat',
     no_hp: '081234567890',
     email: 'info@sistemiartas.com'
   };
@@ -126,7 +128,7 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
         icon: 'warning',
         title: 'Form Belum Lengkap',
         text: `Mohon lengkapi data wajib berikut: ${missing.map(m => m.label).join(', ')}`,
-        confirmButtonColor: '#0066ff'
+        confirmButtonColor: '#2563eb'
       });
       return;
     }
@@ -139,9 +141,15 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
         Swal.fire({
           icon: 'success',
           title: 'Pendaftaran Berhasil!',
-          html: `Nomor Pendaftaran Anda: <b style="font-size:1.3rem;color:#0066ff">${noPendaftaran}</b><br/><br/>Notifikasi konfirmasi & nomor registrasi telah terkirim via WhatsApp. Simpan nomor ini untuk pengecekan kelulusan.`,
-          confirmButtonText: 'Tutup'
+          html: `<div style="text-align:center;padding:10px 0;"><p style="margin:0 0 8px 0;color:#64748b;">Nomor Pendaftaran Resmi Anda:</p><div style="font-size:1.6rem;font-weight:800;color:#2563eb;letter-spacing:1px;background:#eff6ff;padding:12px;border-radius:12px;border:1px dashed #3b82f6;">${noPendaftaran}</div><p style="margin:14px 0 0 0;font-size:13px;color:#475569;">Simpan nomor ini untuk memeriksa kelulusan seleksi dan mencetak kartu peserta ujian.</p></div>`,
+          confirmButtonText: 'Cek Status Sekarang',
+          confirmButtonColor: '#2563eb'
+        }).then(() => {
+          setSearchNo(noPendaftaran);
+          setTab('status');
+          handleCheckStatusByNo(noPendaftaran);
         });
+
         setFormData({
           nama_lengkap: '', nik: '', nisn: '', jenis_kelamin: 'L',
           tempat_lahir: '', tanggal_lahir: '', agama: 'Islam', alamat: '',
@@ -151,8 +159,6 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
           no_hp_ortu: '', email_ortu: '', penghasilan_ortu: '',
           berkas_ijazah: '', berkas_kk: '', berkas_akta: '', pas_foto: ''
         });
-        setSearchNo(noPendaftaran);
-        setTab('status');
       }
     } catch (err) {
       Swal.fire('Gagal Pendaftaran', err.response?.data?.message || 'Terjadi kesalahan sistem', 'error');
@@ -172,8 +178,9 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
     try {
       const res = await api.post('/ppdb/daftar-ulang', duForm);
       if (res.data.success) {
-        Swal.fire('Daftar Ulang Dikirim!', res.data.message, 'success');
-        setSearchNo(duForm.no_pendaftaran);
+        Swal.fire('Daftar Ulang Terkirim!', res.data.message, 'success');
+        const submittedNo = duForm.no_pendaftaran;
+        setSearchNo(submittedNo);
         setDuForm({
           no_pendaftaran: '',
           ukuran_seragam: 'M',
@@ -185,6 +192,7 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
           pas_foto: ''
         });
         setTab('status');
+        handleCheckStatusByNo(submittedNo);
       }
     } catch (err) {
       Swal.fire('Gagal Daftar Ulang', err.response?.data?.message || 'Terjadi kesalahan', 'error');
@@ -193,13 +201,12 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
     }
   };
 
-  const handleCheckStatus = async (e) => {
-    if (e) e.preventDefault();
-    if (!searchNo) return;
+  const handleCheckStatusByNo = async (targetNo) => {
+    if (!targetNo) return;
     setLoading(true);
     setStatusResult(null);
     try {
-      const res = await api.get(`/ppdb/check/${searchNo.trim()}`);
+      const res = await api.get(`/ppdb/check/${encodeURIComponent(targetNo.trim())}`);
       if (res.data.success) {
         setStatusResult(res.data.data);
       }
@@ -210,6 +217,11 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
     }
   };
 
+  const handleCheckStatus = (e) => {
+    if (e) e.preventDefault();
+    handleCheckStatusByNo(searchNo);
+  };
+
   const handlePrintKartu = (data) => {
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
@@ -217,33 +229,39 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
         <head>
           <title>Kartu Peserta PPDB - ${data.nama_lengkap}</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-            .card { border: 2px solid #0066ff; border-radius: 12px; padding: 20px; max-width: 500px; margin: 0 auto; background: #fff; }
-            .header { text-align: center; border-bottom: 2px solid #0066ff; padding-bottom: 10px; margin-bottom: 15px; }
-            .header h2 { margin: 0; color: #0066ff; }
-            .header p { margin: 4px 0 0 0; font-size: 13px; color: #666; }
-            .info { font-size: 14px; line-height: 1.6; }
-            .info tr td { padding: 4px 8px; }
-            .qr { text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; color: #1e293b; background: #fff; }
+            .card { border: 2px solid #2563eb; border-radius: 16px; padding: 24px; max-width: 540px; margin: 0 auto; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+            .header { text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 12px; margin-bottom: 16px; }
+            .header h2 { margin: 0; color: #2563eb; font-size: 18px; text-transform: uppercase; font-weight: 800; }
+            .header h3 { margin: 4px 0 0 0; color: #0f172a; font-size: 15px; }
+            .header p { margin: 4px 0 0 0; font-size: 11px; color: #64748b; }
+            .info { font-size: 13px; line-height: 1.8; margin-top: 10px; }
+            .info tr td { padding: 4px 6px; }
+            .qr { text-align: center; margin-top: 18px; padding-top: 14px; border-top: 1px dashed #cbd5e1; }
+            .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; background: #eff6ff; color: #2563eb; font-weight: bold; font-size: 12px; }
+            @media print { body { padding: 0; } }
           </style>
         </head>
         <body>
           <div class="card">
             <div class="header">
               <h2>KARTU PESERTA PPDB 2026/2027</h2>
-              <p>${schoolData.nama_sekolah}</p>
+              <h3>${schoolData.nama_sekolah}</h3>
+              <p>${schoolData.alamat || 'Portal Pendaftaran Siswa Baru Terpadu'}</p>
             </div>
             <table class="info" width="100%">
-              <tr><td><b>No. Pendaftaran:</b></td><td>${data.no_pendaftaran}</td></tr>
-              <tr><td><b>Nama Lengkap:</b></td><td>${data.nama_lengkap}</td></tr>
-              <tr><td><b>NISN / NIK:</b></td><td>${data.nisn || '-'} / ${data.nik || '-'}</td></tr>
-              <tr><td><b>Jalur Seleksi:</b></td><td>${data.jalur_pendaftaran}</td></tr>
-              <tr><td><b>Sekolah Asal:</b></td><td>${data.sekolah_asal || '-'}</td></tr>
-              <tr><td><b>Jadwal Ujian:</b></td><td>${data.jadwal_tes ? new Date(data.jadwal_tes).toLocaleString('id-ID') : 'Menunggu Jadwal'}</td></tr>
+              <tr><td width="35%"><b>No. Registrasi</b></td><td>: <span class="badge">${data.no_pendaftaran}</span></td></tr>
+              <tr><td><b>Nama Siswa</b></td><td>: <b>${data.nama_lengkap}</b></td></tr>
+              <tr><td><b>NISN / NIK</b></td><td>: ${data.nisn || '-'} / ${data.nik || '-'}</td></tr>
+              <tr><td><b>Jalur Seleksi</b></td><td>: ${data.jalur_pendaftaran}</td></tr>
+              <tr><td><b>Pilihan Jurusan</b></td><td>: ${data.pilihan_jurusan || 'Umum'}</td></tr>
+              <tr><td><b>Sekolah Asal</b></td><td>: ${data.sekolah_asal || '-'}</td></tr>
+              <tr><td><b>Jadwal Ujian</b></td><td>: ${data.jadwal_tes ? new Date(data.jadwal_tes).toLocaleString('id-ID') : 'Menunggu Jadwal dari Panitia'}</td></tr>
+              <tr><td><b>Lokasi Ujian</b></td><td>: ${data.lokasi_tes || 'Kampus Utama ' + schoolData.nama_sekolah}</td></tr>
             </table>
             <div class="qr">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(data.no_pendaftaran)}" alt="QR Code" />
-              <p style="font-size:12px;margin-top:6px;">Tunjukkan kartu ini saat verifikasi berkas & tes ujian.</p>
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(data.no_pendaftaran)}" alt="QR Code" />
+              <p style="font-size:11px;color:#64748b;margin:6px 0 0 0;">Bawa kartu ini saat mengikuti verifikasi berkas fisik dan ujian seleksi.</p>
             </div>
           </div>
           <script>window.print();</script>
@@ -256,17 +274,17 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
   const getStatusBadge = (st) => {
     switch (st) {
       case 'Diterima':
-        return <span style={{ background: '#d1fae5', color: '#059669', padding: '6px 14px', borderRadius: 10, fontWeight: 800, fontSize: 13 }}>Resmi Diterima</span>;
+        return <span style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '6px 14px', borderRadius: 20, fontWeight: 800, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}><CheckCircle2 size={16} /> Resmi Diterima</span>;
       case 'Daftar Ulang':
-        return <span style={{ background: '#e0f2fe', color: '#0284c7', padding: '6px 14px', borderRadius: 10, fontWeight: 800, fontSize: 13 }}>Daftar Ulang</span>;
+        return <span style={{ background: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd', padding: '6px 14px', borderRadius: 20, fontWeight: 800, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}><CheckSquare size={16} /> Siap Daftar Ulang</span>;
       case 'Lulus':
-        return <span style={{ background: '#dcfce7', color: '#166534', padding: '6px 14px', borderRadius: 10, fontWeight: 800, fontSize: 13 }}>Lulus Seleksi</span>;
+        return <span style={{ background: '#d1fae5', color: '#065f46', border: '1px solid #a7f3d0', padding: '6px 14px', borderRadius: 20, fontWeight: 800, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}><Award size={16} /> Lulus Seleksi</span>;
       case 'Ditolak':
-        return <span style={{ background: '#fee2e2', color: '#991b1b', padding: '6px 14px', borderRadius: 10, fontWeight: 800, fontSize: 13 }}>Tidak Lulus</span>;
+        return <span style={{ background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca', padding: '6px 14px', borderRadius: 20, fontWeight: 800, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}><AlertCircle size={16} /> Tidak Lulus</span>;
       case 'Verifikasi':
-        return <span style={{ background: '#e0f2fe', color: '#075985', padding: '6px 14px', borderRadius: 10, fontWeight: 800, fontSize: 13 }}>Verifikasi Berkas</span>;
+        return <span style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', padding: '6px 14px', borderRadius: 20, fontWeight: 800, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}><Clock size={16} /> Sedang Diverifikasi</span>;
       default:
-        return <span style={{ background: '#fef3c7', color: '#92400e', padding: '6px 14px', borderRadius: 10, fontWeight: 800, fontSize: 13 }}>Menunggu Seleksi</span>;
+        return <span style={{ background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', padding: '6px 14px', borderRadius: 20, fontWeight: 800, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}><Clock size={16} /> Menunggu Seleksi</span>;
     }
   };
 
@@ -274,22 +292,65 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
   const canDU = !schedule || isScheduleActive(schedule.is_daftar_ulang_open, schedule.daftar_ulang_buka, schedule.daftar_ulang_tutup);
   const canPengumuman = !schedule || isScheduleActive(schedule.is_pengumuman_open, schedule.pengumuman_buka, schedule.pengumuman_tutup);
 
+  const faqs = [
+    {
+      q: 'Kapan pendaftaran PPDB 2026 dibuka?',
+      a: 'Pendaftaran Gelombang 1 dibuka mulai sekarang secara online melalui website ini. Calon siswa dapat mendaftar kapan saja 24 jam tanpa perlu datang langsung ke sekolah.'
+    },
+    {
+      q: 'Bagaimana jika ijazah asli SMP/MTs belum terbit?',
+      a: 'Calon siswa dapat menggunakan Surat Keterangan Lulus (SKL) sementara atau Surat Keterangan Aktif dari pihak sekolah asal untuk mendaftar.'
+    },
+    {
+      q: 'Apakah ada program beasiswa untuk siswa berprestasi & tahfidz?',
+      a: 'Ya, kami menyediakan beasiswa bebas SPP dan potongan dana sumbangan pendidikan khusus bagi peraih juara perlombaan serta penghafal Al-Qur\'an minimal 1 Juz mutqin.'
+    },
+    {
+      q: 'Bagaimana cara konfirmasi pendaftaran setelah mengisi formulir?',
+      a: 'Setelah formulir dikirim, sistem akan mengirimkan pesan konfirmasi otomatis ke nomor WhatsApp Orang Tua/Wali yang didaftarkan. Anda dapat mencetak kartu peserta di menu Cek Kelulusan.'
+    }
+  ];
+
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#0f172a', fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#0f172a', fontFamily: "'Plus Jakarta Sans', Inter, system-ui, sans-serif" }}>
       <style>{`
+        /* GLOWING ANIMATIONS & MODERN DESIGN */
+        @keyframes pulse-subtle {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.03); }
+        }
+        @keyframes float-gentle {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
+        .pulse-beacon {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #22c55e;
+          box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+          animation: pulse-beacon-kf 1.8s infinite;
+        }
+        @keyframes pulse-beacon-kf {
+          0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+          70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
         .ppdb-header {
           position: sticky;
           top: 0;
           z-index: 100;
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(12px);
-          border-bottom: 1px solid #e2e8f0;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+          background: rgba(255, 255, 255, 0.92);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+          box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
         }
         .ppdb-nav-container {
-          max-width: 1200px;
+          max-width: 1240px;
           margin: 0 auto;
-          padding: 12px 20px;
+          padding: 14px 24px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -299,29 +360,30 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
           display: flex;
           align-items: center;
           gap: 12px;
-          text-decoration: none;
-          color: inherit;
           cursor: pointer;
         }
         .ppdb-brand-icon {
           width: 44px;
           height: 44px;
           border-radius: 12px;
-          background: linear-gradient(135deg, #0066ff 0%, #0284c7 100%);
+          background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
           display: flex;
           align-items: center;
           justify-content: center;
           color: #ffffff;
-          box-shadow: 0 4px 12px rgba(0,102,255,0.3);
+          box-shadow: 0 8px 16px rgba(2, 132, 199, 0.25);
           flex-shrink: 0;
         }
-        .ppdb-nav-links {
+        .ppdb-nav-pills {
           display: flex;
           align-items: center;
-          gap: 8px;
+          background: #f1f5f9;
+          padding: 4px;
+          border-radius: 14px;
+          gap: 4px;
         }
-        .ppdb-nav-btn {
-          padding: 8px 16px;
+        .ppdb-pill-btn {
+          padding: 8px 18px;
           border-radius: 10px;
           border: none;
           background: transparent;
@@ -329,88 +391,143 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
           font-weight: 700;
           font-size: 13px;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
         }
-        .ppdb-nav-btn:hover {
-          background: #f1f5f9;
+        .ppdb-pill-btn:hover {
           color: #0f172a;
         }
-        .ppdb-nav-btn.active {
-          background: #0066ff;
-          color: #ffffff;
-          box-shadow: 0 4px 12px rgba(0,102,255,0.25);
+        .ppdb-pill-btn.active {
+          background: #ffffff;
+          color: #2563eb;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
-        .ppdb-wrapper {
-          max-width: 1200px;
+
+        /* MOBILE NAV STRIP - ONLY SHOWN ON SMALL SCREENS */
+        .ppdb-mobile-strip {
+          display: none;
+          background: #ffffff;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 10px 14px;
+          gap: 8px;
+          overflow-x: auto;
+        }
+
+        .ppdb-main-content {
+          max-width: 1240px;
           margin: 0 auto;
-          padding: 24px 20px 60px 20px;
+          padding: 24px 20px 80px 20px;
         }
-        .ppdb-hero-box {
-          background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e293b 100%);
+
+        /* HERO ULTRA PREMIUM */
+        .ppdb-hero {
+          background: linear-gradient(135deg, #090e17 0%, #0d1527 50%, #172554 100%);
+          border-radius: 28px;
+          padding: 48px 44px;
           color: #ffffff;
-          border-radius: 24px;
-          padding: 44px 36px;
-          margin-bottom: 28px;
-          box-shadow: 0 20px 40px rgba(15,23,42,0.16);
           position: relative;
           overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.1);
+          margin-bottom: 36px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.35);
         }
-        .ppdb-hero-glow {
+        .ppdb-hero-glow-1 {
           position: absolute;
-          top: -40%;
-          right: -10%;
-          width: 500px;
-          height: 500px;
-          background: radial-gradient(circle, rgba(0,102,255,0.25) 0%, transparent 70%);
+          top: -20%;
+          right: 15%;
+          width: 480px;
+          height: 480px;
+          background: radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, transparent 65%);
           pointer-events: none;
+          filter: blur(30px);
         }
-        .ppdb-card {
-          background: #ffffff;
-          border-radius: 20px;
-          border: 1px solid #e2e8f0;
-          box-shadow: 0 10px 30px rgba(15,23,42,0.05);
-          overflow: hidden;
-          margin-bottom: 32px;
+        .ppdb-hero-glow-2 {
+          position: absolute;
+          bottom: -20%;
+          left: -10%;
+          width: 420px;
+          height: 420px;
+          background: radial-gradient(circle, rgba(37, 99, 235, 0.28) 0%, transparent 65%);
+          pointer-events: none;
+          filter: blur(40px);
         }
-        .ppdb-card-body {
-          padding: 32px;
-        }
-        .ppdb-section-card {
-          background: #f8fafc;
-          padding: 24px;
-          border-radius: 16px;
-          border: 1px solid #e2e8f0;
-          border-left: 4px solid #0066ff;
-          margin-bottom: 24px;
-        }
-        .ppdb-grid-2 {
+        .ppdb-hero-grid {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 16px;
+          grid-template-columns: 1.25fr 0.95fr;
+          gap: 36px;
+          align-items: center;
+          position: relative;
+          z-index: 2;
+        }
+
+        /* GLASS CARD WIDGET */
+        .ppdb-glass-widget {
+          background: rgba(255, 255, 255, 0.08);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          border-radius: 24px;
+          padding: 28px;
+          box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+          animation: float-gentle 6s ease-in-out infinite;
+        }
+
+        .gradient-headline {
+          background: linear-gradient(135deg, #ffffff 30%, #38bdf8 70%, #818cf8 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        /* CARDS & GRIDS */
+        .ppdb-bento-card {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 20px;
+          padding: 26px;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          position: relative;
+          overflow: hidden;
+        }
+        .ppdb-bento-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 16px 32px rgba(15, 23, 42, 0.07);
+          border-color: #cbd5e1;
+        }
+
+        .ppdb-grid-4 {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
         }
         .ppdb-grid-3 {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
+          gap: 24px;
         }
-        .ppdb-grid-4 {
+        .ppdb-grid-2 {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 16px;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 24px;
         }
-        .ppdb-grid-full {
-          grid-column: span 2;
+
+        .ppdb-form-card {
+          background: #ffffff;
+          border-radius: 24px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 12px 36px rgba(15, 23, 42, 0.06);
+          overflow: hidden;
         }
         .ppdb-input-field {
           width: 100%;
-          padding: 12px 14px;
-          border-radius: 10px;
+          padding: 13px 16px;
+          border-radius: 12px;
           border: 1px solid #cbd5e1;
-          font-size: 13px;
+          font-size: 14px;
           background: #ffffff;
           color: #0f172a;
           box-sizing: border-box;
@@ -418,74 +535,40 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
         }
         .ppdb-input-field:focus {
           outline: none;
-          border-color: #0066ff;
-          box-shadow: 0 0 0 3px rgba(0,102,255,0.15);
+          border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
-        .ppdb-step-item {
+
+        .faq-item {
           background: #ffffff;
           border: 1px solid #e2e8f0;
           border-radius: 16px;
-          padding: 24px;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.03);
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
+          padding: 20px;
+          cursor: pointer;
+          transition: all 0.2s ease;
         }
-        .ppdb-step-badge {
-          width: 36px;
-          height: 36px;
-          border-radius: 10px;
-          background: linear-gradient(135deg, #0066ff, #0284c7);
-          color: #ffffff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 800;
-          font-size: 15px;
+        .faq-item:hover {
+          border-color: #cbd5e1;
+          background: #f8fafc;
         }
-        .ppdb-footer {
-          background: #0f172a;
-          color: #94a3b8;
-          padding: 40px 20px 30px 20px;
-          border-top: 1px solid #1e293b;
-          font-size: 13px;
-        }
-        @media (max-width: 860px) {
-          .ppdb-nav-links {
-            display: none;
-          }
-          .ppdb-grid-4 {
-            grid-template-columns: repeat(2, 1fr);
-          }
-          .ppdb-grid-3 {
-            grid-template-columns: 1fr;
-          }
+
+        @media (max-width: 960px) {
+          .ppdb-nav-pills { display: none; }
+          .ppdb-mobile-strip { display: flex; }
+          .ppdb-hero-grid { grid-template-columns: 1fr; }
+          .ppdb-grid-4 { grid-template-columns: repeat(2, 1fr); }
+          .ppdb-grid-3 { grid-template-columns: 1fr; }
+          .ppdb-hero { padding: 36px 24px; }
         }
         @media (max-width: 640px) {
-          .ppdb-wrapper {
-            padding: 16px 12px 40px 12px;
-          }
-          .ppdb-hero-box {
-            padding: 24px 18px;
-            border-radius: 18px;
-          }
-          .ppdb-card-body {
-            padding: 20px 16px;
-          }
-          .ppdb-grid-2 {
-            grid-template-columns: 1fr;
-          }
-          .ppdb-grid-full {
-            grid-column: span 1;
-          }
-          .ppdb-grid-4 {
-            grid-template-columns: 1fr;
-          }
+          .ppdb-main-content { padding: 14px 12px 60px 12px; }
+          .ppdb-grid-4 { grid-template-columns: 1fr; }
+          .ppdb-grid-2 { grid-template-columns: 1fr; }
+          .ppdb-hero { padding: 28px 18px; border-radius: 20px; }
         }
       `}</style>
 
-      {/* TOP NAVBAR */}
+      {/* HEADER / NAVIGATION BAR */}
       <header className="ppdb-header">
         <div className="ppdb-nav-container">
           <div className="ppdb-brand" onClick={() => setTab('beranda')}>
@@ -497,74 +580,77 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                 <h1 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
                   {schoolData.nama_sekolah}
                 </h1>
-                <span style={{ background: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: 6, fontSize: 10, fontWeight: 800 }}>
+                <span style={{ background: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 800 }}>
                   PPDB 2026
                 </span>
               </div>
-              <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>
+              <p style={{ margin: 0, fontSize: 11, color: '#64748b', fontWeight: 600 }}>
                 Portal Resmi Penerimaan Peserta Didik Baru Online
               </p>
             </div>
           </div>
 
-          <div className="ppdb-nav-links">
+          {/* DESKTOP NAV PILLS (SINGLE ROW) */}
+          <div className="ppdb-nav-pills">
             <button 
-              className={`ppdb-nav-btn ${tab === 'beranda' ? 'active' : ''}`}
+              className={`ppdb-pill-btn ${tab === 'beranda' ? 'active' : ''}`}
               onClick={() => setTab('beranda')}
             >
               <BookOpen size={16} /> Beranda & Alur
             </button>
             <button 
-              className={`ppdb-nav-btn ${tab === 'daftar' ? 'active' : ''}`}
+              className={`ppdb-pill-btn ${tab === 'daftar' ? 'active' : ''}`}
               onClick={() => setTab('daftar')}
             >
               <UserPlus size={16} /> Formulir Daftar
             </button>
             <button 
-              className={`ppdb-nav-btn ${tab === 'status' ? 'active' : ''}`}
+              className={`ppdb-pill-btn ${tab === 'status' ? 'active' : ''}`}
               onClick={() => setTab('status')}
             >
               <Search size={16} /> Cek Kelulusan
             </button>
             <button 
-              className={`ppdb-nav-btn ${tab === 'daftar_ulang' ? 'active' : ''}`}
+              className={`ppdb-pill-btn ${tab === 'daftar_ulang' ? 'active' : ''}`}
               onClick={() => setTab('daftar_ulang')}
             >
               <CheckSquare size={16} /> Daftar Ulang
             </button>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* RIGHT ACTION BUTTONS */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <a 
-              href={`https://wa.me/${cleanPhone}?text=Halo%20Panitia%20PPDB%20${encodeURIComponent(schoolData.nama_sekolah)},%20saya%20ingin%20bertanya%20seputar%20pendaftaran`}
+              href={`https://wa.me/${cleanPhone}?text=Halo%20Panitia%20PPDB%20${encodeURIComponent(schoolData.nama_sekolah)},%20saya%20ingin%20bertanya%20seputar%20pendaftaran%20siswa%20baru`}
               target="_blank"
               rel="noreferrer"
               style={{
                 background: '#22c55e',
                 color: '#ffffff',
-                padding: '8px 14px',
-                borderRadius: 10,
+                padding: '9px 16px',
+                borderRadius: 12,
                 fontSize: 12,
-                fontWeight: 700,
+                fontWeight: 800,
                 textDecoration: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 6,
-                boxShadow: '0 2px 8px rgba(34,197,94,0.3)'
+                gap: 8,
+                boxShadow: '0 4px 14px rgba(34, 197, 94, 0.32)',
+                transition: 'all 0.2s ease'
               }}
             >
-              <MessageCircle size={15} /> WhatsApp Panitia
+              <MessageCircle size={16} /> WhatsApp Panitia
             </a>
 
             {onLoginClick && (
               <button 
                 onClick={onLoginClick}
                 style={{
-                  background: '#f1f5f9',
+                  background: '#f8fafc',
                   color: '#334155',
                   border: '1px solid #cbd5e1',
-                  padding: '8px 14px',
-                  borderRadius: 10,
+                  padding: '9px 14px',
+                  borderRadius: 12,
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: 'pointer',
@@ -580,428 +666,578 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
         </div>
       </header>
 
-      {/* MOBILE TAB NAVIGATION STRIP */}
-      <div style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '8px 12px', display: 'flex', gap: 6, overflowX: 'auto' }}>
+      {/* MOBILE NAVIGATION STRIP (ONLY VISIBLE ON MOBILE) */}
+      <div className="ppdb-mobile-strip">
         <button 
-          className={`ppdb-nav-btn ${tab === 'beranda' ? 'active' : ''}`}
+          className={`ppdb-pill-btn ${tab === 'beranda' ? 'active' : ''}`}
           onClick={() => setTab('beranda')}
-          style={{ whiteSpace: 'nowrap' }}
         >
           <BookOpen size={14} /> Beranda
         </button>
         <button 
-          className={`ppdb-nav-btn ${tab === 'daftar' ? 'active' : ''}`}
+          className={`ppdb-pill-btn ${tab === 'daftar' ? 'active' : ''}`}
           onClick={() => setTab('daftar')}
-          style={{ whiteSpace: 'nowrap' }}
         >
           <UserPlus size={14} /> Daftar Online
         </button>
         <button 
-          className={`ppdb-nav-btn ${tab === 'status' ? 'active' : ''}`}
+          className={`ppdb-pill-btn ${tab === 'status' ? 'active' : ''}`}
           onClick={() => setTab('status')}
-          style={{ whiteSpace: 'nowrap' }}
         >
           <Search size={14} /> Cek Kelulusan
         </button>
         <button 
-          className={`ppdb-nav-btn ${tab === 'daftar_ulang' ? 'active' : ''}`}
+          className={`ppdb-pill-btn ${tab === 'daftar_ulang' ? 'active' : ''}`}
           onClick={() => setTab('daftar_ulang')}
-          style={{ whiteSpace: 'nowrap' }}
         >
           <CheckSquare size={14} /> Daftar Ulang
         </button>
       </div>
 
-      <div className="ppdb-wrapper">
-        {/* HERO BANNER */}
-        <div className="ppdb-hero-box">
-          <div className="ppdb-hero-glow" />
-          <div style={{ position: 'relative', zIndex: 1, maxWidth: 840 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-              <span style={{ background: 'rgba(59,130,246,0.2)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.4)', padding: '4px 12px', borderRadius: 20, fontSize: 11, fontWeight: 800, letterSpacing: '0.5px' }}>
-                TAHUN AJARAN 2026/2027
-              </span>
-              <span style={{ background: 'rgba(16,185,129,0.2)', color: '#34d399', border: '1px solid rgba(16,185,129,0.4)', padding: '4px 12px', borderRadius: 20, fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <Sparkles size={12} /> Pendaftaran Online Resmi Dibuka
-              </span>
+      <main className="ppdb-main-content">
+        {/* HERO SECTION ULTRA ATTRACTIVE */}
+        <section className="ppdb-hero">
+          <div className="ppdb-hero-glow-1" />
+          <div className="ppdb-hero-glow-2" />
+
+          <div className="ppdb-hero-grid">
+            {/* LEFT COLUMN: HEADLINE & ACTIONS */}
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.15)', padding: '6px 14px', borderRadius: 30, marginBottom: 18 }}>
+                <div className="pulse-beacon" />
+                <span style={{ fontSize: 12, fontWeight: 800, color: '#38bdf8', letterSpacing: '0.4px' }}>
+                  GELOMBANG 1 RESMI DIBUKA • T.A 2026/2027
+                </span>
+              </div>
+
+              <h2 style={{ fontSize: 'clamp(1.9rem, 3.4vw, 2.7rem)', fontWeight: 800, lineHeight: 1.2, margin: '0 0 16px 0', letterSpacing: '-0.8px' }}>
+                Wujudkan Potensi Terbaikmu di<br />
+                <span className="gradient-headline">{schoolData.nama_sekolah}</span>
+              </h2>
+
+              <p style={{ margin: '0 0 28px 0', color: '#cbd5e1', fontSize: 15, lineHeight: 1.7, maxWidth: 560 }}>
+                Sekolah unggulan berkarakter Islami dengan fasilitas modern dan kurikulum terpadu. Daftarkan diri Anda sekarang secara online langsung dari rumah dengan proses cepat, transparan, dan terpercaya.
+              </p>
+
+              {/* ACTION CTA BUTTONS */}
+              <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 28 }}>
+                <button 
+                  onClick={() => setTab('daftar')}
+                  style={{
+                    background: 'linear-gradient(135deg, #2563eb 0%, #0284c7 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '14px 28px',
+                    borderRadius: 14,
+                    fontWeight: 800,
+                    fontSize: 15,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    boxShadow: '0 10px 25px rgba(37, 99, 235, 0.45)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <UserPlus size={19} /> Daftar Siswa Baru Sekarang
+                </button>
+
+                <button 
+                  onClick={() => setTab('status')}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255, 255, 255, 0.22)',
+                    padding: '14px 22px',
+                    borderRadius: 14,
+                    fontWeight: 700,
+                    fontSize: 15,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    backdropFilter: 'blur(8px)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <Search size={18} /> Cek Hasil Seleksi & Kartu
+                </button>
+              </div>
+
+              {/* TRUST RIBBON STATS */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', paddingTop: 18, borderTop: '1px solid rgba(255, 255, 255, 0.12)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#e2e8f0', fontWeight: 700 }}>
+                  <Star size={16} color="#fbbf24" fill="#fbbf24" /> Akreditasi A (Unggul)
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#e2e8f0', fontWeight: 700 }}>
+                  <Award size={16} color="#38bdf8" /> Beasiswa Prestasi & Tahfidz
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#e2e8f0', fontWeight: 700 }}>
+                  <ShieldCheck size={16} color="#34d399" /> 100% Pendaftaran Online
+                </div>
+              </div>
             </div>
 
-            <h2 style={{ margin: '0 0 12px 0', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: 800, letterSpacing: '-0.5px', lineHeight: 1.25 }}>
-              Penerimaan Peserta Didik Baru (PPDB)<br />
-              <span style={{ color: '#38bdf8' }}>{schoolData.nama_sekolah}</span>
-            </h2>
+            {/* RIGHT COLUMN: INTERACTIVE STATUS CARD & SEARCH WIDGET */}
+            <div>
+              <div className="ppdb-glass-widget">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <div>
+                    <span style={{ fontSize: 11, fontWeight: 800, color: '#38bdf8', letterSpacing: '0.5px' }}>INFO LIVE PENDAFTARAN</span>
+                    <h3 style={{ margin: '2px 0 0 0', fontSize: 18, fontWeight: 800, color: '#ffffff' }}>PPDB Online 2026</h3>
+                  </div>
+                  <div style={{ background: 'rgba(34, 197, 94, 0.2)', border: '1px solid rgba(34, 197, 94, 0.4)', padding: '4px 12px', borderRadius: 20, fontSize: 11, color: '#4ade80', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div className="pulse-beacon" /> Aktif & Terbuka
+                  </div>
+                </div>
 
-            <p style={{ margin: '0 0 24px 0', color: '#cbd5e1', fontSize: 14, lineHeight: 1.6, maxWidth: 650 }}>
-              Wujudkan masa depan gemilang bersama sekolah berprestasi dan berkarakter. Pendaftaran dapat dilakukan dari rumah secara praktis, cepat, dan transparan melalui portal resmi ini.
-            </p>
+                <div style={{ background: 'rgba(15, 23, 42, 0.5)', borderRadius: 16, padding: 18, border: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                    <span style={{ fontSize: 13, color: '#94a3b8' }}>Periode Pendaftaran:</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: '#f8fafc' }}>Gelombang 1</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                    <span style={{ fontSize: 13, color: '#94a3b8' }}>Pilihan Jalur:</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: '#38bdf8' }}>Reguler, Prestasi, Tahfidz, Afirmasi</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: '#94a3b8' }}>Layanan Konfirmasi:</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: '#4ade80' }}>WhatsApp Notifikasi Otomatis</span>
+                  </div>
+                </div>
 
-            {/* ACTION CTA BUTTONS */}
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <button 
-                onClick={() => setTab('daftar')}
-                style={{
-                  background: 'linear-gradient(135deg, #0066ff 0%, #0284c7 100%)',
-                  color: '#ffffff',
-                  border: 'none',
-                  padding: '12px 24px',
-                  borderRadius: 12,
-                  fontWeight: 800,
-                  fontSize: 14,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  boxShadow: '0 8px 20px rgba(0,102,255,0.35)'
-                }}
-              >
-                <UserPlus size={18} /> Daftar Siswa Baru Sekarang
-              </button>
-
-              <button 
-                onClick={() => setTab('status')}
-                style={{
-                  background: 'rgba(255,255,255,0.12)',
-                  color: '#ffffff',
-                  border: '1px solid rgba(255,255,255,0.25)',
-                  padding: '12px 20px',
-                  borderRadius: 12,
-                  fontWeight: 700,
-                  fontSize: 14,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  backdropFilter: 'blur(8px)'
-                }}
-              >
-                <Search size={18} /> Cek Kelulusan & Kartu
-              </button>
-
-              <button 
-                onClick={() => setTab('beranda')}
-                style={{
-                  background: 'transparent',
-                  color: '#94a3b8',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  padding: '12px 18px',
-                  borderRadius: 12,
-                  fontWeight: 600,
-                  fontSize: 14,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6
-                }}
-              >
-                <Info size={16} /> Alur & Syarat
-              </button>
+                {/* FAST TRACK QUICK SEARCH */}
+                <div style={{ marginTop: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#cbd5e1', marginBottom: 8 }}>
+                    Cek Status Cepat dengan No. Registrasi:
+                  </label>
+                  <form onSubmit={handleCheckStatus} style={{ display: 'flex', gap: 8 }}>
+                    <input 
+                      type="text" 
+                      placeholder="PPDB-2026-XXXX" 
+                      value={searchNo}
+                      onChange={(e) => setSearchNo(e.target.value)}
+                      style={{
+                        flex: 1,
+                        padding: '11px 14px',
+                        borderRadius: 12,
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: '#ffffff',
+                        fontSize: 13,
+                        outline: 'none'
+                      }}
+                    />
+                    <button 
+                      type="submit"
+                      onClick={() => setTab('status')}
+                      style={{
+                        background: '#38bdf8',
+                        color: '#0f172a',
+                        border: 'none',
+                        padding: '11px 18px',
+                        borderRadius: 12,
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        fontSize: 13
+                      }}
+                    >
+                      Cari
+                    </button>
+                  </form>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* TAB 1: BERANDA & INFORMASI LENGKAP */}
+        {/* TAB CONTENT: BERANDA & INFORMASI */}
         {tab === 'beranda' && (
           <div>
-            {/* JALUR PENDAFTARAN (4 CARDS) */}
-            <div style={{ marginBottom: 32 }}>
-              <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <h3 style={{ margin: '0 0 6px 0', fontSize: 22, fontWeight: 800, color: '#0f172a' }}>
-                  Jalur Penerimaan Calon Siswa Baru
+            {/* SECTION 1: JALUR PENDAFTARAN BENTO */}
+            <section style={{ marginBottom: 48 }}>
+              <div style={{ textAlign: 'center', marginBottom: 28 }}>
+                <span style={{ background: '#eff6ff', color: '#2563eb', padding: '4px 14px', borderRadius: 20, fontSize: 12, fontWeight: 800, letterSpacing: '0.4px' }}>
+                  PILIHAN JALUR SELEKSI
+                </span>
+                <h3 style={{ margin: '8px 0 6px 0', fontSize: 26, fontWeight: 800, color: '#0f172a' }}>
+                  Pilih Jalur Sesuai Bakat & Kualifikasi Anda
                 </h3>
                 <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>
-                  Pilih jalur pendaftaran yang sesuai dengan kualifikasi dan prestasi calon peserta didik
+                  Tersedia beragam jalur penerimaan siswa baru dengan kuota dan kriteria seleksi yang transparan.
                 </p>
               </div>
 
               <div className="ppdb-grid-4">
-                <div className="ppdb-step-item">
-                  <div style={{ width: 40, height: 40, borderRadius: 10, background: '#eff6ff', color: '#0066ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <BookOpen size={20} />
+                {/* 1. REGULER */}
+                <div className="ppdb-bento-card" style={{ borderTop: '4px solid #2563eb' }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <BookOpen size={22} />
                   </div>
                   <div>
-                    <h4 style={{ margin: '0 0 4px 0', fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Jalur Reguler</h4>
-                    <p style={{ margin: 0, color: '#64748b', fontSize: 12, lineHeight: 1.5 }}>
-                      Terbuka bagi seluruh lulusan SMP/MTs sederajat melalui tes potensi akademik & wawancara.
+                    <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb', background: '#dbeafe', padding: '2px 8px', borderRadius: 6 }}>KUOTA TERBESAR</span>
+                    <h4 style={{ margin: '6px 0 4px 0', fontSize: 18, fontWeight: 800, color: '#0f172a' }}>Jalur Reguler</h4>
+                    <p style={{ margin: 0, color: '#64748b', fontSize: 13, lineHeight: 1.6 }}>
+                      Terbuka bagi seluruh lulusan SMP/MTs sederajat melalui seleksi potensi akademik dan wawancara minat bakat.
                     </p>
                   </div>
+                  <ul style={{ margin: 'auto 0 0 0', padding: 0, listStyle: 'none', fontSize: 12, color: '#475569', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Check size={14} color="#16a34a" /> Lulusan SMP/MTs sederajat</li>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Check size={14} color="#16a34a" /> Tes potensi akademik dasar</li>
+                  </ul>
                 </div>
 
-                <div className="ppdb-step-item">
-                  <div style={{ width: 40, height: 40, borderRadius: 10, background: '#ecfdf5', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Award size={20} />
+                {/* 2. PRESTASI */}
+                <div className="ppdb-bento-card" style={{ borderTop: '4px solid #0284c7' }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Award size={22} />
                   </div>
                   <div>
-                    <h4 style={{ margin: '0 0 4px 0', fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Jalur Prestasi</h4>
-                    <p style={{ margin: 0, color: '#64748b', fontSize: 12, lineHeight: 1.5 }}>
-                      Khusus siswa berprestasi akademik, olahraga, seni, sains peringkat juara kota/provinsi.
+                    <span style={{ fontSize: 11, fontWeight: 800, color: '#0284c7', background: '#bae6fd', padding: '2px 8px', borderRadius: 6 }}>BEBAS TES TULIS</span>
+                    <h4 style={{ margin: '6px 0 4px 0', fontSize: 18, fontWeight: 800, color: '#0f172a' }}>Jalur Prestasi</h4>
+                    <p style={{ margin: 0, color: '#64748b', fontSize: 13, lineHeight: 1.6 }}>
+                      Khusus peraih peringkat kelas atau juara perlombaan sains, seni, olahraga, dan riset tingkat kota/provinsi.
                     </p>
                   </div>
+                  <ul style={{ margin: 'auto 0 0 0', padding: 0, listStyle: 'none', fontSize: 12, color: '#475569', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Check size={14} color="#16a34a" /> Sertifikat/Piagam Kejuaraan</li>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Check size={14} color="#16a34a" /> Prioritas kuota penerimaan</li>
+                  </ul>
                 </div>
 
-                <div className="ppdb-step-item">
-                  <div style={{ width: 40, height: 40, borderRadius: 10, background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Sparkles size={20} />
+                {/* 3. TAHFIDZ */}
+                <div className="ppdb-bento-card" style={{ borderTop: '4px solid #d97706' }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Sparkles size={22} />
                   </div>
                   <div>
-                    <h4 style={{ margin: '0 0 4px 0', fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Jalur Tahfidz</h4>
-                    <p style={{ margin: 0, color: '#64748b', fontSize: 12, lineHeight: 1.5 }}>
-                      Beasiswa khusus penghafal Al-Qur'an (minimal 1 Juz mutqin) dengan fasilitas pembinaan khusus.
+                    <span style={{ fontSize: 11, fontWeight: 800, color: '#d97706', background: '#fde68a', padding: '2px 8px', borderRadius: 6 }}>BEASISWA PENUH</span>
+                    <h4 style={{ margin: '6px 0 4px 0', fontSize: 18, fontWeight: 800, color: '#0f172a' }}>Jalur Tahfidz</h4>
+                    <p style={{ margin: 0, color: '#64748b', fontSize: 13, lineHeight: 1.6 }}>
+                      Program beasiswa spesial bagi calon siswa penghafal Al-Qur'an (minimal 1 Juz mutqin) dengan bimbingan istiqomah.
                     </p>
                   </div>
+                  <ul style={{ margin: 'auto 0 0 0', padding: 0, listStyle: 'none', fontSize: 12, color: '#475569', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Check size={14} color="#16a34a" /> Uji hafalan Al-Qur'an</li>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Check size={14} color="#16a34a" /> Bebas biaya SPP bulanan</li>
+                  </ul>
                 </div>
 
-                <div className="ppdb-step-item">
-                  <div style={{ width: 40, height: 40, borderRadius: 10, background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <HeartHandshake size={20} />
+                {/* 4. AFIRMASI */}
+                <div className="ppdb-bento-card" style={{ borderTop: '4px solid #7c3aed' }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <HeartHandshake size={22} />
                   </div>
                   <div>
-                    <h4 style={{ margin: '0 0 4px 0', fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Jalur Afirmasi</h4>
-                    <p style={{ margin: 0, color: '#64748b', fontSize: 12, lineHeight: 1.5 }}>
-                      Bagi pemegang kartu KIP/PKH/KKS dari keluarga prasejahtera untuk keringanan biaya.
+                    <span style={{ fontSize: 11, fontWeight: 800, color: '#7c3aed', background: '#ede9fe', padding: '2px 8px', borderRadius: 6 }}>BANTUAN PENDIDIKAN</span>
+                    <h4 style={{ margin: '6px 0 4px 0', fontSize: 18, fontWeight: 800, color: '#0f172a' }}>Jalur Afirmasi</h4>
+                    <p style={{ margin: 0, color: '#64748b', fontSize: 13, lineHeight: 1.6 }}>
+                      Diberikan bagi keluarga prasejahtera pemegang kartu KIP/PKH/KKS untuk memastikan setiap anak bisa sekolah.
                     </p>
                   </div>
+                  <ul style={{ margin: 'auto 0 0 0', padding: 0, listStyle: 'none', fontSize: 12, color: '#475569', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Check size={14} color="#16a34a" /> Kartu KIP / PKH aktif</li>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Check size={14} color="#16a34a" /> Subsidi biaya seragam</li>
+                  </ul>
                 </div>
               </div>
-            </div>
+            </section>
 
-            {/* ALUR PENDAFTARAN TIMELINE */}
-            <div className="ppdb-card">
-              <div style={{ height: 6, background: 'linear-gradient(90deg, #0066ff 0%, #0284c7 50%, #10b981 100%)' }} />
-              <div className="ppdb-card-body">
-                <div style={{ marginBottom: 24 }}>
-                  <h3 style={{ margin: '0 0 6px 0', fontSize: 20, fontWeight: 800, color: '#0f172a' }}>
-                    Alur & Tata Cara Pendaftaran PPDB
+            {/* SECTION 2: ALUR PENDAFTARAN 4 LANGKAH */}
+            <section style={{ marginBottom: 48, background: '#ffffff', borderRadius: 24, border: '1px solid #e2e8f0', padding: 36, boxShadow: '0 8px 30px rgba(0,0,0,0.03)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, marginBottom: 32 }}>
+                <div>
+                  <span style={{ background: '#f0fdf4', color: '#16a34a', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                    TAHAPAN MUDAH
+                  </span>
+                  <h3 style={{ margin: '8px 0 4px 0', fontSize: 24, fontWeight: 800, color: '#0f172a' }}>
+                    Alur Pendaftaran Siswa Baru
                   </h3>
-                  <p style={{ margin: 0, color: '#64748b', fontSize: 13 }}>
-                    Ikuti 4 langkah mudah berikut untuk menyelesaikan pendaftaran peserta didik baru
+                  <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>
+                    Selesaikan proses seleksi dari awal hingga daftar ulang hanya dalam 4 tahapan
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setTab('daftar')}
+                  style={{
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: 12,
+                    fontWeight: 800,
+                    fontSize: 14,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    boxShadow: '0 4px 14px rgba(37, 99, 235, 0.28)'
+                  }}
+                >
+                  Isi Formulir Sekarang <ArrowRight size={16} />
+                </button>
+              </div>
+
+              <div className="ppdb-grid-4">
+                <div style={{ background: '#f8fafc', padding: 22, borderRadius: 18, border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: '#2563eb', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 15 }}>
+                      1
+                    </div>
+                    <UserPlus size={20} color="#2563eb" />
+                  </div>
+                  <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Isi Formulir Online</h4>
+                  <p style={{ margin: 0, fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>
+                    Buka menu Formulir Daftar, isi data calon siswa dan nomor WhatsApp orang tua. Simpan No. Pendaftaran yang muncul.
                   </p>
                 </div>
 
-                <div className="ppdb-grid-4">
-                  <div className="ppdb-step-item" style={{ background: '#f8fafc' }}>
-                    <div className="ppdb-step-badge">1</div>
-                    <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Isi Formulir Online</h4>
-                    <p style={{ margin: 0, fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
-                      Lengkapi data diri calon siswa & ortu pada menu <b>Formulir Daftar</b>. Simpan Nomor Pendaftaran yang muncul.
-                    </p>
+                <div style={{ background: '#f8fafc', padding: 22, borderRadius: 18, border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 15 }}>
+                      2
+                    </div>
+                    <FileText size={20} color="#0284c7" />
                   </div>
-
-                  <div className="ppdb-step-item" style={{ background: '#f8fafc' }}>
-                    <div className="ppdb-step-badge">2</div>
-                    <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Ujian Seleksi & Berkas</h4>
-                    <p style={{ margin: 0, fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
-                      Ikuti tes potensi akademik, tes wawancara, dan baca Al-Qur'an sesuai jadwal di kartu peserta.
-                    </p>
-                  </div>
-
-                  <div className="ppdb-step-item" style={{ background: '#f8fafc' }}>
-                    <div className="ppdb-step-badge">3</div>
-                    <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Pengumuman Kelulusan</h4>
-                    <p style={{ margin: 0, fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
-                      Cek kelulusan online melalui menu <b>Cek Kelulusan</b> dengan memasukkan Nomor Pendaftaran Anda.
-                    </p>
-                  </div>
-
-                  <div className="ppdb-step-item" style={{ background: '#f8fafc' }}>
-                    <div className="ppdb-step-badge">4</div>
-                    <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Daftar Ulang & Seragam</h4>
-                    <p style={{ margin: 0, fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
-                      Calon siswa yang dinyatakan lulus melakukan konfirmasi ukuran seragam dan upload berkas pendukung.
-                    </p>
-                  </div>
+                  <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Tes Seleksi & Wawancara</h4>
+                  <p style={{ margin: 0, fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>
+                    Hadir sesuai jadwal ujian di kartu peserta untuk tes potensi akademik, wawancara motivasi belajar, dan baca Al-Qur'an.
+                  </p>
                 </div>
 
-                <div style={{ marginTop: 24, textAlign: 'center' }}>
-                  <button 
-                    onClick={() => setTab('daftar')}
-                    style={{
-                      background: '#0066ff',
-                      color: '#ffffff',
-                      border: 'none',
-                      padding: '12px 28px',
-                      borderRadius: 12,
-                      fontWeight: 800,
-                      fontSize: 14,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      boxShadow: '0 4px 16px rgba(0,102,255,0.3)'
-                    }}
-                  >
-                    Mulai Isi Formulir Sekarang <ChevronRight size={16} />
-                  </button>
+                <div style={{ background: '#f8fafc', padding: 22, borderRadius: 18, border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: '#16a34a', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 15 }}>
+                      3
+                    </div>
+                    <Award size={20} color="#16a34a" />
+                  </div>
+                  <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Pengumuman Kelulusan</h4>
+                  <p style={{ margin: 0, fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>
+                    Periksa status kelulusan secara online pada menu Cek Kelulusan menggunakan nomor pendaftaran Anda dan cetak kartu peserta.
+                  </p>
+                </div>
+
+                <div style={{ background: '#f8fafc', padding: 22, borderRadius: 18, border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: '#7c3aed', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 15 }}>
+                      4
+                    </div>
+                    <CheckSquare size={20} color="#7c3aed" />
+                  </div>
+                  <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Daftar Ulang & Seragam</h4>
+                  <p style={{ margin: 0, fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>
+                    Calon siswa yang dinyatakan lulus melengkapi form daftar ulang, ukuran seragam sekolah, dan upload berkas kelulusan.
+                  </p>
                 </div>
               </div>
-            </div>
+            </section>
 
-            {/* SYARAT & JADWAL 2-COLUMNS */}
-            <div className="ppdb-grid-2" style={{ marginBottom: 32 }}>
+            {/* SECTION 3: SYARAT BERKAS & JADWAL */}
+            <div className="ppdb-grid-2" style={{ marginBottom: 48 }}>
               {/* PERSYARATAN BERKAS */}
-              <div className="ppdb-card" style={{ margin: 0 }}>
-                <div className="ppdb-card-body">
-                  <h3 style={{ margin: '0 0 16px 0', fontSize: 18, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <FileText size={20} color="#0066ff" /> Syarat & Dokumen Berkas
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: '#334155' }}>
-                      <Check size={16} color="#10b981" style={{ marginTop: 2, flexShrink: 0 }} />
-                      <span>Fotokopi Ijazah / Surat Keterangan Lulus (SKL) SMP/MTs legalisir (2 lembar).</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: '#334155' }}>
-                      <Check size={16} color="#10b981" style={{ marginTop: 2, flexShrink: 0 }} />
-                      <span>Fotokopi Kartu Keluarga (KK) & Akta Kelahiran yang masih berlaku.</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: '#334155' }}>
-                      <Check size={16} color="#10b981" style={{ marginTop: 2, flexShrink: 0 }} />
-                      <span>Nomor Induk Siswa Nasional (NISN) & NIK Kependudukan yang valid.</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: '#334155' }}>
-                      <Check size={16} color="#10b981" style={{ marginTop: 2, flexShrink: 0 }} />
-                      <span>Pas Foto resmi ukuran 3x4 latar belakang merah/biru (3 lembar).</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: '#334155' }}>
-                      <Check size={16} color="#10b981" style={{ marginTop: 2, flexShrink: 0 }} />
-                      <span>Piagam/Sertifikat Kejuaraan asli (Khusus pendaftar Jalur Prestasi/Tahfidz).</span>
-                    </div>
+              <div style={{ background: '#ffffff', borderRadius: 24, border: '1px solid #e2e8f0', padding: 32 }}>
+                <h3 style={{ margin: '0 0 18px 0', fontSize: 20, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <FileText size={22} color="#2563eb" /> Persyaratan Dokumen Berkas
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontSize: 13, color: '#334155' }}>
+                    <CheckCircle2 size={18} color="#16a34a" style={{ marginTop: 2, flexShrink: 0 }} />
+                    <span>Fotokopi Ijazah SMP/MTs dilegalisir (atau Surat Keterangan Lulus / SKL jika belum terbit).</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontSize: 13, color: '#334155' }}>
+                    <CheckCircle2 size={18} color="#16a34a" style={{ marginTop: 2, flexShrink: 0 }} />
+                    <span>Fotokopi Kartu Keluarga (KK) & Akta Kelahiran calon peserta didik.</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontSize: 13, color: '#334155' }}>
+                    <CheckCircle2 size={18} color="#16a34a" style={{ marginTop: 2, flexShrink: 0 }} />
+                    <span>Nomor Induk Siswa Nasional (NISN) dan NIK yang valid.</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontSize: 13, color: '#334155' }}>
+                    <CheckCircle2 size={18} color="#16a34a" style={{ marginTop: 2, flexShrink: 0 }} />
+                    <span>Pas Foto resmi ukuran 3x4 (latar belakang merah/biru) sebanyak 2 lembar.</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontSize: 13, color: '#334155' }}>
+                    <CheckCircle2 size={18} color="#16a34a" style={{ marginTop: 2, flexShrink: 0 }} />
+                    <span>Sertifikat/Piagam Prestasi atau Kartu KIP (khusus pendaftar Jalur Prestasi/Afirmasi).</span>
                   </div>
                 </div>
               </div>
 
-              {/* JADWAL & AGENDA KEGIATAN */}
-              <div className="ppdb-card" style={{ margin: 0 }}>
-                <div className="ppdb-card-body">
-                  <h3 style={{ margin: '0 0 16px 0', fontSize: 18, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Calendar size={20} color="#0066ff" /> Jadwal & Agenda PPDB 2026
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: 13, color: '#0f172a' }}>Pendaftaran Gelombang 1</div>
-                        <div style={{ fontSize: 11, color: '#64748b' }}>Pendaftaran online & penyerahan berkas</div>
-                      </div>
-                      <span style={{ background: '#dcfce7', color: '#166534', padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
-                        {canDaftar ? 'Aktif' : 'Selesai'}
-                      </span>
+              {/* JADWAL KEGIATAN */}
+              <div style={{ background: '#ffffff', borderRadius: 24, border: '1px solid #e2e8f0', padding: 32 }}>
+                <h3 style={{ margin: '0 0 18px 0', fontSize: 20, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Calendar size={22} color="#2563eb" /> Jadwal Kegiatan PPDB 2026
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#f8fafc', borderRadius: 14, border: '1px solid #e2e8f0' }}>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>Pendaftaran Gelombang 1</div>
+                      <div style={{ fontSize: 12, color: '#64748b' }}>Pendaftaran online & upload berkas</div>
                     </div>
+                    <span style={{ background: '#dcfce7', color: '#15803d', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                      {canDaftar ? 'Sedang Dibuka' : 'Ditutup'}
+                    </span>
+                  </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: 13, color: '#0f172a' }}>Tes Seleksi & Wawancara</div>
-                        <div style={{ fontSize: 11, color: '#64748b' }}>Akademik, wawancara & tes baca Al-Qur'an</div>
-                      </div>
-                      <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
-                        Sesuai Jadwal
-                      </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#f8fafc', borderRadius: 14, border: '1px solid #e2e8f0' }}>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>Tes Seleksi & Wawancara</div>
+                      <div style={{ fontSize: 12, color: '#64748b' }}>Sesuai tanggal pada kartu peserta ujian</div>
                     </div>
+                    <span style={{ background: '#e0f2fe', color: '#0284c7', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                      Terjadwal
+                    </span>
+                  </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: 13, color: '#0f172a' }}>Pengumuman Hasil Seleksi</div>
-                        <div style={{ fontSize: 11, color: '#64748b' }}>Pengecekan online via nomor pendaftaran</div>
-                      </div>
-                      <span style={{ background: '#fef3c7', color: '#92400e', padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
-                        {canPengumuman ? 'Dibuka' : 'Terjadwal'}
-                      </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#f8fafc', borderRadius: 14, border: '1px solid #e2e8f0' }}>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>Pengumuman Hasil Seleksi</div>
+                      <div style={{ fontSize: 12, color: '#64748b' }}>Dapat dicek melalui portal secara online</div>
                     </div>
+                    <span style={{ background: '#fef3c7', color: '#b45309', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                      {canPengumuman ? 'Hasil Terbuka' : 'Menunggu'}
+                    </span>
+                  </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: 13, color: '#0f172a' }}>Daftar Ulang & Seragam</div>
-                        <div style={{ fontSize: 11, color: '#64748b' }}>Pelunasan administrasi & pengukuran seragam</div>
-                      </div>
-                      <span style={{ background: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>
-                        {canDU ? 'Aktif' : 'Terjadwal'}
-                      </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#f8fafc', borderRadius: 14, border: '1px solid #e2e8f0' }}>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>Pendaftaran Ulang & Seragam</div>
+                      <div style={{ fontSize: 12, color: '#64748b' }}>Bagi seluruh peserta yang dinyatakan lulus</div>
                     </div>
+                    <span style={{ background: '#f1f5f9', color: '#475569', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                      {canDU ? 'Aktif' : 'Terjadwal'}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* KONTAK BANTUAN CALL CENTER */}
-            <div style={{ background: '#0f172a', color: '#ffffff', borderRadius: 20, padding: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
-              <div>
-                <h3 style={{ margin: '0 0 6px 0', fontSize: 20, fontWeight: 800 }}>
-                  Butuh Bantuan atau Informasi Lebih Lanjut?
+            {/* SECTION 4: FAQ ACCORDION */}
+            <section style={{ marginBottom: 48 }}>
+              <div style={{ textAlign: 'center', marginBottom: 28 }}>
+                <span style={{ background: '#eff6ff', color: '#2563eb', padding: '4px 14px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                  PUSAT BANTUAN
+                </span>
+                <h3 style={{ margin: '8px 0 6px 0', fontSize: 24, fontWeight: 800, color: '#0f172a' }}>
+                  Pertanyaan yang Sering Diajukan (FAQ)
                 </h3>
-                <p style={{ margin: 0, color: '#94a3b8', fontSize: 13, maxWidth: 500 }}>
-                  Tim Panitia PPDB {schoolData.nama_sekolah} siap membantu Anda setiap hari kerja pukul 08:00 - 15:00 WIB.
+                <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>
+                  Informasi umum seputar pendaftaran peserta didik baru di {schoolData.nama_sekolah}
+                </p>
+              </div>
+
+              <div style={{ maxWidth: 880, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {faqs.map((f, idx) => (
+                  <div 
+                    key={idx} 
+                    className="faq-item" 
+                    onClick={() => setActiveFaq(activeFaq === idx ? -1 : idx)}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 800, fontSize: 15, color: '#0f172a' }}>
+                      <span>{f.q}</span>
+                      <ChevronDown size={18} color="#64748b" style={{ transform: activeFaq === idx ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                    </div>
+                    {activeFaq === idx && (
+                      <p style={{ margin: '12px 0 0 0', color: '#475569', fontSize: 14, lineHeight: 1.6, borderTop: '1px solid #e2e8f0', paddingTop: 12 }}>
+                        {f.a}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* CALL CENTER CARD */}
+            <section style={{ background: 'linear-gradient(135deg, #090e17 0%, #1e293b 100%)', color: '#ffffff', borderRadius: 24, padding: '40px 36px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 24, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}>
+              <div>
+                <span style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', padding: '4px 12px', borderRadius: 20, fontSize: 11, fontWeight: 800 }}>
+                  PANITIA SIAP MEMBANTU
+                </span>
+                <h3 style={{ margin: '10px 0 6px 0', fontSize: 24, fontWeight: 800 }}>
+                  Mengalami Kendala Saat Pendaftaran?
+                </h3>
+                <p style={{ margin: 0, color: '#94a3b8', fontSize: 14, maxWidth: 540, lineHeight: 1.6 }}>
+                  Hubungi layanan pelanggan panitia PPDB {schoolData.nama_sekolah}. Layanan konsultasi dibuka setiap hari kerja pukul 08:00 - 15:00 WIB.
                 </p>
               </div>
 
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <a 
-                  href={`https://wa.me/${cleanPhone}?text=Halo%20Panitia%20PPDB%20${encodeURIComponent(schoolData.nama_sekolah)},%20mohon%20informasi%20PPDB`}
+                  href={`https://wa.me/${cleanPhone}?text=Halo%20Panitia%20PPDB%20${encodeURIComponent(schoolData.nama_sekolah)},%20saya%20memerlukan%20bantuan%20seputar%20pendaftaran`}
                   target="_blank"
                   rel="noreferrer"
                   style={{
                     background: '#22c55e',
                     color: '#ffffff',
-                    padding: '12px 20px',
-                    borderRadius: 12,
-                    fontWeight: 700,
-                    fontSize: 14,
+                    padding: '14px 24px',
+                    borderRadius: 14,
+                    fontWeight: 800,
+                    fontSize: 15,
                     textDecoration: 'none',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 8
+                    gap: 10,
+                    boxShadow: '0 8px 20px rgba(34, 197, 94, 0.35)'
                   }}
                 >
                   <MessageCircle size={18} /> Chat WhatsApp Panitia
                 </a>
               </div>
-            </div>
+            </section>
           </div>
         )}
 
-        {/* TAB 2: FORM PENDAFTARAN SISWA BARU */}
+        {/* TAB CONTENT: FORMULIR PENDAFTARAN */}
         {tab === 'daftar' && (
-          <div>
-            {!canDaftar && (
-              <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', padding: 20, borderRadius: 16, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
-                <AlertCircle size={24} color="#d97706" />
+          <div className="ppdb-form-card">
+            <div style={{ height: 6, background: 'linear-gradient(90deg, #2563eb 0%, #0284c7 50%, #38bdf8 100%)' }} />
+
+            <div style={{ padding: '36px 32px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginBottom: 32 }}>
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: 14, color: '#92400e' }}>Periode Pendaftaran Belum Dibuka / Telah Ditutup</div>
-                  <div style={{ fontSize: 12, color: '#b45309' }}>Anda tetap dapat melihat alur pendaftaran atau melakukan cek kelulusan jika sudah pernah mendaftar.</div>
+                  <span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                    FORMULIR REGISTRASI RESMI
+                  </span>
+                  <h2 style={{ margin: '8px 0 4px 0', fontSize: 24, fontWeight: 800, color: '#0f172a' }}>
+                    Formulir Pendaftaran Siswa Baru (PPDB 2026)
+                  </h2>
+                  <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>
+                    Pastikan seluruh data yang Anda masukkan sesuai dengan dokumen resmi (KK, Akta Kelahiran, dan Ijazah).
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '8px 16px', borderRadius: 20, color: '#16a34a', fontWeight: 800, fontSize: 13 }}>
+                  <ShieldCheck size={18} /> 100% Data Terenkripsi & Aman
                 </div>
               </div>
-            )}
 
-            <form onSubmit={handleSubmitRegister} className="ppdb-card">
-              <div style={{ height: 6, background: 'linear-gradient(90deg, #0066ff 0%, #00c6ff 50%, #6366f1 100%)' }} />
-
-              <div className="ppdb-card-body">
-                <div style={{ marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              {!canDaftar && (
+                <div style={{ background: '#fffbeb', border: '1px solid #fde68a', padding: 18, borderRadius: 16, marginBottom: 28, display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <AlertCircle size={24} color="#d97706" />
                   <div>
-                    <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
-                      Formulir Pendaftaran Siswa Baru (PPDB)
-                    </h2>
-                    <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: 13 }}>
-                      Lengkapi data calon siswa & orang tua secara teliti. Tanda bintang (<span style={{ color: '#ef4444' }}>*</span>) wajib diisi.
-                    </p>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '6px 14px', borderRadius: 20, fontSize: 12, color: '#15803d', fontWeight: 700 }}>
-                    <ShieldCheck size={16} /> Data Aman & Terenkripsi
+                    <div style={{ fontWeight: 800, fontSize: 14, color: '#92400e' }}>Periode Pendaftaran Telah Ditutup / Belum Dibuka</div>
+                    <div style={{ fontSize: 13, color: '#b45309' }}>Anda tetap dapat melihat alur informasi atau memeriksa hasil seleksi jika sudah pernah mendaftar.</div>
                   </div>
                 </div>
+              )}
 
-                {/* SEKSI 1: DATA CALON SISWA */}
-                <div className="ppdb-section-card">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13 }}>
+              <form onSubmit={handleSubmitRegister}>
+                {/* 1. DATA PRIBADI */}
+                <div style={{ background: '#f8fafc', padding: 24, borderRadius: 18, border: '1px solid #e2e8f0', borderLeft: '4px solid #2563eb', marginBottom: 28 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 10, background: '#2563eb', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
                       1
                     </div>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Identitas Calon Peserta Didik</h3>
-                      <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Data sesuai Akta Kelahiran & Kartu Keluarga (KK)</p>
+                      <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Data Calon Peserta Didik</h4>
+                      <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Wajib sesuai Kartu Keluarga (KK) & Akta Kelahiran</p>
                     </div>
                   </div>
 
                   <div className="ppdb-grid-2">
-                    <div className="ppdb-grid-full">
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
-                        Nama Lengkap Calon Siswa <span style={{ color: '#ef4444' }}>*</span>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
+                        Nama Lengkap Siswa <span style={{ color: '#ef4444' }}>*</span>
                       </label>
                       <input 
                         type="text" 
@@ -1009,14 +1245,14 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                         value={formData.nama_lengkap} 
                         onChange={handleInputChange} 
                         required 
-                        placeholder="Nama lengkap sesuai ijazah/akta kelahiran" 
+                        placeholder="Nama lengkap tanpa gelar" 
                         className="ppdb-input-field" 
                       />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
-                        Nomor Induk Kependudukan (NIK) <span style={{ color: '#ef4444' }}>*</span>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
+                        NIK Siswa (16 Digit) <span style={{ color: '#ef4444' }}>*</span>
                       </label>
                       <input 
                         type="text" 
@@ -1025,14 +1261,14 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                         onChange={handleInputChange} 
                         required 
                         maxLength={16}
-                        placeholder="16 Digit NIK sesuai KK" 
+                        placeholder="Contoh: 3206123456780001" 
                         className="ppdb-input-field" 
                       />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
-                        NISN (Nomor Induk Siswa Nasional) <span style={{ color: '#ef4444' }}>*</span>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
+                        NISN (10 Digit) <span style={{ color: '#ef4444' }}>*</span>
                       </label>
                       <input 
                         type="text" 
@@ -1041,67 +1277,40 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                         onChange={handleInputChange} 
                         required 
                         maxLength={10}
-                        placeholder="10 Digit NISN dari SMP/MTs" 
+                        placeholder="Nomor NISN dari SMP/MTs" 
                         className="ppdb-input-field" 
                       />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
                         Jenis Kelamin <span style={{ color: '#ef4444' }}>*</span>
                       </label>
-                      <select 
-                        name="jenis_kelamin" 
-                        value={formData.jenis_kelamin} 
-                        onChange={handleInputChange} 
-                        required
-                        className="ppdb-input-field"
-                      >
+                      <select name="jenis_kelamin" value={formData.jenis_kelamin} onChange={handleInputChange} required className="ppdb-input-field">
                         <option value="L">Laki-laki</option>
                         <option value="P">Perempuan</option>
                       </select>
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
                         Tempat Lahir <span style={{ color: '#ef4444' }}>*</span>
                       </label>
-                      <input 
-                        type="text" 
-                        name="tempat_lahir" 
-                        value={formData.tempat_lahir} 
-                        onChange={handleInputChange} 
-                        required
-                        placeholder="Kota / Kabupaten Lahir" 
-                        className="ppdb-input-field" 
-                      />
+                      <input type="text" name="tempat_lahir" value={formData.tempat_lahir} onChange={handleInputChange} required placeholder="Kota kelahiran" className="ppdb-input-field" />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
                         Tanggal Lahir <span style={{ color: '#ef4444' }}>*</span>
                       </label>
-                      <input 
-                        type="date" 
-                        name="tanggal_lahir" 
-                        value={formData.tanggal_lahir} 
-                        onChange={handleInputChange} 
-                        required
-                        className="ppdb-input-field" 
-                      />
+                      <input type="date" name="tanggal_lahir" value={formData.tanggal_lahir} onChange={handleInputChange} required className="ppdb-input-field" />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
                         Agama <span style={{ color: '#ef4444' }}>*</span>
                       </label>
-                      <select 
-                        name="agama" 
-                        value={formData.agama} 
-                        onChange={handleInputChange} 
-                        required
-                        className="ppdb-input-field"
-                      >
+                      <select name="agama" value={formData.agama} onChange={handleInputChange} required className="ppdb-input-field">
                         <option value="Islam">Islam</option>
                         <option value="Kristen">Kristen</option>
                         <option value="Katolik">Katolik</option>
@@ -1111,203 +1320,121 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                       </select>
                     </div>
 
-                    <div className="ppdb-grid-full">
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
                         Alamat Tempat Tinggal Lengkap <span style={{ color: '#ef4444' }}>*</span>
                       </label>
-                      <textarea 
-                        name="alamat" 
-                        value={formData.alamat} 
-                        onChange={handleInputChange} 
-                        required
-                        rows={2} 
-                        placeholder="Jalan, RT/RW, Kelurahan, Kecamatan, Kota/Kabupaten" 
-                        className="ppdb-input-field"
-                        style={{ fontFamily: 'inherit' }}
-                      />
+                      <textarea name="alamat" value={formData.alamat} onChange={handleInputChange} required rows={2} placeholder="Jalan, RT/RW, Dusun/Kelurahan, Kecamatan, Kota/Kabupaten" className="ppdb-input-field" style={{ fontFamily: 'inherit' }} />
                     </div>
                   </div>
                 </div>
 
-                {/* SEKSI 2: DATA AKADEMIK & JALUR SELEKSI */}
-                <div className="ppdb-section-card">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13 }}>
+                {/* 2. DATA AKADEMIK */}
+                <div style={{ background: '#f8fafc', padding: 24, borderRadius: 18, border: '1px solid #e2e8f0', borderLeft: '4px solid #0284c7', marginBottom: 28 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 10, background: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
                       2
                     </div>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Data Sekolah Asal & Pilihan Jurusan</h3>
-                      <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Informasi sekolah menengah pertama dan program yang diminati</p>
+                      <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Data Sekolah Asal & Pilihan Jalur</h4>
+                      <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Informasi sekolah jenjang sebelumnya dan peminatan</p>
                     </div>
                   </div>
 
                   <div className="ppdb-grid-2">
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
-                        Sekolah Asal (SMP / MTs) <span style={{ color: '#ef4444' }}>*</span>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
+                        Nama Sekolah Asal (SMP / MTs) <span style={{ color: '#ef4444' }}>*</span>
                       </label>
-                      <input 
-                        type="text" 
-                        name="sekolah_asal" 
-                        value={formData.sekolah_asal} 
-                        onChange={handleInputChange} 
-                        required 
-                        placeholder="Contoh: SMPN 1 Kota / MTs Negeri 2" 
-                        className="ppdb-input-field" 
-                      />
+                      <input type="text" name="sekolah_asal" value={formData.sekolah_asal} onChange={handleInputChange} required placeholder="Contoh: SMP Negeri 1 Sukaratu" className="ppdb-input-field" />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
                         Tahun Lulus <span style={{ color: '#ef4444' }}>*</span>
                       </label>
-                      <input 
-                        type="text" 
-                        name="tahun_lulus" 
-                        value={formData.tahun_lulus} 
-                        onChange={handleInputChange} 
-                        required
-                        placeholder="2026" 
-                        className="ppdb-input-field" 
-                      />
+                      <input type="text" name="tahun_lulus" value={formData.tahun_lulus} onChange={handleInputChange} required placeholder="2026" className="ppdb-input-field" />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
                         Jalur Pendaftaran <span style={{ color: '#ef4444' }}>*</span>
                       </label>
-                      <select 
-                        name="jalur_pendaftaran" 
-                        value={formData.jalur_pendaftaran} 
-                        onChange={handleInputChange} 
-                        required
-                        className="ppdb-input-field"
-                      >
+                      <select name="jalur_pendaftaran" value={formData.jalur_pendaftaran} onChange={handleInputChange} required className="ppdb-input-field">
                         <option value="Reguler">Jalur Reguler / Umum</option>
                         <option value="Prestasi">Jalur Prestasi Akademik/Non-Akademik</option>
                         <option value="Tahfidz">Jalur Tahfidz Al-Qur'an / Beasiswa</option>
-                        <option value="Afirmasi">Jalur Afirmasi / Kurang Mampu</option>
+                        <option value="Afirmasi">Jalur Afirmasi / Kurang Mampu (KIP)</option>
                       </select>
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
-                        Pilihan Jurusan / Program <span style={{ color: '#ef4444' }}>*</span>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
+                        Pilihan Program / Jurusan <span style={{ color: '#ef4444' }}>*</span>
                       </label>
-                      <select 
-                        name="pilihan_jurusan" 
-                        value={formData.pilihan_jurusan} 
-                        onChange={handleInputChange} 
-                        required
-                        className="ppdb-input-field"
-                      >
+                      <select name="pilihan_jurusan" value={formData.pilihan_jurusan} onChange={handleInputChange} required className="ppdb-input-field">
                         <option value="Umum">Umum / Reguler</option>
-                        <option value="Komputer">Teknik Jaringan Komputer & Telekomunikasi (TJKT)</option>
-                        <option value="RPL">Pengembangan Perangkat Lunak & Gim (PPLG)</option>
-                        <option value="Bisnis">Manajemen Perkantoran & Bisnis Digital</option>
-                        <option value="Akuntansi">Akuntansi & Keuangan Lembaga</option>
+                        <option value="IPA">MIPA (Matematika & IPA)</option>
+                        <option value="IPS">IPS (Ilmu Pengetahuan Sosial)</option>
+                        <option value="Keagamaan">Program Keagamaan / Keislaman</option>
+                        <option value="Komputer">Teknik Komputer & Informatika</option>
                       </select>
                     </div>
                   </div>
                 </div>
 
-                {/* SEKSI 3: DATA ORANG TUA / WALI */}
-                <div className="ppdb-section-card">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg, #0066ff, #0284c7)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13 }}>
+                {/* 3. DATA ORANG TUA & WA */}
+                <div style={{ background: '#f8fafc', padding: 24, borderRadius: 18, border: '1px solid #e2e8f0', borderLeft: '4px solid #16a34a', marginBottom: 32 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 10, background: '#16a34a', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
                       3
                     </div>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Data Orang Tua / Wali & WhatsApp Notifikasi</h3>
-                      <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Nomor WhatsApp wajib aktif untuk pengiriman bukti pendaftaran & nomor kartu peserta</p>
+                      <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Data Orang Tua & Kontak WhatsApp</h4>
+                      <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Nomor WhatsApp wajib aktif untuk pengiriman bukti pendaftaran</p>
                     </div>
                   </div>
 
                   <div className="ppdb-grid-2">
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
                         Nama Ayah Kandung / Wali <span style={{ color: '#ef4444' }}>*</span>
                       </label>
-                      <input 
-                        type="text" 
-                        name="nama_ayah" 
-                        value={formData.nama_ayah} 
-                        onChange={handleInputChange} 
-                        required
-                        placeholder="Nama lengkap Ayah" 
-                        className="ppdb-input-field" 
-                      />
+                      <input type="text" name="nama_ayah" value={formData.nama_ayah} onChange={handleInputChange} required placeholder="Nama lengkap Ayah" className="ppdb-input-field" />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Pekerjaan Ayah</label>
-                      <input 
-                        type="text" 
-                        name="pekerjaan_ayah" 
-                        value={formData.pekerjaan_ayah} 
-                        onChange={handleInputChange} 
-                        placeholder="PNS / Swasta / Wiraswasta / Buruh" 
-                        className="ppdb-input-field" 
-                      />
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>Pekerjaan Ayah</label>
+                      <input type="text" name="pekerjaan_ayah" value={formData.pekerjaan_ayah} onChange={handleInputChange} placeholder="PNS / Swasta / Wiraswasta / Buruh" className="ppdb-input-field" />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
                         Nama Ibu Kandung <span style={{ color: '#ef4444' }}>*</span>
                       </label>
-                      <input 
-                        type="text" 
-                        name="nama_ibu" 
-                        value={formData.nama_ibu} 
-                        onChange={handleInputChange} 
-                        required
-                        placeholder="Nama lengkap Ibu" 
-                        className="ppdb-input-field" 
-                      />
+                      <input type="text" name="nama_ibu" value={formData.nama_ibu} onChange={handleInputChange} required placeholder="Nama lengkap Ibu" className="ppdb-input-field" />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Pekerjaan Ibu</label>
-                      <input 
-                        type="text" 
-                        name="pekerjaan_ibu" 
-                        value={formData.pekerjaan_ibu} 
-                        onChange={handleInputChange} 
-                        placeholder="Ibu Rumah Tangga / PNS / Swasta" 
-                        className="ppdb-input-field" 
-                      />
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>Pekerjaan Ibu</label>
+                      <input type="text" name="pekerjaan_ibu" value={formData.pekerjaan_ibu} onChange={handleInputChange} placeholder="Ibu Rumah Tangga / PNS / Swasta" className="ppdb-input-field" />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>
-                        No. WhatsApp Ortu / Wali <span style={{ color: '#ef4444' }}>*</span>
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
+                        Nomor WhatsApp Ortu / Wali <span style={{ color: '#ef4444' }}>*</span>
                       </label>
-                      <input 
-                        type="text" 
-                        name="no_hp_ortu" 
-                        value={formData.no_hp_ortu} 
-                        onChange={handleInputChange} 
-                        required 
-                        placeholder="Contoh: 081234567890" 
-                        className="ppdb-input-field" 
-                      />
+                      <input type="text" name="no_hp_ortu" value={formData.no_hp_ortu} onChange={handleInputChange} required placeholder="Contoh: 081234567890" className="ppdb-input-field" />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Email Ortu (Opsional)</label>
-                      <input 
-                        type="email" 
-                        name="email_ortu" 
-                        value={formData.email_ortu} 
-                        onChange={handleInputChange} 
-                        placeholder="email@gmail.com" 
-                        className="ppdb-input-field" 
-                      />
+                      <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>Email Ortu (Opsional)</label>
+                      <input type="email" name="email_ortu" value={formData.email_ortu} onChange={handleInputChange} placeholder="email@gmail.com" className="ppdb-input-field" />
                     </div>
                   </div>
                 </div>
 
-                {/* SUBMIT BUTTON & WA ALERT NOTICE */}
+                {/* SUBMIT BUTTON */}
                 <button 
                   type="submit" 
                   disabled={loading} 
@@ -1316,7 +1443,7 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                     padding: '16px 24px', 
                     borderRadius: 14, 
                     border: 'none', 
-                    background: 'linear-gradient(135deg, #0066ff 0%, #0284c7 100%)', 
+                    background: 'linear-gradient(135deg, #2563eb 0%, #0284c7 100%)', 
                     color: '#ffffff', 
                     fontWeight: 800, 
                     fontSize: 16, 
@@ -1325,48 +1452,53 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                     alignItems: 'center', 
                     justifyContent: 'center', 
                     gap: 10, 
-                    boxShadow: '0 8px 25px rgba(0,102,255,0.3)',
+                    boxShadow: '0 8px 25px rgba(37, 99, 235, 0.35)',
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  <Send size={20} /> {loading ? 'Mengirim Data Pendaftaran...' : 'Kirim Formulir Pendaftaran PPDB'}
+                  <Send size={20} /> {loading ? 'Memproses Pendaftaran...' : 'Kirim Formulir Pendaftaran PPDB'}
                 </button>
 
-                <div style={{ marginTop: 14, textAlign: 'center', color: '#64748b', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                  <Phone size={14} color="#059669" /> Bukti pendaftaran & nomor registrasi akan dikirim otomatis via WhatsApp setelah formulir terkirim.
+                <div style={{ marginTop: 14, textAlign: 'center', color: '#64748b', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <Phone size={15} color="#16a34a" /> Konfirmasi pendaftaran dan nomor registrasi akan dikirim otomatis ke WhatsApp.
                 </div>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         )}
 
-        {/* TAB 3: CEK HASIL SELEKSI & CETAK KARTU */}
+        {/* TAB CONTENT: CEK KELULUSAN & KARTU */}
         {tab === 'status' && (
-          <div className="ppdb-card">
+          <div className="ppdb-form-card">
             <div style={{ height: 6, background: 'linear-gradient(90deg, #0284c7 0%, #38bdf8 100%)' }} />
-            <div className="ppdb-card-body">
-              <h3 style={{ margin: '0 0 6px 0', fontSize: 20, fontWeight: 800, color: '#0f172a' }}>
-                Cek Hasil Seleksi & Cetak Kartu Peserta
-              </h3>
-              <p style={{ margin: '0 0 20px 0', color: '#64748b', fontSize: 13 }}>
-                Masukkan Nomor Pendaftaran yang Anda dapatkan saat registrasi (Contoh: PPDB-2026-0001)
-              </p>
+            <div style={{ padding: '36px 32px' }}>
+              <div style={{ marginBottom: 24 }}>
+                <span style={{ background: '#e0f2fe', color: '#0284c7', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                  CEK HASIL ONLINE
+                </span>
+                <h3 style={{ margin: '8px 0 4px 0', fontSize: 24, fontWeight: 800, color: '#0f172a' }}>
+                  Cek Status Seleksi & Cetak Kartu Peserta
+                </h3>
+                <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>
+                  Masukkan nomor pendaftaran resmi (Contoh: <b>PPDB-2026-0001</b>) yang Anda dapatkan saat registrasi.
+                </p>
+              </div>
 
-              <form onSubmit={handleCheckStatus} style={{ display: 'flex', gap: 10, marginBottom: 24, flexWrap: 'wrap' }}>
+              <form onSubmit={handleCheckStatus} style={{ display: 'flex', gap: 10, marginBottom: 28, flexWrap: 'wrap' }}>
                 <input 
                   type="text" 
                   value={searchNo} 
                   onChange={(e) => setSearchNo(e.target.value)} 
-                  placeholder="Nomor Pendaftaran (Contoh: PPDB-2026-0001)" 
+                  placeholder="Ketik Nomor Pendaftaran (Contoh: PPDB-2026-0001)" 
                   className="ppdb-input-field" 
-                  style={{ flex: 1, minWidth: 240 }} 
+                  style={{ flex: 1, minWidth: 260 }} 
                 />
                 <button 
                   type="submit" 
                   disabled={loading} 
                   style={{ 
-                    padding: '12px 24px', 
-                    background: '#0066ff', 
+                    padding: '13px 28px', 
+                    background: '#2563eb', 
                     color: '#ffffff', 
                     border: 'none', 
                     borderRadius: 12, 
@@ -1376,24 +1508,22 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
-                    boxShadow: '0 4px 14px rgba(0,102,255,0.25)'
+                    boxShadow: '0 4px 14px rgba(37, 99, 235, 0.28)'
                   }}
                 >
-                  <Search size={16} /> {loading ? 'Mencari...' : 'Periksa Status'}
+                  <Search size={18} /> {loading ? 'Mencari...' : 'Cari Data'}
                 </button>
               </form>
 
               {statusResult && (
-                <div style={{ background: '#f8fafc', padding: 24, borderRadius: 16, border: '1px solid #cbd5e1' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
+                <div style={{ background: '#f8fafc', padding: 28, borderRadius: 20, border: '1px solid #cbd5e1', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Nomor Pendaftaran:</span>
-                        <span style={{ fontWeight: 800, color: '#0066ff', fontSize: 14 }}>{statusResult.no_pendaftaran}</span>
-                      </div>
-                      <h4 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: '#0f172a' }}>{statusResult.nama_lengkap}</h4>
-                      <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: 13 }}>
-                        Jalur: <b>{statusResult.jalur_pendaftaran}</b> | Jurusan: <b>{statusResult.pilihan_jurusan}</b>
+                      <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>Nomor Pendaftaran Resmi:</div>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: '#2563eb', letterSpacing: '0.5px' }}>{statusResult.no_pendaftaran}</div>
+                      <h4 style={{ margin: '6px 0 2px 0', fontSize: 22, fontWeight: 800, color: '#0f172a' }}>{statusResult.nama_lengkap}</h4>
+                      <p style={{ margin: 0, color: '#64748b', fontSize: 13 }}>
+                        Jalur: <b>{statusResult.jalur_pendaftaran}</b> | Peminatan: <b>{statusResult.pilihan_jurusan || 'Umum'}</b>
                       </p>
                     </div>
 
@@ -1402,15 +1532,15 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                       <button 
                         onClick={() => handlePrintKartu(statusResult)} 
                         style={{ 
-                          padding: '8px 16px', 
+                          padding: '10px 18px', 
                           background: '#0f172a', 
                           color: '#ffffff', 
                           border: 'none', 
-                          borderRadius: 10, 
+                          borderRadius: 12, 
                           cursor: 'pointer', 
                           display: 'flex', 
                           alignItems: 'center', 
-                          gap: 6, 
+                          gap: 8, 
                           fontSize: 13, 
                           fontWeight: 700 
                         }}
@@ -1424,17 +1554,18 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                             setTab('daftar_ulang');
                           }}
                           style={{
-                            padding: '8px 16px',
-                            background: '#059669',
+                            padding: '10px 18px',
+                            background: '#16a34a',
                             color: '#ffffff',
                             border: 'none',
-                            borderRadius: 10,
+                            borderRadius: 12,
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 6,
+                            gap: 8,
                             fontSize: 13,
-                            fontWeight: 700
+                            fontWeight: 700,
+                            boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)'
                           }}
                         >
                           <CheckSquare size={16} /> Lanjut Daftar Ulang
@@ -1443,20 +1574,32 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                     </div>
                   </div>
 
-                  <hr style={{ margin: '18px 0', borderColor: '#e2e8f0' }} />
+                  <hr style={{ margin: '20px 0', borderColor: '#e2e8f0' }} />
 
-                  <div className="ppdb-grid-2" style={{ fontSize: 13 }}>
-                    <div><b>Jadwal Ujian:</b> {statusResult.jadwal_tes ? new Date(statusResult.jadwal_tes).toLocaleString('id-ID') : 'Belum Dijadwalkan'}</div>
-                    <div><b>Lokasi Ujian:</b> {statusResult.lokasi_tes || 'Gedung Utama Sekolah'}</div>
-                    <div><b>Nilai Ujian Tulis:</b> {statusResult.nilai_tes_tulis || '-'}</div>
-                    <div><b>Nilai Wawancara:</b> {statusResult.nilai_tes_wawancara || '-'}</div>
-                    <div><b>Nilai Baca Al-Qur'an:</b> {statusResult.nilai_baca_quran || '-'}</div>
-                    <div><b>Ukuran Seragam:</b> {statusResult.ukuran_seragam || 'Belum Mengisi'}</div>
+                  <div className="ppdb-grid-3" style={{ fontSize: 13 }}>
+                    <div style={{ background: '#ffffff', padding: 14, borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                      <span style={{ color: '#64748b', fontSize: 12 }}>Jadwal Ujian Masuk:</span>
+                      <div style={{ fontWeight: 800, marginTop: 4, color: '#0f172a' }}>
+                        {statusResult.jadwal_tes ? new Date(statusResult.jadwal_tes).toLocaleString('id-ID') : 'Menunggu Penjadwalan'}
+                      </div>
+                    </div>
+                    <div style={{ background: '#ffffff', padding: 14, borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                      <span style={{ color: '#64748b', fontSize: 12 }}>Lokasi Pelaksanaan:</span>
+                      <div style={{ fontWeight: 800, marginTop: 4, color: '#0f172a' }}>
+                        {statusResult.lokasi_tes || 'Gedung Utama ' + schoolData.nama_sekolah}
+                      </div>
+                    </div>
+                    <div style={{ background: '#ffffff', padding: 14, borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                      <span style={{ color: '#64748b', fontSize: 12 }}>Ukuran Seragam:</span>
+                      <div style={{ fontWeight: 800, marginTop: 4, color: '#0f172a' }}>
+                        {statusResult.ukuran_seragam ? `Ukuran ${statusResult.ukuran_seragam}` : 'Belum Diisi'}
+                      </div>
+                    </div>
                   </div>
 
                   {statusResult.catatan && (
-                    <div style={{ marginTop: 14, background: '#fef3c7', padding: '10px 14px', borderRadius: 10, fontSize: 12, color: '#92400e' }}>
-                      <b>Catatan Panitia:</b> {statusResult.catatan}
+                    <div style={{ marginTop: 16, background: '#fef3c7', padding: '12px 16px', borderRadius: 12, fontSize: 13, color: '#92400e' }}>
+                      <b>Pesan Panitia:</b> {statusResult.catatan}
                     </div>
                   )}
                 </div>
@@ -1465,21 +1608,28 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
           </div>
         )}
 
-        {/* TAB 4: FORM DAFTAR ULANG */}
+        {/* TAB CONTENT: FORMULIR DAFTAR ULANG */}
         {tab === 'daftar_ulang' && (
-          <form onSubmit={handleSubmitDaftarUlang} className="ppdb-card">
-            <div style={{ height: 6, background: 'linear-gradient(90deg, #059669 0%, #10b981 100%)' }} />
-            <div className="ppdb-card-body">
-              <h3 style={{ margin: '0 0 6px 0', fontSize: 20, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <CheckSquare size={22} color="#059669" /> Formulir Pendaftaran Ulang Siswa Lulus
-              </h3>
-              <p style={{ color: '#64748b', fontSize: 13, marginBottom: 24 }}>
-                Form ini diperuntukkan bagi calon siswa yang telah dinyatakan <b>LULUS SELEKSI</b> untuk konfirmasi seragam dan berkas.
-              </p>
+          <form onSubmit={handleSubmitDaftarUlang} className="ppdb-form-card">
+            <div style={{ height: 6, background: 'linear-gradient(90deg, #16a34a 0%, #22c55e 100%)' }} />
+            <div style={{ padding: '36px 32px' }}>
+              <div style={{ marginBottom: 28 }}>
+                <span style={{ background: '#dcfce7', color: '#15803d', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                  KONFIRMASI SISWA LULUS
+                </span>
+                <h3 style={{ margin: '8px 0 4px 0', fontSize: 24, fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <CheckSquare size={24} color="#16a34a" /> Formulir Pendaftaran Ulang & Seragam
+                </h3>
+                <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>
+                  Khusus bagi calon siswa yang telah dinyatakan <b>LULUS SELEKSI</b> untuk memilih ukuran seragam dan verifikasi dokumen.
+                </p>
+              </div>
 
-              <div className="ppdb-grid-2" style={{ marginBottom: 20 }}>
+              <div className="ppdb-grid-2" style={{ marginBottom: 24 }}>
                 <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Nomor Pendaftaran *</label>
+                  <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
+                    Nomor Pendaftaran Siswa *
+                  </label>
                   <input 
                     type="text" 
                     name="no_pendaftaran" 
@@ -1492,7 +1642,9 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Ukuran Seragam Sekolah *</label>
+                  <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
+                    Pilihan Ukuran Seragam Sekolah *
+                  </label>
                   <select name="ukuran_seragam" value={duForm.ukuran_seragam} onChange={handleDuChange} className="ppdb-input-field">
                     <option value="S">S (Small)</option>
                     <option value="M">M (Medium)</option>
@@ -1502,8 +1654,10 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                   </select>
                 </div>
 
-                <div className="ppdb-grid-full">
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#1e293b', marginBottom: 6 }}>Nominal Bayar / Pembayaran Awal (Rp)</label>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
+                    Nominal Pembayaran Daftar Ulang (Rp)
+                  </label>
                   <input 
                     type="number" 
                     name="nominal_daftar_ulang" 
@@ -1515,32 +1669,32 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                 </div>
               </div>
 
-              {/* SEKSI BERKAS DOKUMEN SAAT DAFTAR ULANG */}
-              <div className="ppdb-section-card" style={{ marginBottom: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                  <FileUp size={20} color="#059669" />
+              {/* UPLOAD BERKAS LINK DRIVE */}
+              <div style={{ background: '#f8fafc', padding: 22, borderRadius: 18, border: '1px solid #e2e8f0', marginBottom: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <FileUp size={20} color="#16a34a" />
                   <div>
-                    <h4 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#0f172a' }}>Upload Berkas & Dokumen Pendaftaran Ulang</h4>
-                    <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>Masukkan link Google Drive / Cloud Storage berkas pendukung (Pastikan akses diset publik/siapa saja memiliki link)</p>
+                    <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Link Upload Berkas Digital (Google Drive / Cloud)</h4>
+                    <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Pastikan tautan dapat diakses publik oleh panitia sekolah</p>
                   </div>
                 </div>
 
                 <div className="ppdb-grid-2">
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Ijazah / SKL</label>
-                    <input type="text" name="berkas_ijazah" value={duForm.berkas_ijazah || ''} onChange={handleDuChange} placeholder="URL Google Drive / Link File" className="ppdb-input-field" style={{ fontSize: 12 }} />
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Link Scan Ijazah / SKL</label>
+                    <input type="text" name="berkas_ijazah" value={duForm.berkas_ijazah || ''} onChange={handleDuChange} placeholder="https://drive.google.com/..." className="ppdb-input-field" />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Kartu Keluarga (KK)</label>
-                    <input type="text" name="berkas_kk" value={duForm.berkas_kk || ''} onChange={handleDuChange} placeholder="URL Google Drive / Link File" className="ppdb-input-field" style={{ fontSize: 12 }} />
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Link Scan Kartu Keluarga</label>
+                    <input type="text" name="berkas_kk" value={duForm.berkas_kk || ''} onChange={handleDuChange} placeholder="https://drive.google.com/..." className="ppdb-input-field" />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Scan Akta Kelahiran</label>
-                    <input type="text" name="berkas_akta" value={duForm.berkas_akta || ''} onChange={handleDuChange} placeholder="URL Google Drive / Link File" className="ppdb-input-field" style={{ fontSize: 12 }} />
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Link Scan Akta Kelahiran</label>
+                    <input type="text" name="berkas_akta" value={duForm.berkas_akta || ''} onChange={handleDuChange} placeholder="https://drive.google.com/..." className="ppdb-input-field" />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontWeight: 700, fontSize: 11, color: '#475569', marginBottom: 4 }}>Link Pas Foto (3x4)</label>
-                    <input type="text" name="pas_foto" value={duForm.pas_foto || ''} onChange={handleDuChange} placeholder="URL Google Drive / Link File" className="ppdb-input-field" style={{ fontSize: 12 }} />
+                    <label style={{ display: 'block', fontWeight: 700, fontSize: 12, color: '#475569', marginBottom: 4 }}>Link Pas Foto (3x4)</label>
+                    <input type="text" name="pas_foto" value={duForm.pas_foto || ''} onChange={handleDuChange} placeholder="https://drive.google.com/..." className="ppdb-input-field" />
                   </div>
                 </div>
               </div>
@@ -1553,62 +1707,65 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                   padding: '16px 24px', 
                   borderRadius: 14, 
                   border: 'none', 
-                  background: '#059669', 
+                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)', 
                   color: '#ffffff', 
                   fontWeight: 800, 
-                  fontSize: 15, 
+                  fontSize: 16, 
                   cursor: 'pointer', 
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'center', 
-                  gap: 8, 
-                  boxShadow: '0 4px 16px rgba(5,150,105,0.3)' 
+                  gap: 10, 
+                  boxShadow: '0 8px 25px rgba(22, 163, 74, 0.35)' 
                 }}
               >
-                <CheckSquare size={18} /> {loading ? 'Memproses...' : 'Kirim Konfirmasi Daftar Ulang'}
+                <CheckSquare size={20} /> {loading ? 'Menyimpan...' : 'Kirim Pendaftaran Ulang'}
               </button>
             </div>
           </form>
         )}
-      </div>
+      </main>
 
-      {/* FOOTER */}
-      <footer className="ppdb-footer">
-        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#ffffff', fontWeight: 800, fontSize: 16, marginBottom: 8 }}>
-              <School size={20} color="#38bdf8" /> {schoolData.nama_sekolah}
+      {/* FOOTER PREMIUM */}
+      <footer style={{ background: '#090e17', color: '#94a3b8', padding: '48px 24px 32px 24px', borderTop: '1px solid #1e293b' }}>
+        <div style={{ maxWidth: 1240, margin: '0 auto', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 32 }}>
+          <div style={{ maxWidth: 420 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#ffffff', fontWeight: 800, fontSize: 18, marginBottom: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <School size={20} color="#ffffff" />
+              </div>
+              {schoolData.nama_sekolah}
             </div>
-            <p style={{ margin: 0, color: '#94a3b8', fontSize: 12, maxWidth: 360, lineHeight: 1.6 }}>
-              {schoolData.alamat || 'Jl. Cienteung No. 112 A, Kota Tasikmalaya'}
+            <p style={{ margin: 0, color: '#94a3b8', fontSize: 13, lineHeight: 1.7 }}>
+              {schoolData.alamat || 'Sukaratu, Kabupaten Tasikmalaya, Jawa Barat'}.
             </p>
-            <div style={{ marginTop: 8, fontSize: 12, color: '#64748b' }}>
-              NPSN: {schoolData.npsn || '20279876'}
+            <div style={{ marginTop: 12, fontSize: 12, color: '#64748b' }}>
+              NPSN: <b>{schoolData.npsn || '20279876'}</b> | Status: <b>Terakreditasi A</b>
             </div>
           </div>
 
           <div>
-            <div style={{ color: '#ffffff', fontWeight: 700, fontSize: 14, marginBottom: 8 }}>Layanan Informasi</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12 }}>
-              <div>WhatsApp: <b>{schoolData.no_hp || '-'}</b></div>
-              <div>Email: <b>{schoolData.email || '-'}</b></div>
-              <div>Jam Layanan: <b>Senin - Sabtu (08:00 - 15:00 WIB)</b></div>
+            <div style={{ color: '#ffffff', fontWeight: 800, fontSize: 14, marginBottom: 12 }}>Layanan & Kontak Panitia</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
+              <div>WhatsApp Call Center: <b style={{ color: '#38bdf8' }}>{schoolData.no_hp || '-'}</b></div>
+              <div>Email: <b>{schoolData.email || 'info@sistemiartas.com'}</b></div>
+              <div>Jam Operasional: <b>Senin - Sabtu (08:00 - 15:00 WIB)</b></div>
             </div>
           </div>
 
           <div>
-            <div style={{ color: '#ffffff', fontWeight: 700, fontSize: 14, marginBottom: 8 }}>Tautan Terkait</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12 }}>
-              <a href="https://sistemiartas.com" target="_blank" rel="noreferrer" style={{ color: '#38bdf8', textDecoration: 'none' }}>
-                Portal Sistem Informasi Sekolah &rarr;
+            <div style={{ color: '#ffffff', fontWeight: 800, fontSize: 14, marginBottom: 12 }}>Tautan Resmi</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
+              <a href="https://sistemiartas.com" target="_blank" rel="noreferrer" style={{ color: '#38bdf8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                Sistem Informasi Sekolah E-Sekolah <ExternalLink size={13} />
               </a>
-              <span style={{ color: '#64748b' }}>Sistem Informasi PPDB Terpadu Cloud</span>
+              <span style={{ color: '#64748b' }}>Portal PPDB Cloud Terintegrasi V2</span>
             </div>
           </div>
         </div>
 
-        <div style={{ maxWidth: 1200, margin: '24px auto 0 auto', paddingTop: 20, borderTop: '1px solid #1e293b', textAlign: 'center', fontSize: 12, color: '#64748b' }}>
-          &copy; {new Date().getFullYear()} {schoolData.nama_sekolah}. Seluruh Hak Cipta Dilindungi.
+        <div style={{ maxWidth: 1240, margin: '36px auto 0 auto', paddingTop: 24, borderTop: '1px solid #1e293b', textAlign: 'center', fontSize: 13, color: '#64748b' }}>
+          &copy; {new Date().getFullYear()} {schoolData.nama_sekolah}. Seluruh Hak Cipta Dilindungi Undang-Undang.
         </div>
       </footer>
     </div>
