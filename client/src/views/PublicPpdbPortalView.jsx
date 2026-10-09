@@ -32,6 +32,22 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
     return true;
   };
 
+  const formatDateRange = (start, end, fallbackStr) => {
+    if (start && end) {
+      const s = new Date(start);
+      const e = new Date(end);
+      if (!isNaN(s.getTime()) && !isNaN(e.getTime())) {
+        const sDay = s.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+        const eDay = e.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        return `${sDay} - ${eDay}`;
+      }
+    } else if (start) {
+      const s = new Date(start);
+      if (!isNaN(s.getTime())) return `Mulai ${s.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    }
+    return fallbackStr;
+  };
+
   const fetchSchedule = async () => {
     try {
       const res = await api.get('/ppdb/jadwal');
@@ -943,7 +959,7 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                   </div>
                   <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Pengumuman Kelulusan</h4>
                   <p style={{ margin: 0, fontSize: 13, color: '#475569', lineHeight: 1.6 }}>
-                    Periksa status kelulusan secara online pada menu Cek Kelulusan menggunakan nomor registrasi Anda dan cetak kartu.
+                    Periksa status kelulusan secara online pada menu Cek Kelulusan menggunakan NISN siswa dan cetak kartu.
                   </p>
                 </div>
 
@@ -999,42 +1015,74 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                   <Calendar size={22} color="#2563eb" /> Jadwal Kegiatan PPDB 2026
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#f8fafc', borderRadius: 14, border: '1px solid #cbd5e1' }}>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>Pendaftaran Gelombang 1</div>
-                      <div style={{ fontSize: 12, color: '#475569' }}>Pendaftaran online & upload berkas</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#f8fafc', borderRadius: 14, border: '1px solid #cbd5e1', gap: 12, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 10, background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexShrink: 0 }}>
+                        <Calendar size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>Pendaftaran Gelombang 1</div>
+                        <div style={{ fontSize: 12, color: '#64748b' }}>Pendaftaran online & upload berkas</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#0284c7', marginTop: 4, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <Clock size={12} /> {formatDateRange(schedule?.pendaftaran_buka, schedule?.pendaftaran_tutup, '01 Mei - 30 Juni 2026')}
+                        </div>
+                      </div>
                     </div>
-                    <span style={{ background: '#dcfce7', color: '#15803d', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                    <span style={{ background: '#dcfce7', color: '#15803d', padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
                       {canDaftar ? 'Sedang Dibuka' : 'Ditutup'}
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#f8fafc', borderRadius: 14, border: '1px solid #cbd5e1' }}>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>Tes Seleksi & Wawancara</div>
-                      <div style={{ fontSize: 12, color: '#475569' }}>Sesuai tanggal pada kartu peserta ujian</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#f8fafc', borderRadius: 14, border: '1px solid #cbd5e1', gap: 12, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 10, background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#16a34a', flexShrink: 0 }}>
+                        <BookOpen size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>Tes Seleksi & Wawancara</div>
+                        <div style={{ fontSize: 12, color: '#64748b' }}>Sesuai tanggal pada kartu peserta ujian</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#16a34a', marginTop: 4, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <Clock size={12} /> {formatDateRange(schedule?.tes_buka, schedule?.tes_tutup, '02 Juli - 04 Juli 2026')}
+                        </div>
+                      </div>
                     </div>
-                    <span style={{ background: '#e0f2fe', color: '#0284c7', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                    <span style={{ background: '#e0f2fe', color: '#0284c7', padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
                       Terjadwal
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#f8fafc', borderRadius: 14, border: '1px solid #cbd5e1' }}>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>Pengumuman Hasil Seleksi</div>
-                      <div style={{ fontSize: 12, color: '#475569' }}>Dapat dicek melalui portal secara online</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#f8fafc', borderRadius: 14, border: '1px solid #cbd5e1', gap: 12, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 10, background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#b45309', flexShrink: 0 }}>
+                        <Award size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>Pengumuman Hasil Seleksi</div>
+                        <div style={{ fontSize: 12, color: '#64748b' }}>Dapat dicek melalui portal secara online</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#b45309', marginTop: 4, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <Clock size={12} /> {formatDateRange(schedule?.pengumuman_buka, schedule?.pengumuman_tutup, '07 Juli 2026')}
+                        </div>
+                      </div>
                     </div>
-                    <span style={{ background: '#fef3c7', color: '#b45309', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                    <span style={{ background: '#fef3c7', color: '#b45309', padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
                       {canPengumuman ? 'Hasil Terbuka' : 'Menunggu'}
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#f8fafc', borderRadius: 14, border: '1px solid #cbd5e1' }}>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>Pendaftaran Ulang & Seragam</div>
-                      <div style={{ fontSize: 12, color: '#475569' }}>Bagi seluruh peserta yang dinyatakan lulus</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#f8fafc', borderRadius: 14, border: '1px solid #cbd5e1', gap: 12, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 10, background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7c3aed', flexShrink: 0 }}>
+                        <CheckSquare size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>Pendaftaran Ulang & Seragam</div>
+                        <div style={{ fontSize: 12, color: '#64748b' }}>Bagi seluruh peserta yang dinyatakan lulus</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed', marginTop: 4, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <Clock size={12} /> {formatDateRange(schedule?.daftar_ulang_buka, schedule?.daftar_ulang_tutup, '08 Juli - 15 Juli 2026')}
+                        </div>
+                      </div>
                     </div>
-                    <span style={{ background: '#f1f5f9', color: '#475569', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                    <span style={{ background: '#f1f5f9', color: '#475569', padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
                       {canDU ? 'Aktif' : 'Terjadwal'}
                     </span>
                   </div>

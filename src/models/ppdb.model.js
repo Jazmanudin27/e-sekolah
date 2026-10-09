@@ -260,6 +260,8 @@ class PpdbModel {
           pendaftaran_buka DATETIME NULL,
           pendaftaran_tutup DATETIME NULL,
           is_pendaftaran_open TINYINT(1) DEFAULT 1,
+          tes_buka DATETIME NULL,
+          tes_tutup DATETIME NULL,
           daftar_ulang_buka DATETIME NULL,
           daftar_ulang_tutup DATETIME NULL,
           is_daftar_ulang_open TINYINT(1) DEFAULT 1,
@@ -271,6 +273,10 @@ class PpdbModel {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `;
       await query(sql);
+      try {
+        await query("ALTER TABLE ppdb_setting_jadwal ADD COLUMN IF NOT EXISTS tes_buka DATETIME NULL");
+        await query("ALTER TABLE ppdb_setting_jadwal ADD COLUMN IF NOT EXISTS tes_tutup DATETIME NULL");
+      } catch (e) {}
       const rows = await query("SELECT id FROM ppdb_setting_jadwal WHERE id = 1");
       if (!rows || rows.length === 0) {
         await query("INSERT INTO ppdb_setting_jadwal (id, is_pendaftaran_open, is_daftar_ulang_open, is_pengumuman_open) VALUES (1, 1, 1, 1)");
@@ -296,13 +302,16 @@ class PpdbModel {
     const sql = `
       INSERT INTO ppdb_setting_jadwal (
         id, pendaftaran_buka, pendaftaran_tutup, is_pendaftaran_open,
+        tes_buka, tes_tutup,
         daftar_ulang_buka, daftar_ulang_tutup, is_daftar_ulang_open,
         pengumuman_buka, pengumuman_tutup, is_pengumuman_open
-      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE
         pendaftaran_buka = VALUES(pendaftaran_buka),
         pendaftaran_tutup = VALUES(pendaftaran_tutup),
         is_pendaftaran_open = VALUES(is_pendaftaran_open),
+        tes_buka = VALUES(tes_buka),
+        tes_tutup = VALUES(tes_tutup),
         daftar_ulang_buka = VALUES(daftar_ulang_buka),
         daftar_ulang_tutup = VALUES(daftar_ulang_tutup),
         is_daftar_ulang_open = VALUES(is_daftar_ulang_open),
@@ -314,6 +323,8 @@ class PpdbModel {
       data.pendaftaran_buka || null,
       data.pendaftaran_tutup || null,
       data.is_pendaftaran_open ? 1 : 0,
+      data.tes_buka || null,
+      data.tes_tutup || null,
       data.daftar_ulang_buka || null,
       data.daftar_ulang_tutup || null,
       data.is_daftar_ulang_open ? 1 : 0,
