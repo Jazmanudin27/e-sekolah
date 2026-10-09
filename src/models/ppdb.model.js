@@ -63,7 +63,8 @@ class PpdbModel {
         "ALTER TABLE ppdb_pendaftaran ADD COLUMN IF NOT EXISTS lokasi_tes VARCHAR(150) DEFAULT NULL",
         "ALTER TABLE ppdb_pendaftaran ADD COLUMN IF NOT EXISTS nilai_tes_tulis DECIMAL(5,2) DEFAULT NULL",
         "ALTER TABLE ppdb_pendaftaran ADD COLUMN IF NOT EXISTS nilai_tes_wawancara DECIMAL(5,2) DEFAULT NULL",
-        "ALTER TABLE ppdb_pendaftaran ADD COLUMN IF NOT EXISTS nilai_baca_quran DECIMAL(5,2) DEFAULT NULL"
+        "ALTER TABLE ppdb_pendaftaran ADD COLUMN IF NOT EXISTS nilai_baca_quran DECIMAL(5,2) DEFAULT NULL",
+        "ALTER TABLE ppdb_pendaftaran ADD COLUMN IF NOT EXISTS kode_member VARCHAR(50) DEFAULT 'M002'"
       ];
       for (const alterSql of alterCols) {
         try { await query(alterSql); } catch (e) {}
@@ -101,8 +102,8 @@ class PpdbModel {
         tahun_lulus, jalur_pendaftaran, pilihan_jurusan,
         nama_ayah, pekerjaan_ayah, nama_ibu, pekerjaan_ibu,
         no_hp_ortu, email_ortu, penghasilan_ortu, status,
-        berkas_ijazah, berkas_kk, berkas_akta, pas_foto
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Menunggu', ?, ?, ?, ?)
+        berkas_ijazah, berkas_kk, berkas_akta, pas_foto, kode_member
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Menunggu', ?, ?, ?, ?, ?)
     `;
     const params = [
       no_pendaftaran,
@@ -128,7 +129,8 @@ class PpdbModel {
       data.berkas_ijazah || null,
       data.berkas_kk || null,
       data.berkas_akta || null,
-      data.pas_foto || null
+      data.pas_foto || null,
+      data.kode_member || 'M002'
     ];
 
     const result = await query(sql, params);

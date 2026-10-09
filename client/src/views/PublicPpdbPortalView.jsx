@@ -50,7 +50,9 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
 
   const fetchSchedule = async () => {
     try {
-      const res = await api.get('/ppdb/jadwal');
+      const res = await api.get('/ppdb/jadwal', {
+        params: { kode_member: 'M002' }
+      });
       if (res.data.success && res.data.data) {
         setSchedule(res.data.data);
       }
@@ -60,6 +62,7 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
   };
 
   const schoolData = schedule?.sekolah || sekolahInfo || {
+    kode_member: 'M002',
     nama_sekolah: 'SMA YAB SUKARATU',
     npsn: '20279876',
     alamat: 'Sukaratu, Kabupaten Tasikmalaya, Jawa Barat',
@@ -151,7 +154,10 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
 
     setLoading(true);
     try {
-      const res = await api.post('/ppdb/register', formData);
+      const res = await api.post('/ppdb/register', {
+        ...formData,
+        kode_member: schedule?.sekolah?.kode_member || 'M002'
+      });
       if (res.data.success) {
         const noPendaftaran = res.data.data.no_pendaftaran;
         Swal.fire({

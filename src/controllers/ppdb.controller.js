@@ -3,6 +3,34 @@ const { query } = require('../config/database');
 const { sendWhatsAppMessage } = require('../utils/whatsapp.util');
 
 class PpdbController {
+  static getPpdbKodeMember(req) {
+    if (req?.query?.kode_member) return req.query.kode_member;
+    if (req?.body?.kode_member) return req.body.kode_member;
+    const host = (req?.headers?.host || '').toLowerCase();
+
+    // 1. From DOMAIN_MEMBER_MAP in .env (e.g. {"ppdb.sistemiartas.com":"M002"})
+    if (process.env.DOMAIN_MEMBER_MAP) {
+      try {
+        const map = JSON.parse(process.env.DOMAIN_MEMBER_MAP);
+        for (const [d, km] of Object.entries(map)) {
+          if (host.includes(d.toLowerCase())) return km;
+        }
+      } catch (e) {}
+    }
+
+    // 2. From PPDB_MEMBER_CODE in .env
+    if (process.env.PPDB_MEMBER_CODE) {
+      return process.env.PPDB_MEMBER_CODE;
+    }
+
+    // 3. Auto-detect: if domain is ppdb.sistemiartas.com or contains 'ppdb' -> 'M002'
+    if (host.includes('ppdb.sistemiartas.com') || host.includes('ppdb')) {
+      return 'M002';
+    }
+
+    return null;
+  }
+
   // Public Endpoint: Submit Form Pendaftaran Calon Siswa
   static async register(req, res) {
     try {
@@ -14,7 +42,8 @@ class PpdbController {
         return res.status(400).json({ success: false, message: 'Nomor WhatsApp Ortu wajib diisi' });
       }
 
-      const result = await PpdbModel.create(req.body);
+      const kode_member = req.body.kode_member || PpdbController.getPpdbKodeMember(req) || 'M002';
+      const result = await PpdbModel.create({ ...req.body, kode_member });
 
       // 1. WhatsApp Automatic Notification
       try {
@@ -209,11 +238,12 @@ class PpdbController {
         return res.status(400).json({ success: false, message: 'Siswa sudah ada dalam Master Siswa!' });
       }
 
+      const targetKodeMember = calon.kode_member || PpdbController.getPpdbKodeMember(req) || 'M002';
       const sqlInsert = `
         INSERT INTO siswa (
           kode_siswa, nama_siswa, nis_nisn, jenis_kelamin, tempat_lahir,
-          tanggal_lahir, alamat, no_hp, nama_ortu, kode_kelas, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Aktif')
+          tanggal_lahir, alamat, no_hp, nama_ortu, kode_kelas, kode_member, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Aktif')
       `;
 
       await query(sqlInsert, [
@@ -226,7 +256,8 @@ class PpdbController {
         calon.alamat || '-',
         calon.no_hp_ortu || '-',
         calon.nama_ayah || calon.nama_ibu || '-',
-        kode_kelas || null
+        kode_kelas || null,
+        targetKodeMember
       ]);
 
       await PpdbModel.updateStatus(id, 'Diterima', 'Telah resmi diterima & ditransfer ke Master Siswa');
@@ -244,13 +275,15 @@ class PpdbController {
   // Admin/Public: Get Schedule Settings
   static async getJadwal(req, res) {
     try {
+      const kode_member = PpdbController.getPpdbKodeMember(req);
       const data = await PpdbModel.getJadwal();
       let sekolah = null;
       try {
         const SekolahModel = require('../models/sekolah.model');
-        const s = await SekolahModel.get();
+        const s = await SekolahModel.get(kode_member);
         if (s) {
           sekolah = {
+            kode_member: s.kode_member,
             nama_sekolah: s.nama_sekolah,
             npsn: s.npsn,
             alamat: s.alamat,
