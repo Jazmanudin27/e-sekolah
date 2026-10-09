@@ -425,9 +425,10 @@ export default function AdminPelanggaranTab() {
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: 'pointer',
-                  background: activeSubTab === 'riwayat' ? '#ffffff' : 'transparent',
-                  color: activeSubTab === 'riwayat' ? '#0066ff' : '#64748b',
-                  boxShadow: activeSubTab === 'riwayat' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
+                  background: activeSubTab === 'riwayat' ? '#0066ff' : 'transparent',
+                  color: activeSubTab === 'riwayat' ? '#ffffff' : '#64748b',
+                  boxShadow: activeSubTab === 'riwayat' ? '0 1px 4px rgba(0, 102, 255, 0.3)' : 'none',
+                  transition: 'all 0.15s ease'
                 }}
               >
                 Catatan Pelanggaran
@@ -442,9 +443,10 @@ export default function AdminPelanggaranTab() {
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: 'pointer',
-                  background: activeSubTab === 'rekap' ? '#ffffff' : 'transparent',
-                  color: activeSubTab === 'rekap' ? '#0066ff' : '#64748b',
-                  boxShadow: activeSubTab === 'rekap' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
+                  background: activeSubTab === 'rekap' ? '#0066ff' : 'transparent',
+                  color: activeSubTab === 'rekap' ? '#ffffff' : '#64748b',
+                  boxShadow: activeSubTab === 'rekap' ? '0 1px 4px rgba(0, 102, 255, 0.3)' : 'none',
+                  transition: 'all 0.15s ease'
                 }}
               >
                 Rekap Poin & Buku Sanksi
