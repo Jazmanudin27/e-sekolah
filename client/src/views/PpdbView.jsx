@@ -518,10 +518,6 @@ export default function PpdbView({ currentUser, onSwitchTab }) {
             >
               <BarChart2 size={16} color="#0284c7" /> {mode === 'statistik' ? 'Tabel Pendaftar' : 'Statistik & Rekap'}
             </button>
-
-            <button className="btn-primary-admin" onClick={() => setShowRegisterModal(true)}>
-              <UserPlus size={16} /> Tambah Pendaftar Baru
-            </button>
           </div>
         </div>
 
