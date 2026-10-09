@@ -23,7 +23,7 @@ export default function PresensiSubTabNav({ activeSubTab = 'guru', onTabChange }
           gap: 6
         }}
       >
-        <Users size={16} /> Presensi Guru
+        <Users size={16} color={activeSubTab === 'guru' ? '#ffffff' : '#475569'} /> Presensi Guru
       </button>
 
       <button
@@ -43,7 +43,7 @@ export default function PresensiSubTabNav({ activeSubTab = 'guru', onTabChange }
           gap: 6
         }}
       >
-        <GraduationCap size={16} /> Absensi Siswa
+        <GraduationCap size={16} color={activeSubTab === 'siswa' ? '#ffffff' : '#475569'} /> Absensi Siswa
       </button>
 
       <button
@@ -63,7 +63,7 @@ export default function PresensiSubTabNav({ activeSubTab = 'guru', onTabChange }
           gap: 6
         }}
       >
-        <BookOpen size={16} /> Absensi Mapel
+        <BookOpen size={16} color={activeSubTab === 'mapel' ? '#ffffff' : '#475569'} /> Absensi Mapel
       </button>
     </div>
   );

@@ -1259,7 +1259,7 @@ body {
 /* 7. Secondary & Outline Admin */
 .btn-secondary, .btn-outline-secondary, .btn-outline-admin {
   background: #ffffff;
-  color: #334155 !important;
+  color: #334155;
   border: 1px solid var(--portal-border);
   height: 30px;
   padding: 4px 12px;
@@ -1274,10 +1274,22 @@ body {
   transition: all 0.15s ease;
   box-sizing: border-box;
 }
-.btn-secondary:hover:not(:disabled), .btn-outline-secondary:hover:not(:disabled), .btn-outline-admin:hover:not(:disabled) {
+
+.btn-secondary.active, .btn-outline-secondary.active, .btn-outline-admin.active {
+  background: #0066ff !important;
+  color: #ffffff !important;
+  border-color: #0066ff !important;
+}
+
+.btn-secondary.active *, .btn-outline-secondary.active *, .btn-outline-admin.active * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.btn-secondary:hover:not(:disabled):not(.active), .btn-outline-secondary:hover:not(:disabled):not(.active), .btn-outline-admin:hover:not(:disabled):not(.active) {
   background: #f1f5f9;
   border-color: #94a3b8;
-  color: #0f172a !important;
+  color: #0f172a;
 }
 
 .btn-action-icon {

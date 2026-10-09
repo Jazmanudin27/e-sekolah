@@ -212,39 +212,45 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
         {/* SUBTAB TOGGLE */}
         <div style={{ display: 'flex', gap: 10, marginBottom: 20, borderBottom: '1px solid #e2e8f0', paddingBottom: 12 }}>
           <button
+            type="button"
             className={`btn-outline-admin ${activeSubTab === 'guru' ? 'active' : ''}`}
             onClick={() => setActiveSubTab('guru')}
             style={{
               background: activeSubTab === 'guru' ? '#0066ff' : '#ffffff',
               color: activeSubTab === 'guru' ? '#ffffff' : '#475569',
-              borderColor: activeSubTab === 'guru' ? '#0066ff' : '#cbd5e1'
+              borderColor: activeSubTab === 'guru' ? '#0066ff' : '#cbd5e1',
+              fontWeight: 700
             }}
           >
-            <Users size={16} /> Rekap Presensi Guru
+            <Users size={16} color={activeSubTab === 'guru' ? '#ffffff' : '#475569'} /> Rekap Presensi Guru
           </button>
 
           <button
+            type="button"
             className={`btn-outline-admin ${activeSubTab === 'siswa' ? 'active' : ''}`}
             onClick={() => setActiveSubTab('siswa')}
             style={{
               background: activeSubTab === 'siswa' ? '#0066ff' : '#ffffff',
               color: activeSubTab === 'siswa' ? '#ffffff' : '#475569',
-              borderColor: activeSubTab === 'siswa' ? '#0066ff' : '#cbd5e1'
+              borderColor: activeSubTab === 'siswa' ? '#0066ff' : '#cbd5e1',
+              fontWeight: 700
             }}
           >
-            <GraduationCap size={16} /> Rekap Absensi Siswa
+            <GraduationCap size={16} color={activeSubTab === 'siswa' ? '#ffffff' : '#475569'} /> Rekap Absensi Siswa
           </button>
 
           <button
+            type="button"
             className={`btn-outline-admin ${activeSubTab === 'mapel' ? 'active' : ''}`}
             onClick={() => setActiveSubTab('mapel')}
             style={{
               background: activeSubTab === 'mapel' ? '#0066ff' : '#ffffff',
               color: activeSubTab === 'mapel' ? '#ffffff' : '#475569',
-              borderColor: activeSubTab === 'mapel' ? '#0066ff' : '#cbd5e1'
+              borderColor: activeSubTab === 'mapel' ? '#0066ff' : '#cbd5e1',
+              fontWeight: 700
             }}
           >
-            <BookOpen size={16} /> Rekap Absensi Mapel
+            <BookOpen size={16} color={activeSubTab === 'mapel' ? '#ffffff' : '#475569'} /> Rekap Absensi Mapel
           </button>
         </div>
 
