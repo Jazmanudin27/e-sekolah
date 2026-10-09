@@ -2,12 +2,22 @@ import React, { useState, useEffect } from 'react';
 import {
   Printer, FileSpreadsheet, FileText, Users, GraduationCap,
   Building2, BookOpen, Send, Calendar, RefreshCw, CheckCircle2,
-  AlertCircle
+  AlertCircle, X
 } from 'lucide-react';
 import api from '../../api/client';
 import SearchableSelect from '../../components/SearchableSelect';
 
-export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }) {
+export default function AdminLaporanGeneratorTab({
+  reportType: initialReportType = 'laporanSiswa',
+  isModal = false,
+  onClose = null,
+  allowSwitchType = false
+}) {
+  const [reportType, setReportType] = useState(initialReportType);
+
+  useEffect(() => {
+    setReportType(initialReportType);
+  }, [initialReportType]);
   const currentDateObj = new Date();
   const [loading, setLoading] = useState(false);
 
@@ -650,6 +660,293 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
     document.body.removeChild(link);
   };
 
+  const filterCardForm = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* 1. FILTER KELAS (For Siswa, Absensi Siswa, Absensi Mapel) */}
+      {['laporanSiswa', 'laporanAbsensiSiswa', 'laporanAbsensiMapel'].includes(reportType) && (
+        <div className="form-group-admin">
+          <label>Kelas</label>
+          <SearchableSelect
+            value={selectedKelas}
+            onChange={(e) => setSelectedKelas(e.target.value)}
+            options={[
+              ...(reportType === 'laporanSiswa' ? [{ value: 'ALL', label: 'Semua Kelas' }] : []),
+              ...kelasList.map(k => ({
+                value: k.kode_kelas,
+                label: `${k.nama_kelas} ${k.jurusan && k.jurusan !== '-' ? `(${k.jurusan})` : ''}`
+              }))
+            ]}
+          />
+        </div>
+      )}
+
+      {/* 2. FILTER MAPEL (For Absensi Mapel) */}
+      {reportType === 'laporanAbsensiMapel' && (
+        <div className="form-group-admin">
+          <label>Mata Pelajaran</label>
+          <SearchableSelect
+            value={selectedMapel}
+            onChange={(e) => setSelectedMapel(e.target.value)}
+            options={[
+              { value: 'ALL', label: 'Semua Mata Pelajaran' },
+              ...mapelList.map(m => ({
+                value: m.kode_mapel,
+                label: `${m.nama_mapel} (${m.kode_mapel})`
+              }))
+            ]}
+          />
+        </div>
+      )}
+
+      {/* 3. FILTER STATUS (For Laporan Siswa & Guru) */}
+      {['laporanSiswa', 'laporanGuru'].includes(reportType) && (
+        <div className="form-group-admin">
+          <label>Status</label>
+          <SearchableSelect
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            options={[
+              { value: 'Aktif', label: 'Aktif' },
+              { value: 'Nonaktif', label: 'Nonaktif' },
+              { value: 'ALL', label: 'Semua Status' }
+            ]}
+          />
+        </div>
+      )}
+
+      {/* 4. FILTER STATUS KEPEGAWAIAN (For Laporan Guru) */}
+      {reportType === 'laporanGuru' && (
+        <div className="form-group-admin">
+          <label>Status Kepegawaian</label>
+          <SearchableSelect
+            value={selectedKepegawaian}
+            onChange={(e) => setSelectedKepegawaian(e.target.value)}
+            options={[
+              { value: 'ALL', label: 'Semua Kepegawaian' },
+              { value: 'PNS', label: 'PNS' },
+              { value: 'PPPK', label: 'PPPK' },
+              { value: 'GTT', label: 'Guru Tidak Tetap (GTT)' },
+              { value: 'Honorer', label: 'Honorer' },
+              { value: 'Yayasan', label: 'Guru Tetap Yayasan' }
+            ]}
+          />
+        </div>
+      )}
+
+      {/* 5. FILTER DARI TANGGAL & SAMPAI TANGGAL (For Presensi Guru, Absensi Siswa, Absensi Mapel, Surat Izin) */}
+      {['laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat', 'laporanIzin'].includes(reportType) && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div className="form-group-admin">
+            <label>Dari Tanggal</label>
+            <input
+              type="date"
+              className="form-control-admin"
+              value={dariTanggal}
+              onChange={(e) => setDariTanggal(e.target.value)}
+            />
+          </div>
+          <div className="form-group-admin">
+            <label>Sampai Tanggal</label>
+            <input
+              type="date"
+              className="form-control-admin"
+              value={sampaiTanggal}
+              onChange={(e) => setSampaiTanggal(e.target.value)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 6. FILTER JENIS LAPORAN (Standar, Detail, Rekap) */}
+      {['laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel'].includes(reportType) && (
+        <div className="form-group-admin">
+          <label>Jenis Laporan</label>
+          <SearchableSelect
+            value={jenisLaporan}
+            onChange={(e) => setJenisLaporan(e.target.value)}
+            options={[
+              { value: 'Standar', label: 'Standar' },
+              { value: 'Detail', label: 'Detail' },
+              { value: 'Rekap', label: 'Rekap' }
+            ]}
+          />
+        </div>
+      )}
+
+      {/* 7. FILTER JENIS & STATUS IZIN */}
+      {['laporanSurat', 'laporanIzin'].includes(reportType) && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div className="form-group-admin">
+            <label>Jenis Izin</label>
+            <SearchableSelect
+              value={selectedJenisIzin}
+              onChange={(e) => setSelectedJenisIzin(e.target.value)}
+              options={[
+                { value: 'ALL', label: 'Semua Jenis' },
+                { value: 'Sakit', label: 'Sakit' },
+                { value: 'Izin', label: 'Izin' },
+                { value: 'Dinas', label: 'Dinas' },
+                { value: 'Cuti', label: 'Cuti' }
+              ]}
+            />
+          </div>
+          <div className="form-group-admin">
+            <label>Status</label>
+            <SearchableSelect
+              value={selectedStatusIzin}
+              onChange={(e) => setSelectedStatusIzin(e.target.value)}
+              options={[
+                { value: 'ALL', label: 'Semua Status' },
+                { value: 'Disetujui', label: 'Disetujui' },
+                { value: 'Menunggu', label: 'Menunggu' },
+                { value: 'Ditolak', label: 'Ditolak' }
+              ]}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ACTION BUTTONS (CETAK & EXCEL - SM COMPACT) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '6px' }}>
+        <button
+          type="button"
+          onClick={handleCetak}
+          disabled={loading}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            height: '32px',
+            padding: '4px 14px',
+            borderRadius: '6px',
+            background: '#2563eb',
+            color: '#ffffff',
+            border: 'none',
+            fontSize: '12px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            boxShadow: '0 1px 2px rgba(37, 99, 235, 0.25)',
+            transition: 'background 0.15s ease'
+          }}
+        >
+          <Printer size={14} /> {loading ? 'Memuat...' : 'CETAK'}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleExportExcel}
+          disabled={loading}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            height: '32px',
+            padding: '4px 14px',
+            borderRadius: '6px',
+            background: '#16a34a',
+            color: '#ffffff',
+            border: 'none',
+            fontSize: '12px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            boxShadow: '0 1px 2px rgba(22, 163, 74, 0.25)',
+            transition: 'background 0.15s ease'
+          }}
+        >
+          <FileSpreadsheet size={14} /> EXCEL
+        </button>
+      </div>
+    </div>
+  );
+
+  if (isModal) {
+    return (
+      <div className="admin-modal-overlay" style={{ zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }} onClick={onClose}>
+        <div 
+          className="admin-modal-content" 
+          style={{ maxWidth: '460px', width: '100%', borderRadius: '14px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.25)', border: '1px solid #cbd5e1', background: '#ffffff' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="admin-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {meta.icon} {meta.title}
+              </h3>
+              <p style={{ margin: '3px 0 0 0', fontSize: '12px', color: '#64748b' }}>
+                {meta.subtitle}
+              </p>
+            </div>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', borderRadius: '6px' }}
+              >
+                <X size={20} />
+              </button>
+            )}
+          </div>
+
+          {allowSwitchType && (
+            <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', background: '#f1f5f9', padding: '8px 16px', gap: '8px' }}>
+              <button
+                type="button"
+                className={`btn-outline-admin ${reportType === 'laporanAbsensiSiswa' ? 'active' : ''}`}
+                onClick={() => setReportType('laporanAbsensiSiswa')}
+                style={{
+                  fontSize: '11.5px',
+                  padding: '4px 10px',
+                  height: '28px',
+                  background: reportType === 'laporanAbsensiSiswa' ? '#0066ff' : '#ffffff',
+                  color: reportType === 'laporanAbsensiSiswa' ? '#ffffff' : '#475569',
+                  borderColor: reportType === 'laporanAbsensiSiswa' ? '#0066ff' : '#cbd5e1'
+                }}
+              >
+                Absensi Siswa
+              </button>
+              <button
+                type="button"
+                className={`btn-outline-admin ${reportType === 'laporanPresensiGuru' ? 'active' : ''}`}
+                onClick={() => setReportType('laporanPresensiGuru')}
+                style={{
+                  fontSize: '11.5px',
+                  padding: '4px 10px',
+                  height: '28px',
+                  background: reportType === 'laporanPresensiGuru' ? '#0066ff' : '#ffffff',
+                  color: reportType === 'laporanPresensiGuru' ? '#ffffff' : '#475569',
+                  borderColor: reportType === 'laporanPresensiGuru' ? '#0066ff' : '#cbd5e1'
+                }}
+              >
+                Presensi Guru
+              </button>
+              <button
+                type="button"
+                className={`btn-outline-admin ${reportType === 'laporanAbsensiMapel' ? 'active' : ''}`}
+                onClick={() => setReportType('laporanAbsensiMapel')}
+                style={{
+                  fontSize: '11.5px',
+                  padding: '4px 10px',
+                  height: '28px',
+                  background: reportType === 'laporanAbsensiMapel' ? '#0066ff' : '#ffffff',
+                  color: reportType === 'laporanAbsensiMapel' ? '#ffffff' : '#475569',
+                  borderColor: reportType === 'laporanAbsensiMapel' ? '#0066ff' : '#cbd5e1'
+                }}
+              >
+                Absensi Mapel
+              </button>
+            </div>
+          )}
+
+          <div className="admin-modal-body" style={{ padding: '18px 20px' }}>
+            {filterCardForm}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="portal-dashboard-view">
       {/* PAGE HEADING */}
@@ -671,206 +968,7 @@ export default function AdminLaporanGeneratorTab({ reportType = 'laporanSiswa' }
         maxWidth: '440px',
         boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)'
       }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          
-          {/* 1. FILTER KELAS (For Siswa, Absensi Siswa, Absensi Mapel) */}
-          {['laporanSiswa', 'laporanAbsensiSiswa', 'laporanAbsensiMapel'].includes(reportType) && (
-            <div className="form-group-admin">
-              <label>Kelas</label>
-              <SearchableSelect
-                value={selectedKelas}
-                onChange={(e) => setSelectedKelas(e.target.value)}
-                options={[
-                  ...(reportType === 'laporanSiswa' ? [{ value: 'ALL', label: 'Semua Kelas' }] : []),
-                  ...kelasList.map(k => ({
-                    value: k.kode_kelas,
-                    label: `${k.nama_kelas} ${k.jurusan && k.jurusan !== '-' ? `(${k.jurusan})` : ''}`
-                  }))
-                ]}
-              />
-            </div>
-          )}
-
-          {/* 2. FILTER MAPEL (For Absensi Mapel) */}
-          {reportType === 'laporanAbsensiMapel' && (
-            <div className="form-group-admin">
-              <label>Mata Pelajaran</label>
-              <SearchableSelect
-                value={selectedMapel}
-                onChange={(e) => setSelectedMapel(e.target.value)}
-                options={[
-                  { value: 'ALL', label: 'Semua Mata Pelajaran' },
-                  ...mapelList.map(m => ({
-                    value: m.kode_mapel,
-                    label: `${m.nama_mapel} (${m.kode_mapel})`
-                  }))
-                ]}
-              />
-            </div>
-          )}
-
-          {/* 3. FILTER STATUS (For Laporan Siswa & Guru) */}
-          {['laporanSiswa', 'laporanGuru'].includes(reportType) && (
-            <div className="form-group-admin">
-              <label>Status</label>
-              <SearchableSelect
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                options={[
-                  { value: 'Aktif', label: 'Aktif' },
-                  { value: 'Nonaktif', label: 'Nonaktif' },
-                  { value: 'ALL', label: 'Semua Status' }
-                ]}
-              />
-            </div>
-          )}
-
-          {/* 4. FILTER STATUS KEPEGAWAIAN (For Laporan Guru) */}
-          {reportType === 'laporanGuru' && (
-            <div className="form-group-admin">
-              <label>Status Kepegawaian</label>
-              <SearchableSelect
-                value={selectedKepegawaian}
-                onChange={(e) => setSelectedKepegawaian(e.target.value)}
-                options={[
-                  { value: 'ALL', label: 'Semua Kepegawaian' },
-                  { value: 'PNS', label: 'PNS' },
-                  { value: 'PPPK', label: 'PPPK' },
-                  { value: 'GTT', label: 'Guru Tidak Tetap (GTT)' },
-                  { value: 'Honorer', label: 'Honorer' },
-                  { value: 'Yayasan', label: 'Guru Tetap Yayasan' }
-                ]}
-              />
-            </div>
-          )}
-
-          {/* 5. FILTER DARI TANGGAL & SAMPAI TANGGAL (For Presensi Guru, Absensi Siswa, Absensi Mapel, Surat Izin) */}
-          {['laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel', 'laporanSurat', 'laporanIzin'].includes(reportType) && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <div className="form-group-admin">
-                <label>Dari Tanggal</label>
-                <input
-                  type="date"
-                  className="form-control-admin"
-                  value={dariTanggal}
-                  onChange={(e) => setDariTanggal(e.target.value)}
-                />
-              </div>
-              <div className="form-group-admin">
-                <label>Sampai Tanggal</label>
-                <input
-                  type="date"
-                  className="form-control-admin"
-                  value={sampaiTanggal}
-                  onChange={(e) => setSampaiTanggal(e.target.value)}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* 6. FILTER JENIS LAPORAN (Standar, Detail, Rekap) */}
-          {['laporanPresensiGuru', 'laporanAbsensiSiswa', 'laporanAbsensiMapel'].includes(reportType) && (
-            <div className="form-group-admin">
-              <label>Jenis Laporan</label>
-              <SearchableSelect
-                value={jenisLaporan}
-                onChange={(e) => setJenisLaporan(e.target.value)}
-                options={[
-                  { value: 'Standar', label: 'Standar' },
-                  { value: 'Detail', label: 'Detail' },
-                  { value: 'Rekap', label: 'Rekap' }
-                ]}
-              />
-            </div>
-          )}
-
-          {/* 7. FILTER JENIS & STATUS IZIN */}
-          {['laporanSurat', 'laporanIzin'].includes(reportType) && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <div className="form-group-admin">
-                <label>Jenis Izin</label>
-                <SearchableSelect
-                  value={selectedJenisIzin}
-                  onChange={(e) => setSelectedJenisIzin(e.target.value)}
-                  options={[
-                    { value: 'ALL', label: 'Semua Jenis' },
-                    { value: 'Sakit', label: 'Sakit' },
-                    { value: 'Izin', label: 'Izin' },
-                    { value: 'Dinas', label: 'Dinas' },
-                    { value: 'Cuti', label: 'Cuti' }
-                  ]}
-                />
-              </div>
-              <div className="form-group-admin">
-                <label>Status</label>
-                <SearchableSelect
-                  value={selectedStatusIzin}
-                  onChange={(e) => setSelectedStatusIzin(e.target.value)}
-                  options={[
-                    { value: 'ALL', label: 'Semua Status' },
-                    { value: 'Disetujui', label: 'Disetujui' },
-                    { value: 'Menunggu', label: 'Menunggu' },
-                    { value: 'Ditolak', label: 'Ditolak' }
-                  ]}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* ACTION BUTTONS (CETAK & EXCEL - SM COMPACT) */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '6px' }}>
-            <button
-              type="button"
-              onClick={handleCetak}
-              disabled={loading}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                height: '30px',
-                padding: '4px 12px',
-                borderRadius: '4px',
-                background: '#2563eb',
-                color: '#ffffff',
-                border: 'none',
-                fontSize: '11.5px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 1px 2px rgba(37, 99, 235, 0.25)',
-                transition: 'background 0.15s ease'
-              }}
-            >
-              <Printer size={14} /> {loading ? 'Memuat...' : 'CETAK'}
-            </button>
-
-            <button
-              type="button"
-              onClick={handleExportExcel}
-              disabled={loading}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                height: '30px',
-                padding: '4px 12px',
-                borderRadius: '4px',
-                background: '#16a34a',
-                color: '#ffffff',
-                border: 'none',
-                fontSize: '11.5px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 1px 2px rgba(22, 163, 74, 0.25)',
-                transition: 'background 0.15s ease'
-              }}
-            >
-              <FileSpreadsheet size={14} /> EXCEL
-            </button>
-          </div>
-
-        </div>
+        {filterCardForm}
       </div>
     </div>
   );

@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import {
   FileBarChart, RefreshCw, Users, GraduationCap, BookOpen,
-  Calendar, CheckCircle2, HeartPulse, FileText, AlertCircle, X, ChevronRight
+  Calendar, CheckCircle2, HeartPulse, FileText, AlertCircle, X, ChevronRight,
+  Printer
 } from 'lucide-react';
 import api from '../../api/client';
 import Pagination from '../../components/Pagination';
 import SearchableSelect from '../../components/SearchableSelect';
+import AdminLaporanGeneratorTab from './AdminLaporanGeneratorTab';
 
 export default function AdminRekapTab({ initialSubTab = 'guru' }) {
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showCetakModal, setShowCetakModal] = useState(false);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -192,6 +195,14 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              type="button"
+              className="btn-primary-admin"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
+              onClick={() => setShowCetakModal(true)}
+            >
+              <Printer size={16} /> Cetak Laporan
+            </button>
             <button className="btn-outline-admin" onClick={fetchCurrentRekap} title="Refresh">
               <RefreshCw size={16} />
             </button>
@@ -757,6 +768,22 @@ export default function AdminRekapTab({ initialSubTab = 'guru' }) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* MODAL CETAK LAPORAN DENGAN FORM FILTER */}
+      {showCetakModal && (
+        <AdminLaporanGeneratorTab
+          reportType={
+            activeSubTab === 'guru'
+              ? 'laporanPresensiGuru'
+              : activeSubTab === 'mapel'
+              ? 'laporanAbsensiMapel'
+              : 'laporanAbsensiSiswa'
+          }
+          isModal={true}
+          allowSwitchType={true}
+          onClose={() => setShowCetakModal(false)}
+        />
       )}
     </div>
   );
