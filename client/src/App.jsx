@@ -36,9 +36,8 @@ import api from './api/client';
 
 const getInitialTab = () => {
   try {
-    const path = window.location.pathname.toLowerCase();
     const host = window.location.hostname.toLowerCase();
-    if (path.startsWith('/ppdb') || host.startsWith('ppdb.')) return 'ppdb';
+    if (host.startsWith('ppdb.')) return 'ppdb';
 
     const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
     if (hash) return hash;
@@ -223,25 +222,21 @@ export default function App() {
     );
   }
 
-  const isPpdbDirect = window.location.pathname.toLowerCase().startsWith('/ppdb') ||
-                       window.location.hash === '#ppdb' ||
-                       window.location.hostname.toLowerCase().startsWith('ppdb.');
+  const isPpdbPortalDomain = window.location.hostname.toLowerCase().startsWith('ppdb.') ||
+                             window.location.pathname.toLowerCase() === '/public-ppdb';
 
-  if (isPpdbDirect) {
+  if (isPpdbPortalDomain) {
     return (
       <>
         <InstallPwaModal />
         <PublicPpdbPortalView 
           sekolahInfo={sekolahInfo}
           onLoginClick={() => {
-            if (window.location.hostname.toLowerCase().startsWith('ppdb.')) {
-              const mainHost = window.location.hostname.replace(/^ppdb\./i, '');
-              window.location.href = `${window.location.protocol}//${mainHost}${window.location.port ? ':' + window.location.port : ''}/`;
-            } else {
-              window.location.hash = '';
-              window.history.pushState('', '', '/');
-              window.location.href = '/';
-            }
+            const host = window.location.hostname.toLowerCase();
+            const mainHost = host.startsWith('ppdb.') 
+              ? host.replace(/^ppdb\./i, 'mobile.') 
+              : host;
+            window.location.href = `${window.location.protocol}//${mainHost}${window.location.port ? ':' + window.location.port : ''}/`;
           }} 
         />
       </>
