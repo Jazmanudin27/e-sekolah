@@ -211,7 +211,7 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
         setStatusResult(res.data.data);
       }
     } catch (err) {
-      Swal.fire('Tidak Ditemukan', 'Nomor Pendaftaran tidak terdaftar.', 'error');
+      Swal.fire('Tidak Ditemukan', 'NISN atau Nomor Pendaftaran tidak terdaftar.', 'error');
     } finally {
       setLoading(false);
     }
@@ -759,12 +759,12 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                 {/* FAST TRACK QUICK SEARCH */}
                 <div>
                   <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#cbd5e1', marginBottom: 6 }}>
-                    Cek Status Cepat dengan No. Registrasi:
+                    Cek Status Cepat dengan NISN:
                   </label>
                   <form onSubmit={handleCheckStatus} style={{ display: 'flex', gap: 6 }}>
                     <input 
                       type="text" 
-                      placeholder="PPDB-2026-XXXX" 
+                      placeholder="Masukkan 10 Digit NISN..." 
                       value={searchNo}
                       onChange={(e) => setSearchNo(e.target.value)}
                       style={{
@@ -1430,7 +1430,7 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                   Cek Status Seleksi & Cetak Kartu Peserta
                 </h3>
                 <p style={{ margin: 0, color: '#475569', fontSize: 14 }}>
-                  Masukkan nomor pendaftaran resmi (Contoh: <b>PPDB-2026-0001</b>) yang Anda dapatkan saat registrasi.
+                  Masukkan NISN calon siswa (atau Nomor Pendaftaran resmi) yang telah didaftarkan.
                 </p>
               </div>
 
@@ -1439,7 +1439,7 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                   type="text" 
                   value={searchNo} 
                   onChange={(e) => setSearchNo(e.target.value)} 
-                  placeholder="Ketik Nomor Pendaftaran (Contoh: PPDB-2026-0001)" 
+                  placeholder="Ketik NISN Siswa (Contoh: 0081234567) atau No. Pendaftaran" 
                   className="ppdb-input-field" 
                   style={{ flex: 1, minWidth: 260 }} 
                 />
@@ -1578,7 +1578,7 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
               <div className="ppdb-grid-2" style={{ marginBottom: 24 }}>
                 <div>
                   <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#1e293b', marginBottom: 6 }}>
-                    Nomor Pendaftaran Siswa *
+                    NISN atau Nomor Pendaftaran Siswa *
                   </label>
                   <input 
                     type="text" 
@@ -1586,7 +1586,7 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                     value={duForm.no_pendaftaran} 
                     onChange={handleDuChange} 
                     required 
-                    placeholder="Contoh: PPDB-2026-0001" 
+                    placeholder="Contoh: 0081234567 atau PPDB-2026-0001" 
                     className="ppdb-input-field" 
                   />
                 </div>

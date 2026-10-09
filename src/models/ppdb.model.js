@@ -224,9 +224,10 @@ class PpdbModel {
     return rows && rows.length > 0 ? rows[0] : null;
   }
 
-  static async findByNoPendaftaran(no_pendaftaran) {
+  static async findByNoPendaftaran(identifier) {
     await this.ensureTable();
-    const rows = await query('SELECT * FROM ppdb_pendaftaran WHERE no_pendaftaran = ? LIMIT 1', [no_pendaftaran]);
+    const cleanId = String(identifier || '').trim();
+    const rows = await query('SELECT * FROM ppdb_pendaftaran WHERE no_pendaftaran = ? OR nisn = ? LIMIT 1', [cleanId, cleanId]);
     return rows && rows.length > 0 ? rows[0] : null;
   }
 

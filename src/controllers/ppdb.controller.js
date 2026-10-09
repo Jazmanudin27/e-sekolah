@@ -43,7 +43,7 @@ class PpdbController {
       const { no } = req.params;
       const data = await PpdbModel.findByNoPendaftaran(no);
       if (!data) {
-        return res.status(404).json({ success: false, message: 'Nomor Pendaftaran tidak ditemukan' });
+        return res.status(404).json({ success: false, message: 'NISN atau Nomor Pendaftaran tidak ditemukan' });
       }
       return res.json({ success: true, data });
     } catch (e) {
