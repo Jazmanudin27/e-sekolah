@@ -231,11 +231,19 @@ export default function App() {
     return (
       <>
         <InstallPwaModal />
-        <PublicPpdbPortalView onLoginClick={() => {
-          window.location.hash = '';
-          window.history.pushState('', '', '/');
-          window.location.href = '/';
-        }} />
+        <PublicPpdbPortalView 
+          sekolahInfo={sekolahInfo}
+          onLoginClick={() => {
+            if (window.location.hostname.toLowerCase().startsWith('ppdb.')) {
+              const mainHost = window.location.hostname.replace(/^ppdb\./i, '');
+              window.location.href = `${window.location.protocol}//${mainHost}${window.location.port ? ':' + window.location.port : ''}/`;
+            } else {
+              window.location.hash = '';
+              window.history.pushState('', '', '/');
+              window.location.href = '/';
+            }
+          }} 
+        />
       </>
     );
   }

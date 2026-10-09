@@ -245,7 +245,23 @@ class PpdbController {
   static async getJadwal(req, res) {
     try {
       const data = await PpdbModel.getJadwal();
-      return res.json({ success: true, data });
+      let sekolah = null;
+      try {
+        const SekolahModel = require('../models/sekolah.model');
+        const s = await SekolahModel.get();
+        if (s) {
+          sekolah = {
+            nama_sekolah: s.nama_sekolah,
+            npsn: s.npsn,
+            alamat: s.alamat,
+            kota: s.kota,
+            no_hp: s.no_hp,
+            email: s.email
+          };
+        }
+      } catch (errSekolah) {}
+
+      return res.json({ success: true, data: { ...data, sekolah } });
     } catch (e) {
       return res.status(500).json({ success: false, message: e.message });
     }
