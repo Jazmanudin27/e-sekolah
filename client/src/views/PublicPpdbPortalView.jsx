@@ -391,25 +391,25 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
           padding: 24px 20px 80px 20px;
         }
 
-        /* HERO SECTION */
+        /* HERO SECTION - SLEEK & COMPACT */
         .ppdb-hero {
           background: linear-gradient(135deg, #090e17 0%, #0f172a 45%, #1e293b 100%);
-          border-radius: 28px;
-          padding: 48px 44px;
+          border-radius: 22px;
+          padding: 32px 32px;
           color: #ffffff;
           position: relative;
           overflow: hidden;
-          margin-bottom: 36px;
+          margin-bottom: 30px;
           border: 1px solid rgba(255, 255, 255, 0.12);
-          box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.4);
+          box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.35);
         }
         .ppdb-hero-glow-1 {
           position: absolute;
           top: -20%;
           right: 15%;
-          width: 480px;
-          height: 480px;
-          background: radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, transparent 65%);
+          width: 420px;
+          height: 420px;
+          background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 65%);
           pointer-events: none;
           filter: blur(30px);
         }
@@ -417,16 +417,16 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
           position: absolute;
           bottom: -20%;
           left: -10%;
-          width: 420px;
-          height: 420px;
-          background: radial-gradient(circle, rgba(37, 99, 235, 0.28) 0%, transparent 65%);
+          width: 360px;
+          height: 360px;
+          background: radial-gradient(circle, rgba(37, 99, 235, 0.24) 0%, transparent 65%);
           pointer-events: none;
           filter: blur(40px);
         }
         .ppdb-hero-grid {
           display: grid;
-          grid-template-columns: 1.25fr 0.95fr;
-          gap: 36px;
+          grid-template-columns: 1.25fr 0.9fr;
+          gap: 26px;
           align-items: center;
           position: relative;
           z-index: 2;
@@ -438,9 +438,9 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
           backdrop-filter: blur(24px);
           -webkit-backdrop-filter: blur(24px);
           border: 1px solid rgba(255, 255, 255, 0.18);
-          border-radius: 24px;
-          padding: 28px;
-          box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+          border-radius: 20px;
+          padding: 20px 22px;
+          box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
           animation: float-gentle 6s ease-in-out infinite;
         }
 
@@ -624,7 +624,7 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
           </div>
         )}
 
-        {/* HERO SECTION */}
+        {/* HERO SECTION - REFINED COMPACT */}
         <section className="ppdb-hero">
           <div className="ppdb-hero-glow-1" />
           <div className="ppdb-hero-glow-2" />
@@ -632,43 +632,43 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
           <div className="ppdb-hero-grid">
             {/* LEFT COLUMN: HEADLINE & ACTIONS */}
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.15)', padding: '6px 14px', borderRadius: 30, marginBottom: 18 }}>
-                <div className="pulse-beacon" />
-                <span style={{ fontSize: 12, fontWeight: 800, color: '#38bdf8', letterSpacing: '0.4px' }}>
-                  GELOMBANG 1 RESMI DIBUKA • T.A 2026/2027
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.16)', padding: '4px 12px', borderRadius: 20, marginBottom: 12 }}>
+                <div className="pulse-beacon" style={{ width: 6, height: 6 }} />
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#38bdf8', letterSpacing: '0.4px' }}>
+                  GELOMBANG 1 DIBUKA • T.A 2026/2027
                 </span>
               </div>
 
-              <h2 style={{ fontSize: 'clamp(1.9rem, 3.4vw, 2.7rem)', fontWeight: 800, lineHeight: 1.2, margin: '0 0 16px 0', letterSpacing: '-0.8px' }}>
+              <h2 style={{ fontSize: 'clamp(1.35rem, 2.2vw, 1.75rem)', fontWeight: 800, lineHeight: 1.3, margin: '0 0 10px 0', letterSpacing: '-0.4px' }}>
                 Wujudkan Potensi Terbaikmu di<br />
                 <span className="gradient-headline">{schoolData.nama_sekolah}</span>
               </h2>
 
-              <p style={{ margin: '0 0 28px 0', color: '#cbd5e1', fontSize: 15, lineHeight: 1.7, maxWidth: 560 }}>
+              <p style={{ margin: '0 0 18px 0', color: '#cbd5e1', fontSize: 13, lineHeight: 1.6, maxWidth: 500 }}>
                 Sekolah unggulan berkarakter Islami dengan fasilitas modern dan kurikulum terpadu. Daftarkan diri Anda sekarang secara online langsung dari rumah dengan proses cepat, transparan, dan terpercaya.
               </p>
 
-              {/* ACTION CTA BUTTONS */}
-              <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 28 }}>
+              {/* ACTION CTA BUTTONS (REFINED COMPACT SIZES) */}
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
                 <button 
                   onClick={() => setTab('daftar')}
                   style={{
                     background: 'linear-gradient(135deg, #2563eb 0%, #0284c7 100%)',
                     color: '#ffffff',
                     border: 'none',
-                    padding: '14px 28px',
-                    borderRadius: 14,
+                    padding: '9px 18px',
+                    borderRadius: 10,
                     fontWeight: 800,
-                    fontSize: 15,
+                    fontSize: 12.5,
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 10,
-                    boxShadow: '0 10px 25px rgba(37, 99, 235, 0.45)',
+                    gap: 7,
+                    boxShadow: '0 6px 18px rgba(37, 99, 235, 0.35)',
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  <UserPlus size={19} /> Daftar Siswa Baru Sekarang
+                  <UserPlus size={15} /> Daftar Siswa Baru Sekarang
                 </button>
 
                 <button 
@@ -677,19 +677,19 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                     background: 'rgba(255, 255, 255, 0.08)',
                     color: '#ffffff',
                     border: '1px solid rgba(255, 255, 255, 0.22)',
-                    padding: '14px 22px',
-                    borderRadius: 14,
+                    padding: '9px 15px',
+                    borderRadius: 10,
                     fontWeight: 700,
-                    fontSize: 15,
+                    fontSize: 12.5,
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 8,
+                    gap: 7,
                     backdropFilter: 'blur(8px)',
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  <Search size={18} /> Cek Hasil Seleksi & Kartu
+                  <Search size={15} /> Cek Hasil Seleksi & Kartu
                 </button>
 
                 <button 
@@ -698,32 +698,32 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                     background: 'rgba(16, 185, 129, 0.15)',
                     color: '#34d399',
                     border: '1px solid rgba(16, 185, 129, 0.35)',
-                    padding: '14px 20px',
-                    borderRadius: 14,
+                    padding: '9px 15px',
+                    borderRadius: 10,
                     fontWeight: 700,
-                    fontSize: 14,
+                    fontSize: 12.5,
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 8,
+                    gap: 7,
                     backdropFilter: 'blur(8px)',
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  <CheckSquare size={17} /> Daftar Ulang
+                  <CheckSquare size={15} /> Daftar Ulang
                 </button>
               </div>
 
-              {/* TRUST RIBBON STATS */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', paddingTop: 18, borderTop: '1px solid rgba(255, 255, 255, 0.12)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#e2e8f0', fontWeight: 700 }}>
-                  <Star size={16} color="#fbbf24" fill="#fbbf24" /> Akreditasi A (Unggul)
+              {/* TRUST RIBBON STATS (COMPACT CHIPS) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', paddingTop: 14, borderTop: '1px solid rgba(255, 255, 255, 0.12)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: '#e2e8f0', fontWeight: 700 }}>
+                  <Star size={14} color="#fbbf24" fill="#fbbf24" /> Akreditasi A (Unggul)
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#e2e8f0', fontWeight: 700 }}>
-                  <Award size={16} color="#38bdf8" /> Beasiswa Prestasi & Tahfidz
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: '#e2e8f0', fontWeight: 700 }}>
+                  <Award size={14} color="#38bdf8" /> Beasiswa Prestasi & Tahfidz
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#e2e8f0', fontWeight: 700 }}>
-                  <ShieldCheck size={16} color="#34d399" /> 100% Pendaftaran Online
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: '#e2e8f0', fontWeight: 700 }}>
+                  <ShieldCheck size={14} color="#34d399" /> 100% Pendaftaran Online
                 </div>
               </div>
             </div>
@@ -731,37 +731,37 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
             {/* RIGHT COLUMN: INTERACTIVE STATUS CARD & SEARCH WIDGET */}
             <div>
               <div className="ppdb-glass-widget">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                   <div>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: '#38bdf8', letterSpacing: '0.5px' }}>INFO LIVE PENDAFTARAN</span>
-                    <h3 style={{ margin: '2px 0 0 0', fontSize: 18, fontWeight: 800, color: '#ffffff' }}>PPDB Online 2026</h3>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: '#38bdf8', letterSpacing: '0.5px' }}>INFO LIVE PENDAFTARAN</span>
+                    <h3 style={{ margin: '2px 0 0 0', fontSize: 16, fontWeight: 800, color: '#ffffff' }}>PPDB Online 2026</h3>
                   </div>
-                  <div style={{ background: 'rgba(34, 197, 94, 0.2)', border: '1px solid rgba(34, 197, 94, 0.4)', padding: '4px 12px', borderRadius: 20, fontSize: 11, color: '#4ade80', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <div className="pulse-beacon" /> Aktif & Terbuka
+                  <div style={{ background: 'rgba(34, 197, 94, 0.2)', border: '1px solid rgba(34, 197, 94, 0.4)', padding: '3px 10px', borderRadius: 16, fontSize: 10.5, color: '#4ade80', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <div className="pulse-beacon" style={{ width: 6, height: 6 }} /> Aktif & Terbuka
                   </div>
                 </div>
 
-                <div style={{ background: 'rgba(15, 23, 42, 0.5)', borderRadius: 16, padding: 18, border: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: 20 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                    <span style={{ fontSize: 13, color: '#94a3b8' }}>Periode Pendaftaran:</span>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: '#f8fafc' }}>Gelombang 1</span>
+                <div style={{ background: 'rgba(15, 23, 42, 0.5)', borderRadius: 14, padding: '14px 16px', border: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, paddingBottom: 8, borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                    <span style={{ fontSize: 11.5, color: '#94a3b8' }}>Periode Pendaftaran:</span>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: '#f8fafc' }}>Gelombang 1</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                    <span style={{ fontSize: 13, color: '#94a3b8' }}>Pilihan Jalur:</span>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: '#38bdf8' }}>Reguler, Prestasi, Tahfidz, Afirmasi</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, paddingBottom: 8, borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                    <span style={{ fontSize: 11.5, color: '#94a3b8' }}>Pilihan Jalur:</span>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: '#38bdf8' }}>Reguler, Prestasi, Tahfidz, Afirmasi</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 13, color: '#94a3b8' }}>Layanan Konfirmasi:</span>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: '#4ade80' }}>WhatsApp Notifikasi Otomatis</span>
+                    <span style={{ fontSize: 11.5, color: '#94a3b8' }}>Layanan Konfirmasi:</span>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: '#4ade80' }}>WhatsApp Notifikasi Otomatis</span>
                   </div>
                 </div>
 
                 {/* FAST TRACK QUICK SEARCH */}
-                <div style={{ marginTop: 16 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#cbd5e1', marginBottom: 8 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#cbd5e1', marginBottom: 6 }}>
                     Cek Status Cepat dengan No. Registrasi:
                   </label>
-                  <form onSubmit={handleCheckStatus} style={{ display: 'flex', gap: 8 }}>
+                  <form onSubmit={handleCheckStatus} style={{ display: 'flex', gap: 6 }}>
                     <input 
                       type="text" 
                       placeholder="PPDB-2026-XXXX" 
@@ -769,12 +769,12 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                       onChange={(e) => setSearchNo(e.target.value)}
                       style={{
                         flex: 1,
-                        padding: '11px 14px',
-                        borderRadius: 12,
+                        padding: '8px 12px',
+                        borderRadius: 9,
                         background: 'rgba(255, 255, 255, 0.1)',
                         border: '1px solid rgba(255, 255, 255, 0.2)',
                         color: '#ffffff',
-                        fontSize: 13,
+                        fontSize: 12,
                         outline: 'none'
                       }}
                     />
@@ -785,11 +785,11 @@ export default function PublicPpdbPortalView({ onLoginClick, sekolahInfo }) {
                         background: '#38bdf8',
                         color: '#0f172a',
                         border: 'none',
-                        padding: '11px 18px',
-                        borderRadius: 12,
+                        padding: '8px 14px',
+                        borderRadius: 9,
                         fontWeight: 800,
                         cursor: 'pointer',
-                        fontSize: 13
+                        fontSize: 12
                       }}
                     >
                       Cari
