@@ -469,6 +469,8 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
             <span>Rekap Guru</span>
           </button>
 
+          {/* Menu Penilaian & Nilai Akhir di-hidden sementara */}
+          {/*
           <button className="menu-blue-card menu-item-nilai-input" onClick={() => onSwitchTab('penilaianInput')}>
             <div className="menu-icon-circle">
               <FileSpreadsheet size={35} strokeWidth={2.5} />
@@ -482,6 +484,7 @@ export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwi
             </div>
             <span>Nilah Akhir</span>
           </button>
+          */}
 
           <button className="menu-blue-card menu-item-perpus" onClick={() => onSwitchTab('perpustakaan')}>
             <div className="menu-icon-circle">
