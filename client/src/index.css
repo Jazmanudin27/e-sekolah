@@ -542,12 +542,50 @@ body {
   margin-top: 1px;
 }
 
-/* 12-GRID MENU CARDS (COMPACT, PROFESSIONAL & CLEAN) */
+/* 12-GRID MENU CARDS (WRAPPED IN CARD WITH HEADER) */
 .grid-8-menu-wrapper {
   max-width: 680px;
-  margin: 0 auto 6px auto;
+  margin: 0 auto 14px auto;
   width: 100%;
-  padding: 0 12px;
+  padding: 0 14px;
+}
+
+.menu-card-box {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px 10px 14px 10px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  position: relative;
+  animation: fadeInUpCard 0.4s ease-out both;
+}
+
+.menu-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.menu-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.menu-card-title::before {
+  content: '';
+  display: inline-block;
+  width: 3.5px;
+  height: 13px;
+  background: #0066ff;
+  border-radius: 2px;
 }
 
 .grid-8-menu {

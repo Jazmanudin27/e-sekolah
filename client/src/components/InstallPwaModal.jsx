@@ -1,17 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, Smartphone, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Download, X, CheckCircle2 } from 'lucide-react';
 
 export default function InstallPwaModal() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(() => {
+    try {
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true ||
+        document.referrer.includes('android-app://');
+      const savedInstalled = localStorage.getItem('esekolah_pwa_installed') === 'true';
+      return isStandalone || savedInstalled;
+    } catch (e) {
+      return false;
+    }
+  });
+  const [isInstalling, setIsInstalling] = useState(false);
 
   useEffect(() => {
-    // Check if already in standalone mode (already installed & running as app)
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    // 1. Cek standalone mode
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true ||
+      document.referrer.includes('android-app://');
+
+    if (isStandalone) {
+      try {
+        localStorage.setItem('esekolah_pwa_installed', 'true');
+      } catch (e) {}
       setIsInstalled(true);
       return;
+    }
+
+    // 2. Cek jika sudah pernah diinstall via localStorage
+    if (localStorage.getItem('esekolah_pwa_installed') === 'true') {
+      setIsInstalled(true);
+      return;
+    }
+
+    // 3. Cek via getInstalledRelatedApps API (Chrome Android / Desktop)
+    if ('getInstalledRelatedApps' in navigator) {
+      navigator
+        .getInstalledRelatedApps()
+        .then((apps) => {
+          if (apps && apps.length > 0) {
+            try {
+              localStorage.setItem('esekolah_pwa_installed', 'true');
+            } catch (e) {}
+            setIsInstalled(true);
+            setShowModal(false);
+          }
+        })
+        .catch(() => {});
     }
 
     // Detect iOS
@@ -19,49 +61,77 @@ export default function InstallPwaModal() {
     const iosDevice = /iphone|ipad|ipod/.test(ua);
     setIsIOS(iosDevice);
 
-    // Listen for Chrome/Android beforeinstallprompt event
+    // 4. Tangkap event Chrome beforeinstallprompt
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
 
-      // Check if user dismissed prompt recently in this session
+      // Jika Chrome menembakkan event ini, aplikasi belum terinstall
+      try {
+        localStorage.removeItem('esekolah_pwa_installed');
+      } catch (err) {}
+      setIsInstalled(false);
+
       const dismissed = sessionStorage.getItem('esekolah_pwa_dismissed');
       if (!dismissed) {
-        // Show modal after 1.5 seconds for great UX
         setTimeout(() => setShowModal(true), 1500);
       }
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    // 5. Tangkap event saat aplikasi berhasil diinstall
+    const handleAppInstalled = () => {
+      try {
+        localStorage.setItem('esekolah_pwa_installed', 'true');
+      } catch (e) {}
+      setIsInstalled(true);
+      setShowModal(false);
+      setDeferredPrompt(null);
+    };
 
-    // If iOS and not standalone, also offer install guide
-    if (iosDevice && !sessionStorage.getItem('esekolah_pwa_dismissed')) {
-      setTimeout(() => setShowModal(true), 2000);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    // Fallback: Munculkan modal setelah 2 detik jika belum terinstall dan belum di-dismiss di sesi ini
+    const dismissed = sessionStorage.getItem('esekolah_pwa_dismissed');
+    let timer = null;
+    if (!dismissed) {
+      timer = setTimeout(() => {
+        const alreadyDone = localStorage.getItem('esekolah_pwa_installed') === 'true';
+        if (!alreadyDone) {
+          setShowModal(true);
+        }
+      }, 1800);
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      if (timer) clearTimeout(timer);
     };
   }, []);
-
-  const [isInstalling, setIsInstalling] = useState(false);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
       if (isIOS) {
-        alert('Untuk menginstall di iPhone/iPad:\n1. Ketik ikon "Share" (Bagikan) di bagian bawah Safari\n2. Pilih "Tambahkan ke Layar Utama" (Add to Home Screen)');
+        alert(
+          'Untuk menginstall di iPhone / iPad:\n1. Ketuk ikon "Share" (Bagikan) di bagian bawah Safari\n2. Pilih "Tambahkan ke Layar Utama" (Add to Home Screen)'
+        );
       } else {
-        alert('Petunjuk Install Manual (Chrome):\n1. Klik ikon Titik Tiga (⋮) di sudut kanan atas Chrome\n2. Pilih "Install aplikasi" atau "Tambahkan ke Layar Utama" (Add to Home Screen)');
+        alert(
+          'Petunjuk Install Chrome:\n1. Klik tombol Titik Tiga (⋮) di sudut kanan atas Chrome\n2. Pilih "Install aplikasi" atau "Tambahkan ke Layar Utama" (Add to Home Screen)'
+        );
       }
       return;
     }
 
     try {
       setIsInstalling(true);
-      // Show Native Install Prompt
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
+        try {
+          localStorage.setItem('esekolah_pwa_installed', 'true');
+        } catch (e) {}
         setIsInstalled(true);
       }
     } catch (err) {
@@ -74,7 +144,9 @@ export default function InstallPwaModal() {
   };
 
   const handleDismiss = () => {
-    sessionStorage.setItem('esekolah_pwa_dismissed', 'true');
+    try {
+      sessionStorage.setItem('esekolah_pwa_dismissed', 'true');
+    } catch (e) {}
     setShowModal(false);
   };
 
@@ -86,28 +158,29 @@ export default function InstallPwaModal() {
         position: 'fixed',
         inset: 0,
         zIndex: 99999,
-        background: 'rgba(7, 19, 43, 0.75)',
-        backdropFilter: 'blur(10px)',
+        background: 'rgba(9, 23, 46, 0.72)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '16px',
-        animation: 'fadeIn 0.3s ease-out'
+        animation: 'fadeIn 0.25s ease-out'
       }}
     >
       <div
         style={{
           width: '100%',
-          maxWidth: 420,
-          background: 'linear-gradient(145deg, #0f172a, #1e293b)',
-          borderRadius: 24,
-          border: '1px solid rgba(56, 189, 248, 0.3)',
-          padding: '24px 20px',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(56, 189, 248, 0.25)',
+          maxWidth: 380,
+          background: '#0f172a',
+          borderRadius: 20,
+          border: '1px solid rgba(255, 255, 255, 0.12)',
+          padding: '20px 18px',
+          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.5)',
           position: 'relative',
           color: '#ffffff',
           textAlign: 'center',
-          animation: 'slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
+          animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
         {/* CLOSE BUTTON */}
@@ -115,98 +188,90 @@ export default function InstallPwaModal() {
           onClick={handleDismiss}
           style={{
             position: 'absolute',
-            top: 14,
-            right: 14,
-            background: 'rgba(255, 255, 255, 0.1)',
+            top: 12,
+            right: 12,
+            background: 'rgba(255, 255, 255, 0.08)',
             border: 'none',
             borderRadius: '50%',
-            width: 32,
-            height: 32,
+            width: 28,
+            height: 28,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: '#94a3b8',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            transition: 'background 0.15s ease'
           }}
+          title="Tutup"
         >
-          <X size={18} />
+          <X size={15} />
         </button>
 
         {/* LOGO SHOWCASE */}
-        <div style={{ position: 'relative', display: 'inline-block', marginBottom: 16 }}>
+        <div style={{ marginBottom: 12 }}>
           <div
             style={{
-              width: 86,
-              height: 86,
-              borderRadius: 22,
+              width: 58,
+              height: 58,
+              borderRadius: 16,
               background: '#ffffff',
-              padding: 6,
-              boxShadow: '0 8px 30px rgba(0, 102, 255, 0.4), 0 0 0 3px rgba(56, 189, 248, 0.4)',
+              padding: 5,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto'
+              margin: '0 auto',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)'
             }}
           >
             <img
               src="/logo.png"
-              alt="Logo SMK Artanita"
-              style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 16 }}
+              alt="Logo E-Sekolah"
+              style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 12 }}
             />
-          </div>
-          <div
-            style={{
-              position: 'absolute',
-              bottom: -4,
-              right: -4,
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              color: '#fff',
-              borderRadius: '50%',
-              width: 26,
-              height: 26,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '2px solid #0f172a'
-            }}
-          >
-            <Sparkles size={14} />
           </div>
         </div>
 
-        {/* TITLE & APP INFO */}
-        <h3 style={{ fontSize: 19, fontWeight: 800, color: '#ffffff', margin: '0 0 6px 0', letterSpacing: '-0.2px' }}>
+        {/* TITLE & INFO */}
+        <h3
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            color: '#ffffff',
+            margin: '0 0 4px 0',
+            letterSpacing: '-0.2px'
+          }}
+        >
           Install Aplikasi E-Sekolah
         </h3>
-        <p style={{ fontSize: 13, color: '#94a3b8', margin: '0 0 18px 0', lineHeight: 1.45 }}>
-          Pasang aplikasi <strong>SIARTAS SMK Artanita</strong> di HP Anda untuk akses presensi cepat tanpa lewat browser!
+        <p style={{ fontSize: 12, color: '#94a3b8', margin: '0 0 14px 0', lineHeight: 1.45 }}>
+          Pasang aplikasi di layar utama HP Anda agar akses presensi lebih cepat & praktis tanpa lewat tab browser.
         </p>
 
         {/* ADVANTAGES LIST */}
         <div
           style={{
-            background: 'rgba(30, 41, 59, 0.6)',
-            borderRadius: 16,
-            padding: '12px 14px',
-            marginBottom: 20,
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            background: 'rgba(30, 41, 59, 0.5)',
+            borderRadius: 12,
+            padding: '10px 12px',
+            marginBottom: 16,
+            border: '1px solid rgba(255, 255, 255, 0.06)',
             textAlign: 'left',
             display: 'flex',
             flexDirection: 'column',
-            gap: 8
+            gap: 6
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12.5, color: '#cbd5e1' }}>
-            <CheckCircle2 size={16} color="#38bdf8" />
-            <span>Akses 1-Klik langsung dari Layar Utama HP</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: '#cbd5e1' }}>
+            <CheckCircle2 size={14} color="#38bdf8" />
+            <span>Akses 1-klik langsung dari layar HP</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12.5, color: '#cbd5e1' }}>
-            <CheckCircle2 size={16} color="#38bdf8" />
-            <span>Tampilan Fullscreen layaknya Aplikasi Android/iOS</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: '#cbd5e1' }}>
+            <CheckCircle2 size={14} color="#38bdf8" />
+            <span>Tampilan bersih fullscreen tanpa address bar</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12.5, color: '#cbd5e1' }}>
-            <CheckCircle2 size={16} color="#38bdf8" />
-            <span>Notifikasi & scan presensi lebih stabil</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: '#cbd5e1' }}>
+            <CheckCircle2 size={14} color="#38bdf8" />
+            <span>Presensi & scan kamera lebih responsif</span>
           </div>
         </div>
 
@@ -216,29 +281,30 @@ export default function InstallPwaModal() {
           disabled={isInstalling}
           style={{
             width: '100%',
-            height: 48,
-            background: isInstalling ? '#334155' : 'linear-gradient(135deg, #0066ff, #0052cc)',
+            height: 42,
+            background: isInstalling ? '#334155' : 'linear-gradient(135deg, #1e40af, #2563eb)',
             border: 'none',
-            borderRadius: 14,
+            borderRadius: 12,
             color: '#ffffff',
-            fontSize: 14.5,
-            fontWeight: 700,
+            fontSize: 13.5,
+            fontWeight: 600,
             cursor: isInstalling ? 'wait' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
-            boxShadow: isInstalling ? 'none' : '0 6px 20px rgba(0, 102, 255, 0.45)',
-            marginBottom: 10,
-            opacity: isInstalling ? 0.8 : 1,
-            transition: 'transform 0.15s ease'
+            gap: 6,
+            boxShadow: isInstalling ? 'none' : '0 4px 14px rgba(37, 99, 235, 0.35)',
+            marginBottom: 8,
+            transition: 'all 0.15s ease'
           }}
         >
-          <Download size={18} />
+          <Download size={16} />
           <span>
-            {isInstalling 
-              ? 'Memproses Install...' 
-              : (isIOS ? 'Petunjuk Install iOS' : 'Install Aplikasi Sekarang')}
+            {isInstalling
+              ? 'Memproses Install...'
+              : isIOS
+              ? 'Petunjuk Install iOS'
+              : 'Install Aplikasi Sekarang'}
           </span>
         </button>
 
@@ -248,10 +314,10 @@ export default function InstallPwaModal() {
             background: 'none',
             border: 'none',
             color: '#64748b',
-            fontSize: 12.5,
-            fontWeight: 600,
+            fontSize: 12,
+            fontWeight: 500,
             cursor: 'pointer',
-            padding: '6px'
+            padding: '4px'
           }}
         >
           Nanti Saja
