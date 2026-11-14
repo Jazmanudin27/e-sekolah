@@ -1,44 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
-  CheckSquare,
-  Building2,
-  FileText,
-  Clock,
-  Fingerprint,
-  Users,
-  GraduationCap,
-  History,
-  UserCheck,
-  BookOpen,
-  FileBarChart,
-  PieChart,
-  Award,
-  Calendar,
-  CalendarDays,
-  X,
-  AlertCircle,
-  CheckCircle2,
-  Send,
-  Library,
-  FileSpreadsheet,
-  FileCheck,
-  Edit3,
-  ShieldAlert,
-  UserPlus,
-} from "lucide-react";
-import api from "../api/client";
-import TopBar from "../components/TopBar";
-import PengumumanSlider from "../components/PengumumanSlider";
+  CheckSquare, Building2, FileText, Clock, Fingerprint,
+  Users, GraduationCap, History, UserCheck, BookOpen,
+  FileBarChart, PieChart, Award, Calendar, CalendarDays, X, AlertCircle, CheckCircle2,
+  Send, Library, FileSpreadsheet, FileCheck, Edit3, ShieldAlert, UserPlus
+} from 'lucide-react';
+import api from '../api/client';
+import TopBar from '../components/TopBar';
+import PengumumanSlider from '../components/PengumumanSlider';
 
-export default function BerandaView({
-  user,
-  onLogout,
-  onOpenPresensiModal,
-  onSwitchTab,
-  onUserUpdated,
-}) {
-  const isClassAccount = user?.type === "Kelas" || user?.role === "Kelas";
-  const isSiswaAccount = user?.type === "Siswa" || user?.role === "Siswa";
+export default function BerandaView({ user, onLogout, onOpenPresensiModal, onSwitchTab, onUserUpdated }) {
+  const isClassAccount = user?.type === 'Kelas' || user?.role === 'Kelas';
+  const isSiswaAccount = user?.type === 'Siswa' || user?.role === 'Siswa';
   const [todayStatus, setTodayStatus] = useState(null);
   const [historyItems, setHistoryItems] = useState([]);
   const [izinItems, setIzinItems] = useState([]);
@@ -47,20 +20,7 @@ export default function BerandaView({
   const now = new Date();
   const currentBulan = now.getMonth() + 1;
   const currentTahun = now.getFullYear();
-  const namaBulan = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-  ][now.getMonth()];
+  const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][now.getMonth()];
 
   useEffect(() => {
     if (!isClassAccount && !isSiswaAccount) {
@@ -72,7 +32,7 @@ export default function BerandaView({
 
   const fetchTodayStatus = async () => {
     try {
-      const res = await api.get("/presensi/today");
+      const res = await api.get('/presensi/today');
       if (res.data.success) {
         setTodayStatus(res.data.data);
       }
@@ -83,9 +43,7 @@ export default function BerandaView({
 
   const fetchHistory = async () => {
     try {
-      const res = await api.get(
-        `/presensi/history?bulan=${currentBulan}&tahun=${currentTahun}&limit=100`,
-      );
+      const res = await api.get(`/presensi/history?bulan=${currentBulan}&tahun=${currentTahun}&limit=100`);
       if (res.data.success) {
         setHistoryItems(res.data.data);
       }
@@ -96,7 +54,7 @@ export default function BerandaView({
 
   const fetchIzin = async () => {
     try {
-      const res = await api.get("/izin");
+      const res = await api.get('/izin');
       if (res.data.success && Array.isArray(res.data.data)) {
         setIzinItems(res.data.data);
       }
@@ -105,75 +63,37 @@ export default function BerandaView({
     }
   };
 
-  const isCheckInDisabled =
-    todayStatus?.status === "CHECKIN" || todayStatus?.status === "CHECKOUT";
-  const isCheckOutDisabled =
-    todayStatus?.status === "BELUM_CHECKIN" ||
-    todayStatus?.status === "CHECKOUT";
+  const isCheckInDisabled = todayStatus?.status === 'CHECKIN' || todayStatus?.status === 'CHECKOUT';
+  const isCheckOutDisabled = todayStatus?.status === 'BELUM_CHECKIN' || todayStatus?.status === 'CHECKOUT';
 
   // Helper: apakah tanggal berada di bulan+tahun ini
   const isThisMonth = (dateStr) => {
     if (!dateStr) return false;
     const d = new Date(dateStr);
-    return (
-      d.getMonth() + 1 === currentBulan && d.getFullYear() === currentTahun
-    );
+    return d.getMonth() + 1 === currentBulan && d.getFullYear() === currentTahun;
   };
 
   // Categorize lists — hanya data bulan ini
-  const hadirList = historyItems.filter((h) => h.jam_in);
-  const sakitList = izinItems.filter(
-    (i) =>
-      (i.jenis || i.jenis_izin || "").toLowerCase() === "sakit" &&
-      isThisMonth(i.tanggal_mulai || i.tanggal),
-  );
-  const izinList = izinItems.filter(
-    (i) =>
-      (i.jenis || i.jenis_izin || "").toLowerCase() === "izin" &&
-      isThisMonth(i.tanggal_mulai || i.tanggal),
-  );
-  const cutiList = izinItems.filter(
-    (i) =>
-      (i.jenis || i.jenis_izin || "").toLowerCase() === "cuti" &&
-      isThisMonth(i.tanggal_mulai || i.tanggal),
-  );
+  const hadirList = historyItems.filter(h => h.jam_in);
+  const sakitList = izinItems.filter(i => (i.jenis || i.jenis_izin || '').toLowerCase() === 'sakit' && isThisMonth(i.tanggal_mulai || i.tanggal));
+  const izinList = izinItems.filter(i => (i.jenis || i.jenis_izin || '').toLowerCase() === 'izin' && isThisMonth(i.tanggal_mulai || i.tanggal));
+  const cutiList = izinItems.filter(i => (i.jenis || i.jenis_izin || '').toLowerCase() === 'cuti' && isThisMonth(i.tanggal_mulai || i.tanggal));
 
   const defaultHistoryCards = [
-    { date: "Friday, 25 September 2026", time: "06:23:35 - 15:08:46" },
-    { date: "Thursday, 24 September 2026", time: "06:19:20 - 15:00:12" },
-    { date: "Wednesday, 23 September 2026", time: "06:20:05 - 15:05:40" },
-    { date: "Tuesday, 22 September 2026", time: "06:17:42 - 15:10:00" },
-    { date: "Monday, 21 September 2026", time: "06:25:10 - 15:02:18" },
+    { date: 'Friday, 25 September 2026', time: '06:23:35 - 15:08:46' },
+    { date: 'Thursday, 24 September 2026', time: '06:19:20 - 15:00:12' },
+    { date: 'Wednesday, 23 September 2026', time: '06:20:05 - 15:05:40' },
+    { date: 'Tuesday, 22 September 2026', time: '06:17:42 - 15:10:00' },
+    { date: 'Monday, 21 September 2026', time: '06:25:10 - 15:02:18' },
   ];
 
   const formatFullDate = (dateStr) => {
-    if (!dateStr) return "Hari ini";
+    if (!dateStr) return 'Hari ini';
     try {
       const d = new Date(dateStr);
       if (isNaN(d.getTime())) return dateStr;
-      const days = [
-        "Minggu",
-        "Senin",
-        "Selasa",
-        "Rabu",
-        "Kamis",
-        "Jumat",
-        "Sabtu",
-      ];
-      const months = [
-        "Januari",
-        "Februari",
-        "Maret",
-        "April",
-        "Mei",
-        "Juni",
-        "Juli",
-        "Agustus",
-        "September",
-        "Oktober",
-        "November",
-        "Desember",
-      ];
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
       const dayName = days[d.getDay()];
       const dateNum = d.getDate();
       const monthName = months[d.getMonth()];
@@ -185,26 +105,16 @@ export default function BerandaView({
   };
 
   const renderTimeRange = (jamIn, jamOut) => {
-    const inText = jamIn || "Belum Scan";
-    const outText = jamOut || "Belum Scan";
+    const inText = jamIn || 'Belum Scan';
+    const outText = jamOut || 'Belum Scan';
 
     return (
       <div className="history-item-time">
-        <span
-          style={{
-            color: !jamIn ? "#dc2626" : "#0066ff",
-            fontWeight: !jamIn ? 700 : 600,
-          }}
-        >
+        <span style={{ color: !jamIn ? '#dc2626' : '#0066ff', fontWeight: !jamIn ? 700 : 600 }}>
           {inText}
         </span>
-        <span style={{ color: "#94a3b8", margin: "0 4px" }}>-</span>
-        <span
-          style={{
-            color: !jamOut ? "#dc2626" : "#0066ff",
-            fontWeight: !jamOut ? 700 : 600,
-          }}
-        >
+        <span style={{ color: '#94a3b8', margin: '0 4px' }}>-</span>
+        <span style={{ color: !jamOut ? '#dc2626' : '#0066ff', fontWeight: !jamOut ? 700 : 600 }}>
           {outText}
         </span>
       </div>
@@ -213,10 +123,10 @@ export default function BerandaView({
 
   // Get active list for modal
   const getModalList = () => {
-    if (selectedCategory === "Hadir") return hadirList;
-    if (selectedCategory === "Sakit") return sakitList;
-    if (selectedCategory === "Izin") return izinList;
-    if (selectedCategory === "Cuti") return cutiList;
+    if (selectedCategory === 'Hadir') return hadirList;
+    if (selectedCategory === 'Sakit') return sakitList;
+    if (selectedCategory === 'Izin') return izinList;
+    if (selectedCategory === 'Cuti') return cutiList;
     return [];
   };
 
@@ -224,7 +134,7 @@ export default function BerandaView({
   // BERANDA KHUSUS AKUN SISWA / ORTU (TAMPILAN MIRIP AKUN KELAS)
   // ========================
   if (isSiswaAccount) {
-    const studentName = user?.nama_siswa || user?.name || "Siswa";
+    const studentName = user?.nama_siswa || user?.name || 'Siswa';
     return (
       <div className="beranda-view-container">
         {/* HERO BLUE HEADER */}
@@ -232,41 +142,19 @@ export default function BerandaView({
 
         {/* WELCOME CARD SISWA */}
         <div className="summary-overlap-card">
-          <div style={{ textAlign: "center", padding: "6px 0 2px 0" }}>
-            <div
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                color: "#0284c7",
-                marginBottom: 4,
-              }}
-            >
+          <div style={{ textAlign: 'center', padding: '6px 0 2px 0' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#0284c7', marginBottom: 4 }}>
               🎓 Akun Siswa & Ortu
             </div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a" }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a' }}>
               {studentName}
             </div>
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "#475569",
-                marginTop: 2,
-              }}
-            >
-              NIS: {user?.nis_nisn || "-"} &bull; Kelas:{" "}
-              {user?.nama_kelas || "-"}
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#475569', marginTop: 2 }}>
+              NIS: {user?.nis_nisn || '-'} &bull; Kelas: {user?.nama_kelas || '-'}
             </div>
             {user?.nama_ortu && (
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "#64748b",
-                  marginTop: 2,
-                }}
-              >
-                Orang Tua: {user.nama_ortu} ({user.no_wa_ortu || "-"})
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginTop: 2 }}>
+                Orang Tua: {user.nama_ortu} ({user.no_wa_ortu || '-'})
               </div>
             )}
           </div>
@@ -278,44 +166,29 @@ export default function BerandaView({
             <div className="menu-card-header">
               <span className="menu-card-title">Menu Layanan</span>
             </div>
-            <div
-              className="grid-8-menu"
-              style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
-            >
-              <button
-                className="menu-blue-card menu-item-rekap-siswa"
-                onClick={() => onSwitchTab("tagihanSiswa")}
-              >
+            <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+              <button className="menu-blue-card menu-item-rekap-siswa" onClick={() => onSwitchTab('tagihanSiswa')}>
                 <div className="menu-icon-circle">
                   <FileBarChart size={20} strokeWidth={2} />
                 </div>
                 <span>Tagihan</span>
               </button>
 
-              <button
-                className="menu-blue-card menu-item-absen-siswa"
-                onClick={() => onSwitchTab("absensiSiswa")}
-              >
+              <button className="menu-blue-card menu-item-absen-siswa" onClick={() => onSwitchTab('absensiSiswa')}>
                 <div className="menu-icon-circle">
                   <UserCheck size={20} strokeWidth={2} />
                 </div>
                 <span>Absensi</span>
               </button>
 
-              <button
-                className="menu-blue-card menu-item-kalender"
-                onClick={() => onSwitchTab("pelanggaran")}
-              >
+              <button className="menu-blue-card menu-item-kalender" onClick={() => onSwitchTab('pelanggaran')}>
                 <div className="menu-icon-circle">
                   <ShieldAlert size={20} strokeWidth={2} />
                 </div>
                 <span>Catatan BK</span>
               </button>
 
-              <button
-                className="menu-blue-card menu-item-jadwal"
-                onClick={() => onSwitchTab("kalender")}
-              >
+              <button className="menu-blue-card menu-item-jadwal" onClick={() => onSwitchTab('kalender')}>
                 <div className="menu-icon-circle">
                   <CalendarDays size={20} strokeWidth={2} />
                 </div>
@@ -326,7 +199,7 @@ export default function BerandaView({
         </div>
 
         {/* PENGUMUMAN SLIDER BANNER (PALING BAWAH) */}
-        <div style={{ padding: "0 16px", marginTop: 8, marginBottom: 20 }}>
+        <div style={{ padding: '0 16px', marginTop: 8, marginBottom: 20 }}>
           <PengumumanSlider />
         </div>
       </div>
@@ -337,7 +210,7 @@ export default function BerandaView({
   // BERANDA KHUSUS AKUN KELAS
   // ========================
   if (isClassAccount) {
-    const className = user?.nama_kelas || "Kelas";
+    const className = user?.nama_kelas || 'Kelas';
     return (
       <div className="beranda-view-container">
         {/* HERO BLUE HEADER */}
@@ -345,29 +218,15 @@ export default function BerandaView({
 
         {/* WELCOME CARD KELAS */}
         <div className="summary-overlap-card">
-          <div style={{ textAlign: "center", padding: "6px 0 2px 0" }}>
-            <div
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                color: "#64748b",
-                marginBottom: 4,
-              }}
-            >
+          <div style={{ textAlign: 'center', padding: '6px 0 2px 0' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
               🏫 Dashboard Kelas
             </div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a" }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a' }}>
               {className}
             </div>
-            {user?.jurusan && user.jurusan !== "-" && (
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "#475569",
-                  marginTop: 2,
-                }}
-              >
+            {user?.jurusan && user.jurusan !== '-' && (
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#475569', marginTop: 2 }}>
                 {user.jurusan}
               </div>
             )}
@@ -380,44 +239,29 @@ export default function BerandaView({
             <div className="menu-card-header">
               <span className="menu-card-title">Menu Layanan</span>
             </div>
-            <div
-              className="grid-8-menu"
-              style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
-            >
-              <button
-                className="menu-blue-card menu-item-absen-siswa"
-                onClick={() => onSwitchTab("absensiSiswa")}
-              >
+            <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+              <button className="menu-blue-card menu-item-absen-siswa" onClick={() => onSwitchTab('absensiSiswa')}>
                 <div className="menu-icon-circle">
                   <UserCheck size={20} strokeWidth={2} />
                 </div>
                 <span>Absen Siswa</span>
               </button>
 
-              <button
-                className="menu-blue-card menu-item-jadwal"
-                onClick={() => onSwitchTab("jadwal")}
-              >
+              <button className="menu-blue-card menu-item-jadwal" onClick={() => onSwitchTab('jadwal')}>
                 <div className="menu-icon-circle">
                   <Calendar size={20} strokeWidth={2} />
                 </div>
                 <span>Jadwal</span>
               </button>
 
-              <button
-                className="menu-blue-card menu-item-rekap-siswa"
-                onClick={() => onSwitchTab("rekapSiswa")}
-              >
+              <button className="menu-blue-card menu-item-rekap-siswa" onClick={() => onSwitchTab('rekapSiswa')}>
                 <div className="menu-icon-circle">
                   <FileBarChart size={20} strokeWidth={2} />
                 </div>
                 <span>Rekap Siswa</span>
               </button>
 
-              <button
-                className="menu-blue-card menu-item-kalender"
-                onClick={() => onSwitchTab("kalender")}
-              >
+              <button className="menu-blue-card menu-item-kalender" onClick={() => onSwitchTab('kalender')}>
                 <div className="menu-icon-circle">
                   <CalendarDays size={20} strokeWidth={2} />
                 </div>
@@ -428,28 +272,23 @@ export default function BerandaView({
         </div>
 
         {/* INFO BOX */}
-        <div
-          style={{
-            margin: "0 16px 20px",
-            padding: "14px 16px",
-            borderRadius: 14,
-            background: "#eff6ff",
-            border: "1px solid #bfdbfe",
-            color: "#1e40af",
-            fontSize: 13,
-            fontWeight: 600,
-            lineHeight: 1.6,
-          }}
-        >
-          <div style={{ fontWeight: 800, marginBottom: 4 }}>
-            ℹ️ Informasi Akun Kelas
-          </div>
-          Anda login sebagai <strong>{className}</strong>. Akses terbatas pada
-          menu absensi dan rekap siswa untuk kelas ini saja.
+        <div style={{
+          margin: '0 16px 20px',
+          padding: '14px 16px',
+          borderRadius: 14,
+          background: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          color: '#1e40af',
+          fontSize: 13,
+          fontWeight: 600,
+          lineHeight: 1.6
+        }}>
+          <div style={{ fontWeight: 800, marginBottom: 4 }}>ℹ️ Informasi Akun Kelas</div>
+          Anda login sebagai <strong>{className}</strong>. Akses terbatas pada menu absensi dan rekap siswa untuk kelas ini saja.
         </div>
 
         {/* PENGUMUMAN SLIDER BANNER (PALING BAWAH) */}
-        <div style={{ padding: "0 16px", marginTop: 8, marginBottom: 20 }}>
+        <div style={{ padding: '0 16px', marginTop: 8, marginBottom: 20 }}>
           <PengumumanSlider />
         </div>
       </div>
@@ -461,82 +300,62 @@ export default function BerandaView({
   // ========================
   return (
     <div className="beranda-view-container">
+
       {/* HERO BLUE HEADER */}
       <TopBar user={user} onLogout={onLogout} onUserUpdated={onUserUpdated} />
 
       {/* 1. FLOATING OVERLAPPING SUMMARY CARD (4 VERTICAL ICON COLUMNS) */}
       <div className="summary-overlap-card">
         <div className="summary-grid-4">
+
           <div
             className="summary-col-item"
-            onClick={() => setSelectedCategory("Hadir")}
-            style={{ cursor: "pointer" }}
+            onClick={() => setSelectedCategory('Hadir')}
+            style={{ cursor: 'pointer' }}
           >
             <div className="summary-icon-box box-green">
               <CheckSquare size={18} color="#ffffff" strokeWidth={2.2} />
-              {hadirList.length > 0 && (
-                <span className="box-notify-badge">{hadirList.length}</span>
-              )}
+              {hadirList.length > 0 && <span className="box-notify-badge">{hadirList.length}</span>}
             </div>
             <span className="summary-col-label">Hadir</span>
           </div>
 
           <div
             className="summary-col-item"
-            onClick={() => setSelectedCategory("Sakit")}
-            style={{ cursor: "pointer" }}
+            onClick={() => setSelectedCategory('Sakit')}
+            style={{ cursor: 'pointer' }}
           >
             <div className="summary-icon-box box-red">
               <Building2 size={18} color="#ffffff" strokeWidth={2.2} />
-              {sakitList.length > 0 && (
-                <span
-                  className="box-notify-badge"
-                  style={{ background: "#ef4444" }}
-                >
-                  {sakitList.length}
-                </span>
-              )}
+              {sakitList.length > 0 && <span className="box-notify-badge" style={{ background: '#ef4444' }}>{sakitList.length}</span>}
             </div>
             <span className="summary-col-label">Sakit</span>
           </div>
 
           <div
             className="summary-col-item"
-            onClick={() => setSelectedCategory("Izin")}
-            style={{ cursor: "pointer" }}
+            onClick={() => setSelectedCategory('Izin')}
+            style={{ cursor: 'pointer' }}
           >
             <div className="summary-icon-box box-amber">
               <FileText size={18} color="#ffffff" strokeWidth={2.2} />
-              {izinList.length > 0 && (
-                <span
-                  className="box-notify-badge"
-                  style={{ background: "#f59e0b" }}
-                >
-                  {izinList.length}
-                </span>
-              )}
+              {izinList.length > 0 && <span className="box-notify-badge" style={{ background: '#f59e0b' }}>{izinList.length}</span>}
             </div>
             <span className="summary-col-label">Izin</span>
           </div>
 
           <div
             className="summary-col-item"
-            onClick={() => setSelectedCategory("Cuti")}
-            style={{ cursor: "pointer" }}
+            onClick={() => setSelectedCategory('Cuti')}
+            style={{ cursor: 'pointer' }}
           >
             <div className="summary-icon-box box-teal">
               <Clock size={18} color="#ffffff" strokeWidth={2.2} />
-              {cutiList.length > 0 && (
-                <span
-                  className="box-notify-badge"
-                  style={{ background: "#0d9488" }}
-                >
-                  {cutiList.length}
-                </span>
-              )}
+              {cutiList.length > 0 && <span className="box-notify-badge" style={{ background: '#0d9488' }}>{cutiList.length}</span>}
             </div>
             <span className="summary-col-label">Cuti</span>
           </div>
+
         </div>
       </div>
 
@@ -544,7 +363,7 @@ export default function BerandaView({
       <div className="dual-scan-row">
         <button
           className="scan-box-btn scan-masuk-btn"
-          onClick={() => onOpenPresensiModal("in")}
+          onClick={() => onOpenPresensiModal('in')}
         >
           <div className="scan-icon-circle-box">
             <Fingerprint size={19} strokeWidth={2.2} />
@@ -552,16 +371,14 @@ export default function BerandaView({
           <div>
             <div className="scan-main-title">Absen Masuk</div>
             <div className="scan-sub-text">
-              {todayStatus?.jam_in
-                ? `Jam: ${todayStatus.jam_in}`
-                : "Belum Scan"}
+              {todayStatus?.jam_in ? `Jam: ${todayStatus.jam_in}` : 'Belum Scan'}
             </div>
           </div>
         </button>
 
         <button
           className="scan-box-btn scan-pulang-btn"
-          onClick={() => onOpenPresensiModal("out")}
+          onClick={() => onOpenPresensiModal('out')}
         >
           <div className="scan-icon-circle-box">
             <Fingerprint size={19} strokeWidth={2.2} />
@@ -569,9 +386,7 @@ export default function BerandaView({
           <div>
             <div className="scan-main-title">Absen Pulang</div>
             <div className="scan-sub-text">
-              {todayStatus?.jam_out
-                ? `Jam: ${todayStatus.jam_out}`
-                : "Belum Scan"}
+              {todayStatus?.jam_out ? `Jam: ${todayStatus.jam_out}` : 'Belum Scan'}
             </div>
           </div>
         </button>
@@ -583,132 +398,93 @@ export default function BerandaView({
           <div className="menu-card-header">
             <span className="menu-card-title">Menu Layanan</span>
           </div>
-          <div
-            className="grid-8-menu"
-            style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
-          >
-            <button
-              className="menu-blue-card menu-item-siswa"
-              onClick={() => onSwitchTab("siswa")}
-            >
+          <div className="grid-8-menu" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+            <button className="menu-blue-card menu-item-siswa" onClick={() => onSwitchTab('siswa')}>
               <div className="menu-icon-circle">
                 <GraduationCap size={20} strokeWidth={2} />
               </div>
               <span>Siswa</span>
             </button>
 
-            <button
-              className="menu-blue-card menu-item-guru"
-              onClick={() => onSwitchTab("guru")}
-            >
-              <div className="menu-icon-circle">
-                <Users size={20} strokeWidth={2} />
-              </div>
-              <span>Guru</span>
-            </button>
+          <button className="menu-blue-card menu-item-guru" onClick={() => onSwitchTab('guru')}>
+            <div className="menu-icon-circle">
+              <Users size={20} strokeWidth={2} />
+            </div>
+            <span>Guru</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-mapel"
-              onClick={() => onSwitchTab("mapel")}
-            >
-              <div className="menu-icon-circle">
-                <Library size={20} strokeWidth={2} />
-              </div>
-              <span>Mapel</span>
-            </button>
+          <button className="menu-blue-card menu-item-mapel" onClick={() => onSwitchTab('mapel')}>
+            <div className="menu-icon-circle">
+              <Library size={20} strokeWidth={2} />
+            </div>
+            <span>Mapel</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-history"
-              onClick={() => onSwitchTab("riwayat")}
-            >
-              <div className="menu-icon-circle">
-                <History size={20} strokeWidth={2} />
-              </div>
-              <span>History</span>
-            </button>
+          <button className="menu-blue-card menu-item-history" onClick={() => onSwitchTab('riwayat')}>
+            <div className="menu-icon-circle">
+              <History size={20} strokeWidth={2} />
+            </div>
+            <span>History</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-jadwal"
-              onClick={() => onSwitchTab("jadwal")}
-            >
-              <div className="menu-icon-circle">
-                <Calendar size={20} strokeWidth={2} />
-              </div>
-              <span>Jadwal</span>
-            </button>
+          <button className="menu-blue-card menu-item-jadwal" onClick={() => onSwitchTab('jadwal')}>
+            <div className="menu-icon-circle">
+              <Calendar size={20} strokeWidth={2} />
+            </div>
+            <span>Jadwal</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-kalender"
-              onClick={() => onSwitchTab("kalender")}
-            >
-              <div className="menu-icon-circle">
-                <CalendarDays size={20} strokeWidth={2} />
-              </div>
-              <span>Kalender</span>
-            </button>
+          <button className="menu-blue-card menu-item-kalender" onClick={() => onSwitchTab('kalender')}>
+            <div className="menu-icon-circle">
+              <CalendarDays size={20} strokeWidth={2} />
+            </div>
+            <span>Kalender</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-izin"
-              onClick={() => onSwitchTab("izin")}
-            >
-              <div className="menu-icon-circle">
-                <Send size={20} strokeWidth={2} />
-              </div>
-              <span>Izin</span>
-            </button>
+          <button className="menu-blue-card menu-item-izin" onClick={() => onSwitchTab('izin')}>
+            <div className="menu-icon-circle">
+              <Send size={20} strokeWidth={2} />
+            </div>
+            <span>Izin</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-absen-siswa"
-              onClick={() => onSwitchTab("absensiSiswa")}
-            >
-              <div className="menu-icon-circle">
-                <UserCheck size={20} strokeWidth={2} />
-              </div>
-              <span>Absen Siswa</span>
-            </button>
+          <button className="menu-blue-card menu-item-absen-siswa" onClick={() => onSwitchTab('absensiSiswa')}>
+            <div className="menu-icon-circle">
+              <UserCheck size={20} strokeWidth={2} />
+            </div>
+            <span>Absen Siswa</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-absen-mapel"
-              onClick={() => onSwitchTab("absensiMapel")}
-            >
-              <div className="menu-icon-circle">
-                <BookOpen size={20} strokeWidth={2} />
-              </div>
-              <span>Absen Mapel</span>
-            </button>
+          <button className="menu-blue-card menu-item-absen-mapel" onClick={() => onSwitchTab('absensiMapel')}>
+            <div className="menu-icon-circle">
+              <BookOpen size={20} strokeWidth={2} />
+            </div>
+            <span>Absen Mapel</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-rekap-siswa"
-              onClick={() => onSwitchTab("rekapSiswa")}
-            >
-              <div className="menu-icon-circle">
-                <FileBarChart size={20} strokeWidth={2} />
-              </div>
-              <span>Rekap Siswa</span>
-            </button>
+          <button className="menu-blue-card menu-item-rekap-siswa" onClick={() => onSwitchTab('rekapSiswa')}>
+            <div className="menu-icon-circle">
+              <FileBarChart size={20} strokeWidth={2} />
+            </div>
+            <span>Rekap Siswa</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-rekap-mapel"
-              onClick={() => onSwitchTab("rekapMapel")}
-            >
-              <div className="menu-icon-circle">
-                <PieChart size={20} strokeWidth={2} />
-              </div>
-              <span>Rekap Mapel</span>
-            </button>
+          <button className="menu-blue-card menu-item-rekap-mapel" onClick={() => onSwitchTab('rekapMapel')}>
+            <div className="menu-icon-circle">
+              <PieChart size={20} strokeWidth={2} />
+            </div>
+            <span>Rekap Mapel</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-rekap-guru"
-              onClick={() => onSwitchTab("rekapGuru")}
-            >
-              <div className="menu-icon-circle">
-                <Award size={20} strokeWidth={2} />
-              </div>
-              <span>Rekap Guru</span>
-            </button>
+          <button className="menu-blue-card menu-item-rekap-guru" onClick={() => onSwitchTab('rekapGuru')}>
+            <div className="menu-icon-circle">
+              <Award size={20} strokeWidth={2} />
+            </div>
+            <span>Rekap Guru</span>
+          </button>
 
-            {/* Menu Penilaian & Nilai Akhir di-hidden sementara */}
-            {/*
+          {/* Menu Penilaian & Nilai Akhir di-hidden sementara */}
+          {/*
           <button className="menu-blue-card menu-item-nilai-input" onClick={() => onSwitchTab('penilaianInput')}>
             <div className="menu-icon-circle">
               <FileSpreadsheet size={20} strokeWidth={2} />
@@ -724,273 +500,124 @@ export default function BerandaView({
           </button>
           */}
 
-            <button
-              className="menu-blue-card menu-item-perpus"
-              onClick={() => onSwitchTab("perpustakaan")}
-            >
-              <div className="menu-icon-circle">
-                <BookOpen size={20} strokeWidth={2} color="#ffffff" />
-              </div>
-              <span>Perpustakaan</span>
-            </button>
+          <button className="menu-blue-card menu-item-perpus" onClick={() => onSwitchTab('perpustakaan')}>
+            <div className="menu-icon-circle">
+              <BookOpen size={20} strokeWidth={2} color="#ffffff" />
+            </div>
+            <span>Perpustakaan</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-sapras"
-              onClick={() => onSwitchTab("sapras")}
-            >
-              <div className="menu-icon-circle">
-                <Building2 size={20} strokeWidth={2} color="#ffffff" />
-              </div>
-              <span>Sapras</span>
-            </button>
+          <button className="menu-blue-card menu-item-sapras" onClick={() => onSwitchTab('sapras')}>
+            <div className="menu-icon-circle">
+              <Building2 size={20} strokeWidth={2} color="#ffffff" />
+            </div>
+            <span>Sapras</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-pelanggaran"
-              onClick={() => onSwitchTab("pelanggaran")}
-            >
-              <div
-                className="menu-icon-circle"
-                style={{
-                  background: "linear-gradient(135deg, #ef4444, #b91c1c)",
-                }}
-              >
-                <ShieldAlert size={20} strokeWidth={2} color="#ffffff" />
-              </div>
-              <span>Tata Tertib</span>
-            </button>
+          <button className="menu-blue-card menu-item-pelanggaran" onClick={() => onSwitchTab('pelanggaran')}>
+            <div className="menu-icon-circle" style={{ background: 'linear-gradient(135deg, #ef4444, #b91c1c)' }}>
+              <ShieldAlert size={20} strokeWidth={2} color="#ffffff" />
+            </div>
+            <span>Tata Tertib</span>
+          </button>
 
-            <button
-              className="menu-blue-card menu-item-ppdb"
-              onClick={() => onSwitchTab("ppdb")}
-            >
-              <div
-                className="menu-icon-circle"
-                style={{
-                  background: "linear-gradient(135deg, #059669, #10b981)",
-                }}
-              >
-                <UserPlus size={20} strokeWidth={2} color="#ffffff" />
-              </div>
-              <span>PPDB Online</span>
-            </button>
-          </div>
+          <button className="menu-blue-card menu-item-ppdb" onClick={() => onSwitchTab('ppdb')}>
+            <div className="menu-icon-circle" style={{ background: 'linear-gradient(135deg, #059669, #10b981)' }}>
+              <UserPlus size={20} strokeWidth={2} color="#ffffff" />
+            </div>
+            <span>PPDB Online</span>
+          </button>
         </div>
       </div>
+    </div>
 
       {/* PENGUMUMAN SLIDER BANNER (PALING BAWAH) */}
-      <div style={{ padding: "0 16px", marginTop: 8, marginBottom: 20 }}>
+      <div style={{ padding: '0 16px', marginTop: 8, marginBottom: 20 }}>
         <PengumumanSlider />
       </div>
 
       {/* DETAIL MODAL UNTUK CARD HADIR, SAKIT, IZIN, CUTI */}
       {selectedCategory && (
-        <div
-          className="beranda-modal-backdrop"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(15, 23, 42, 0.65)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "center",
-            zIndex: 999999,
-          }}
-        >
-          <div
-            className="beranda-modal-card"
-            style={{
-              background: "#ffffff",
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              width: "100%",
-              maxWidth: 500,
-              maxHeight: "80vh",
-              overflowY: "auto",
-              boxShadow: "0 -10px 25px rgba(0,0,0,0.15)",
-              padding: "20px 18px 30px",
-            }}
-          >
+        <div className="beranda-modal-backdrop" style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          zIndex: 999999
+        }}>
+          <div className="beranda-modal-card" style={{
+            background: '#ffffff', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+            width: '100%', maxWidth: 500, maxHeight: '80vh', overflowY: 'auto',
+            boxShadow: '0 -10px 25px rgba(0,0,0,0.15)', padding: '20px 18px 30px'
+          }}>
             {/* Modal Header */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 16,
-                borderBottom: "1px solid #f1f5f9",
-                pb: 12,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div
-                  style={{
-                    padding: 8,
-                    borderRadius: 10,
-                    background:
-                      selectedCategory === "Hadir"
-                        ? "#ecfdf5"
-                        : selectedCategory === "Sakit"
-                          ? "#fef2f2"
-                          : selectedCategory === "Izin"
-                            ? "#fffbeb"
-                            : "#f0fdf4",
-                    color:
-                      selectedCategory === "Hadir"
-                        ? "#059669"
-                        : selectedCategory === "Sakit"
-                          ? "#dc2626"
-                          : selectedCategory === "Izin"
-                            ? "#d97706"
-                            : "#0d9488",
-                  }}
-                >
-                  {selectedCategory === "Hadir" && <CheckSquare size={22} />}
-                  {selectedCategory === "Sakit" && <Building2 size={22} />}
-                  {selectedCategory === "Izin" && <FileText size={22} />}
-                  {selectedCategory === "Cuti" && <Clock size={22} />}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, borderBottom: '1px solid #f1f5f9', pb: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  padding: 8, borderRadius: 10,
+                  background: selectedCategory === 'Hadir' ? '#ecfdf5' : selectedCategory === 'Sakit' ? '#fef2f2' : selectedCategory === 'Izin' ? '#fffbeb' : '#f0fdf4',
+                  color: selectedCategory === 'Hadir' ? '#059669' : selectedCategory === 'Sakit' ? '#dc2626' : selectedCategory === 'Izin' ? '#d97706' : '#0d9488'
+                }}>
+                  {selectedCategory === 'Hadir' && <CheckSquare size={22} />}
+                  {selectedCategory === 'Sakit' && <Building2 size={22} />}
+                  {selectedCategory === 'Izin' && <FileText size={22} />}
+                  {selectedCategory === 'Cuti' && <Clock size={22} />}
                 </div>
                 <div>
-                  <h3
-                    style={{ fontSize: 16, fontWeight: 800, color: "#0f172a" }}
-                  >
-                    Detail: {selectedCategory}
-                  </h3>
-                  <div style={{ fontSize: 11, color: "#64748b" }}>
-                    {namaBulan} {currentTahun} &bull; {getModalList().length}{" "}
-                    Catatan
-                  </div>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Detail: {selectedCategory}</h3>
+                  <div style={{ fontSize: 11, color: '#64748b' }}>{namaBulan} {currentTahun} &bull; {getModalList().length} Catatan</div>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedCategory(null)}
-                style={{
-                  background: "#f1f5f9",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: 32,
-                  height: 32,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                }}
+                style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               >
                 <X size={18} color="#64748b" />
               </button>
             </div>
 
             {/* List Body */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {getModalList().length === 0 ? (
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: "30px 0",
-                    color: "#94a3b8",
-                    fontSize: 13,
-                  }}
-                >
-                  <AlertCircle
-                    size={32}
-                    color="#cbd5e1"
-                    style={{ marginBottom: 6 }}
-                  />
-                  <div>
-                    Belum ada data untuk kategori{" "}
-                    <strong>{selectedCategory}</strong>
-                  </div>
+                <div style={{ textAlign: 'center', padding: '30px 0', color: '#94a3b8', fontSize: 13 }}>
+                  <AlertCircle size={32} color="#cbd5e1" style={{ marginBottom: 6 }} />
+                  <div>Belum ada data untuk kategori <strong>{selectedCategory}</strong></div>
                 </div>
               ) : (
                 getModalList().map((item, idx) => (
                   <div
                     key={item.id || idx}
                     style={{
-                      background: "#f8fafc",
-                      border: "1px solid #e2e8f0",
-                      borderRadius: 14,
-                      padding: "12px 14px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
+                      background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 14, padding: '12px 14px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between'
                     }}
                   >
                     <div>
-                      <div
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 700,
-                          color: "#0f172a",
-                        }}
-                      >
-                        {item.nama_guru ||
-                          item.nama_pengaju ||
-                          user?.nama_guru ||
-                          "Guru"}
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>
+                        {item.nama_guru || item.nama_pengaju || user?.nama_guru || 'Guru'}
                       </div>
-                      <div
-                        style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}
-                      >
-                        📅{" "}
-                        {formatFullDate(
-                          item.tanggal_mulai || item.tanggal || item.date,
-                        )}
+                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                        📅 {formatFullDate(item.tanggal_mulai || item.tanggal || item.date)}
                       </div>
                       {item.keterangan && (
-                        <div
-                          style={{
-                            fontSize: 11.5,
-                            color: "#475569",
-                            marginTop: 4,
-                            fontStyle: "italic",
-                          }}
-                        >
+                        <div style={{ fontSize: 11.5, color: '#475569', marginTop: 4, fontStyle: 'italic' }}>
                           "{item.keterangan}"
                         </div>
                       )}
                     </div>
 
-                    <div style={{ textAlign: "right" }}>
-                      {selectedCategory === "Hadir" ? (
-                        <div
-                          style={{
-                            fontSize: 11.5,
-                            fontWeight: 700,
-                            color: "#059669",
-                            background: "#ecfdf5",
-                            padding: "4px 10px",
-                            borderRadius: 8,
-                            border: "1px solid #a7f3d0",
-                          }}
-                        >
-                          {item.jam_in || "Hadir"}{" "}
-                          {item.jam_out ? `- ${item.jam_out}` : ""}
+                    <div style={{ textAlign: 'right' }}>
+                      {selectedCategory === 'Hadir' ? (
+                        <div style={{ fontSize: 11.5, fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '4px 10px', borderRadius: 8, border: '1px solid #a7f3d0' }}>
+                          {item.jam_in || 'Hadir'} {item.jam_out ? `- ${item.jam_out}` : ''}
                         </div>
                       ) : (
-                        <div
-                          style={{
-                            fontSize: 11.5,
-                            fontWeight: 700,
-                            background:
-                              selectedCategory === "Sakit"
-                                ? "#fef2f2"
-                                : selectedCategory === "Izin"
-                                  ? "#fffbeb"
-                                  : "#f0fdf4",
-                            color:
-                              selectedCategory === "Sakit"
-                                ? "#dc2626"
-                                : selectedCategory === "Izin"
-                                  ? "#d97706"
-                                  : "#0d9488",
-                            border: `1px solid ${selectedCategory === "Sakit" ? "#fecaca" : selectedCategory === "Izin" ? "#fde68a" : "#99f6e4"}`,
-                            padding: "4px 10px",
-                            borderRadius: 8,
-                          }}
-                        >
+                        <div style={{
+                          fontSize: 11.5, fontWeight: 700,
+                          background: selectedCategory === 'Sakit' ? '#fef2f2' : selectedCategory === 'Izin' ? '#fffbeb' : '#f0fdf4',
+                          color: selectedCategory === 'Sakit' ? '#dc2626' : selectedCategory === 'Izin' ? '#d97706' : '#0d9488',
+                          border: `1px solid ${selectedCategory === 'Sakit' ? '#fecaca' : selectedCategory === 'Izin' ? '#fde68a' : '#99f6e4'}`,
+                          padding: '4px 10px', borderRadius: 8
+                        }}>
                           {item.status || selectedCategory}
                         </div>
                       )}
@@ -1002,6 +629,7 @@ export default function BerandaView({
           </div>
         </div>
       )}
+
     </div>
   );
 }
