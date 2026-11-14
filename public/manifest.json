@@ -1,6 +1,6 @@
 {
-  "short_name": "Sekolah",
-  "name": "Ruang",
+  "short_name": "Ruang Sekolah",
+  "name": "Ruang Sekolah",
   "description": "Aplikasi Presensi dan Sistem Informasi Sekolah Digital",
   "icons": [
     {
@@ -13,7 +13,7 @@
       "src": "/logo.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "start_url": "https://mobile.sistemiartas.com/",
