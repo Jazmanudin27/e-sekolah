@@ -38,40 +38,18 @@ body {
   flex-direction: column;
 }
 
-/* HEADER HERO BANNER (VIBRANT BLUE MODERN GRADIENT WITH MESH GLOW) */
+/* HEADER HERO BANNER (CLEAN, MODERN & PROFESSIONAL NAVY) */
 .header-blue-hero {
-  background: linear-gradient(135deg, #071633 0%, #004ecc 50%, #0066ff 100%);
-  padding: 14px 18px 42px 18px;
+  background: linear-gradient(135deg, #09172e 0%, #0e2a47 50%, #1e3a8a 100%);
+  padding: 12px 16px 26px 16px;
   color: #ffffff;
   position: relative;
   width: 100%;
-  border-bottom-left-radius: 28px;
-  border-bottom-right-radius: 28px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 12px 32px rgba(0, 82, 204, 0.28), inset 0 -1px 0 rgba(255, 255, 255, 0.15);
-  animation: heroHeaderSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) ease-out;
-}
-
-.hero-glow-circle {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.hero-glow-1 {
-  width: 240px;
-  height: 240px;
-  top: -85px;
-  right: -55px;
-  background: radial-gradient(circle, rgba(96, 165, 250, 0.4) 0%, rgba(59, 130, 246, 0) 70%);
-}
-
-.hero-glow-2 {
-  width: 200px;
-  height: 200px;
-  bottom: -65px;
-  left: -45px;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, rgba(168, 85, 247, 0) 70%);
+  box-shadow: 0 6px 20px rgba(9, 23, 46, 0.18), inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  animation: heroHeaderSlideDown 0.4s ease-out;
 }
 
 .header-inner {
@@ -85,157 +63,114 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .brand-title {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .brand-logo-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .brand-text {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .brand-name {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
   color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .brand-badge {
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 800;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: rgba(245, 158, 11, 0.9);
   color: #ffffff;
-  padding: 3px 7px;
-  border-radius: 8px;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+  padding: 2px 5px;
+  border-radius: 5px;
+  letter-spacing: 0.4px;
 }
 
 .header-icons {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .header-icon-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
   cursor: pointer;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
 }
 
-/* 0. KEY / CREDENTIALS BUTTON BG */
+.header-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+.header-icon-btn:active {
+  transform: scale(0.95);
+}
+
+/* Key button tint */
 .key-btn-hero {
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%);
-  border: 1px solid rgba(186, 230, 253, 0.7);
-  color: #ffffff;
-  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.5), inset 0 1px 1.5px rgba(255, 255, 255, 0.5);
+  color: #e0f2fe;
 }
 
-.key-btn-hero:hover {
-  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 50%, #0284c7 100%);
-  border-color: #ffffff;
-  color: #ffffff;
-  transform: translateY(-3px) scale(1.08);
-  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.7), 0 0 14px rgba(56, 189, 248, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.7);
-}
-
-/* 1. NOTIFICATION BUTTON BG (VIBRANT SOLID SAPPHIRE BLUE) */
+/* Notification button tint */
 .notif-btn-hero {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
-  border: 1px solid rgba(191, 219, 254, 0.7);
   color: #ffffff;
-  box-shadow: 0 4px 16px rgba(29, 78, 216, 0.5), inset 0 1px 1.5px rgba(255, 255, 255, 0.5);
 }
 
-.notif-btn-hero:hover {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
-  border-color: #ffffff;
-  color: #ffffff;
-  transform: translateY(-3px) scale(1.08);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.7), 0 0 14px rgba(96, 165, 250, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.7);
-}
-
-/* 2. LOGOUT BUTTON BG (VIBRANT SOLID CRIMSON RED) */
+/* Logout button tint */
 .logout-btn-hero {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
-  border: 1px solid rgba(254, 202, 202, 0.7);
-  color: #ffffff;
-  box-shadow: 0 4px 16px rgba(225, 29, 72, 0.5), inset 0 1px 1.5px rgba(255, 255, 255, 0.5);
-}
-
-.logout-btn-hero:hover {
-  background: linear-gradient(135deg, #f87171 0%, #ef4444 50%, #dc2626 100%);
-  border-color: #ffffff;
-  color: #ffffff;
-  transform: translateY(-3px) scale(1.08);
-  box-shadow: 0 8px 26px rgba(239, 68, 68, 0.75), 0 0 16px rgba(239, 68, 68, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.7);
+  color: #fecaca;
 }
 
 .bell-dot {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 9px;
-  height: 9px;
-  background: #ff2d55;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
   border-radius: 50%;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 10px #ff2d55;
-  animation: pulseBellDot 2s infinite ease-in-out;
+  border: 1.5px solid #0e2a47;
 }
 
-@keyframes pulseBellDot {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-  }
-
-  70% {
-    transform: scale(1.1);
-    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
-  }
-
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-  }
-}
-
-/* HERO WELCOME USER CARD */
+/* HERO WELCOME USER CARD (COMPACT & PRO) */
 .hero-welcome-card {
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 0 0 6px 0;
+  gap: 12px;
+  padding: 2px 0 2px 0;
 }
 
 .hero-avatar-wrapper {
@@ -244,19 +179,19 @@ body {
 }
 
 .user-avatar-circle {
-  width: 58px;
-  height: 58px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  border: 2.5px solid rgba(255, 255, 255, 0.9);
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1e40af, #2563eb);
+  border: 2px solid rgba(255, 255, 255, 0.85);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
+  font-weight: 700;
   color: #ffffff;
-  font-size: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .user-avatar-circle img {
@@ -267,61 +202,58 @@ body {
 
 .avatar-online-dot {
   position: absolute;
-  bottom: 0px;
-  right: 0px;
-  width: 14px;
-  height: 14px;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
   background: #22c55e;
-  border: 2.5px solid #0052cc;
+  border: 2px solid #09172e;
   border-radius: 50%;
-  box-shadow: 0 0 8px #22c55e;
-  animation: pulseAvatarDot 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 .hero-user-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .hero-greeting-line {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .greeting-emoji {
-  font-size: 15px;
+  font-size: 13px;
 }
 
 .greeting-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
-  letter-spacing: 0.2px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .hero-user-name {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
   color: #ffffff;
   line-height: 1.25;
   margin: 0;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.2px;
 }
 
 .hero-date-row {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: 600;
-  margin-top: 4px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  padding: 3px 10px;
-  border-radius: 20px;
+  gap: 5px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  margin-top: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 2px 8px;
+  border-radius: 12px;
   backdrop-filter: blur(6px);
   width: fit-content;
 }
@@ -332,8 +264,8 @@ body {
 }
 
 .hero-date-text {
-  font-weight: 600;
-  letter-spacing: 0.2px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
 }
 
 /* MODERN APP ANIMATIONS & KEYFRAMES */
@@ -434,176 +366,19 @@ body {
   }
 }
 
-/* ==========================================================
-   ANIMASI KHUSUS ICON SUMMARY: HADIR, SAKIT, IZIN, CUTI
-   ========================================================== */
-
-/* 1. HADIR: Bouncing aura float & checkmark nod */
-@keyframes hadirBoxFloat {
-
-  0%,
-  100% {
-    transform: translateY(0);
-    box-shadow: 0 8px 18px rgba(34, 197, 94, 0.32), 0 0 0 0 rgba(34, 197, 94, 0);
-  }
-
-  50% {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(34, 197, 94, 0.45), 0 0 0 5px rgba(34, 197, 94, 0.16);
-  }
-}
-
-@keyframes hadirCheckNod {
-
-  0%,
-  100% {
-    transform: scale(1) rotate(0deg);
-  }
-
-  30% {
-    transform: scale(1.14) rotate(-6deg);
-  }
-
-  65% {
-    transform: scale(1.05) rotate(3deg);
-  }
-}
-
-/* 2. SAKIT: Heartbeat double pulse rhythm & soft red pulse ring */
-@keyframes sakitBoxHeartbeat {
-
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 8px 18px rgba(239, 68, 68, 0.32), 0 0 0 0 rgba(239, 68, 68, 0);
-  }
-
-  14% {
-    transform: scale(1.08);
-    box-shadow: 0 12px 24px rgba(239, 68, 68, 0.48), 0 0 0 6px rgba(239, 68, 68, 0.22);
-  }
-
-  28% {
-    transform: scale(1.02);
-    box-shadow: 0 8px 18px rgba(239, 68, 68, 0.35), 0 0 0 2px rgba(239, 68, 68, 0.12);
-  }
-
-  42% {
-    transform: scale(1.11);
-    box-shadow: 0 14px 26px rgba(239, 68, 68, 0.52), 0 0 0 8px rgba(239, 68, 68, 0.16);
-  }
-
-  56% {
-    transform: scale(1);
-    box-shadow: 0 8px 18px rgba(239, 68, 68, 0.32), 0 0 0 0 rgba(239, 68, 68, 0);
-  }
-}
-
-@keyframes sakitPulseNod {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  14%,
-  42% {
-    transform: scale(1.15);
-  }
-
-  28%,
-  56% {
-    transform: scale(1.03);
-  }
-}
-
-/* 3. IZIN: Gentle paper sway, side rocking & warm amber glow */
-@keyframes izinBoxWave {
-
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-    box-shadow: 0 8px 18px rgba(245, 158, 11, 0.32);
-  }
-
-  25% {
-    transform: translateY(-3px) rotate(-3.5deg);
-    box-shadow: 0 12px 22px rgba(245, 158, 11, 0.45);
-  }
-
-  75% {
-    transform: translateY(-2px) rotate(3.5deg);
-    box-shadow: 0 10px 20px rgba(245, 158, 11, 0.40);
-  }
-}
-
-@keyframes izinPaperSway {
-
-  0%,
-  100% {
-    transform: rotate(0deg) translateY(0);
-  }
-
-  30% {
-    transform: rotate(8deg) translateY(-2px);
-  }
-
-  70% {
-    transform: rotate(-7deg) translateY(1px);
-  }
-}
-
-/* 4. CUTI: Pendulum swing, time tick & teal breathing aura */
-@keyframes cutiBoxPendulum {
-
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-    box-shadow: 0 8px 18px rgba(13, 148, 136, 0.32);
-  }
-
-  50% {
-    transform: translateY(-4px) scale(1.04);
-    box-shadow: 0 12px 24px rgba(13, 148, 136, 0.46);
-  }
-}
-
-@keyframes cutiClockSpin {
-
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-
-  20% {
-    transform: rotate(14deg);
-  }
-
-  40% {
-    transform: rotate(4deg);
-  }
-
-  60% {
-    transform: rotate(-12deg);
-  }
-
-  80% {
-    transform: rotate(-3deg);
-  }
-}
-
-/* FLOATING OVERLAPPING SUMMARY CARD (4 VERTICAL ICON COLUMNS) */
+/* FLOATING OVERLAPPING SUMMARY CARD (CLEAN & PRO) */
 .summary-overlap-card {
   max-width: 680px;
-  margin: -28px auto 16px auto;
-  width: calc(100% - 32px);
+  margin: -18px auto 14px auto;
+  width: calc(100% - 28px);
   background: #ffffff;
-  border-radius: 20px;
-  padding: 16px 12px;
-  box-shadow: 0 10px 25px rgba(0, 80, 220, 0.12);
+  border-radius: 16px;
+  padding: 12px 8px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+  border: 1px solid #e2e8f0;
   position: relative;
   z-index: 10;
-  animation: fadeInUpCard 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+  animation: fadeInUpCard 0.4s ease-out both;
 }
 
 .summary-grid-4 {
@@ -617,130 +392,94 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   cursor: pointer;
-  animation: fadeInUpCard 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.15s ease;
 }
 
-.summary-col-item:nth-child(1) {
-  animation-delay: 0.12s;
-}
-
-.summary-col-item:nth-child(2) {
-  animation-delay: 0.19s;
-}
-
-.summary-col-item:nth-child(3) {
-  animation-delay: 0.26s;
-}
-
-.summary-col-item:nth-child(4) {
-  animation-delay: 0.33s;
+.summary-col-item:hover {
+  transform: translateY(-2px);
 }
 
 .summary-col-item:active {
-  transform: scale(0.92);
+  transform: scale(0.95);
 }
 
 .summary-icon-box {
-  width: 54px;
-  height: 54px;
-  border-radius: 17px;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .summary-icon-box svg {
-  width: 28px;
-  height: 28px;
-}
-
-.summary-col-item:hover .summary-icon-box {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+  width: 18px;
+  height: 18px;
 }
 
 .box-green {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  animation: hadirBoxFloat 3.2s infinite ease-in-out;
-}
-
-.box-green svg {
-  animation: hadirCheckNod 3.2s infinite ease-in-out;
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.25);
 }
 
 .box-red {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  animation: sakitBoxHeartbeat 2.6s infinite ease-in-out;
-}
-
-.box-red svg {
-  animation: sakitPulseNod 2.6s infinite ease-in-out;
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  box-shadow: 0 3px 10px rgba(244, 63, 94, 0.25);
 }
 
 .box-amber {
   background: linear-gradient(135deg, #f59e0b, #d97706);
-  animation: izinBoxWave 3.5s infinite ease-in-out;
-}
-
-.box-amber svg {
-  animation: izinPaperSway 3.5s infinite ease-in-out;
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.25);
 }
 
 .box-teal {
-  background: linear-gradient(135deg, #10b981, #0d9488);
-  animation: cutiBoxPendulum 3.8s infinite ease-in-out;
-}
-
-.box-teal svg {
-  animation: cutiClockSpin 3.8s infinite ease-in-out;
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  box-shadow: 0 3px 10px rgba(20, 184, 166, 0.25);
 }
 
 .box-notify-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 22px;
-  height: 22px;
+  top: -4px;
+  right: -4px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
   background: #ef4444;
   color: #ffffff;
-  border: 2px solid #ffffff;
-  font-size: 11px;
-  font-weight: 800;
+  border: 1.5px solid #ffffff;
+  font-size: 9.5px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-  animation: floatBadgePulse 2.8s infinite ease-in-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .summary-col-label {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   color: #475569;
   text-align: center;
 }
 
-/* DUAL ACTION SCAN CARDS (GREEN / RED) */
+/* DUAL ACTION SCAN CARDS (STREAMLINED & PRO) */
 .dual-scan-row {
   max-width: 680px;
-  margin: 0 auto 16px auto;
+  margin: 0 auto 12px auto;
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 0 16px;
+  gap: 10px;
+  padding: 0 14px;
 }
 
 .scan-box-btn {
-  border-radius: 18px;
-  padding: 14px 12px;
+  border-radius: 14px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -750,42 +489,27 @@ body {
   text-align: left;
   position: relative;
   overflow: hidden;
-  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
-  animation: fadeInUpCard 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  animation: fadeInUpCard 0.4s ease-out both;
 }
 
 .scan-masuk-btn {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
-  animation-delay: 0.25s;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.22);
 }
 
 .scan-pulang-btn {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
-  animation-delay: 0.32s;
-}
-
-/* Continuous Light Shimmer Overlay on Scan Buttons */
-.scan-box-btn::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 60%;
-  height: 100%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
-  pointer-events: none;
-  animation: scanShimmerSweep 4.5s infinite ease-in-out;
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.22);
 }
 
 .scan-box-btn:hover:not(:disabled) {
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-2px);
+  filter: brightness(1.05);
 }
 
 .scan-box-btn:active:not(:disabled) {
-  transform: scale(0.95);
-  transition: transform 0.1s ease;
+  transform: scale(0.97);
 }
 
 .scan-box-btn:disabled {
@@ -795,50 +519,45 @@ body {
 }
 
 .scan-icon-circle-box {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.22);
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.scan-icon-circle-box svg {
-  animation: pulseFingerprintIcon 2.5s infinite ease-in-out;
-}
-
 .scan-main-title {
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 700;
   line-height: 1.2;
 }
 
 .scan-sub-text {
-  font-size: 10px;
+  font-size: 9.5px;
   opacity: 0.9;
   font-weight: 500;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
-/* 8-GRID BLUE MENU CARDS */
+/* 12-GRID MENU CARDS (COMPACT, PROFESSIONAL & CLEAN) */
 .grid-8-menu-wrapper {
   max-width: 680px;
-  margin: 0 auto 4px auto;
+  margin: 0 auto 6px auto;
   width: 100%;
-  padding: 0 14px 0 14px;
+  padding: 0 12px;
 }
 
 .grid-8-menu {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  row-gap: 8px;
-  column-gap: 8px;
+  row-gap: 10px;
+  column-gap: 6px;
 }
 
 .menu-blue-card {
-  border-radius: 0;
   padding: 4px 0;
   display: flex;
   flex-direction: column;
@@ -851,97 +570,28 @@ body {
   box-shadow: none;
   cursor: pointer;
   min-height: auto;
-  overflow: visible;
-  position: relative;
   outline: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  animation: fadeInUpCard 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.menu-blue-card:nth-child(1) {
-  animation-delay: 0.10s;
-}
-
-.menu-blue-card:nth-child(2) {
-  animation-delay: 0.13s;
-}
-
-.menu-blue-card:nth-child(3) {
-  animation-delay: 0.16s;
-}
-
-.menu-blue-card:nth-child(4) {
-  animation-delay: 0.19s;
-}
-
-.menu-blue-card:nth-child(5) {
-  animation-delay: 0.22s;
-}
-
-.menu-blue-card:nth-child(6) {
-  animation-delay: 0.25s;
-}
-
-.menu-blue-card:nth-child(7) {
-  animation-delay: 0.28s;
-}
-
-.menu-blue-card:nth-child(8) {
-  animation-delay: 0.31s;
-}
-
-.menu-blue-card:nth-child(9) {
-  animation-delay: 0.34s;
-}
-
-.menu-blue-card:nth-child(10) {
-  animation-delay: 0.37s;
-}
-
-.menu-blue-card:nth-child(11) {
-  animation-delay: 0.40s;
-}
-
-.menu-blue-card:nth-child(12) {
-  animation-delay: 0.43s;
-}
-
-.menu-blue-card:nth-child(13) {
-  animation-delay: 0.46s;
-}
-
-.menu-blue-card:nth-child(14) {
-  animation-delay: 0.49s;
-}
-
-.menu-blue-card:nth-child(15) {
-  animation-delay: 0.52s;
-}
-
-.menu-blue-card:nth-child(16) {
-  animation-delay: 0.55s;
+  transition: transform 0.15s ease;
 }
 
 .menu-blue-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
 }
 
 .menu-blue-card:hover .menu-icon-circle {
-  transform: scale(1.08);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
+  transform: scale(1.04);
 }
 
 .menu-blue-card:active {
-  transform: scale(0.92);
-  transition: transform 0.1s ease;
+  transform: scale(0.95);
 }
 
 .menu-icon-circle {
-  width: 62px;
-  height: 62px;
-  border-radius: 19px;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -949,121 +599,22 @@ body {
   color: #ffffff;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.16);
-  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-/* Continuous Light Shimmer Sweep like Absen Masuk & Pulang */
-.menu-icon-circle::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 70%;
-  height: 100%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.42) 50%, rgba(255, 255, 255, 0) 100%);
-  pointer-events: none;
-  animation: scanShimmerSweep 4.5s infinite ease-in-out;
-}
-
-/* Continuous Gentle Pulse on Icon SVG like Absen Masuk & Pulang */
 .menu-icon-circle svg {
-  width: 30px;
-  height: 30px;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.25));
-  animation: pulseFingerprintIcon 3s infinite ease-in-out;
-  position: relative;
-  z-index: 1;
-}
-
-/* Stagger Shimmer & Pulse Animation Across Icons */
-.menu-blue-card:nth-child(1) .menu-icon-circle::after,
-.menu-blue-card:nth-child(1) .menu-icon-circle svg {
-  animation-delay: 0.1s;
-}
-
-.menu-blue-card:nth-child(2) .menu-icon-circle::after,
-.menu-blue-card:nth-child(2) .menu-icon-circle svg {
-  animation-delay: 0.4s;
-}
-
-.menu-blue-card:nth-child(3) .menu-icon-circle::after,
-.menu-blue-card:nth-child(3) .menu-icon-circle svg {
-  animation-delay: 0.7s;
-}
-
-.menu-blue-card:nth-child(4) .menu-icon-circle::after,
-.menu-blue-card:nth-child(4) .menu-icon-circle svg {
-  animation-delay: 1.0s;
-}
-
-.menu-blue-card:nth-child(5) .menu-icon-circle::after,
-.menu-blue-card:nth-child(5) .menu-icon-circle svg {
-  animation-delay: 1.3s;
-}
-
-.menu-blue-card:nth-child(6) .menu-icon-circle::after,
-.menu-blue-card:nth-child(6) .menu-icon-circle svg {
-  animation-delay: 1.6s;
-}
-
-.menu-blue-card:nth-child(7) .menu-icon-circle::after,
-.menu-blue-card:nth-child(7) .menu-icon-circle svg {
-  animation-delay: 1.9s;
-}
-
-.menu-blue-card:nth-child(8) .menu-icon-circle::after,
-.menu-blue-card:nth-child(8) .menu-icon-circle svg {
-  animation-delay: 2.2s;
-}
-
-.menu-blue-card:nth-child(9) .menu-icon-circle::after,
-.menu-blue-card:nth-child(9) .menu-icon-circle svg {
-  animation-delay: 2.5s;
-}
-
-.menu-blue-card:nth-child(10) .menu-icon-circle::after,
-.menu-blue-card:nth-child(10) .menu-icon-circle svg {
-  animation-delay: 2.8s;
-}
-
-.menu-blue-card:nth-child(11) .menu-icon-circle::after,
-.menu-blue-card:nth-child(11) .menu-icon-circle svg {
-  animation-delay: 3.1s;
-}
-
-.menu-blue-card:nth-child(12) .menu-icon-circle::after,
-.menu-blue-card:nth-child(12) .menu-icon-circle svg {
-  animation-delay: 3.4s;
-}
-
-.menu-blue-card:nth-child(13) .menu-icon-circle::after,
-.menu-blue-card:nth-child(13) .menu-icon-circle svg {
-  animation-delay: 3.7s;
-}
-
-.menu-blue-card:nth-child(14) .menu-icon-circle::after,
-.menu-blue-card:nth-child(14) .menu-icon-circle svg {
-  animation-delay: 4.0s;
-}
-
-.menu-blue-card:nth-child(15) .menu-icon-circle::after,
-.menu-blue-card:nth-child(15) .menu-icon-circle svg {
-  animation-delay: 4.3s;
-}
-
-.menu-blue-card:nth-child(16) .menu-icon-circle::after,
-.menu-blue-card:nth-child(16) .menu-icon-circle svg {
-  animation-delay: 4.6s;
+  width: 20px;
+  height: 20px;
 }
 
 .menu-blue-card span {
-  font-size: 11.5px;
-  font-weight: 700;
+  font-size: 10.5px;
+  font-weight: 600;
   text-align: center;
   line-height: 1.25;
   color: #334155;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.1px;
   white-space: normal;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1084,167 +635,77 @@ body {
 }
 
 /* ==========================================================================
-   WARNA-WARNI KHUSUS TIAP MENU (GRADIASI VIBRANT BERBEDA-BEDA TIAP MENU)
+   WARNA REFINED TIAP MENU
    ========================================================================== */
 
-/* 1. Siswa -> Royal Sapphire Blue */
+/* 1. Siswa -> Royal Blue */
 .menu-item-siswa .menu-icon-circle {
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.38);
 }
 
-.menu-item-siswa:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #3b82f6, #1e40af);
-}
-
-/* 2. Guru -> Emerald Forest Green */
+/* 2. Guru -> Ocean Sky */
 .menu-item-guru .menu-icon-circle {
-  background: linear-gradient(135deg, #059669, #047857);
-  box-shadow: 0 8px 18px rgba(5, 150, 105, 0.38);
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
 }
 
-.menu-item-guru:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #10b981, #065f46);
-}
-
-/* 3. Mapel -> Amber Tangerine */
+/* 3. Mapel -> Indigo */
 .menu-item-mapel .menu-icon-circle {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  box-shadow: 0 8px 18px rgba(245, 158, 11, 0.38);
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
 }
 
-.menu-item-mapel:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #fbbf24, #b45309);
-}
-
-/* 4. History -> Crimson Rose */
+/* 4. History -> Slate */
 .menu-item-history .menu-icon-circle {
-  background: linear-gradient(135deg, #e11d48, #be123c);
-  box-shadow: 0 8px 18px rgba(225, 29, 72, 0.38);
+  background: linear-gradient(135deg, #64748b, #475569);
 }
 
-.menu-item-history:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #f43f5e, #9f1239);
-}
-
-/* 5. Jadwal -> Royal Violet Purple */
+/* 5. Jadwal -> Violet Purple */
 .menu-item-jadwal .menu-icon-circle {
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
-  box-shadow: 0 8px 18px rgba(124, 58, 237, 0.38);
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
 }
 
-.menu-item-jadwal:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #8b5cf6, #5b21b6);
-}
-
-/* 6. Kalender -> Aquamarine / Dark Teal */
+/* 6. Kalender -> Dark Teal */
 .menu-item-kalender .menu-icon-circle {
   background: linear-gradient(135deg, #0d9488, #0f766e);
-  box-shadow: 0 8px 18px rgba(13, 148, 136, 0.38);
 }
 
-.menu-item-kalender:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #14b8a6, #115e59);
-}
-
-/* 7. Izin -> Coral Orange Sunset */
+/* 7. Izin -> Amber */
 .menu-item-izin .menu-icon-circle {
-  background: linear-gradient(135deg, #ea580c, #c2410c);
-  box-shadow: 0 8px 18px rgba(234, 88, 12, 0.38);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
 }
 
-.menu-item-izin:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #f97316, #9a3412);
-}
-
-/* 8. Absen Siswa -> Vibrant Hot Pink / Magenta */
+/* 8. Absen Siswa -> Emerald Green */
 .menu-item-absen-siswa .menu-icon-circle {
-  background: linear-gradient(135deg, #ec4899, #db2777);
-  box-shadow: 0 8px 18px rgba(236, 72, 153, 0.38);
+  background: linear-gradient(135deg, #059669, #047857);
 }
 
-.menu-item-absen-siswa:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #f472b6, #be185d);
-}
-
-/* 9. Absen Mapel -> Indigo Iris */
+/* 9. Absen Mapel -> Sapphire */
 .menu-item-absen-mapel .menu-icon-circle {
-  background: linear-gradient(135deg, #4f46e5, #4338ca);
-  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.38);
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
 }
 
-.menu-item-absen-mapel:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #6366f1, #3730a3);
-}
-
-/* 10. Rekap Siswa -> Golden Honey */
+/* 10. Rekap Siswa -> Warm Gold */
 .menu-item-rekap-siswa .menu-icon-circle {
-  background: linear-gradient(135deg, #ca8a04, #a16207);
-  box-shadow: 0 8px 18px rgba(202, 138, 4, 0.38);
+  background: linear-gradient(135deg, #d97706, #b45309);
 }
 
-.menu-item-rekap-siswa:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #eab308, #854d0e);
-}
-
-/* 11. Rekap Mapel -> Bright Cyan Lagoon */
+/* 11. Rekap Mapel -> Cyan */
 .menu-item-rekap-mapel .menu-icon-circle {
-  background: linear-gradient(135deg, #0891b2, #0e7490);
-  box-shadow: 0 8px 18px rgba(8, 145, 178, 0.38);
+  background: linear-gradient(135deg, #0284c7, #0369a1);
 }
 
-.menu-item-rekap-mapel:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #06b6d4, #155e75);
-}
-
-/* 12. Rekap Guru -> Crimson Red Ruby */
+/* 12. Rekap Guru -> Purple Ruby */
 .menu-item-rekap-guru .menu-icon-circle {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
-  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.38);
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
 }
 
-.menu-item-rekap-guru:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #ef4444, #991b1b);
-}
-
-/* 13. Input Nilai -> Electric Amethyst Purple */
-.menu-item-nilai-input .menu-icon-circle {
-  background: linear-gradient(135deg, #9333ea, #7e22ce);
-  box-shadow: 0 8px 18px rgba(147, 51, 234, 0.38);
-}
-
-.menu-item-nilai-input:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #a855f7, #6b21a8);
-}
-
-/* 14. Rapor Nilai -> Lime Olive Fresh */
-.menu-item-nilai-laporan .menu-icon-circle {
-  background: linear-gradient(135deg, #65a30d, #4d7c0f);
-  box-shadow: 0 8px 18px rgba(101, 163, 13, 0.38);
-}
-
-.menu-item-nilai-laporan:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #84cc16, #3f6212);
-}
-
-/* 15. Perpustakaan -> Cerulean Blue Oceanic */
+/* 13. Perpustakaan -> Cerulean Blue */
 .menu-item-perpus .menu-icon-circle {
   background: linear-gradient(135deg, #0284c7, #0369a1);
-  box-shadow: 0 8px 18px rgba(2, 132, 199, 0.38);
 }
 
-.menu-item-perpus:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #38bdf8, #075985);
-}
-
-/* 16. Sapras -> Amber Rust Warm / Vibrant Orange Tangerine */
+/* 14. Sapras -> Rust Tangerine */
 .menu-item-sapras .menu-icon-circle {
   background: linear-gradient(135deg, #ea580c, #c2410c);
-  box-shadow: 0 8px 18px rgba(234, 88, 12, 0.38);
-}
-
-.menu-item-sapras:hover .menu-icon-circle {
-  background: linear-gradient(135deg, #f97316, #9a3412);
 }
 
 /* Fallback categories */
@@ -1349,23 +810,23 @@ body {
 }
 
 
-/* BOTTOM NAV BAR WITH CENTER FLOATING FINGERPRINT FAB */
+/* BOTTOM NAV BAR WITH CENTER FLOATING FINGERPRINT FAB (SLEEK & COMPACT) */
 .bottom-nav-white {
   position: fixed;
-  bottom: 12px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 24px);
   max-width: 680px;
-  height: 68px;
+  height: 56px;
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 26px;
+  border-radius: 18px;
   z-index: 100;
-  padding: 0 8px;
-  box-shadow: 0 12px 32px rgba(0, 50, 150, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+  padding: 0 6px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
 .bottom-nav-inner {
@@ -1374,7 +835,7 @@ body {
   justify-content: space-between;
   align-items: center;
   position: relative;
-  padding: 0 4px;
+  padding: 0 2px;
 }
 
 .nav-link-item {
@@ -1385,25 +846,25 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  font-size: 11px;
-  font-weight: 700;
+  gap: 2px;
+  font-size: 9.5px;
+  font-weight: 600;
   cursor: pointer;
   flex: 1;
   height: 100%;
   position: relative;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  padding-top: 4px;
+  transition: all 0.15s ease;
+  padding-top: 2px;
 }
 
 .nav-icon-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 28px;
-  border-radius: 12px;
-  transition: all 0.2s ease;
+  width: 32px;
+  height: 24px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
 }
 
 .nav-link-item:hover {
@@ -1420,72 +881,47 @@ body {
 }
 
 .active-dot {
-  width: 4px;
-  height: 4px;
+  width: 3.5px;
+  height: 3.5px;
   border-radius: 50%;
   background: #0066ff;
   position: absolute;
-  bottom: 6px;
+  bottom: 4px;
 }
 
 .fab-wrapper {
   position: relative;
-  width: 64px;
+  width: 52px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .floating-center-fab {
-  width: 58px;
-  height: 58px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0048ba 0%, #0066ff 50%, #0284c7 100%);
-  border: 4px solid #ffffff;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  border: 3px solid #ffffff;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   position: absolute;
-  top: -28px;
-  box-shadow: 0 10px 25px rgba(0, 102, 255, 0.45);
+  top: -20px;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
   overflow: visible;
 }
 
-.fab-pulse-ring {
-  position: absolute;
-  top: -3px;
-  left: -3px;
-  right: -3px;
-  bottom: -3px;
-  border-radius: 50%;
-  border: 2px solid rgba(0, 114, 255, 0.4);
-  animation: fabPulse 2s infinite;
-  pointer-events: none;
-}
-
-@keyframes fabPulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-
-  50% {
-    transform: scale(1.15);
-    opacity: 0.2;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-}
-
 .floating-center-fab:hover {
-  transform: scale(1.08);
-  box-shadow: 0 12px 30px rgba(0, 102, 255, 0.6);
+  transform: scale(1.05);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.45);
+}
+
+.floating-center-fab:active {
+  transform: scale(0.95);
 }
 
 .floating-center-fab:active {
@@ -1601,18 +1037,18 @@ body {
   box-shadow: 0 6px 18px rgba(239, 68, 68, 0.35);
 }
 
-/* SUBHEADER FOR NON-BERANDA PAGES */
+/* SUBHEADER FOR NON-BERANDA PAGES (CLEAN & COMPACT PRO) */
 .subheader-wrapper {
-  background: linear-gradient(135deg, #0041a8 0%, #0066ff 60%, #0284c7 100%);
+  background: linear-gradient(135deg, #09172e 0%, #0e2a47 50%, #1e3a8a 100%);
   position: sticky;
   top: 0;
   z-index: 90;
-  padding: 14px 18px;
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0, 80, 220, 0.18);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  margin-bottom: 10px;
+  padding: 10px 14px;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  box-shadow: 0 4px 16px rgba(9, 23, 46, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 8px;
 }
 
 .subheader-inner {
@@ -1620,34 +1056,32 @@ body {
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .subheader-back-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.18);
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.15s ease;
 }
 
 .subheader-back-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateX(-3px) scale(1.02);
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .subheader-back-btn:active {
-  transform: translateX(-1px) scale(0.96);
+  transform: scale(0.95);
 }
 
 .subheader-title-col {
@@ -1656,22 +1090,21 @@ body {
 }
 
 .subheader-title {
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 14.5px;
+  font-weight: 700;
   color: #ffffff;
   margin: 0;
   line-height: 1.25;
   letter-spacing: -0.2px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .subheader-subtitle {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.88);
-  margin: 3px 0 0 0;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 2px 0 0 0;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;

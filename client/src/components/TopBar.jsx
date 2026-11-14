@@ -41,16 +41,12 @@ export default function TopBar({ user, onLogout, onUserUpdated }) {
 
   return (
     <header className="header-blue-hero">
-      {/* Decorative Glow Elements */}
-      <div className="hero-glow-circle hero-glow-1"></div>
-      <div className="hero-glow-circle hero-glow-2"></div>
-
       <div className="header-inner">
         {/* TOP BRAND & CONTROLS */}
         <div className="header-top-row">
           <div className="brand-title">
             <div className="brand-logo-icon">
-              <GraduationCap size={18} color="#ffffff" />
+              <GraduationCap size={15} color="#ffffff" strokeWidth={2.2} />
             </div>
             <div className="brand-text">
               <span className="brand-name">E-Sekolah</span>
@@ -65,14 +61,14 @@ export default function TopBar({ user, onLogout, onUserUpdated }) {
               onClick={() => setShowAccountModal(true)}
               title="Ubah Email & Password"
             >
-              <KeyRound size={17} />
+              <KeyRound size={14} />
             </button>
             <button className="header-icon-btn notif-btn-hero" title="Notifikasi">
-              <Bell size={18} />
+              <Bell size={14} />
               <span className="bell-dot"></span>
             </button>
             <button className="header-icon-btn logout-btn-hero" onClick={onLogout} title="Keluar Akun">
-              <LogOut size={16} />
+              <LogOut size={13} />
             </button>
           </div>
         </div>
@@ -104,7 +100,7 @@ export default function TopBar({ user, onLogout, onUserUpdated }) {
             <h2 className="hero-user-name">{displayName}</h2>
 
             <div className="hero-date-row">
-              <Calendar size={12} className="hero-date-icon" />
+              <Calendar size={11} className="hero-date-icon" />
               <span className="hero-date-text">
                 {currentDate} &bull; <span className="live-clock-badge"><span className="live-clock-dot"></span>{currentTime}</span>
               </span>

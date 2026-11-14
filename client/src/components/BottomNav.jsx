@@ -127,7 +127,7 @@ export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user
           onClick={() => onTabChange('beranda')}
         >
           <div className="nav-icon-wrapper">
-            <Home size={21} />
+            <Home size={18} strokeWidth={2.2} />
           </div>
           <span>Beranda</span>
           {activeTab === 'beranda' && <span className="active-dot" />}
@@ -139,7 +139,7 @@ export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user
           onClick={() => onTabChange('izin')}
         >
           <div className="nav-icon-wrapper">
-            <FileText size={21} />
+            <FileText size={18} strokeWidth={2.2} />
           </div>
           <span>Izin</span>
           {activeTab === 'izin' && <span className="active-dot" />}
@@ -152,8 +152,7 @@ export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user
             onClick={() => onOpenPresensi?.('in')}
             title="Scan Presensi Fingerprint"
           >
-            <div className="fab-pulse-ring" />
-            <Fingerprint size={32} color="#ffffff" />
+            <Fingerprint size={24} strokeWidth={2.2} color="#ffffff" />
           </button>
         </div>
 
@@ -163,7 +162,7 @@ export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user
           onClick={() => onTabChange('riwayat')}
         >
           <div className="nav-icon-wrapper">
-            <History size={21} />
+            <History size={18} strokeWidth={2.2} />
           </div>
           <span>Histori</span>
           {(activeTab === 'riwayat' || activeTab === 'histori') && <span className="active-dot" />}
@@ -175,7 +174,7 @@ export default function BottomNav({ activeTab, onTabChange, onOpenPresensi, user
           onClick={() => onTabChange('profil')}
         >
           <div className="nav-icon-wrapper">
-            <User size={21} />
+            <User size={18} strokeWidth={2.2} />
           </div>
           <span>Profile</span>
           {activeTab === 'profil' && <span className="active-dot" />}
