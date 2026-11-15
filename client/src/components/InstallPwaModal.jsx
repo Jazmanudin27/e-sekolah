@@ -224,7 +224,7 @@ export default function InstallPwaModal() {
             }}
           >
             <img
-              src="/logo.png"
+              src="/E-Sekolah.png"
               alt="Logo E-Sekolah"
               style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 12 }}
             />

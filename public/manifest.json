@@ -4,13 +4,13 @@
   "description": "Aplikasi Presensi dan Sistem Informasi Sekolah Digital",
   "icons": [
     {
-      "src": "/logo.png",
+      "src": "/E-Sekolah.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "/logo.png",
+      "src": "/E-Sekolah.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
@@ -21,7 +21,7 @@
   "theme_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait",
-  "id": "com.ruang.sekolah",
+  "id": "com.esekolah.app",
   "categories": [
     "education"
   ]

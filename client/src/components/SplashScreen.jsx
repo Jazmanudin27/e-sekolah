@@ -51,8 +51,8 @@ export default function SplashScreen({ onFinish, duration = 2000 }) {
         {/* Animated Logo Display */}
         <div className="splash-logo-wrapper" style={{ width: 100, height: 100, marginBottom: 16 }}>
           <img
-            src="/logo.png"
-            alt="Ruang Sekolah"
+            src="/E-Sekolah.png"
+            alt="E-Sekolah"
             style={{
               width: '100%',
               height: '100%',
