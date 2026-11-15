@@ -205,12 +205,12 @@ export default function AdminDesktopView({ user, onLogout }) {
       <aside className={`portal-sidebar ${isMobileSidebarOpen ? 'mobile-visible' : ''}`}>
         {/* BRAND LOGO HEADER */}
         <div className="portal-brand-header">
-          <div className="portal-logo-box">
-            <span>P</span>
+          <div className="portal-logo-box" style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)' }}>
+            <GraduationCap size={20} color="#ffffff" />
           </div>
           <div className="portal-brand-text">
-            <div className="brand-title">PORTAL</div>
-            <div className="brand-subtitle">ARTANITA SYSTEM</div>
+            <div className="brand-title">E-SEKOLAH</div>
+            <div className="brand-subtitle">PORTAL SYSTEM</div>
           </div>
           {/* Mobile close button */}
           <button
@@ -223,9 +223,14 @@ export default function AdminDesktopView({ user, onLogout }) {
 
         {/* SCHOOL PROFILE CARD IN SIDEBAR */}
         <div className="portal-school-card">
-          <ArtanitaLogo size={36} />
+          <img
+            src="/E-Sekolah.png"
+            alt="Logo Sekolah"
+            style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 8, background: '#fff', padding: 2 }}
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
           <div className="school-info">
-            <div className="school-name">{sekolahInfo?.nama_sekolah || 'SMK ARTANITA'}</div>
+            <div className="school-name">{sekolahInfo?.nama_sekolah || 'E-SEKOLAH'}</div>
             <div className="school-badge-admin">
               {isPerpusAdmin ? 'PUSTAKAWAN' : isSaprasAdmin ? 'SARPRAS' : (user?.role?.toUpperCase() || 'ADMIN')}
             </div>
@@ -672,8 +677,13 @@ export default function AdminDesktopView({ user, onLogout }) {
                 className="navbar-profile-btn"
                 onClick={() => setShowProfileMenu(prev => !prev)}
               >
-                <ArtanitaLogo size={24} />
-                <span className="profile-school-title">{sekolahInfo?.nama_sekolah || 'SMK ARTANITA'}</span>
+                <img
+                  src="/E-Sekolah.png"
+                  alt="Logo"
+                  style={{ width: 22, height: 22, objectFit: 'contain' }}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+                <span className="profile-school-title">{sekolahInfo?.nama_sekolah || 'E-SEKOLAH'}</span>
                 <ChevronDown size={14} color="#64748b" />
               </button>
 
@@ -681,8 +691,8 @@ export default function AdminDesktopView({ user, onLogout }) {
               {showProfileMenu && (
                 <div className="navbar-profile-dropdown" onClick={() => setShowProfileMenu(false)}>
                   <div className="dropdown-header">
-                    <div style={{ fontWeight: 700, color: '#0f172a' }}>{user?.name || user?.username || 'Admin Artanita'}</div>
-                    <div style={{ fontSize: 11, color: '#64748b' }}>{user?.email || 'admin@artanita.com'}</div>
+                    <div style={{ fontWeight: 700, color: '#0f172a' }}>{user?.name || user?.username || 'Admin E-Sekolah'}</div>
+                    <div style={{ fontSize: 11, color: '#64748b' }}>{user?.email || 'admin@e-sekolah.id'}</div>
                   </div>
                   {!isPerpusAdmin && !isSaprasAdmin && (
                     <button
