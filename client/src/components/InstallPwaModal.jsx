@@ -5,85 +5,43 @@ export default function InstallPwaModal() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(() => {
-    try {
-      const isStandalone =
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true ||
-        document.referrer.includes('android-app://');
-      const savedInstalled = localStorage.getItem('esekolah_pwa_installed') === 'true';
-      return isStandalone || savedInstalled;
-    } catch (e) {
-      return false;
-    }
-  });
   const [isInstalling, setIsInstalling] = useState(false);
 
-  useEffect(() => {
-    // 1. Cek standalone mode
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
+  // Cek apakah sedang berjalan di dalam aplikasi terinstal (standalone)
+  const isStandalone =
+    typeof window !== 'undefined' &&
+    (window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone === true ||
-      document.referrer.includes('android-app://');
+      document.referrer.includes('android-app://'));
 
+  useEffect(() => {
+    // Jika sudah dibuka sebagai aplikasi mandiri (standalone), jangan tampilkan modal
     if (isStandalone) {
-      try {
-        localStorage.setItem('esekolah_pwa_installed', 'true');
-      } catch (e) {}
-      setIsInstalled(true);
       return;
     }
 
-    // 2. Cek jika sudah pernah diinstall via localStorage
-    if (localStorage.getItem('esekolah_pwa_installed') === 'true') {
-      setIsInstalled(true);
-      return;
-    }
-
-    // 3. Cek via getInstalledRelatedApps API (Chrome Android / Desktop)
-    if ('getInstalledRelatedApps' in navigator) {
-      navigator
-        .getInstalledRelatedApps()
-        .then((apps) => {
-          if (apps && apps.length > 0) {
-            try {
-              localStorage.setItem('esekolah_pwa_installed', 'true');
-            } catch (e) {}
-            setIsInstalled(true);
-            setShowModal(false);
-          }
-        })
-        .catch(() => {});
-    }
+    // Bersihkan kunci localStorage lama yang sempat mengunci modal
+    try {
+      localStorage.removeItem('esekolah_pwa_installed');
+    } catch (e) {}
 
     // Detect iOS
     const ua = window.navigator.userAgent.toLowerCase();
     const iosDevice = /iphone|ipad|ipod/.test(ua);
     setIsIOS(iosDevice);
 
-    // 4. Tangkap event Chrome beforeinstallprompt
+    // Tangkap event Chrome beforeinstallprompt
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-
-      // Jika Chrome menembakkan event ini, aplikasi belum terinstall
-      try {
-        localStorage.removeItem('esekolah_pwa_installed');
-      } catch (err) {}
-      setIsInstalled(false);
-
       const dismissed = sessionStorage.getItem('esekolah_pwa_dismissed');
       if (!dismissed) {
-        setTimeout(() => setShowModal(true), 1500);
+        setShowModal(true);
       }
     };
 
-    // 5. Tangkap event saat aplikasi berhasil diinstall
+    // Tangkap saat aplikasi selesai diinstall
     const handleAppInstalled = () => {
-      try {
-        localStorage.setItem('esekolah_pwa_installed', 'true');
-      } catch (e) {}
-      setIsInstalled(true);
       setShowModal(false);
       setDeferredPrompt(null);
     };
@@ -91,16 +49,13 @@ export default function InstallPwaModal() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Fallback: Munculkan modal setelah 2 detik jika belum terinstall dan belum di-dismiss di sesi ini
+    // Munculkan modal otomatis setelah 1.5 detik jika dibuka di browser biasa
     const dismissed = sessionStorage.getItem('esekolah_pwa_dismissed');
     let timer = null;
     if (!dismissed) {
       timer = setTimeout(() => {
-        const alreadyDone = localStorage.getItem('esekolah_pwa_installed') === 'true';
-        if (!alreadyDone) {
-          setShowModal(true);
-        }
-      }, 1800);
+        setShowModal(true);
+      }, 1500);
     }
 
     return () => {
@@ -108,7 +63,7 @@ export default function InstallPwaModal() {
       window.removeEventListener('appinstalled', handleAppInstalled);
       if (timer) clearTimeout(timer);
     };
-  }, []);
+  }, [isStandalone]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
@@ -129,17 +84,13 @@ export default function InstallPwaModal() {
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        try {
-          localStorage.setItem('esekolah_pwa_installed', 'true');
-        } catch (e) {}
-        setIsInstalled(true);
+        setShowModal(false);
       }
     } catch (err) {
       console.error('Error during PWA install:', err);
     } finally {
       setIsInstalling(false);
       setDeferredPrompt(null);
-      setShowModal(false);
     }
   };
 
@@ -150,7 +101,7 @@ export default function InstallPwaModal() {
     setShowModal(false);
   };
 
-  if (isInstalled || !showModal) return null;
+  if (isStandalone || !showModal) return null;
 
   return (
     <div

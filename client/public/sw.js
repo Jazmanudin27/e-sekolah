@@ -1,4 +1,4 @@
-const CACHE_NAME = 'e-sekolah-v6';
+const CACHE_NAME = 'e-sekolah-v7';
 const urlsToCache = ['/', '/index.html', '/E-Sekolah.png', '/manifest.json'];
 
 self.addEventListener('install', (event) => {
