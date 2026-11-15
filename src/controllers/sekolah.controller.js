@@ -2,7 +2,7 @@ const SekolahModel = require('../models/sekolah.model');
 const { query } = require('../config/database');
 
 async function getKodeMemberFromReq(req) {
-  let km = req.user?.kode_member || req.query?.kode_member || req.body?.kode_member;
+  let km = req.query?.kode_member || req.body?.kode_member || req.user?.kode_member;
   if (km) return km;
 
   if (req.user) {

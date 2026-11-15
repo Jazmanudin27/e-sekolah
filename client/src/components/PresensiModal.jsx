@@ -3,7 +3,7 @@ import { X, MapPin, Send, ShieldCheck, Navigation, AlertTriangle, CheckCircle2, 
 import Swal from 'sweetalert2';
 import api from '../api/client';
 
-export default function PresensiModal({ type: initialType = 'in', onClose, onSuccess, showToast }) {
+export default function PresensiModal({ type: initialType = 'in', user, onClose, onSuccess, showToast }) {
   const [scanType, setScanType] = useState(initialType);
   const [coords, setCoords] = useState(null);
   const [coordsString, setCoordsString] = useState('Mencari lokasi GPS...');
@@ -14,7 +14,7 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
 
   // Dynamic School Settings
   const [schoolSettings, setSchoolSettings] = useState({
-    name: 'SMK Artanita Tasikmalaya',
+    name: 'Memuat data sekolah...',
     lat: -7.325205,
     lng: 108.208354,
     radiusMeter: 100,
@@ -29,6 +29,8 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
+  const circleRef = useRef(null);
+  const schoolMarkerRef = useRef(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
 
@@ -36,11 +38,12 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
   useEffect(() => {
     const fetchSchoolInfo = async () => {
       try {
-        const res = await api.get('/sekolah');
+        const km = user?.kode_member;
+        const res = await api.get('/sekolah', { params: km ? { kode_member: km } : {} });
         if (res.data && res.data.success && res.data.data) {
           const d = res.data.data;
           setSchoolSettings({
-            name: d.nama_sekolah || 'SMK Artanita Tasikmalaya',
+            name: d.nama_sekolah || d.nama_member || 'Sekolah',
             lat: parseFloat(d.lat_sekolah || -7.325205),
             lng: parseFloat(d.lng_sekolah || 108.208354),
             radiusMeter: parseInt(d.radius_gps || 100, 10),
@@ -52,7 +55,7 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
       }
     };
     fetchSchoolInfo();
-  }, []);
+  }, [user?.kode_member]);
 
   const requiresGps = schoolSettings.mode === 'gps_kamera' || schoolSettings.mode === 'gps_only';
   const requiresKamera = schoolSettings.mode === 'gps_kamera' || schoolSettings.mode === 'kamera_only';
@@ -212,7 +215,7 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
     if (!mapInstanceRef.current) {
       const map = L.map(mapContainerRef.current, {
         center: [coords.lat, coords.lng],
-        zoom: 17,
+        zoom: 16,
         zoomControl: true
       });
 
@@ -222,16 +225,18 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
       }).addTo(map);
 
       // School Safe Zone Radius Circle
-      L.circle([schoolSettings.lat, schoolSettings.lng], {
+      const circle = L.circle([schoolSettings.lat, schoolSettings.lng], {
         color: '#0066ff',
         fillColor: '#3b82f6',
         fillOpacity: 0.18,
         radius: schoolSettings.radiusMeter
       }).addTo(map);
+      circleRef.current = circle;
 
       // Marker for School Office
       const schoolMarker = L.marker([schoolSettings.lat, schoolSettings.lng]).addTo(map);
-      schoolMarker.bindPopup(`<b>${schoolSettings.name}</b><br>Titik Pusat Sekolah`);
+      schoolMarker.bindPopup(`<b>${schoolSettings.name}</b><br>Titik Pusat Sekolah (Radius: ${schoolSettings.radiusMeter}m)`);
+      schoolMarkerRef.current = schoolMarker;
 
       // Custom User Marker (Actual Location)
       const userMarker = L.marker([coords.lat, coords.lng]).addTo(map);
@@ -240,10 +245,18 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
       markerRef.current = userMarker;
       mapInstanceRef.current = map;
     } else {
-      mapInstanceRef.current.setView([coords.lat, coords.lng], 17);
+      mapInstanceRef.current.setView([coords.lat, coords.lng], 16);
       if (markerRef.current) {
         markerRef.current.setLatLng([coords.lat, coords.lng]);
         markerRef.current.setPopupContent(`<b>Titik Lokasi Anda</b><br>Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`);
+      }
+      if (circleRef.current) {
+        circleRef.current.setLatLng([schoolSettings.lat, schoolSettings.lng]);
+        circleRef.current.setRadius(schoolSettings.radiusMeter);
+      }
+      if (schoolMarkerRef.current) {
+        schoolMarkerRef.current.setLatLng([schoolSettings.lat, schoolSettings.lng]);
+        schoolMarkerRef.current.setPopupContent(`<b>${schoolSettings.name}</b><br>Titik Pusat Sekolah (Radius: ${schoolSettings.radiusMeter}m)`);
       }
     }
   }, [coords, requiresGps, schoolSettings]);
