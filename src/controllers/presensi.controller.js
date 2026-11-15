@@ -5,7 +5,7 @@ const { getTodayString, getCurrentTimeString } = require('../utils/date.util');
 // Get today's attendance status for logged-in teacher
 async function getTodayStatus(req, res, next) {
   try {
-    const { kode_guru } = req.user;
+    const kode_guru = req.user.kode_guru || req.user.id || req.user.username;
     const today = getTodayString();
 
     const item = await PresensiModel.findByGuruAndDate(kode_guru, today);
@@ -72,10 +72,15 @@ function checkRadiusValidation(lokasiStr, schoolLat, schoolLng, maxRadius) {
 // Teacher Check-In (Absen Masuk)
 async function checkIn(req, res, next) {
   try {
-    const { kode_guru, kode_member } = req.user;
+    const kode_guru = req.user.kode_guru || req.user.id || req.user.username;
+    const kode_member = req.user.kode_member;
     const { lokasi, foto, is_fake_gps } = req.body;
     const today = getTodayString();
     const timeNow = getCurrentTimeString();
+
+    if (!kode_guru) {
+      return sendError(res, 'Akun Anda tidak memiliki identitas Guru/Pegawai yang valid.', 400);
+    }
 
     const existing = await PresensiModel.findByGuruAndDate(kode_guru, today);
     if (existing) {
@@ -84,10 +89,10 @@ async function checkIn(req, res, next) {
 
     // Load dynamic school settings
     const school = await SekolahModel.get(kode_member);
-    const modePresensi = school.mode_presensi_guru || 'gps_kamera';
-    const schoolLat = parseFloat(school.lat_sekolah || DEFAULT_SCHOOL_LAT);
-    const schoolLng = parseFloat(school.lng_sekolah || DEFAULT_SCHOOL_LNG);
-    const maxRadius = parseInt(school.radius_gps || DEFAULT_MAX_RADIUS_METER, 10);
+    const modePresensi = school?.mode_presensi_guru || 'gps_kamera';
+    const schoolLat = parseFloat(school?.lat_sekolah || DEFAULT_SCHOOL_LAT);
+    const schoolLng = parseFloat(school?.lng_sekolah || DEFAULT_SCHOOL_LNG);
+    const maxRadius = parseInt(school?.radius_gps || DEFAULT_MAX_RADIUS_METER, 10);
 
     // Mode check
     const requiresGps = modePresensi === 'gps_kamera' || modePresensi === 'gps_only';
@@ -133,10 +138,15 @@ async function checkIn(req, res, next) {
 // Teacher Check-Out (Absen Pulang)
 async function checkOut(req, res, next) {
   try {
-    const { kode_guru, kode_member } = req.user;
+    const kode_guru = req.user.kode_guru || req.user.id || req.user.username;
+    const kode_member = req.user.kode_member;
     const { lokasi, foto, is_fake_gps } = req.body;
     const today = getTodayString();
     const timeNow = getCurrentTimeString();
+
+    if (!kode_guru) {
+      return sendError(res, 'Akun Anda tidak memiliki identitas Guru/Pegawai yang valid.', 400);
+    }
 
     const existing = await PresensiModel.findByGuruAndDate(kode_guru, today);
     if (!existing) {
@@ -148,10 +158,10 @@ async function checkOut(req, res, next) {
 
     // Load dynamic school settings
     const school = await SekolahModel.get(kode_member);
-    const modePresensi = school.mode_presensi_guru || 'gps_kamera';
-    const schoolLat = parseFloat(school.lat_sekolah || DEFAULT_SCHOOL_LAT);
-    const schoolLng = parseFloat(school.lng_sekolah || DEFAULT_SCHOOL_LNG);
-    const maxRadius = parseInt(school.radius_gps || DEFAULT_MAX_RADIUS_METER, 10);
+    const modePresensi = school?.mode_presensi_guru || 'gps_kamera';
+    const schoolLat = parseFloat(school?.lat_sekolah || DEFAULT_SCHOOL_LAT);
+    const schoolLng = parseFloat(school?.lng_sekolah || DEFAULT_SCHOOL_LNG);
+    const maxRadius = parseInt(school?.radius_gps || DEFAULT_MAX_RADIUS_METER, 10);
 
     const requiresGps = modePresensi === 'gps_kamera' || modePresensi === 'gps_only';
     const requiresKamera = modePresensi === 'gps_kamera' || modePresensi === 'kamera_only';

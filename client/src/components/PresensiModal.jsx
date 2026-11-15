@@ -94,11 +94,20 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
     try {
       const video = videoRef.current;
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
+      const MAX_WIDTH = 480;
+      let width = video.videoWidth || 640;
+      let height = video.videoHeight || 480;
+
+      if (width > MAX_WIDTH) {
+        height = Math.round((height * MAX_WIDTH) / width);
+        width = MAX_WIDTH;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      ctx.drawImage(video, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
       setFotoData(dataUrl);
       stopCamera();
     } catch (e) {
@@ -265,21 +274,43 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
   const handleSubmit = async () => {
     if (requiresGps) {
       if (!coords?.lat || !coords?.lng) {
-        showToast('Menunggu lokasi GPS perangkat terdeteksi...', false);
+        Swal.fire({
+          icon: 'warning',
+          title: 'Lokasi GPS Belum Siap',
+          text: 'Sedang mencari titik koordinat GPS perangkat Anda. Mohon pastikan GPS HP aktif.',
+          confirmButtonColor: '#0066ff'
+        });
         return;
       }
       if (isFakeGpsDetected) {
-        showToast('Presensi ditolak! Terdeteksi aplikasi pemalsu lokasi (Fake GPS).', false);
+        Swal.fire({
+          icon: 'error',
+          title: 'Presensi Ditolak',
+          text: 'Terdeteksi penggunaan aplikasi pemalsu lokasi (Fake GPS).',
+          confirmButtonColor: '#ef4444'
+        });
         return;
       }
       if (isOutOfRadius) {
-        showToast(`Presensi ditolak! Anda berada di luar radius aman sekolah (${distanceMeter}m dari sekolah). Maksimal radius: ${schoolSettings.radiusMeter}m.`, false);
+        const radiusMsg = `Presensi ditolak! Anda berada di luar radius aman sekolah (${distanceMeter}m dari sekolah). Maksimal radius: ${schoolSettings.radiusMeter}m.`;
+        if (typeof showToast === 'function') showToast(radiusMsg, false);
+        Swal.fire({
+          icon: 'warning',
+          title: 'Di Luar Radius Sekolah',
+          text: radiusMsg,
+          confirmButtonColor: '#f59e0b'
+        });
         return;
       }
     }
 
     if (requiresKamera && !fotoData) {
-      showToast('Wajib mengambil foto selfie bukti presensi terlebih dahulu!', false);
+      Swal.fire({
+        icon: 'warning',
+        title: 'Foto Wajib Diambil',
+        text: 'Silakan ambil foto selfie bukti presensi terlebih dahulu.',
+        confirmButtonColor: '#0066ff'
+      });
       return;
     }
 
@@ -330,7 +361,16 @@ export default function PresensiModal({ type: initialType = 'in', onClose, onSuc
         });
       }
     } catch (err) {
-      showToast(err.response?.data?.message || 'Terjadi kesalahan sistem.', false);
+      const errMsg = err.response?.data?.message || err.message || 'Terjadi kesalahan sistem.';
+      if (typeof showToast === 'function') {
+        showToast(errMsg, false);
+      }
+      Swal.fire({
+        icon: 'error',
+        title: 'Presensi Gagal',
+        text: errMsg,
+        confirmButtonColor: '#ef4444'
+      });
     } finally {
       setLoading(false);
     }

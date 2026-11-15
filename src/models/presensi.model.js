@@ -3,6 +3,31 @@ const { query } = require('../config/database');
 class PresensiModel {
   static async ensureColumns() {
     try {
+      await query(`CREATE TABLE IF NOT EXISTS \`presensi\` (
+        \`id\` INT AUTO_INCREMENT PRIMARY KEY,
+        \`kode_guru\` VARCHAR(50) NOT NULL,
+        \`tanggal\` DATE NOT NULL,
+        \`jam_in\` TIME NOT NULL,
+        \`jam_out\` TIME DEFAULT NULL,
+        \`lokasi_in\` TEXT DEFAULT NULL,
+        \`lokasi_out\` TEXT DEFAULT NULL,
+        \`foto_in\` LONGTEXT DEFAULT NULL,
+        \`foto_out\` LONGTEXT DEFAULT NULL,
+        \`kode_member\` VARCHAR(50) DEFAULT NULL,
+        \`created_at\` DATETIME DEFAULT CURRENT_TIMESTAMP,
+        \`updated_at\` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX \`idx_presensi_guru_tgl\` (\`kode_guru\`, \`tanggal\`),
+        INDEX \`idx_presensi_member\` (\`kode_member\`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+    } catch (e) {}
+
+    try {
+      await query("ALTER TABLE presensi MODIFY COLUMN foto_in LONGTEXT");
+    } catch (e) {}
+    try {
+      await query("ALTER TABLE presensi MODIFY COLUMN foto_out LONGTEXT");
+    } catch (e) {}
+    try {
       await query("ALTER TABLE presensi ADD COLUMN kode_member VARCHAR(50) DEFAULT NULL");
     } catch (e) {}
   }
