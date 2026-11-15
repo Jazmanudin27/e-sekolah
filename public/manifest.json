@@ -1,6 +1,6 @@
 {
-  "short_name": "Ruang Sekolah",
-  "name": "Ruang Sekolah",
+  "short_name": "E-Sekolah",
+  "name": "E-Sekolah",
   "description": "Aplikasi Presensi dan Sistem Informasi Sekolah Digital",
   "icons": [
     {
@@ -17,8 +17,8 @@
     }
   ],
   "start_url": "https://mobile.sistemiartas.com/",
-  "background_color": "#071633",
-  "theme_color": "#071633",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait",
   "id": "com.ruang.sekolah",
